@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pricing – Scriptora</title>
+  <link rel="stylesheet" href="css/pricing.css"/>
+</head>
+<body>
+
+  <!-- SHARED NAVBAR -->
+  <script src="../shared/navbar.js"></script>
+
+  <!-- HERO -->
+  <section class="pr-hero">
+    <div class="pr-badge"><span class="pr-badge-dot"></span> Transparent Pricing</div>
+    <h1>সঠিক Plan বেছে নিন <span class="blue">আপনার জন্য</span></h1>
+    <p>কোনো hidden charge নেই — যা দেখছেন তাই পাবেন</p>
+    <div class="pr-toggle">
+      <button class="pr-toggle-btn active" id="togOnce" onclick="switchToggle('once')">One-time</button>
+      <button class="pr-toggle-btn" id="togMonthly" onclick="switchToggle('monthly')">Monthly</button>
+    </div>
+  </section>
+
+  <!-- PLAN CARDS -->
+  <section class="pr-plans">
+    <div class="pr-cards">
+
+      <!-- Essential -->
+      <div class="pr-card">
+        <div class="pr-plan-icon">📝</div>
+        <div class="pr-plan-name">Essential</div>
+        <div class="pr-plan-price">
+          <span class="price-val" data-once="৳৮,০০০" data-monthly="৳৬,৫০০">৳৮,০০০</span>
+          <span class="price-from">থেকে</span>
+        </div>
+        <div class="pr-plan-for">Assignment ও Short Report এর জন্য</div>
+        <div class="pr-feats">
+          <div class="pr-feat yes">৫,০০০ words পর্যন্ত</div>
+          <div class="pr-feat yes">১টি revision</div>
+          <div class="pr-feat yes">APA / MLA format</div>
+          <div class="pr-feat yes">Plagiarism-free</div>
+          <div class="pr-feat yes">৭ দিনের মধ্যে delivery</div>
+          <div class="pr-feat no">Data Analysis</div>
+          <div class="pr-feat no">Turnitin Report</div>
+          <div class="pr-feat no">Priority support</div>
+        </div>
+        <button class="pr-btn outline" onclick="window.location.href='../Register page/register.html'">Order করুন</button>
+      </div>
+
+      <!-- Standard (Popular) -->
+      <div class="pr-card popular">
+        <div class="popular-tag">⭐ Most Popular</div>
+        <div class="pr-plan-icon">🎓</div>
+        <div class="pr-plan-name">Standard</div>
+        <div class="pr-plan-price">
+          <span class="price-val" data-once="৳১৫,০০০" data-monthly="৳১২,০০০">৳১৫,০০০</span>
+          <span class="price-from">থেকে</span>
+        </div>
+        <div class="pr-plan-for">BSc ও MSc Thesis এর জন্য</div>
+        <div class="pr-feats">
+          <div class="pr-feat yes">১৫,০০০ words পর্যন্ত</div>
+          <div class="pr-feat yes">৩টি revision</div>
+          <div class="pr-feat yes">সব Citation format</div>
+          <div class="pr-feat yes">Plagiarism-free</div>
+          <div class="pr-feat yes">১৪ দিনের মধ্যে delivery</div>
+          <div class="pr-feat yes">Data Analysis</div>
+          <div class="pr-feat no">Turnitin Report</div>
+          <div class="pr-feat no">Priority support</div>
+        </div>
+        <button class="pr-btn filled" onclick="window.location.href='../Register page/register.html'">Order করুন</button>
+      </div>
+
+      <!-- Advanced -->
+      <div class="pr-card">
+        <div class="pr-plan-icon">🏆</div>
+        <div class="pr-plan-name">Advanced</div>
+        <div class="pr-plan-price">
+          <span class="price-val" data-once="৳২৭,০০০" data-monthly="৳২২,০০০">৳২৭,০০০</span>
+          <span class="price-from">থেকে</span>
+        </div>
+        <div class="pr-plan-for">PhD ও Complex Research এর জন্য</div>
+        <div class="pr-feats">
+          <div class="pr-feat yes">Unlimited words</div>
+          <div class="pr-feat yes">Unlimited revision</div>
+          <div class="pr-feat yes">সব Citation format</div>
+          <div class="pr-feat yes">Plagiarism-free</div>
+          <div class="pr-feat yes">Deadline অনুযায়ী</div>
+          <div class="pr-feat yes">Data Analysis</div>
+          <div class="pr-feat yes">Turnitin Report</div>
+          <div class="pr-feat yes">Priority support</div>
+        </div>
+        <button class="pr-btn outline" onclick="window.location.href='../Register page/register.html'">Order করুন</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ADDITIONAL SERVICES -->
+  <section class="pr-additional">
+    <div class="pr-section-label">Additional Academic Services</div>
+    <div class="pr-add-grid">
+      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Assignment Writing</span></div><span class="pr-add-price">৳৪০০+</span></div>
+      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Presentation Slides</span></div><span class="pr-add-price">৳৬০০+</span></div>
+      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Proofreading</span></div><span class="pr-add-price">৳১,০০০+</span></div>
+      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>APA / MLA Formatting</span></div><span class="pr-add-price">৳৯০০+</span></div>
+      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Plagiarism Reduction</span></div><span class="pr-add-price">৳১,৫০০+</span></div>
+      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>SPSS Analysis</span></div><span class="pr-add-price">৳২,০০০+</span></div>
+      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Research Proposal</span></div><span class="pr-add-price">৳২,৫০০+</span></div>
+      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Case Study Report</span></div><span class="pr-add-price">৳১,২০০+</span></div>
+    </div>
+  </section>
+
+  <!-- TRUST BADGES -->
+  <section class="pr-trust">
+    <div class="pr-trust-grid">
+      <div class="pr-trust-card">
+        <div class="pr-trust-icon">🔒</div>
+        <div class="pr-trust-title">Confidential Service</div>
+        <div class="pr-trust-sub">তথ্য সম্পূর্ণ নিরাপদ</div>
+      </div>
+      <div class="pr-trust-card">
+        <div class="pr-trust-icon">✍️</div>
+        <div class="pr-trust-title">Experienced Writers</div>
+        <div class="pr-trust-sub">Expert academic team</div>
+      </div>
+      <div class="pr-trust-card">
+        <div class="pr-trust-icon">⏰</div>
+        <div class="pr-trust-title">On-Time Delivery</div>
+        <div class="pr-trust-sub">Deadline guarantee</div>
+      </div>
+      <div class="pr-trust-card">
+        <div class="pr-trust-icon">🔄</div>
+        <div class="pr-trust-title">Flexible Revision</div>
+        <div class="pr-trust-sub">Package অনুযায়ী</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="pr-faq">
+    <div class="pr-sec-title">সাধারণ প্রশ্নসমূহ</div>
+    <div class="pr-sec-sub">যা সবচেয়ে বেশি জিজ্ঞেস করা হয়</div>
+    <div class="pr-faq-list">
+      <div class="pr-faq-item" onclick="toggleFaq(this)">
+        <div class="pr-faq-q"><span>Payment কীভাবে করব?</span><span class="pr-faq-icon">+</span></div>
+        <div class="pr-faq-a">bKash, Nagad বা Rocket-এ ৫০% advance payment করতে হবে। বাকি ৫০% delivery-র পর।</div>
+      </div>
+      <div class="pr-faq-item" onclick="toggleFaq(this)">
+        <div class="pr-faq-q"><span>কাজ না হলে refund পাব?</span><span class="pr-faq-icon">+</span></div>
+        <div class="pr-faq-a">হ্যাঁ। কাজ সম্পূর্ণ না হলে বা মানসম্পন্ন না হলে পূর্ণ refund দেওয়া হবে।</div>
+      </div>
+      <div class="pr-faq-item" onclick="toggleFaq(this)">
+        <div class="pr-faq-q"><span>কতদিনে কাজ পাব?</span><span class="pr-faq-icon">+</span></div>
+        <div class="pr-faq-a">Essential: ৭ দিন, Standard: ১৪ দিন, Advanced: আপনার deadline অনুযায়ী। Urgent order-এর জন্য আলাদা যোগাযোগ করুন।</div>
+      </div>
+      <div class="pr-faq-item" onclick="toggleFaq(this)">
+        <div class="pr-faq-q"><span>Deadline miss হলে কী হবে?</span><span class="pr-faq-icon">+</span></div>
+        <div class="pr-faq-a">Deadline miss হলে সম্পূর্ণ refund অথবা free revision দেওয়া হবে — আপনার পছন্দ অনুযায়ী।</div>
+      </div>
+      <div class="pr-faq-item" onclick="toggleFaq(this)">
+        <div class="pr-faq-q"><span>আমার তথ্য কি নিরাপদ?</span><span class="pr-faq-icon">+</span></div>
+        <div class="pr-faq-a">হ্যাঁ। আপনার সকল তথ্য সম্পূর্ণ গোপনীয় রাখা হয়। কোনো তৃতীয় পক্ষের সাথে share করা হয় না।</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="pr-cta">
+    <div class="pr-cta-inner">
+      <div class="pr-cta-emoji">🚀</div>
+      <h2>এখনই শুরু করুন</h2>
+      <p>৫০০+ satisfied client-দের সাথে যোগ দিন — আজই আপনার order দিন</p>
+      <div class="pr-cta-btns">
+        <button class="pr-cta-btn filled" onclick="window.location.href='../Register page/register.html'">Order করুন</button>
+        <button class="pr-cta-btn outline" onclick="window.open('https://wa.me/8801XXXXXXXXX','_blank')">WhatsApp করুন</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/pricing.js"></script>
+</body>
+</html>

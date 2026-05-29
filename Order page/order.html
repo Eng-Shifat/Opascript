@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Place Order — Scriptora</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/order.css">
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-o bg-o1"></div>
+  <div class="bg-o bg-o2"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="../Homepage/index.html">
+    <div class="logo-icon">S</div>
+    Scriptora
+  </a>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div id="navPkg" style="background:rgba(45,110,247,0.12);border:1px solid rgba(45,110,247,0.3);border-radius:20px;padding:5px 14px;font-size:12.5px;color:#60a5fa;font-weight:500;">
+      📚 BBA/MBA
+    </div>
+    <button class="nav-close" onclick="window.history.back()">✕</button>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+  <div class="modal">
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap">
+      <div class="steps-row">
+        <div class="progress-fill" id="pFill"></div>
+        <div class="sn active" id="sn1" onclick="jumpToStep(1)">
+          <div class="sn-circle" id="sc1">1</div>
+          <div class="sn-label">Academic<br>Details</div>
+        </div>
+        <div class="sn" id="sn2" onclick="jumpToStep(2)">
+          <div class="sn-circle" id="sc2">2</div>
+          <div class="sn-label">Research<br>Scope</div>
+        </div>
+        <div class="sn" id="sn3" onclick="jumpToStep(3)">
+          <div class="sn-circle" id="sc3">3</div>
+          <div class="sn-label">Timeline</div>
+        </div>
+        <div class="sn" id="sn4" onclick="jumpToStep(4)">
+          <div class="sn-circle" id="sc4">4</div>
+          <div class="sn-label">Materials</div>
+        </div>
+        <div class="sn" id="sn5" onclick="jumpToStep(5)">
+          <div class="sn-circle" id="sc5">5</div>
+          <div class="sn-label">Confirm</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <!-- ══ STEP 1: Academic Details ══ -->
+      <div class="panel active" id="p1">
+        <div class="panel-head">
+          <h2>Academic Details</h2>
+          <p>আপনার thesis বা academic project সম্পর্কে মূল তথ্য দিন</p>
+        </div>
+
+        <!-- Dept Tabs -->
+        <div class="dept-tabs" id="deptTabs">
+          <button class="dept-tab active" data-dept="bba" onclick="switchDept('bba')">📚 Honours & Masters</button>
+          <button class="dept-tab" data-dept="cse" onclick="switchDept('cse')">⚙️ Engineering</button>
+          <button class="dept-tab" data-dept="premium" onclick="switchDept('premium')">✨ Special Request</button>
+        </div>
+
+        <div class="row2">
+          <div class="fg">
+            <label>Thesis / Project শিরোনাম <span>*</span></label>
+            <input type="text" id="thesisTitle" placeholder="Impact of Digital Banking on SMEs…">
+            <div class="field-err" id="err-thesisTitle"></div>
+          </div>
+          <!-- Research Area — shown for Honours, Engineering, Premium -->
+          <div class="fg" id="researchAreaWrap">
+            <label>Research Area <span>*</span></label>
+            <div class="sw">
+              <select id="thesisTopic">
+                <option value="" disabled selected>বেছে নিন</option>
+              </select>
+            </div>
+            <div class="field-err" id="err-thesisTopic"></div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <!-- Department: dropdown for Honours/Engineering, text input for Premium -->
+          <div class="fg">
+            <label id="deptLabel">বিভাগ <span>*</span></label>
+            <div class="sw" id="deptDropWrap">
+              <select id="department">
+                <option value="" disabled selected>বেছে নিন</option>
+              </select>
+            </div>
+            <input type="text" id="departmentText" placeholder="আপনার বিভাগ লিখুন…" style="display:none">
+            <div class="field-err" id="err-department"></div>
+          </div>
+          <div class="fg">
+            <label>বিশ্ববিদ্যালয় <span>*</span></label>
+            <input type="text" id="university" placeholder="BUET, DU, NSU, BRACU…">
+            <div class="field-err" id="err-university"></div>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label>Supervisor Name</label>
+          <input type="text" id="supervisorName" placeholder="Dr. Rahman…">
+        </div>
+
+        <!-- Chapter Selection (moved above Research Type) -->
+        <div class="sec-div">Chapter Selection</div>
+        <div class="fg" style="margin-bottom:4px;">
+          <div class="sw">
+            <select id="chapterSelect" onchange="syncChapterFromDropdown(this.value)">
+              <option value="" disabled selected>বেছে নিন</option>
+              <option value="proposal">📋 Research Proposal</option>
+              <option value="ch1-3">📖 Chapter 1–3 (Intro, Literature, Methodology)</option>
+              <option value="full">📚 Full Thesis (সম্পূর্ণ)</option>
+              <option value="analysis">📊 Analysis Only (Chapter 4–5)</option>
+              <option value="custom">✏️ Custom — নিচে specify করুন</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg" id="chapterCustomWrap" style="display:none;margin-top:6px;">
+          <input type="text" id="chapterCustom" placeholder="e.g. Chapter 2 & 4 only, Literature Review + Discussion…">
+        </div>
+
+        <!-- Research Type — dynamic by dept -->
+        <div class="sec-div">Research Type</div>
+        <div id="researchTypeCards" style="display:grid;gap:8px;"></div>
+      </div>
+
+      <!-- ══ STEP 2: Research Scope — Dynamic ══ -->
+      <div class="panel" id="p2">
+        <div class="panel-head">
+          <h2>Research Scope</h2>
+          <p id="p2Desc">Thesis এর বিস্তারিত requirements ও methodology জানান</p>
+        </div>
+
+        <!-- ── Honours & Masters fields ── -->
+        <div id="scopeBBA">
+
+          <div class="sec-div">Methodology</div>
+          <div class="rc-grid" id="methodCards">
+            <div class="rc active" data-m="survey" onclick="selectRC('methodCards','survey');toggleVariableFields('survey')">
+              <div class="rc-dot"></div>
+              <div class="rc-body"><div class="rc-title">Survey / Questionnaire</div><div class="rc-desc">Structured · Likert scale</div></div>
+            </div>
+            <div class="rc" data-m="interview" onclick="selectRC('methodCards','interview');toggleVariableFields('interview')">
+              <div class="rc-dot"></div>
+              <div class="rc-body"><div class="rc-title">In-depth Interview</div><div class="rc-desc">Qualitative · narrative</div></div>
+            </div>
+            <div class="rc" data-m="secondary" onclick="selectRC('methodCards','secondary');toggleVariableFields('secondary')">
+              <div class="rc-dot"></div>
+              <div class="rc-body"><div class="rc-title">Secondary Data</div><div class="rc-desc">Reports, journals, DB</div></div>
+            </div>
+            <div class="rc" data-m="mixed" onclick="selectRC('methodCards','mixed');toggleVariableFields('mixed')">
+              <div class="rc-dot"></div>
+              <div class="rc-body"><div class="rc-title">Mixed Method</div><div class="rc-desc">Quant + Qualitative</div></div>
+            </div>
+          </div>
+
+          <!-- Variable fields — only shown for Survey/Mixed -->
+          <div id="variableFields" style="margin-top:10px">
+            <div class="row2">
+              <div class="fg">
+                <label>আপনি কী নিয়ে গবেষণা করছেন? <span>*</span></label>
+                <input type="text" id="indepVar" placeholder="যেমন: Digital Marketing, Employee Training…">
+                <div class="field-err" id="err-indepVar"></div>
+              </div>
+              <div class="fg">
+                <label>এর প্রভাব কোথায় দেখছেন? <span>*</span></label>
+                <input type="text" id="depVar" placeholder="যেমন: Customer Satisfaction, Sales Growth…">
+                <div class="field-err" id="err-depVar"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row2" style="margin-top:10px">
+            <div class="fg">
+              <label>Target Population</label>
+              <input type="text" id="population" placeholder="SME Owners in Dhaka…">
+            </div>
+            <div class="fg">
+              <label>Sample Size</label>
+              <input type="text" id="sampleSize" placeholder="100, 200…">
+            </div>
+          </div>
+
+          <div class="fg">
+            <label>Special Instructions</label>
+            <textarea id="specialInstructions" placeholder="Supervisor requirements, formatting guidelines, Scopus indexed only…"></textarea>
+          </div>
+
+        </div>
+
+        <!-- ── Engineering / Thesis fields ── -->
+        <div id="scopeCSE" style="display:none">
+
+          <div class="sec-div">Methodology</div>
+          <div class="rc-grid" id="engMethodCards">
+            <div class="rc active" data-et="experimental" onclick="selectRC('engMethodCards','experimental')">
+              <div class="rc-dot"></div>
+              <div class="rc-body"><div class="rc-title">Experimental</div><div class="rc-desc">Lab-based · Hardware · Prototype</div></div>
+            </div>
+            <div class="rc" data-et="simulation" onclick="selectRC('engMethodCards','simulation')">
+              <div class="rc-dot"></div>
+              <div class="rc-body"><div class="rc-title">Simulation</div><div class="rc-desc">MATLAB · Modelling · Analysis</div></div>
+            </div>
+            <div class="rc" data-et="literature" onclick="selectRC('engMethodCards','literature')">
+              <div class="rc-dot"></div>
+              <div class="rc-body"><div class="rc-title">Literature Review</div><div class="rc-desc">Secondary data · Comparative</div></div>
+            </div>
+            <div class="rc" data-et="datadriven" onclick="selectRC('engMethodCards','datadriven')">
+              <div class="rc-dot"></div>
+              <div class="rc-body"><div class="rc-title">Data-driven</div><div class="rc-desc">Dataset · ML model · Analysis</div></div>
+            </div>
+          </div>
+
+          <div class="fg" style="margin-top:14px">
+            <label>Dataset / Data Source</label>
+            <input type="text" id="dataset" placeholder="Kaggle, UCI, custom collected, sensor data…">
+          </div>
+
+          <div class="row2" style="margin-top:10px">
+            <div class="fg">
+              <label>Target Population</label>
+              <input type="text" id="populationCSE" placeholder="SME Owners in Dhaka…">
+            </div>
+            <div class="fg">
+              <label>Sample Size</label>
+              <input type="text" id="sampleSizeCSE" placeholder="100, 200…">
+            </div>
+          </div>
+
+          <div class="fg" style="margin-top:10px">
+            <label>Special Instructions</label>
+            <textarea id="specialInstructionsCSE" placeholder="Supervisor requirements, IEEE formatting, specific journal target…"></textarea>
+          </div>
+
+        </div>
+
+        <!-- ── Special Request fields ── -->
+        <div id="scopePremium" style="display:none">
+
+          <div class="fg">
+            <label>Special Instructions <span>*</span></label>
+            <textarea id="specialInstructionsPremium" placeholder="আপনার কাজের বিস্তারিত বর্ণনা দিন — topic, requirements, deadline, formatting, references…" style="min-height:120px"></textarea>
+            <div class="field-err" id="err-specialInstructionsPremium"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: Timeline ══ -->
+      <div class="panel" id="p3">
+        <div class="panel-head">
+          <h2>Timeline & Delivery</h2>
+          <p>আপনার deadline ও urgency level নির্ধারণ করুন</p>
+        </div>
+
+        <div class="fg">
+          <label>Submission Deadline <span>*</span></label>
+          <input type="date" id="deadlineDate" style="color-scheme:dark" onchange="handleDeadlineChange()">
+          <div class="field-err" id="err-deadlineDate"></div>
+        </div>
+
+        <div class="sec-div">Urgency Level</div>
+        <div class="urgency-grid">
+          <div class="uc active" data-u="standard" onclick="selectUrgency('standard')">
+            <div class="uc-icon">🕐</div>
+            <div class="uc-name">Standard</div>
+            <div class="uc-days">৭–১৪ দিন</div>
+            <div class="uc-extra">Base price</div>
+          </div>
+          <div class="uc" data-u="urgent" onclick="selectUrgency('urgent')">
+            <div class="uc-icon">⚡</div>
+            <div class="uc-name">Urgent</div>
+            <div class="uc-days">৩–৭ দিন</div>
+            <div class="uc-extra">+২০%</div>
+          </div>
+          <div class="uc" data-u="express" onclick="selectUrgency('express')">
+            <div class="uc-icon">🚀</div>
+            <div class="uc-name">Express</div>
+            <div class="uc-days">১–৩ দিন</div>
+            <div class="uc-extra">+৫০%</div>
+          </div>
+        </div>
+
+        <div class="dl-info" id="dlInfo">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Deadline নির্বাচন করুন — আমরা আপনার timeline অনুযায়ী কাজ নিশ্চিত করব।
+        </div>
+
+        <!-- Word Count + Citation — moved here from Step 2 -->
+        <div class="sec-div" style="margin-top:1.2rem">Word Count & Citation</div>
+
+        <div class="fg">
+          <label>Word Count <span>*</span>
+            <span id="wcDisplay" style="float:right;color:#60a5fa;font-weight:600">৫,০০০ words — প্রায় ২০ পাতা</span>
+          </label>
+          <input type="range" id="wordCount" min="2000" max="25000" step="1000" value="5000"
+            oninput="updateWcDisplay(this.value); updateCalc()"
+            style="width:100%;accent-color:#2d6ef7;height:6px;cursor:pointer;margin-top:4px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">
+            <span>২,০০০</span><span>৫,০০০</span><span>১০,০০০</span><span>১৫,০০০</span><span>২০,০০০</span><span>২৫,০০০</span>
+          </div>
+          <div class="field-err" id="err-wordCount"></div>
+        </div>
+
+        <div class="row2" style="margin-top:10px">
+          <div class="fg">
+            <label>Citation Style <span>*</span></label>
+            <div class="sw">
+              <select id="citationStyle">
+                <option value="" disabled selected>বেছে নিন</option>
+                <option id="cit-apa">APA</option>
+                <option id="cit-ieee">IEEE</option>
+                <option>Harvard</option>
+                <option>MLA</option>
+                <option>Chicago</option>
+                <option>Vancouver</option>
+                <option>ACM</option>
+              </select>
+            </div>
+            <div class="field-err" id="err-citationStyle"></div>
+          </div>
+        </div>
+
+        <!-- ADDITIONAL SERVICES -->
+        <div class="sec-div" style="margin-top:1.5rem">Additional Services</div>
+        <div class="addon-list">
+          <div class="addon-item addon-free">
+            <div class="addon-check addon-checked"></div>
+            <div class="addon-body">
+              <div class="addon-title">Plagiarism Check <span class="free-badge">FREE</span></div>
+              <div class="addon-desc">Turnitin report সহ সম্পূর্ণ plagiarism verification — প্রতিটি order এ included</div>
+            </div>
+            <div class="addon-price free">৳০</div>
+          </div>
+          <div class="addon-item" id="addon-slides" onclick="toggleAddon('slides')">
+            <div class="addon-check" id="ac-slides"></div>
+            <div class="addon-body">
+              <div class="addon-title">Presentation Slides</div>
+              <div class="addon-desc">Professional PowerPoint deck — thesis defense ও viva র জন্য প্রস্তুত</div>
+            </div>
+            <div class="addon-price">+৳৫০০</div>
+          </div>
+          <div class="addon-item" id="addon-datacollection" onclick="toggleAddon('datacollection')">
+            <div class="addon-check" id="ac-datacollection"></div>
+            <div class="addon-body">
+              <div class="addon-title">Data Collection</div>
+              <div class="addon-desc">Primary data সংগ্রহ — survey distribution, response collection ও raw data delivery</div>
+            </div>
+            <div class="addon-price">+৳১,০০০</div>
+          </div>
+          <div class="addon-item" id="addon-coverpage" onclick="toggleAddon('coverpage')">
+            <div class="addon-check" id="ac-coverpage"></div>
+            <div class="addon-body">
+              <div class="addon-title">Custom Cover Page</div>
+              <div class="addon-desc">University format অনুযায়ী professionally designed cover page</div>
+            </div>
+            <div class="addon-price">+৳১০০</div>
+          </div>
+          <div class="addon-item" id="addon-figures" onclick="toggleAddon('figures')">
+            <div class="addon-check" id="ac-figures"></div>
+            <div class="addon-body">
+              <div class="addon-title">All Figures & Charts</div>
+              <div class="addon-desc">Data visualization — graphs, charts, diagrams ও tables professionally formatted</div>
+            </div>
+            <div class="addon-price">+৳৩০০</div>
+          </div>
+        </div>
+
+        <!-- PRICING CALCULATOR -->
+        <div class="sec-div" style="margin-top:1.5rem;">Pricing Calculator</div>
+        <div class="calc-box" id="calcBox">
+
+          <!-- Summary rows -->
+          <div class="calc-row">
+            <span class="calc-label">Base Price</span>
+            <span class="calc-val" id="calc-base">—</span>
+          </div>
+          <div class="calc-row" style="opacity:0.6">
+            <span class="calc-label">Estimated Pages</span>
+            <span class="calc-val" id="calc-pages">— পাতা <span style="font-size:11px;color:rgba(255,255,255,0.35)">(250 words = 1 page)</span></span>
+          </div>
+          <div class="calc-row" id="calc-urgency-row">
+            <span class="calc-label">Delivery Type</span>
+            <span class="calc-val" id="calc-urgency-val">Standard</span>
+          </div>
+          <div id="calc-addon-rows"></div>
+          <div class="calc-row">
+            <span class="calc-label">Plagiarism Check</span>
+            <span class="calc-val free-tag">FREE</span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">APA/Harvard Formatting</span>
+            <span class="calc-val free-tag">FREE</span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">Revisions</span>
+            <span class="calc-val" id="calc-revision">৩টি free revision</span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">Delivery Time</span>
+            <span class="calc-val" id="calc-delivery">৭–১৪ দিন</span>
+          </div>
+          <div class="calc-divider"></div>
+          <div class="calc-row total">
+            <span>মোট অনুমানিত মূল্য</span>
+            <span id="calc-total">—</span>
+          </div>
+          <div class="calc-note" id="calc-note">Word count ও deadline অনুযায়ী price calculate হবে</div>
+        </div>
+
+        <div class="info-box" style="margin-top:1rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Final pricing নির্ভর করে topic, deadline ও research complexity-র উপর। Order করার পর ২৪ ঘণ্টার মধ্যে যোগাযোগ করা হবে।
+        </div>
+
+      </div>
+
+      <!-- ══ STEP 4: Materials ══ -->
+      <div class="panel" id="p4">
+        <div class="panel-head">
+          <h2>Supporting Materials</h2>
+          <p>Thesis সংক্রান্ত কোনো file থাকলে upload করুন (optional)</p>
+        </div>
+
+        <div class="upload-zone" id="uploadZone"
+          onclick="document.getElementById('fileInp').click()"
+          ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">File drag করুন বা <span class="upload-link">browse করুন</span></div>
+          <div class="upload-hint">PDF, DOCX, JPG, XLSX · সর্বোচ্চ ১০MB</div>
+          <div class="upload-hint" id="uploadDeptHint" style="margin-top:6px;color:rgba(255,255,255,0.4);font-size:12px"></div>
+          <input type="file" id="fileInp" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style="display:none" onchange="fileSelect(event)">
+        </div>
+        <div class="file-list" id="fileList"></div>
+
+        <div class="fg" style="margin-top:14px">
+          <label>Reference Requirement</label>
+          <input type="text" id="refReq" placeholder="e.g. Scopus indexed only, last 5 years, minimum 30 references…">
+        </div>
+
+        <div class="info-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          File upload optional — কোনো file না থাকলেও পরবর্তী step এ যেতে পারবেন।
+        </div>
+      </div>
+
+      <!-- ══ STEP 5: Review & Confirm ══ -->
+      <div class="panel" id="p5">
+        <div class="panel-head">
+          <h2>Review & Confirm</h2>
+          <p>সব তথ্য ঠিক আছে কিনা দেখে নিন</p>
+        </div>
+
+        <div class="review-grid" id="reviewGrid"></div>
+        <div class="receipt" id="priceBox"></div>
+
+        <label class="terms-row">
+          <input type="checkbox" id="termsChk">
+          <span>আমি Scriptora এর <a href="#">Terms & Conditions</a>, <a href="#">Revision Policy</a> ও <a href="#">Confidentiality Agreement</a> পড়েছি ও সম্মত আছি</span>
+        </label>
+        <div class="field-err" id="err-terms"></div>
+
+        <div class="review-notice">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Order confirm হওয়ার পর আমাদের team ২৪ ঘণ্টার মধ্যে WhatsApp এ যোগাযোগ করবে।
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <div class="footer-info">ধাপ <span id="stepLabel">১</span> / ৫</div>
+      <div class="footer-btns">
+        <button class="btn-prev" id="btnPrev" onclick="prevStep()">← আগের</button>
+        <button class="btn-next" id="btnNext" onclick="nextStep()">
+          পরবর্তী
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="overlay" id="overlay">
+  <div class="sbox">
+    <div class="sbox-icon">🎓</div>
+    <div class="sbox-title">Order Confirmed!</div>
+    <div class="sbox-desc">আপনার thesis order সফলভাবে submit হয়েছে। আমাদের team ২৪ ঘণ্টার মধ্যে যোগাযোগ করবে।</div>
+    <button class="sbox-btn" onclick="window.location.href='../Homepage/index.html'">Homepage →</button>
+  </div>
+</div>
+
+<script src="js/order.js"></script>
+</body>
+</html>
