@@ -241,13 +241,13 @@ body {
 /* PROGRESS STEPS */
 .progress-card { }
 .progress-steps {
-  padding: 16px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 4px;
   position: relative;
+  overflow: hidden;
 }
 .ps-item {
   display: flex;
@@ -255,29 +255,32 @@ body {
   align-items: center;
   gap: 6px;
   flex: 1;
+  min-width: 0;
   position: relative;
 }
 .ps-item:not(.last)::after {
   content: '';
   position: absolute;
-  top: 16px;
-  left: 50%;
-  width: 100%;
+  top: 15px;
+  left: calc(50% + 16px);
+  right: calc(-50% + 16px);
   height: 2px;
   background: var(--border);
+  z-index: 0;
 }
 .ps-item.done:not(.last)::after { background: var(--green); }
 .ps-item.active:not(.last)::after { background: linear-gradient(90deg, var(--green), var(--border)); }
 
 .ps-icon {
-  width: 32px; height: 32px;
+  width: 30px; height: 30px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   position: relative; z-index: 1;
   background: var(--glass2);
   border: 1.5px solid var(--border);
   color: var(--muted);
+  flex-shrink: 0;
 }
 .ps-item.done .ps-icon {
   background: rgba(34,197,94,0.15);
@@ -295,10 +298,14 @@ body {
   50% { box-shadow: 0 0 0 6px rgba(45,110,247,0); }
 }
 .ps-title {
-  font-size: 10px;
+  font-size: 9.5px;
   text-align: center;
   color: var(--muted);
   line-height: 1.3;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  width: 100%;
+  padding: 0 2px;
 }
 .ps-item.done .ps-title { color: var(--green2); }
 .ps-item.active .ps-title { color: var(--blue2); }
