@@ -615,6 +615,8 @@ function buildReview() {
     }
   });
   const grand = after ? after + addonTotal : null;
+  discountAmount = calcDiscount(grand);
+  const finalTotal = grand ? grand - discountAmount : null;
   const urgLabel = { standard:'Standard', urgent:'Urgent (+২০%)', express:'Express (+৫০%)' }[selectedUrgencyVal];
 
   document.getElementById('priceBox').innerHTML =
@@ -626,7 +628,51 @@ function buildReview() {
     + (selectedUrgencyVal !== 'standard' && after && base ? '<div class="pr-row"><span class="pr-row-label">Urgency — ' + urgLabel + '</span><span class="pr-row-val clr-amber">+৳' + (after - base).toLocaleString() + '</span></div>' : '')
     + '<div class="pr-row free"><span class="pr-row-label">Plagiarism Check</span><span class="pr-row-val clr-green">FREE</span></div>'
     + addonLines
-    + '<div class="pr-total"><span class="pr-total-label">মোট অনুমানিত মূল্য</span><span class="pr-total-val">' + (grand ? '৳' + grand.toLocaleString() + '+' : 'আলোচনা সাপেক্ষে') + '</span></div>';
+    + (discountAmount > 0 ? '<div class="pr-row"><span class="pr-row-label">🎟️ Coupon (' + appliedCoupon + ')</span><span class="pr-row-val clr-green">−৳' + discountAmount.toLocaleString() + '</span></div>' : '')
+    + '<div class="pr-total"><span class="pr-total-label">মোট অনুমানিত মূল্য</span><span class="pr-total-val">' + (finalTotal ? '৳' + finalTotal.toLocaleString() + '+' : 'আলোচনা সাপেক্ষে') + '</span></div>';
+}
+
+// ── Coupon System ──
+const COUPONS = {
+  'SCRIPTORA10': { type:'percent', value:10, label:'১০% ছাড়' },
+  'WELCOME15':   { type:'percent', value:15, label:'১৫% ছাড়' },
+  'FLAT500':     { type:'flat',    value:500, label:'৳৫০০ ছাড়' },
+  'THESIS20':    { type:'percent', value:20, label:'২০% ছাড়' },
+};
+let appliedCoupon = null;
+let discountAmount = 0;
+
+function applyCoupon() {
+  const code = document.getElementById('couponInput').value.trim().toUpperCase();
+  const btn  = document.getElementById('couponApplyBtn');
+  if (!code) { showCouponMsg('Coupon code লিখুন', 'error'); return; }
+  if (appliedCoupon && code === appliedCoupon) { removeCoupon(); return; }
+  const coupon = COUPONS[code];
+  if (!coupon) { showCouponMsg('Invalid coupon code', 'error'); appliedCoupon = null; discountAmount = 0; buildReview(); return; }
+  appliedCoupon = code;
+  btn.textContent = 'Remove';
+  btn.classList.add('remove');
+  buildReview();
+  showCouponMsg('✓ ' + coupon.label + ' সফলভাবে apply হয়েছে!', 'success');
+}
+function removeCoupon() {
+  appliedCoupon = null; discountAmount = 0;
+  document.getElementById('couponInput').value = '';
+  const btn = document.getElementById('couponApplyBtn');
+  btn.textContent = 'Apply'; btn.classList.remove('remove');
+  showCouponMsg('', ''); buildReview();
+}
+function showCouponMsg(text, type) {
+  const el = document.getElementById('couponMsg');
+  if (!el) return; el.textContent = text; el.className = 'coupon-msg ' + type;
+}
+function calcDiscount(grand) {
+  if (!appliedCoupon || !grand) return 0;
+  const coupon = COUPONS[appliedCoupon];
+  if (!coupon) return 0;
+  if (coupon.type === 'percent') return Math.round(grand * coupon.value / 100);
+  if (coupon.type === 'flat')    return Math.min(coupon.value, grand);
+  return 0;
 }
 
 // ── BBA fields show/hide ──
@@ -660,17 +706,33 @@ function nextStep() {
     let addonTotal = 0;
     Object.entries(addonPrices).forEach(([k,p]) => { if (activeAddons[k]) addonTotal += p; });
     const grand = after ? after + addonTotal : null;
+    const finalTotal = grand ? grand - discountAmount : null;
     const pages = wc ? Math.round(parseInt(wc) / 250) : null;
+
+    // Collect active addons labels
+    const addonLabels = Object.entries(activeAddons)
+      .filter(([k, v]) => v && addonData[k])
+      .map(([k]) => addonData[k].label);
+
+    // Research area
+    const researchArea = selectedDept === 'premium'
+      ? (document.getElementById('researchAreaText')?.value.trim() || '—')
+      : (document.getElementById('thesisTopic')?.options?.[document.getElementById('thesisTopic')?.selectedIndex]?.text || document.getElementById('thesisTopic')?.value || '—');
+
     sessionStorage.setItem('scriptora_order', JSON.stringify({
       title:    document.getElementById('thesisTitle')?.value.trim() || '',
       dept:     pkgData[selectedDept]?.label || '',
       university: document.getElementById('university')?.value.trim() || '',
       pkg:      pkgData[selectedDept]?.label || '',
+      research: researchArea,
       pages:    pages ? pages + ' পাতা (~' + wc + ' words)' : '—',
       citation: document.getElementById('citationStyle')?.value || '—',
       urgency:  { standard:'Standard', urgent:'Urgent +২০%', express:'Express +৫০%' }[selectedUrgencyVal],
       deadline: document.getElementById('deadlineDate')?.value || '—',
-      total:    grand || 0
+      addons:   addonLabels,
+      total:    finalTotal || grand || 0,
+      coupon:   appliedCoupon || null,
+      discount: discountAmount || 0
     }));
     window.location.href = '../Payment page/payment.html';
     return;

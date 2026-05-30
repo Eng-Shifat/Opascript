@@ -471,6 +471,19 @@
         <div id="reviewGrid" style="margin-bottom:10px"></div>
         <div id="priceBox" style="background:var(--glass);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px"></div>
 
+        <!-- COUPON SECTION -->
+        <div class="coupon-box" id="couponBox">
+          <div class="coupon-head">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <span>Coupon / Promo Code আছে?</span>
+          </div>
+          <div class="coupon-input-row">
+            <input type="text" id="couponInput" placeholder="Coupon code লিখুন..." autocomplete="off" oninput="this.value=this.value.toUpperCase()" />
+            <button class="coupon-apply-btn" id="couponApplyBtn" onclick="applyCoupon()">Apply</button>
+          </div>
+          <div class="coupon-msg" id="couponMsg"></div>
+        </div>
+
         <label class="terms-row">
           <input type="checkbox" id="termsChk">
           <span>আমি Scriptora এর <a href="#">Terms & Conditions</a>, <a href="#">Revision Policy</a> ও <a href="#">Confidentiality Agreement</a> পড়েছি ও সম্মত আছি</span>

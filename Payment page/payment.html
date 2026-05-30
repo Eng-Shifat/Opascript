@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment – Scriptora</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/payment.css"/>
+</head>
+<body>
+  <script src="../shared/navbar.js"></script>
+
+  <div class="pay-page">
+    <div class="pay-grid">
+
+      <!-- LEFT: Payment Method -->
+      <div class="pay-left">
+
+        <!-- Method Select -->
+        <div class="pay-card">
+          <div class="card-head">
+            <div class="card-head-dot"></div>
+            <span>PAYMENT METHOD বেছে নিন</span>
+          </div>
+          <div class="method-tabs">
+            <div class="method-tab active" data-method="bkash" onclick="selectMethod('bkash',this)">
+              <div class="method-icon bkash">B</div>
+              <span>bKash</span>
+            </div>
+            <div class="method-tab" data-method="nagad" onclick="selectMethod('nagad',this)">
+              <div class="method-icon nagad">N</div>
+              <span>Nagad</span>
+            </div>
+            <div class="method-tab" data-method="bank" onclick="selectMethod('bank',this)">
+              <div class="method-icon bank">৳</div>
+              <span>Bank</span>
+            </div>
+          </div>
+
+          <!-- bKash Instructions -->
+          <div class="method-detail active" id="detail-bkash">
+            <div class="detail-head">
+              <div class="card-head-dot"></div>
+              <span>bKash এ পাঠান</span>
+            </div>
+            <div class="step-list">
+              <div class="step-item"><div class="step-num">1</div><div>bKash থেকে <strong>Send Money</strong> করুন</div></div>
+              <div class="step-item"><div class="step-num">2</div><div>Number: <span class="highlight">01XXXXXXXXX</span></div></div>
+              <div class="step-item"><div class="step-num">3</div><div>Amount: মোট মূল্যের <span class="highlight">৫০% Advance</span></div></div>
+              <div class="step-item"><div class="step-num">4</div><div>Transaction ID নিচে দিন ও confirm করুন</div></div>
+            </div>
+          </div>
+
+          <!-- Nagad Instructions -->
+          <div class="method-detail" id="detail-nagad">
+            <div class="detail-head">
+              <div class="card-head-dot nagad"></div>
+              <span>Nagad এ পাঠান</span>
+            </div>
+            <div class="step-list">
+              <div class="step-item"><div class="step-num nagad">1</div><div>Nagad থেকে <strong>Send Money</strong> করুন</div></div>
+              <div class="step-item"><div class="step-num nagad">2</div><div>Number: <span class="highlight nagad">01XXXXXXXXX</span></div></div>
+              <div class="step-item"><div class="step-num nagad">3</div><div>Amount: মোট মূল্যের <span class="highlight nagad">৫০% Advance</span></div></div>
+              <div class="step-item"><div class="step-num nagad">4</div><div>Transaction ID নিচে দিন ও confirm করুন</div></div>
+            </div>
+          </div>
+
+          <!-- Bank Instructions -->
+          <div class="method-detail" id="detail-bank">
+            <div class="detail-head">
+              <div class="card-head-dot bank"></div>
+              <span>Bank Transfer করুন</span>
+            </div>
+            <div class="step-list">
+              <div class="step-item"><div class="step-num bank">1</div><div>Account Name: <span class="highlight bank">Scriptora</span></div></div>
+              <div class="step-item"><div class="step-num bank">2</div><div>Account No: <span class="highlight bank">1234-5678-9012</span></div></div>
+              <div class="step-item"><div class="step-num bank">3</div><div>Bank: Dutch-Bangla · Narayanganj Branch</div></div>
+              <div class="step-item"><div class="step-num bank">4</div><div>Transaction ID নিচে দিন ও confirm করুন</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Info Form -->
+        <div class="pay-card">
+          <div class="card-head">
+            <div class="card-head-dot"></div>
+            <span>PAYMENT তথ্য দিন</span>
+          </div>
+          <div class="form-body">
+            <div class="fg">
+              <label>Transaction ID <span class="req">*</span></label>
+              <input type="text" id="txnId" placeholder="যেমন: 8KJ3H9X2P1">
+              <div class="field-err" id="err-txnId"></div>
+            </div>
+            <div class="fg">
+              <label>Payment পরিমাণ</label>
+              <input type="text" id="payAmount" placeholder="৳ 8,000 (৫০% Advance)" readonly>
+            </div>
+            <div class="fg">
+              <label>Screenshot <span class="opt">(ঐচ্ছিক)</span></label>
+              <div class="upload-zone" id="ssZone" onclick="document.getElementById('ssInput').click()"
+                ondragover="event.preventDefault();this.classList.add('drag')"
+                ondragleave="this.classList.remove('drag')"
+                ondrop="handleSSdrop(event)">
+                <div class="upload-icon">🖼️</div>
+                <div class="upload-text">Screenshot আপলোড করুন</div>
+                <div class="upload-hint">PNG, JPG · সর্বোচ্চ 5MB</div>
+                <input type="file" id="ssInput" accept="image/*" style="display:none" onchange="handleSSfile(this)">
+              </div>
+              <div class="ss-preview" id="ssPreview" style="display:none">
+                <img id="ssImg" src="" alt="screenshot">
+                <button class="ss-remove" onclick="removeScreenshot()">✕</button>
+              </div>
+            </div>
+
+            <button class="pay-btn" onclick="submitPayment()">
+              <span>💳</span> Payment নিশ্চিত করুন
+            </button>
+            <div class="pay-secure">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              আপনার তথ্য সম্পূর্ণ নিরাপদ
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Order Summary -->
+      <div class="pay-right">
+        <div class="pay-card summary-card">
+          <div class="card-head">
+            <div class="card-head-dot"></div>
+            <span>ORDER সারসংক্ষেপ</span>
+          </div>
+
+          <div class="summary-title-box">
+            <div class="summary-title" id="sumTitle">—</div>
+            <div class="summary-sub" id="sumSub">—</div>
+          </div>
+
+          <div class="summary-rows">
+            <div class="sum-row"><span class="sum-label">Package</span><span class="sum-val" id="sumPkg">—</span></div>
+            <div class="sum-row"><span class="sum-label">Research Area</span><span class="sum-val" id="sumResearch">—</span></div>
+            <div class="sum-row"><span class="sum-label">পেজ সংখ্যা</span><span class="sum-val" id="sumPages">—</span></div>
+            <div class="sum-row"><span class="sum-label">Citation</span><span class="sum-val" id="sumCitation">—</span></div>
+            <div class="sum-row"><span class="sum-label">Urgency</span><span class="sum-val" id="sumUrgency">—</span></div>
+            <div class="sum-row" id="sumAddonsRow" style="display:none;"><span class="sum-label">Extra Services</span><span class="sum-val" id="sumAddons" style="color:#60a5fa;text-align:right;max-width:60%;line-height:1.5;">—</span></div>
+            <div class="sum-row" id="sumCouponRow" style="display:none;"><span class="sum-label">Coupon</span><span class="sum-val" id="sumCoupon" style="color:#4ade80;">—</span></div>
+          </div>
+
+          <div class="sum-total">
+            <span class="sum-total-label">মোট মূল্য</span>
+            <span class="sum-total-val" id="sumTotal">—</span>
+          </div>
+
+          <div class="sum-split">
+            <div class="split-head">Payment দুই ভাগে</div>
+            <div class="split-row"><span>এখন (৫০% Advance)</span><span id="splitNow">—</span></div>
+            <div class="split-row"><span>Delivery এর পরে</span><span id="splitLater">—</span></div>
+          </div>
+
+          <div class="sum-info deadline">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Deadline: <strong id="sumDeadline">—</strong>
+          </div>
+
+          <div class="sum-info green">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Payment confirm হলে Dashboard এ order section দেখা যাবে এবং <span class="green-text">Live countdown</span> শুরু হবে।</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Success Overlay -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+      <div class="success-icon">🎉</div>
+      <h2>Payment Submitted!</h2>
+      <p>আপনার payment information পাঠানো হয়েছে। আমাদের team ২৪ ঘণ্টার মধ্যে confirm করবে।</p>
+      <button onclick="window.location.href='../Homepage/index.html'">Homepage →</button>
+    </div>
+  </div>
+
+  <script src="js/payment.js"></script>
+</body>
+</html>

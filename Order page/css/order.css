@@ -648,3 +648,16 @@ color:white;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;curs
 }
 .pr-total-label { font-size: 13px; font-weight: 500; color: var(--text); }
 .pr-total-val   { font-size: 17px; font-weight: 700; color: #60a5fa; }
+
+/* ── Coupon Box ── */
+.coupon-box { background: rgba(251,191,36,0.04); border: 0.5px solid rgba(251,191,36,0.2); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+.coupon-head { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(251,191,36,0.06); border-bottom: 0.5px solid rgba(251,191,36,0.15); font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.8); }
+.coupon-input-row { display: flex; gap: 8px; padding: 12px 14px; }
+.coupon-input-row input { flex: 1; padding: 9px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: white; font-size: 13px; font-family: inherit; letter-spacing: 0.05em; outline: none; transition: border-color 0.2s; }
+.coupon-input-row input:focus { border-color: #fbbf24; }
+.coupon-apply-btn { padding: 9px 18px; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.4); border-radius: 8px; color: #fbbf24; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+.coupon-apply-btn:hover { background: rgba(251,191,36,0.25); }
+.coupon-apply-btn.remove { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.4); color: #f87171; }
+.coupon-msg { padding: 0 14px 10px; font-size: 12.5px; min-height: 18px; }
+.coupon-msg.success { color: #4ade80; }
+.coupon-msg.error   { color: #f87171; }
