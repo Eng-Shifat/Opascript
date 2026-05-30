@@ -487,7 +487,7 @@ function updateProgress() {
   document.getElementById('btnPrev').style.display = step>1?'flex':'none';
   const btn = document.getElementById('btnNext');
   if (step===total) {
-    btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg> Confirm Order`;
+    btn.innerHTML='💳 Pay Now';
     btn.classList.add('green');
   } else {
     btn.innerHTML=`পরবর্তী <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
@@ -559,62 +559,74 @@ function validate(s) {
 
 // ── Build Review ──
 function buildReview() {
-  // Chapter from dropdown
   const chSel = document.getElementById('chapterSelect');
-  const chOpt = chSel.options[chSel.selectedIndex];
-  const chapterVal = chSel.value === 'custom'
-    ? (gv('chapterCustom') || 'Custom')
-    : (chOpt.text || '—');
+  const chapterVal = chSel.value === 'custom' ? (gv('chapterCustom') || 'Custom') : (chSel.options[chSel.selectedIndex]?.text || '—');
+  const method = document.querySelector('#methodCards .rc.active')?.dataset.m || document.querySelector('#engMethodCards .rc.active')?.dataset.et || '—';
+  const dept = selectedDept === 'premium' ? document.getElementById('departmentText')?.value.trim() : gv('department');
+  const researchArea = selectedDept === 'premium' ? (document.getElementById('researchAreaText')?.value.trim() || '—') : gv('thesisTopic');
+  const wc = getSelectedWordCount();
+  const pages = wc ? Math.round(parseInt(wc) / 250) : null;
+  const urgBadge = { standard:'Standard', urgent:'Urgent +২০%', express:'Express +৫০%' }[selectedUrgencyVal];
+  const urgColor = { standard:'green', urgent:'amber', express:'red' }[selectedUrgencyVal];
 
-  const rt = document.querySelector('#researchTypeCards .rc.active')?.dataset.rt || '—';
-  const method = document.querySelector('#methodCards .rc.active')?.dataset.m || '—';
+  const row = (label, val, colorClass) =>
+    '<div class="rv-row">'
+    + '<span class="rv-label">' + label + '</span>'
+    + '<span class="rv-val' + (colorClass ? ' ' + colorClass : '') + '">' + val + '</span>'
+    + '</div>';
 
-  document.getElementById('reviewGrid').innerHTML = `
-    <div class="rv full"><div class="rv-label">Thesis শিরোনাম</div><div class="rv-val">${gv('thesisTitle')}</div></div>
-    <div class="rv"><div class="rv-label">Topic</div><div class="rv-val">${gv('thesisTopic')}</div></div>
-    <div class="rv"><div class="rv-label">Package</div><div class="rv-val">${pkgData[selectedDept].label}</div></div>
-    <div class="rv"><div class="rv-label">বিভাগ</div><div class="rv-val">${selectedDept === 'premium' ? document.getElementById('departmentText').value.trim() : gv('department')}</div></div>
-    <div class="rv"><div class="rv-label">বিশ্ববিদ্যালয়</div><div class="rv-val">${gv('university')}</div></div>
-    <div class="rv"><div class="rv-label">Chapter Scope</div><div class="rv-val">${chapterVal}</div></div>
-    <div class="rv"><div class="rv-label">Research Area</div><div class="rv-val">${selectedDept === 'premium' ? (document.getElementById('researchAreaText')?.value.trim() || '—') : gv('thesisTopic')}</div></div>
-    <div class="rv"><div class="rv-label">Word Count</div><div class="rv-val">${getWordCount('wordCount','wordCountCustom') || getWordCount('wordCountCSE','wordCountCSECustom') || getWordCount('wordCountPremium','wordCountPremiumCustom')} words</div></div>
-    <div class="rv"><div class="rv-label">Citation Style</div><div class="rv-val">${gv('citationStyle')}</div></div>
-    ${selectedDept==='bba'?`<div class="rv"><div class="rv-label">Independent Variable</div><div class="rv-val">${gv('indepVar')}</div></div><div class="rv"><div class="rv-label">Dependent Variable</div><div class="rv-val">${gv('depVar')}</div></div><div class="rv"><div class="rv-label">Methodology</div><div class="rv-val" style="text-transform:capitalize">${method}</div></div>`:''}
-    <div class="rv"><div class="rv-label">Deadline</div><div class="rv-val">${gv('deadlineDate')}</div></div>
-    <div class="rv"><div class="rv-label">Urgency</div><div class="rv-val" style="text-transform:capitalize">${selectedUrgencyVal}</div></div>
-    ${uploadedFiles.length?`<div class="rv full"><div class="rv-label">Uploaded Files</div><div class="rv-val">${uploadedFiles.map(f=>f.name).join(', ')}</div></div>`:''}
-  `;
+  const section = (icon, title, rows) =>
+    '<div class="rv-section">'
+    + '<div class="rv-sec-head"><i class="ti ti-' + icon + '" aria-hidden="true"></i><span>' + title + '</span></div>'
+    + rows
+    + '</div>';
 
-  // ── Price Summary ──
-  const wc   = getSelectedWordCount();
-  const base = calcBase(wc);
-  const mul  = urgMul[selectedUrgencyVal] || 1;
+  document.getElementById('reviewGrid').innerHTML =
+    section('file-text', 'Thesis Information',
+      row('Thesis শিরোনাম', gv('thesisTitle'))
+      + row('Package', pkgData[selectedDept].label, 'clr-blue')
+      + row('বিভাগ', dept)
+      + row('বিশ্ববিদ্যালয়', gv('university'))
+    )
+    + section('microscope', 'Research Details',
+      row('Research Area', researchArea)
+      + row('Chapter Scope', chapterVal)
+      + row('Methodology', method.charAt(0).toUpperCase() + method.slice(1))
+      + row('Citation Style', gv('citationStyle'))
+      + (selectedDept === 'bba' && gv('indepVar') ? row('গবেষণার বিষয়', gv('indepVar')) : '')
+      + (selectedDept === 'bba' && gv('depVar') ? row('প্রভাবের বিষয়', gv('depVar')) : '')
+    )
+    + section('calendar-time', 'Timeline',
+      row('Submission Deadline', gv('deadlineDate'))
+      + row('Word Count', (wc ? parseInt(wc).toLocaleString() + ' words' : '—') + (pages ? ' — প্রায় ' + pages + ' পাতা' : ''))
+      + row('Urgency Level', '<span class="rv-badge ' + urgColor + '">' + urgBadge + '</span>')
+    )
+    + (uploadedFiles.length ? section('paperclip', 'Uploaded Files', row('Files', uploadedFiles.map(f => f.name).join(', '))) : '');
+
+  // Price Receipt
+  const base  = calcBase(wc);
+  const mul   = urgMul[selectedUrgencyVal] || 1;
   const after = base ? Math.round(base * mul) : null;
-  let addonTotal = 0;
-  let addonLines = '';
+  let addonTotal = 0, addonLines = '';
   Object.entries(addonPrices).forEach(([key, price]) => {
     if (activeAddons[key]) {
       addonTotal += price;
-      addonLines += `<div class="pr"><span class="pr-label">${addonData[key]?.label || key}</span><span class="pr-amt">+৳${price.toLocaleString()}</span></div>`;
+      addonLines += '<div class="pr-row addon"><span class="pr-row-label">' + (addonData[key]?.label || key) + '</span><span class="pr-row-val">+৳' + price.toLocaleString() + '</span></div>';
     }
   });
   const grand = after ? after + addonTotal : null;
   const urgLabel = { standard:'Standard', urgent:'Urgent (+২০%)', express:'Express (+৫০%)' }[selectedUrgencyVal];
-  document.getElementById('priceBox').innerHTML = `
-    <div class="receipt-head">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span class="receipt-head-title">মূল্য বিবরণী</span>
-    </div>
-    <div class="receipt-body">
-      <div class="pr"><div class="pr-label"><span>Base Price</span><span class="pr-sub">${wc} words</span></div><span class="pr-amt">${base?'৳'+base.toLocaleString():'—'}</span></div>
-      ${selectedUrgencyVal!=='standard'&&after&&base?`<div class="pr"><span class="pr-label">Delivery (${urgLabel})</span><span class="pr-amt">+৳${(after-base).toLocaleString()}</span></div>`:''}
-      ${addonLines}
-      <div class="pr"><span class="pr-label">Plagiarism Check</span><span class="pr-amt free-tag">FREE</span></div>
-      <div class="pr"><span class="pr-label">Formatting</span><span class="pr-amt free-tag">FREE</span></div>
-      <div class="pr"><span class="pr-label">Revisions</span><span class="pr-amt">${urgRevision[selectedUrgencyVal]}</span></div>
-    </div>
-    <div class="pr total"><span>মোট মূল্য</span><span>${grand?'৳'+grand.toLocaleString()+'+':'আলোচনা সাপেক্ষে'}</span></div>
-  `;
+
+  document.getElementById('priceBox').innerHTML =
+    '<div class="rv-sec-head" style="padding:10px 16px;background:var(--glass2);border-bottom:0.5px solid var(--border)">'
+    + '<i class="ti ti-receipt" aria-hidden="true"></i><span>মূল্য বিবরণী</span>'
+    + '<span style="margin-left:auto;font-size:11px;color:var(--muted)">অনুমানিত</span>'
+    + '</div>'
+    + '<div class="pr-row"><span class="pr-row-label">Base Price — ' + pkgData[selectedDept].label.replace(/[📚⚙✨]\s?/g,'') + '</span><span class="pr-row-val">' + (base ? '৳' + base.toLocaleString() : '—') + '</span></div>'
+    + (selectedUrgencyVal !== 'standard' && after && base ? '<div class="pr-row"><span class="pr-row-label">Urgency — ' + urgLabel + '</span><span class="pr-row-val clr-amber">+৳' + (after - base).toLocaleString() + '</span></div>' : '')
+    + '<div class="pr-row free"><span class="pr-row-label">Plagiarism Check</span><span class="pr-row-val clr-green">FREE</span></div>'
+    + addonLines
+    + '<div class="pr-total"><span class="pr-total-label">মোট অনুমানিত মূল্য</span><span class="pr-total-val">' + (grand ? '৳' + grand.toLocaleString() + '+' : 'আলোচনা সাপেক্ষে') + '</span></div>';
 }
 
 // ── BBA fields show/hide ──
@@ -625,10 +637,42 @@ function toggleBBAFields() {
 }
 
 // ── Next/Prev ──
+function jumpToStep(target) {
+  // Only allow jumping to completed steps or current step
+  if (target >= step) return;
+  document.getElementById('p'+step).classList.remove('active');
+  step = target;
+  const tp = document.getElementById('p'+step);
+  tp.style.animation = 'slideInBk .3s ease';
+  tp.classList.add('active');
+  updateProgress();
+  document.querySelector('.modal-body').scrollTop = 0;
+}
+
 function nextStep() {
   if (step===total) {
     if (!validate(step)) return;
-    document.getElementById('overlay').classList.add('show');
+    // Save order data for payment page
+    const wc = getSelectedWordCount();
+    const base = calcBase(wc);
+    const mul  = urgMul[selectedUrgencyVal] || 1;
+    const after = base ? Math.round(base * mul) : null;
+    let addonTotal = 0;
+    Object.entries(addonPrices).forEach(([k,p]) => { if (activeAddons[k]) addonTotal += p; });
+    const grand = after ? after + addonTotal : null;
+    const pages = wc ? Math.round(parseInt(wc) / 250) : null;
+    sessionStorage.setItem('scriptora_order', JSON.stringify({
+      title:    document.getElementById('thesisTitle')?.value.trim() || '',
+      dept:     pkgData[selectedDept]?.label || '',
+      university: document.getElementById('university')?.value.trim() || '',
+      pkg:      pkgData[selectedDept]?.label || '',
+      pages:    pages ? pages + ' পাতা (~' + wc + ' words)' : '—',
+      citation: document.getElementById('citationStyle')?.value || '—',
+      urgency:  { standard:'Standard', urgent:'Urgent +২০%', express:'Express +৫০%' }[selectedUrgencyVal],
+      deadline: document.getElementById('deadlineDate')?.value || '—',
+      total:    grand || 0
+    }));
+    window.location.href = '../Payment page/payment.html';
     return;
   }
   if (!validate(step)) return;
