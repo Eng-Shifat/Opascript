@@ -379,7 +379,10 @@ nav {
 }
 
 @media (max-width: 360px) {
-  .services-grid { grid-template-columns: 1fr; }
+  .services-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .service-card { padding: 0.85rem 0.7rem; }
+  .card-title { font-size: 12px; }
+  .card-desc { font-size: 11px; }
   .hero-title-en { font-size: 20px; }
 }
 
