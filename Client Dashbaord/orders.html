@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order History — Scriptora</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/orders.css"/>
+</head>
+<body>
+
+<div id="sidebarMount"></div>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Order History</h1>
+      <p class="page-sub">আপনার সব orders এর তালিকা</p>
+    </div>
+    <a href="../Order/order.html" class="new-order-btn">+ New Order</a>
+  </div>
+
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="filterOrders('all',this)">সব</button>
+    <button class="ftab" onclick="filterOrders('active',this)">চলমান</button>
+    <button class="ftab" onclick="filterOrders('completed',this)">Completed</button>
+    <button class="ftab" onclick="filterOrders('pending',this)">Payment বাকি</button>
+  </div>
+
+  <div class="orders-table">
+
+    <!-- ORDER 1 — active -->
+    <div class="ot-row order-item" data-status="active">
+      <div class="ot-main">
+        <div class="ot-icon blue-bg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="ot-info">
+          <div class="ot-title">Impact of AI on Software Development</div>
+          <div class="ot-meta">#SCR-2026-007 · CSE/SWE Research · BUET</div>
+        </div>
+      </div>
+      <div class="ot-summary">
+        <span class="ot-badge active-status">চলমান</span>
+        <span class="ot-price">৳16,000</span>
+        <span class="ot-date">Jan 2026</span>
+        <button class="ot-toggle-btn" onclick="toggleDetails('detail-1',this)">
+          Details <svg class="toggle-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="ot-expand" id="detail-1">
+        <div class="exp-inner">
+          <div class="exp-grid">
+            <div class="exp-item"><span class="exp-lbl">Status</span><span class="exp-val blue">Writing চলছে</span></div>
+            <div class="exp-item"><span class="exp-lbl">Deadline</span><span class="exp-val gold">20 June 2026</span></div>
+            <div class="exp-item"><span class="exp-lbl">Advance দেওয়া</span><span class="exp-val green">৳8,000 ✓</span></div>
+            <div class="exp-item"><span class="exp-lbl">বাকি</span><span class="exp-val red">৳8,000</span></div>
+          </div>
+          <div class="exp-actions">
+            <a href="order-detail.html" class="exp-full-btn">
+              Full Details দেখুন
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="../Payment page/payment.html" class="exp-pay-btn">Due Pay করুন →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER 2 — completed -->
+    <div class="ot-row order-item" data-status="completed">
+      <div class="ot-main">
+        <div class="ot-icon green-bg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="ot-info">
+          <div class="ot-title">BBA Final Year Thesis — Marketing</div>
+          <div class="ot-meta">#SCR-2025-041 · BBA Research · DU</div>
+        </div>
+      </div>
+      <div class="ot-summary">
+        <span class="ot-badge done-status">Completed</span>
+        <span class="ot-price">৳12,000</span>
+        <span class="ot-date">Nov 2025</span>
+        <button class="ot-toggle-btn green" onclick="toggleDetails('detail-2',this)">
+          Details <svg class="toggle-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="ot-expand" id="detail-2">
+        <div class="exp-inner">
+          <div class="exp-grid">
+            <div class="exp-item"><span class="exp-lbl">Status</span><span class="exp-val green">✓ Delivered</span></div>
+            <div class="exp-item"><span class="exp-lbl">Delivered</span><span class="exp-val">28 Nov 2025</span></div>
+            <div class="exp-item"><span class="exp-lbl">মোট পরিশোধ</span><span class="exp-val green">৳12,000 ✓</span></div>
+          </div>
+          <div class="exp-actions">
+            <a href="downloads.html" class="exp-full-btn green">
+              File Download করুন
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER 3 — pending -->
+    <div class="ot-row order-item" data-status="pending">
+      <div class="ot-main">
+        <div class="ot-icon gold-bg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="ot-info">
+          <div class="ot-title">MBA Research Paper — Finance</div>
+          <div class="ot-meta">#SCR-2026-012 · MBA Research · NSU</div>
+        </div>
+      </div>
+      <div class="ot-summary">
+        <span class="ot-badge pending-status">Payment বাকি</span>
+        <span class="ot-price">৳18,000</span>
+        <span class="ot-date">Feb 2026</span>
+        <button class="ot-toggle-btn gold" onclick="toggleDetails('detail-3',this)">
+          Details <svg class="toggle-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="ot-expand" id="detail-3">
+        <div class="exp-inner">
+          <div class="exp-grid">
+            <div class="exp-item"><span class="exp-lbl">Status</span><span class="exp-val gold">Payment pending</span></div>
+            <div class="exp-item"><span class="exp-lbl">Deadline</span><span class="exp-val gold">15 Aug 2026</span></div>
+            <div class="exp-item"><span class="exp-lbl">Advance দেওয়া</span><span class="exp-val green">৳9,000 ✓</span></div>
+            <div class="exp-item"><span class="exp-lbl">বাকি</span><span class="exp-val red">৳9,000</span></div>
+          </div>
+          <div class="exp-actions">
+            <a href="../Payment page/payment.html" class="exp-pay-btn gold">এখনই Pay করুন →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="js/dashboard.js"></script>
+<script>
+function filterOrders(status, btn) {
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.order-item').forEach(row => {
+    row.style.display = (status === 'all' || row.dataset.status === status) ? 'block' : 'none';
+  });
+}
+function toggleDetails(id, btn) {
+  const panel = document.getElementById(id);
+  const isOpen = panel.classList.toggle('open');
+  btn.classList.toggle('expanded', isOpen);
+  btn.querySelector('.toggle-arrow').style.transform = isOpen ? 'rotate(180deg)' : '';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Details — Scriptora</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/order-detail.css"/>
+</head>
+<body>
+
+<div id="sidebarMount"></div>
+
+<main class="main">
+
+  <!-- BREADCRUMB -->
+  <div class="od-topbar">
+    <div class="od-breadcrumb">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span class="od-bc-item" onclick="window.location.href='orders.html'">Orders</span>
+      <span class="od-bc-sep">›</span>
+      <span class="od-bc-cur" id="bcOrderId">#SCR-2026-005</span>
+    </div>
+    <div class="od-topbar-right">
+      <div class="sb-avatar sm" id="headerAvatar">RH</div>
+      <span class="od-username" id="headerName">Rahim</span>
+    </div>
+  </div>
+
+  <!-- ORDER HEADER -->
+  <div class="od-header-card">
+    <div class="od-header-top">
+      <div class="od-header-left">
+        <h2 class="od-title" id="odTitle">Impact of AI on Software Development in Bangladesh</h2>
+        <div class="od-meta" id="odMeta">#SCR-2026-005 · CSE/SWE Research · Order: 15 May 2026</div>
+      </div>
+      <div class="od-status-badge" id="odStatusBadge">Writing চলছে</div>
+    </div>
+    <div class="od-countdown-wrap">
+      <div class="od-cd-label"><span class="od-live-dot"></span> Deadline countdown চলছে</div>
+      <div class="od-countdown">
+        <div class="ocd-block"><div class="ocd-num" id="ocdDays">00</div><div class="ocd-unit">days</div></div>
+        <div class="ocd-sep">:</div>
+        <div class="ocd-block"><div class="ocd-num" id="ocdHours">00</div><div class="ocd-unit">hours</div></div>
+        <div class="ocd-sep">:</div>
+        <div class="ocd-block"><div class="ocd-num" id="ocdMins">00</div><div class="ocd-unit">mins</div></div>
+        <div class="ocd-sep">:</div>
+        <div class="ocd-block"><div class="ocd-num" id="ocdSecs">00</div><div class="ocd-unit">secs</div></div>
+      </div>
+    </div>
+    <div class="od-deadline-row">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Deadline: <strong id="odDeadline">20 June 2026</strong>
+      <span class="od-days-left" id="odDaysLeft"></span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="od-card">
+    <div class="od-card-lbl">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      PROGRESS STATUS
+    </div>
+    <div class="od-progress">
+      <div class="opp-item done">
+        <div class="opp-dot done"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="opp-line"></div>
+        <div class="opp-lbl">Order<br>confirmed</div>
+      </div>
+      <div class="opp-item done">
+        <div class="opp-dot done"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="opp-line"></div>
+        <div class="opp-lbl">Payment<br>received</div>
+      </div>
+      <div class="opp-item active">
+        <div class="opp-dot active"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="opp-line"></div>
+        <div class="opp-lbl">Writing<br>চলছে</div>
+      </div>
+      <div class="opp-item"><div class="opp-dot idle">4</div><div class="opp-line"></div><div class="opp-lbl">Draft<br>Delivery</div></div>
+      <div class="opp-item"><div class="opp-dot idle">5</div><div class="opp-line"></div><div class="opp-lbl">Final<br>Payment</div></div>
+      <div class="opp-item last"><div class="opp-dot idle">6</div><div class="opp-lbl">File<br>Unlock</div></div>
+    </div>
+  </div>
+
+  <!-- PAYMENT + FILES -->
+  <div class="od-grid2">
+
+    <div class="od-card">
+      <div class="od-card-lbl">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        PAYMENT
+      </div>
+      <div class="od-pay-rows">
+        <div class="od-pay-row">
+          <span class="od-pay-lbl">মোট মূল্য</span>
+          <span class="od-pay-val" id="odTotal">৳১৬,০০০</span>
+        </div>
+        <div class="od-pay-row">
+          <span class="od-pay-lbl">Advance paid</span>
+          <span class="od-pay-val green" id="odAdvance">৳৮,০০০ <span class="pay-check">✓</span></span>
+        </div>
+        <div class="od-pay-row">
+          <span class="od-pay-lbl">Due amount</span>
+          <span class="od-pay-val muted" id="odDue">৳৮,০০০</span>
+        </div>
+      </div>
+      <div class="od-pay-tags">
+        <span class="od-pay-tag green">✓ Advance paid</span>
+        <span class="od-pay-tag gold" id="odDueTag">⏳ Due pending</span>
+      </div>
+    </div>
+
+    <div class="od-card">
+      <div class="od-card-lbl">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        FILES
+      </div>
+      <div class="od-files">
+        <div class="od-file-row">
+          <div class="od-file-left">
+            <div class="od-file-icon pdf">PDF</div>
+            <div>
+              <div class="od-file-name">Outline_SCR005.pdf</div>
+              <div class="od-file-meta">245 KB · 18 May</div>
+            </div>
+          </div>
+          <button class="od-dl-btn" onclick="simulateDownload(this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </button>
+        </div>
+        <div class="od-file-row">
+          <div class="od-file-left">
+            <div class="od-file-icon docx">DOCX</div>
+            <div>
+              <div class="od-file-name">Chapter1_2_Draft.docx</div>
+              <div class="od-file-meta">1.2 MB · 20 May</div>
+            </div>
+          </div>
+          <button class="od-dl-btn" onclick="simulateDownload(this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </button>
+        </div>
+        <div class="od-file-row locked">
+          <div class="od-file-left">
+            <div class="od-file-icon lock">🔒</div>
+            <div>
+              <div class="od-file-name" style="opacity:.45">Final Thesis.docx</div>
+              <div class="od-file-meta gold">Due payment করলে unlock হবে</div>
+            </div>
+          </div>
+          <button class="od-dl-btn locked-btn" onclick="window.location.href='../Payment page/payment.html'">Pay to Unlock</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ADMIN MESSAGE -->
+  <div class="od-card">
+    <div class="od-card-lbl">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      ADMIN MESSAGE
+    </div>
+    <div class="od-messages">
+      <div class="od-msg">
+        <div class="od-msg-text">আপনার thesis-এর outline তৈরি হয়েছে এবং writing শুরু হয়েছে। Chapter 1 &amp; 2 সম্পন্ন হয়েছে। Chapter 3 (Methodology) এখন চলছে।</div>
+        <div class="od-msg-time">21 May 2026, 3:45 PM</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="js/dashboard.js"></script>
+<script src="js/order-detail.js"></script>
+</body>
+</html>
