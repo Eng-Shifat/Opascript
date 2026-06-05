@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scriptora — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">S</div>
+    <div class="logo-text">
+      <strong>Scriptora</strong>
+      <span>Admin Panel</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Main Menu</div>
+    <a class="nav-item active" onclick="setPage('dashboard')">
+      <span class="nav-icon"><i class="ti ti-layout-dashboard"></i></span> Dashboard Overview
+    </a>
+    <a class="nav-item" onclick="setPage('orders')">
+      <span class="nav-icon"><i class="ti ti-clipboard-list"></i></span> Orders Management
+      <span class="nav-badge">5</span>
+    </a>
+    <a class="nav-item" onclick="setPage('clients')">
+      <span class="nav-icon"><i class="ti ti-users"></i></span> Client List
+    </a>
+    <a class="nav-item" onclick="setPage('payments')">
+      <span class="nav-icon"><i class="ti ti-credit-card"></i></span> Payments &amp; Billing
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" onclick="setPage('files')">
+      <span class="nav-icon"><i class="ti ti-folder"></i></span> File Manager
+    </a>
+
+    <div class="nav-label">System</div>
+    <a class="nav-item" onclick="setPage('settings')">
+      <span class="nav-icon"><i class="ti ti-settings"></i></span> Settings
+    </a>
+    <a class="nav-item" onclick="setPage('help')">
+      <span class="nav-icon"><i class="ti ti-help-circle"></i></span> Help &amp; Support
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="admin-card">
+      <div class="admin-avatar">SA</div>
+      <div class="admin-info">
+        <strong>Super Admin</strong>
+        <span>admin@scriptora.com</span>
+      </div>
+      <span class="admin-dots">⋯</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="icon-btn menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title">
+      <h1 id="page-title">Dashboard Overview</h1>
+      <p id="page-sub">শুক্রবার, ৫ জুন ২০২৫ · স্বাগতম, Super Admin!</p>
+    </div>
+    <div class="search-box">
+      <i class="ti ti-search search-icon"></i>
+      <input type="text" placeholder="Search orders, clients..." id="searchInput" oninput="handleSearch(this.value)">
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn" id="notif-btn" onclick="toggleDropdown('notif-panel', event)">
+        <i class="ti ti-bell"></i><span class="dot"></span>
+      </div>
+      <div class="icon-btn" id="msg-btn" onclick="toggleDropdown('msg-panel', event)">
+        <i class="ti ti-mail"></i>
+      </div>
+      <div class="topbar-avatar" id="avatar-btn" onclick="toggleDropdown('profile-panel', event)">SA</div>
+    </div>
+
+    <!-- NOTIFICATION PANEL -->
+    <div class="dropdown-panel" id="notif-panel">
+      <div class="dp-header">
+        <span class="dp-title">Notifications</span>
+        <span class="dp-badge">3 new</span>
+      </div>
+      <div class="dp-list">
+        <div class="dp-item unread">
+          <div class="dp-icon" style="background:rgba(248,113,113,0.15);color:#f87171"><i class="ti ti-alert-circle"></i></div>
+          <div class="dp-body">
+            <div class="dp-text">Order <b>#SCR-1079</b> is overdue</div>
+            <div class="dp-time">10 min ago</div>
+          </div>
+        </div>
+        <div class="dp-item unread">
+          <div class="dp-icon" style="background:rgba(52,211,153,0.15);color:#34d399"><i class="ti ti-check"></i></div>
+          <div class="dp-body">
+            <div class="dp-text">Order <b>#SCR-1080</b> completed</div>
+            <div class="dp-time">2 hours ago</div>
+          </div>
+        </div>
+        <div class="dp-item unread">
+          <div class="dp-icon" style="background:rgba(108,99,255,0.15);color:#a78bfa"><i class="ti ti-user-plus"></i></div>
+          <div class="dp-body">
+            <div class="dp-text">New client <b>Nusrat Jahan</b> registered</div>
+            <div class="dp-time">Yesterday</div>
+          </div>
+        </div>
+        <div class="dp-item">
+          <div class="dp-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b"><i class="ti ti-file-invoice"></i></div>
+          <div class="dp-body">
+            <div class="dp-text">Payment received <b>৳1,200</b></div>
+            <div class="dp-time">3 hours ago</div>
+          </div>
+        </div>
+      </div>
+      <div class="dp-footer">Mark all as read</div>
+    </div>
+
+    <!-- MESSAGE PANEL -->
+    <div class="dropdown-panel" id="msg-panel">
+      <div class="dp-header">
+        <span class="dp-title">Messages</span>
+        <span class="dp-badge">2 new</span>
+      </div>
+      <div class="dp-list">
+        <div class="dp-item unread">
+          <div class="dp-avatar" style="background:#6c63ff22;color:#6c63ff">RU</div>
+          <div class="dp-body">
+            <div class="dp-text"><b>Rahim Uddin</b></div>
+            <div class="dp-sub">Assignment টা কবে দেবেন?</div>
+            <div class="dp-time">5 min ago</div>
+          </div>
+        </div>
+        <div class="dp-item unread">
+          <div class="dp-avatar" style="background:#34d39922;color:#34d399">NJ</div>
+          <div class="dp-body">
+            <div class="dp-text"><b>Nusrat Jahan</b></div>
+            <div class="dp-sub">Thesis format কি APA হবে?</div>
+            <div class="dp-time">1 hour ago</div>
+          </div>
+        </div>
+        <div class="dp-item">
+          <div class="dp-avatar" style="background:#f59e0b22;color:#f59e0b">TA</div>
+          <div class="dp-body">
+            <div class="dp-text"><b>Tanvir Ahmed</b></div>
+            <div class="dp-sub">Thanks! Received the file.</div>
+            <div class="dp-time">2 hours ago</div>
+          </div>
+        </div>
+      </div>
+      <div class="dp-footer">View all messages</div>
+    </div>
+
+    <!-- PROFILE PANEL -->
+    <div class="dropdown-panel" id="profile-panel">
+      <div class="dp-profile-head">
+        <div class="dp-profile-avatar">SA</div>
+        <div>
+          <div class="dp-profile-name">Super Admin</div>
+          <div class="dp-profile-email">admin@scriptora.com</div>
+        </div>
+      </div>
+      <div class="dp-divider"></div>
+      <div class="dp-menu-item"><i class="ti ti-user"></i> My Profile</div>
+      <div class="dp-menu-item"><i class="ti ti-settings"></i> Settings</div>
+      <div class="dp-menu-item"><i class="ti ti-help-circle"></i> Help & Support</div>
+      <div class="dp-divider"></div>
+      <div class="dp-menu-item logout" onclick="handleLogout()"><i class="ti ti-logout"></i> Logout</div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <div class="content" id="main-content">
+
+
+
+
+
+    <!-- STATS GRID -->
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-icon purple"><i class="ti ti-currency-taka"></i></div>
+        </div>
+        <div class="stat-value" id="stat-revenue">৳0</div>
+        <div class="stat-inline"><span class="stat-badge up">↑ +18.4%</span><span class="stat-sub">গত মাসের তুলনায়</span></div>
+        <div class="stat-progress">
+          <div class="stat-progress-bar">
+            <div class="stat-progress-fill revenue-fill"></div>
+          </div>
+          <div class="stat-progress-label"><span>Monthly Goal</span><span>72%</span></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-label">Active Orders</div>
+          <div class="stat-icon green"><i class="ti ti-writing"></i></div>
+        </div>
+        <div class="stat-value" id="stat-orders">0</div>
+        <div class="stat-inline"><span class="stat-badge up">↑ +8 this week</span></div>
+        <div class="stat-breakdown">
+          <span class="breakdown-item green" id="orders-inprogress">18 In Progress</span>
+          <span class="breakdown-item yellow" id="orders-pending">12 Pending</span>
+          <span class="breakdown-item red" id="orders-overdue">5 Overdue</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-label">Total Clients</div>
+          <div class="stat-icon yellow"><i class="ti ti-user-circle"></i></div>
+        </div>
+        <div class="stat-value" id="stat-clients">0</div>
+        <div class="stat-inline"><span class="stat-badge up">↑ +5 new this month</span></div>
+        <div class="stat-breakdown">
+          <span class="breakdown-item green" id="clients-active">112 Active</span>
+          <span class="breakdown-item muted" id="clients-inactive">26 Inactive</span>
+          <span class="breakdown-item purple" id="clients-retention">94% Retention</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-label">Amount Due</div>
+          <div class="stat-icon red"><i class="ti ti-receipt"></i></div>
+        </div>
+        <div class="stat-value" id="stat-due">৳0</div>
+        <div class="stat-inline"><span class="stat-badge down">⚠ 9 invoices pending</span><span class="stat-sub">মোট বকেয়া পেমেন্ট</span></div>
+        <div class="stat-progress">
+          <div class="stat-progress-bar">
+            <div class="stat-progress-fill due-fill"></div>
+          </div>
+          <div class="stat-progress-label"><span>Overdue</span><span>35%</span></div>
+        </div>
+      </div>
+
+    </div><!-- /stats-grid -->
+
+    <!-- MID ROW -->
+    <div class="mid-row">
+
+      <div class="chart-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Revenue Overview</div>
+            <div class="card-sub">Monthly revenue &amp; expenses breakdown</div>
+          </div>
+          <div class="tab-group">
+            <button class="tab-btn active" onclick="switchTab(this,'monthly')">Monthly</button>
+            <button class="tab-btn" onclick="switchTab(this,'quarterly')">Quarterly</button>
+            <button class="tab-btn" onclick="switchTab(this,'yearly')">Yearly</button>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <div class="donut-card">
+        <div class="card-header donut-header">
+          <div>
+            <div class="card-title">Order Status</div>
+            <div class="card-sub">Current distribution</div>
+          </div>
+          <button class="view-all-btn" onclick="setPage('orders')">View All →</button>
+        </div>
+        <div class="donut-wrap">
+          <canvas id="donutChart"></canvas>
+          <div class="donut-center">
+            <div class="big" id="donut-total">57</div>
+            <div class="small">Total</div>
+          </div>
+        </div>
+        <div class="donut-legend" id="donut-legend"></div>
+      </div>
+
+    </div><!-- /mid-row -->
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-row">
+
+      <div class="table-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Recent Orders</div>
+            <div class="card-sub">Latest orders across all clients</div>
+          </div>
+          <button class="view-all-btn" onclick="setPage('orders')">View All →</button>
+        </div>
+        <table id="ordersTable">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Client</th>
+              <th>Service</th>
+              <th>Dept</th>
+              <th>Status</th>
+              <th>Amount</th>
+              <th>Deadline</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+
+      <div class="activity-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Recent Activity</div>
+            <div class="card-sub">Live updates</div>
+          </div>
+          <span class="today-label">Today</span>
+        </div>
+        <div class="activity-list" id="activityList"></div>
+      </div>
+
+    </div><!-- /bottom-row -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title">New Order</div>
+    <div class="modal-sub">নতুন অর্ডার তৈরি করুন</div>
+
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Client Name</label>
+        <input type="text" id="m-client" placeholder="Rahim Uddin">
+      </div>
+      <div class="modal-field">
+        <label>Phone / Email</label>
+        <input type="text" id="m-contact" placeholder="01XXXXXXXXX">
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Service Type</label>
+        <select id="m-service">
+          <option>Assignment Writing</option>
+          <option>Thesis Writing</option>
+          <option>Report Writing</option>
+          <option>Research Paper</option>
+          <option>Presentation</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Department</label>
+        <select id="m-dept">
+          <option>BBA</option>
+          <option>CSE</option>
+          <option>EEE</option>
+          <option>Law</option>
+          <option>English</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Amount (৳)</label>
+        <input type="number" id="m-amount" placeholder="500">
+      </div>
+      <div class="modal-field">
+        <label>Deadline</label>
+        <input type="date" id="m-deadline">
+      </div>
+    </div>
+
+    <div class="modal-field modal-notes">
+      <label>Notes</label>
+      <textarea id="m-notes" rows="2" placeholder="অতিরিক্ত তথ্য..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitOrder()">Create Order →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- BOTTOM NAV (mobile only) -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-item active" onclick="bottomNav('dashboard', this)">
+    <i class="ti ti-layout-dashboard"></i>
+    <span>Overview</span>
+  </div>
+  <div class="bottom-nav-item" onclick="bottomNav('orders', this)">
+    <i class="ti ti-clipboard-list"></i>
+    <span>Orders</span>
+  </div>
+  <div class="bottom-nav-item" onclick="bottomNav('clients', this)">
+    <i class="ti ti-users"></i>
+    <span>Clients</span>
+  </div>
+  <div class="bottom-nav-item" onclick="bottomNav('payments', this)">
+    <i class="ti ti-credit-card"></i>
+    <span>Payments</span>
+  </div>
+  <div class="bottom-nav-item" onclick="bottomNav('settings', this)">
+    <i class="ti ti-settings"></i>
+    <span>Settings</span>
+  </div>
+</nav>
+
+<script src="js/admin.js"></script>
+</body>
+</html>
