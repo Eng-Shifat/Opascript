@@ -13,12 +13,12 @@ const orders = [
 ];
 
 const activities = [
-  { icon:'✅', color:'rgba(52,211,153,0.15)',   title:'Order <b>#SCR-1080</b> completed',        sub:'Tanvir Ahmed — Report Writing',       time:'2 hours ago' },
-  { icon:'💳', color:'rgba(108,99,255,0.15)',   title:'Payment received <b>৳1,200</b>',         sub:'Invoice #INV-0412 settled',            time:'3 hours ago' },
-  { icon:'📋', color:'rgba(245,158,11,0.15)',   title:'New order <b>#SCR-1082</b> created',     sub:'Rahim Uddin — BBA Assignment',         time:'5 hours ago' },
-  { icon:'👤', color:'rgba(167,139,250,0.15)',  title:'New client <b>Nusrat Jahan</b> registered', sub:'CSE Dept · Thesis Writing',         time:'Yesterday'   },
-  { icon:'⚠️', color:'rgba(248,113,113,0.15)', title:'Order <b>#SCR-1079</b> is overdue',      sub:'Priya Sharma — Research Paper',        time:'Yesterday'   },
-  { icon:'📁', color:'rgba(52,211,153,0.15)',   title:'File uploaded for <b>#SCR-1081</b>',     sub:'requirements.pdf — 2.3 MB',            time:'2 days ago'  },
+  { icon:'✅', color:'rgba(52,211,153,0.15)',   title:'Order <b>#SCR-1080</b> completed',           sub:'Tanvir Ahmed — Report Writing',    time:'Today, 2:30 PM' },
+  { icon:'💳', color:'rgba(108,99,255,0.15)',   title:'Payment received <b>৳1,200</b>',            sub:'Invoice #INV-0412 settled',        time:'Today, 1:15 PM' },
+  { icon:'📋', color:'rgba(245,158,11,0.15)',   title:'New order <b>#SCR-1082</b> created',        sub:'Rahim Uddin — BBA Assignment',     time:'Today, 11:00 AM' },
+  { icon:'👤', color:'rgba(167,139,250,0.15)',  title:'New client <b>Nusrat Jahan</b> registered', sub:'CSE Dept · Thesis Writing',        time:'Yesterday, 6:45 PM' },
+  { icon:'⚠️', color:'rgba(248,113,113,0.15)', title:'Order <b>#SCR-1079</b> is overdue',         sub:'Priya Sharma — Research Paper',    time:'Yesterday, 9:00 AM' },
+  { icon:'📁', color:'rgba(52,211,153,0.15)',   title:'File uploaded for <b>#SCR-1081</b>',        sub:'requirements.pdf — 2.3 MB',        time:'Jun 3, 4:20 PM' },
 ];
 
 const donutData = [
@@ -128,8 +128,9 @@ function renderActivity() {
         <div class="activity-line"></div>
       </div>
       <div class="activity-body">
-        <div class="activity-title">${a.title}<br><span>${a.sub}</span></div>
-        <div class="activity-time">${a.time}</div>
+        <div class="activity-title">${a.title}</div>
+        <div class="activity-title"><span>${a.sub}</span></div>
+        <div class="activity-time"><i class="ti ti-clock" style="font-size:.7rem"></i> ${a.time}</div>
       </div>
     </div>
   `).join('');
@@ -324,6 +325,11 @@ function setPage(page) {
   };
 
   document.getElementById('page-title').textContent = titles[page] || 'Dashboard';
+
+  if (page === 'orders') {
+    window.location.href = 'order-management.html';
+    return;
+  }
 
   if (page !== 'dashboard') {
     showToast(`📂 "${titles[page]}" — এই পেজটি শীঘ্রই যোগ হবে!`, '#f59e0b');

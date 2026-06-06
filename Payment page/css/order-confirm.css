@@ -453,3 +453,27 @@ body {
   .hero-title { font-size: 19px; }
   .hero-sub { font-size: 12.5px; }
 }
+/* Payment Status Badge */
+.payment-status-badge {
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 10px auto;
+  display: inline-block;
+}
+.payment-status-badge.pending {
+  background: rgba(251,191,36,0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251,191,36,0.3);
+}
+.payment-status-badge.confirmed {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.payment-status-badge.rejected {
+  background: rgba(248,113,113,0.15);
+  color: #f87171;
+  border: 1px solid rgba(248,113,113,0.3);
+}

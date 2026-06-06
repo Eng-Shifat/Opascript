@@ -11,56 +11,6 @@
 </head>
 <body>
 
-<!-- ═══ SIDEBAR ═══ -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-icon">S</div>
-    <div class="logo-text">
-      <strong>Scriptora</strong>
-      <span>Admin Panel</span>
-    </div>
-  </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Main Menu</div>
-    <a class="nav-item active" onclick="setPage('dashboard')">
-      <span class="nav-icon"><i class="ti ti-layout-dashboard"></i></span> Dashboard Overview
-    </a>
-    <a class="nav-item" onclick="setPage('orders')">
-      <span class="nav-icon"><i class="ti ti-clipboard-list"></i></span> Orders Management
-      <span class="nav-badge">5</span>
-    </a>
-    <a class="nav-item" onclick="setPage('clients')">
-      <span class="nav-icon"><i class="ti ti-users"></i></span> Client List
-    </a>
-    <a class="nav-item" onclick="setPage('payments')">
-      <span class="nav-icon"><i class="ti ti-credit-card"></i></span> Payments &amp; Billing
-      <span class="nav-badge">3</span>
-    </a>
-    <a class="nav-item" onclick="setPage('files')">
-      <span class="nav-icon"><i class="ti ti-folder"></i></span> File Manager
-    </a>
-
-    <div class="nav-label">System</div>
-    <a class="nav-item" onclick="setPage('settings')">
-      <span class="nav-icon"><i class="ti ti-settings"></i></span> Settings
-    </a>
-    <a class="nav-item" onclick="setPage('help')">
-      <span class="nav-icon"><i class="ti ti-help-circle"></i></span> Help &amp; Support
-    </a>
-  </div>
-
-  <div class="sidebar-footer">
-    <div class="admin-card">
-      <div class="admin-avatar">SA</div>
-      <div class="admin-info">
-        <strong>Super Admin</strong>
-        <span>admin@scriptora.com</span>
-      </div>
-      <span class="admin-dots">⋯</span>
-    </div>
-  </div>
-</aside>
 
 <!-- ═══ MAIN ═══ -->
 <div class="main">
@@ -94,28 +44,28 @@
       </div>
       <div class="dp-list">
         <div class="dp-item unread">
-          <div class="dp-icon" style="background:rgba(248,113,113,0.15);color:#f87171"><i class="ti ti-alert-circle"></i></div>
+          <div class="dp-icon dp-red"><i class="ti ti-alert-circle"></i></div>
           <div class="dp-body">
             <div class="dp-text">Order <b>#SCR-1079</b> is overdue</div>
             <div class="dp-time">10 min ago</div>
           </div>
         </div>
         <div class="dp-item unread">
-          <div class="dp-icon" style="background:rgba(52,211,153,0.15);color:#34d399"><i class="ti ti-check"></i></div>
+          <div class="dp-icon dp-green"><i class="ti ti-check"></i></div>
           <div class="dp-body">
             <div class="dp-text">Order <b>#SCR-1080</b> completed</div>
             <div class="dp-time">2 hours ago</div>
           </div>
         </div>
         <div class="dp-item unread">
-          <div class="dp-icon" style="background:rgba(108,99,255,0.15);color:#a78bfa"><i class="ti ti-user-plus"></i></div>
+          <div class="dp-icon dp-purple"><i class="ti ti-user-plus"></i></div>
           <div class="dp-body">
             <div class="dp-text">New client <b>Nusrat Jahan</b> registered</div>
             <div class="dp-time">Yesterday</div>
           </div>
         </div>
         <div class="dp-item">
-          <div class="dp-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b"><i class="ti ti-file-invoice"></i></div>
+          <div class="dp-icon dp-yellow"><i class="ti ti-file-invoice"></i></div>
           <div class="dp-body">
             <div class="dp-text">Payment received <b>৳1,200</b></div>
             <div class="dp-time">3 hours ago</div>
@@ -133,7 +83,7 @@
       </div>
       <div class="dp-list">
         <div class="dp-item unread">
-          <div class="dp-avatar" style="background:#6c63ff22;color:#6c63ff">RU</div>
+          <div class="dp-avatar dp-av-purple">RU</div>
           <div class="dp-body">
             <div class="dp-text"><b>Rahim Uddin</b></div>
             <div class="dp-sub">Assignment টা কবে দেবেন?</div>
@@ -141,7 +91,7 @@
           </div>
         </div>
         <div class="dp-item unread">
-          <div class="dp-avatar" style="background:#34d39922;color:#34d399">NJ</div>
+          <div class="dp-avatar dp-av-green">NJ</div>
           <div class="dp-body">
             <div class="dp-text"><b>Nusrat Jahan</b></div>
             <div class="dp-sub">Thesis format কি APA হবে?</div>
@@ -149,7 +99,7 @@
           </div>
         </div>
         <div class="dp-item">
-          <div class="dp-avatar" style="background:#f59e0b22;color:#f59e0b">TA</div>
+          <div class="dp-avatar dp-av-yellow">TA</div>
           <div class="dp-body">
             <div class="dp-text"><b>Tanvir Ahmed</b></div>
             <div class="dp-sub">Thanks! Received the file.</div>
@@ -248,85 +198,90 @@
 
     </div><!-- /stats-grid -->
 
-    <!-- MID ROW -->
-    <div class="mid-row">
+    <!-- MAIN GRID -->
+    <div class="main-grid">
 
-      <div class="chart-card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Revenue Overview</div>
-            <div class="card-sub">Monthly revenue &amp; expenses breakdown</div>
-          </div>
-          <div class="tab-group">
-            <button class="tab-btn active" onclick="switchTab(this,'monthly')">Monthly</button>
-            <button class="tab-btn" onclick="switchTab(this,'quarterly')">Quarterly</button>
-            <button class="tab-btn" onclick="switchTab(this,'yearly')">Yearly</button>
-          </div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="revenueChart"></canvas>
-        </div>
-      </div>
+      <!-- LEFT COLUMN -->
+      <div class="left-col">
 
-      <div class="donut-card">
-        <div class="card-header donut-header">
-          <div>
-            <div class="card-title">Order Status</div>
-            <div class="card-sub">Current distribution</div>
+        <div class="chart-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Revenue Overview</div>
+              <div class="card-sub">Monthly revenue &amp; expenses breakdown</div>
+            </div>
+            <div class="tab-group">
+              <button class="tab-btn active" onclick="switchTab(this,'monthly')">Monthly</button>
+              <button class="tab-btn" onclick="switchTab(this,'quarterly')">Quarterly</button>
+              <button class="tab-btn" onclick="switchTab(this,'yearly')">Yearly</button>
+            </div>
           </div>
-          <button class="view-all-btn" onclick="setPage('orders')">View All →</button>
-        </div>
-        <div class="donut-wrap">
-          <canvas id="donutChart"></canvas>
-          <div class="donut-center">
-            <div class="big" id="donut-total">57</div>
-            <div class="small">Total</div>
+          <div class="chart-wrap">
+            <canvas id="revenueChart"></canvas>
           </div>
         </div>
-        <div class="donut-legend" id="donut-legend"></div>
-      </div>
 
-    </div><!-- /mid-row -->
-
-    <!-- BOTTOM ROW -->
-    <div class="bottom-row">
-
-      <div class="table-card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Recent Orders</div>
-            <div class="card-sub">Latest orders across all clients</div>
+        <div class="table-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Recent Orders</div>
+              <div class="card-sub">Latest orders across all clients</div>
+            </div>
+            <button class="view-all-btn" onclick="window.location.href='order-management.html'">View All →</button>
           </div>
-          <button class="view-all-btn" onclick="setPage('orders')">View All →</button>
+          <table id="ordersTable">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Dept</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Deadline</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
         </div>
-        <table id="ordersTable">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Client</th>
-              <th>Service</th>
-              <th>Dept</th>
-              <th>Status</th>
-              <th>Amount</th>
-              <th>Deadline</th>
-            </tr>
-          </thead>
-          <tbody id="ordersBody"></tbody>
-        </table>
-      </div>
 
-      <div class="activity-card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Recent Activity</div>
-            <div class="card-sub">Live updates</div>
+      </div><!-- /left-col -->
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-col">
+
+        <div class="donut-card">
+          <div class="card-header donut-header">
+            <div>
+              <div class="card-title">Order Status</div>
+              <div class="card-sub">Current distribution</div>
+            </div>
+            <button class="view-all-btn" onclick="window.location.href='order-management.html'">View All →</button>
           </div>
-          <span class="today-label">Today</span>
+          <div class="donut-wrap">
+            <canvas id="donutChart"></canvas>
+            <div class="donut-center">
+              <div class="big" id="donut-total">57</div>
+              <div class="small">Total</div>
+            </div>
+          </div>
+          <div class="donut-legend" id="donut-legend"></div>
         </div>
-        <div class="activity-list" id="activityList"></div>
-      </div>
 
-    </div><!-- /bottom-row -->
+        <div class="activity-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Recent Activity</div>
+              <div class="card-sub">Live updates</div>
+            </div>
+            <span class="today-label">Today</span>
+          </div>
+          <div class="activity-list" id="activityList"></div>
+        </div>
+
+      </div><!-- /right-col -->
+
+    </div><!-- /main-grid -->
 
   </div><!-- /content -->
 </div><!-- /main -->
@@ -399,7 +354,7 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- SIDEBAR OVERLAY (mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
 
 <!-- BOTTOM NAV (mobile only) -->
 <nav class="bottom-nav" id="bottomNav">
@@ -407,7 +362,7 @@
     <i class="ti ti-layout-dashboard"></i>
     <span>Overview</span>
   </div>
-  <div class="bottom-nav-item" onclick="bottomNav('orders', this)">
+  <div class="bottom-nav-item" onclick="window.location.href='order-management.html'">
     <i class="ti ti-clipboard-list"></i>
     <span>Orders</span>
   </div>
@@ -425,6 +380,7 @@
   </div>
 </nav>
 
+<script src="js/sidebar.js" data-page="dashboard"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>

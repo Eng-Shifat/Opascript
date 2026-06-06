@@ -1,11 +1,33 @@
-// =====================
-// SCRIPTORA - auth.js
-// Login page JavaScript
-// =====================
+/* ============================================
+   SCRIPTORA — auth.js  (Supabase Auth version)
+   ============================================
+   HTML <head> এ আগে যোগ করো:
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+   ============================================ */
 
+// ── Supabase Config ─────────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── Admin emails (Supabase Auth bypass করবে) ────────────────────────────────
+const ADMIN_EMAILS   = ['admin@scriptora.com'];
+const ADMIN_PASSWORD = 'Scriptora@123'; // ← শুধু admin এর জন্য, বদলে নাও
+
+
+// ════════════════════════════════════════════════════════════════
+//  DOM Ready
+// ════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function () {
 
-  // ---- Password show/hide toggle ----
+  // ── Already logged in? Redirect করো ──────────────────────────────────
+  const role = localStorage.getItem('scriptora_role');
+  if (role === 'admin')  { window.location.href = '../Admin Dashboard/admin.html';    return; }
+  if (role === 'client') { window.location.href = '../Client Dashboard/dashboard.html'; return; }
+
+  // ── Password show/hide ────────────────────────────────────────────────
   const eyeBtn    = document.getElementById('eyeBtn');
   const passInput = document.getElementById('password');
   const eyeIcon   = document.getElementById('eyeIcon');
@@ -16,44 +38,38 @@ document.addEventListener('DOMContentLoaded', function () {
   let passVisible = false;
   if (eyeBtn) {
     eyeBtn.addEventListener('click', () => {
-      passVisible = !passVisible;
-      passInput.type = passVisible ? 'text' : 'password';
+      passVisible       = !passVisible;
+      passInput.type    = passVisible ? 'text' : 'password';
       eyeIcon.innerHTML = passVisible ? eyeOffPath : eyeOnPath;
     });
   }
 
-  // ---- Type করলে error সরে যাবে ----
-  const emailInp = document.getElementById('email');
-  const passInp  = document.getElementById('password');
+  // ── Input এ error clear ───────────────────────────────────────────────
+  document.getElementById('email')?.addEventListener('input', () => {
+    showError('emailError', '');
+    document.getElementById('email').classList.remove('input-error');
+  });
 
-  if (emailInp) {
-    emailInp.addEventListener('input', () => {
-      showError('emailError', '');
-      emailInp.classList.remove('input-error');
-    });
-  }
-  if (passInp) {
-    passInp.addEventListener('input', () => {
-      showError('passError', '');
-      passInp.classList.remove('input-error');
-    });
-  }
+  document.getElementById('password')?.addEventListener('input', () => {
+    showError('passError', '');
+    document.getElementById('password').classList.remove('input-error');
+  });
 
-  // ---- Enter key দিয়ে login ----
+  // ── Enter key → login ─────────────────────────────────────────────────
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleLogin();
   });
 
 });
 
-// ---- Admin emails ----
-const ADMIN_EMAILS = ['admin@scriptora.com', 'hello@scriptora.com'];
 
-// ---- Error show/hide ----
+// ════════════════════════════════════════════════════════════════
+//  Helper Functions
+// ════════════════════════════════════════════════════════════════
 function showError(id, msg) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.textContent = msg;
+  el.textContent   = msg;
   el.style.display = msg ? 'block' : 'none';
 }
 
@@ -61,22 +77,51 @@ function clearErrors() {
   ['emailError', 'passError', 'authError'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.textContent = '';
+    el.textContent   = '';
     el.style.display = 'none';
   });
-  const e = document.getElementById('email');
-  const p = document.getElementById('password');
-  if (e) e.classList.remove('input-error');
-  if (p) p.classList.remove('input-error');
+  document.getElementById('email')   ?.classList.remove('input-error');
+  document.getElementById('password')?.classList.remove('input-error');
 }
 
-// ---- Login handler ----
-function handleLogin() {
-  clearErrors();
-  const email = document.getElementById('email').value.trim();
-  const pass  = document.getElementById('password').value;
-  let valid = true;
+function setLoading(on) {
+  const btnText   = document.getElementById('loginBtnText');
+  const spinner   = document.getElementById('loginSpinner');
+  const btn       = document.getElementById('loginBtn');
+  if (btnText) btnText.style.display  = on ? 'none'         : 'inline';
+  if (spinner) spinner.style.display  = on ? 'inline-block' : 'none';
+  if (btn)     btn.disabled           = on;
+}
 
+function saveClientSession(user, name, email) {
+  localStorage.setItem('scriptora_client_id', user.id);
+  localStorage.setItem('scriptora_name',      name || user.user_metadata?.full_name || '');
+  localStorage.setItem('scriptora_email',     email || user.email);
+  localStorage.setItem('scriptora_role',      'client');
+}
+
+function redirectAfterLogin() {
+  const redirect = sessionStorage.getItem('scriptora_redirect');
+  if (redirect === 'payment') {
+    sessionStorage.removeItem('scriptora_redirect');
+    window.location.href = '../Payment page/payment.html';
+  } else {
+    window.location.href = '../Client Dashboard/dashboard.html';
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  Main Login Handler
+// ════════════════════════════════════════════════════════════════
+async function handleLogin() {
+  clearErrors();
+
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const pass  = document.getElementById('password').value;
+  let valid   = true;
+
+  // ── Validation ────────────────────────────────────────────────────────
   if (!email) {
     showError('emailError', 'ইমেইল ঠিকানা দিন');
     document.getElementById('email').classList.add('input-error');
@@ -99,33 +144,169 @@ function handleLogin() {
 
   if (!valid) return;
 
-  document.getElementById('loginBtnText').style.display = 'none';
-  document.getElementById('loginSpinner').style.display = 'inline-block';
-  document.getElementById('loginBtn').disabled = true;
+  setLoading(true);
+
+  // ── ADMIN LOGIN (hardcoded bypass) ────────────────────────────────────
+  if (ADMIN_EMAILS.includes(email)) {
+    if (pass !== ADMIN_PASSWORD) {
+      showError('authError', 'Admin পাসওয়ার্ড সঠিক নয়।');
+      setLoading(false);
+      return;
+    }
+    localStorage.setItem('scriptora_role',  'admin');
+    localStorage.setItem('scriptora_email', email);
+    window.location.href = '../Admin Dashboard/admin.html';
+    return;
+  }
+
+  // ── CLIENT LOGIN — Supabase Auth ──────────────────────────────────────
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+
+    if (error) {
+      // Supabase error → বাংলা message
+      if (error.message.includes('Invalid login credentials') || error.message.includes('invalid_credentials')) {
+        showError('authError', 'ইমেইল বা পাসওয়ার্ড সঠিক নয়।');
+      } else if (error.message.includes('Email not confirmed')) {
+        showError('authError', 'আপনার ইমেইল verify করা হয়নি। Inbox চেক করুন।');
+      } else if (error.message.includes('Too many requests')) {
+        showError('authError', 'অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।');
+      } else {
+        showError('authError', error.message || 'Login করা যাচ্ছে না।');
+      }
+      setLoading(false);
+      return;
+    }
+
+    const authUser = data.user;
+
+    // ── clients table থেকে name নিয়ে আসো ────────────────────────────────
+    const { data: clientData } = await sb
+      .from('clients')
+      .select('name, email, phone')
+      .eq('id', authUser.id)
+      .single();
+
+    saveClientSession(
+      authUser,
+      clientData?.name  || authUser.user_metadata?.full_name,
+      clientData?.email || authUser.email
+    );
+
+    setLoading(false);
+    redirectAfterLogin();
+
+  } catch (err) {
+    console.error('Login error:', err);
+    showError('authError', 'কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন।');
+    setLoading(false);
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  Google OAuth Login
+// ════════════════════════════════════════════════════════════════
+async function handleGoogleLogin() {
+  try {
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/Client Dashboard/dashboard.html',
+      },
+    });
+    if (error) {
+      showError('authError', 'Google Login এ সমস্যা হয়েছে।');
+      console.error(error);
+    }
+    // Supabase নিজেই Google এ redirect করবে → callback এ dashboard
+  } catch (err) {
+    showError('authError', 'Google Login করা যাচ্ছে না।');
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  Forgot Password
+// ════════════════════════════════════════════════════════════════
+async function handleForgotPassword() {
+  const email = document.getElementById('email')?.value.trim().toLowerCase();
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showError('emailError', 'আগে সঠিক ইমেইল দিন, তারপর Forgot Password চাপুন');
+    document.getElementById('email')?.classList.add('input-error');
+    return;
+  }
+
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/Login Page/reset-password.html',
+    });
+
+    if (error) {
+      showError('authError', 'Password reset email পাঠানো যায়নি।');
+    } else {
+      // Success toast
+      showToast('✉️ Password reset email পাঠানো হয়েছে। Inbox চেক করুন।', 'success');
+    }
+  } catch (err) {
+    showError('authError', 'কিছু একটা সমস্যা হয়েছে।');
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  WhatsApp Support
+// ════════════════════════════════════════════════════════════════
+function handleWhatsApp() {
+  const msg = encodeURIComponent('আমি Scriptora-তে login করতে সমস্যায় পড়েছি। সাহায্য করুন।');
+  window.open(`https://wa.me/8801XXXXXXXXX?text=${msg}`, '_blank');
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  Toast Notification (success/error)
+// ════════════════════════════════════════════════════════════════
+function showToast(msg, type = 'success') {
+  const existing = document.getElementById('scriptora-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'scriptora-toast';
+  toast.style.cssText = `
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    max-width: 320px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    animation: slideInToast 0.3s ease;
+    background: ${type === 'success' ? 'linear-gradient(135deg,#059669,#047857)' : 'linear-gradient(135deg,#dc2626,#b91c1c)'};
+  `;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
 
   setTimeout(() => {
-    document.getElementById('loginBtnText').style.display = 'inline';
-    document.getElementById('loginSpinner').style.display = 'none';
-    document.getElementById('loginBtn').disabled = false;
-
-    if (ADMIN_EMAILS.includes(email.toLowerCase())) {
-      window.location.href = 'admin-dashboard.html';
-    } else {
-      const authError = document.getElementById('authError');
-      authError.textContent = 'ইমেইল বা পাসওয়ার্ড সঠিক নয়। আবার চেষ্টা করুন।';
-      authError.style.display = 'flex';
-    }
-  }, 1400);
+    toast.style.animation = 'fadeOutToast 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
 }
 
-// ---- Google Login ----
-function handleGoogleLogin() {
-  alert("Google Login শীঘ্রই আসছে! Site deploy করার পর activate হবে।");
-}
-
-// ---- WhatsApp ----
-function handleWhatsApp() {
-  const waNumber = '8801XXXXXXXXX';
-  const msg = encodeURIComponent('আমি Scriptora-তে login করতে চাই।');
-  window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
-}
+// Toast animations
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+  @keyframes slideInToast {
+    from { transform: translateX(110%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+  @keyframes fadeOutToast {
+    from { opacity: 1; }
+    to   { opacity: 0; transform: translateX(110%); }
+  }
+`;
+document.head.appendChild(toastStyle);

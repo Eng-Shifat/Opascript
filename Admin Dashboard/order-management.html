@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scriptora · Order Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/order-management.css" />
+</head>
+<body>
+
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-top">
+      <button class="topbar-menu-btn" onclick="toggleGlobalSidebar()">&#9776;</button>
+      <div class="topbar-title-group">
+        <div class="topbar-title">Orders Management</div>
+        <div class="topbar-date">Thursday, 5 June 2025 &nbsp;·&nbsp; <strong>57</strong> total orders</div>
+      </div>
+      <div class="topbar-status">
+        <div class="status-dot"></div>
+        System Operational
+      </div>
+      <div class="om-spacer"></div>
+      <div class="topbar-search">
+        <i class="ti ti-search"></i>
+        <input id="searchInput" type="text" placeholder="Search orders, clients…" oninput="handleSearch(this.value)" />
+        <span class="om-kbd">⌘K</span>
+      </div>
+      <div class="topbar-deadline">
+        <i class="ti ti-calendar"></i>
+        Deadline: This Week
+        <i class="ti ti-chevron-down"></i>
+      </div>
+      <button class="btn-new-order" id="btnNewOrder" onclick="openNewOrderModal()">
+        <i class="ti ti-plus"></i> New Order
+      </button>
+      <div class="topbar-bell">
+        <i class="ti ti-bell"></i>
+        <div class="bell-dot">5</div>
+      </div>
+    </div>
+
+    <!-- TABS ROW -->
+    <div class="topbar-bottom">
+      <div class="topbar-tabs" id="statusTabs">
+        <button class="tab-btn active" onclick="filterStatus('all', this)">All <span class="tab-count" id="count-all">57</span></button>
+        <button class="tab-btn" onclick="filterStatus('overdue', this)">Overdue <span class="tab-count" id="count-overdue">5</span></button>
+        <button class="tab-btn" onclick="filterStatus('pending', this)">Pending <span class="tab-count" id="count-pending">12</span></button>
+        <button class="tab-btn" onclick="filterStatus('writing', this)">In Progress <span class="tab-count" id="count-writing">18</span></button>
+        <button class="tab-btn" onclick="filterStatus('draft_ready', this)">In Review <span class="tab-count" id="count-draft_ready">0</span></button>
+        <button class="tab-btn" onclick="filterStatus('completed', this)">Completed <span class="tab-count" id="count-completed">22</span></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content-area">
+    <div class="center-panel">
+
+      <!-- STAT CARDS — screenshot style -->
+      <div class="om-stat-row">
+
+        <div class="om-stat-card">
+          <div class="om-stat-icon purple"><i class="ti ti-stack-2"></i></div>
+          <div class="om-stat-info">
+            <div class="om-stat-num" id="s-total">57</div>
+            <div class="om-stat-label">All Orders</div>
+          </div>
+        </div>
+
+        <div class="om-stat-card">
+          <div class="om-stat-icon blue"><i class="ti ti-loader"></i></div>
+          <div class="om-stat-info">
+            <div class="om-stat-num blue" id="s-inprogress">18</div>
+            <div class="om-stat-label">In Progress</div>
+          </div>
+        </div>
+
+        <div class="om-stat-card">
+          <div class="om-stat-icon yellow"><i class="ti ti-clock"></i></div>
+          <div class="om-stat-info">
+            <div class="om-stat-num yellow" id="s-pending">12</div>
+            <div class="om-stat-label">Pending</div>
+          </div>
+        </div>
+
+        <div class="om-stat-card">
+          <div class="om-stat-icon green"><i class="ti ti-circle-check"></i></div>
+          <div class="om-stat-info">
+            <div class="om-stat-num green" id="s-completed">22</div>
+            <div class="om-stat-label">Completed</div>
+          </div>
+        </div>
+
+        <div class="om-stat-card">
+          <div class="om-stat-icon red"><i class="ti ti-alert-triangle"></i></div>
+          <div class="om-stat-info">
+            <div class="om-stat-num red" id="s-overdue">5</div>
+            <div class="om-stat-label">Overdue</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <button class="filter-btn">
+          <i class="ti ti-arrows-sort"></i> Sort: Deadline ↑
+          <i class="ti ti-chevron-down"></i>
+        </button>
+        <button class="filter-btn">
+          <i class="ti ti-filter"></i> All Packages
+          <i class="ti ti-chevron-down"></i>
+        </button>
+        <button class="filter-btn">
+          <i class="ti ti-calendar"></i> Jun 1 – Jun 30, 2025
+          <i class="ti ti-chevron-down"></i>
+        </button>
+        <div class="filter-spacer"></div>
+        <button class="btn-export"><i class="ti ti-download"></i> Export CSV</button>
+        <button class="btn-export"><i class="ti ti-columns"></i> Columns</button>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Thesis / Topic</th>
+              <th>Package</th>
+              <th>Status</th>
+              <th class="sortable">Deadline <span class="th-sort-icon">↑</span></th>
+              <th style="text-align:right">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination-bar">
+        <div class="pagination-info">
+          Showing <span id="showing-count">10 of 57 orders</span>
+        </div>
+        <div class="page-btns">
+          <button class="page-btn" disabled><i class="ti ti-chevron-left"></i></button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn"><i class="ti ti-chevron-right"></i></button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <aside class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <div class="detail-header-left">
+          <div class="detail-label">Order Detail</div>
+          <span class="detail-order-id" id="detailOrderId">#SCR-1080</span>
+          <div class="detail-topic" id="detailTopic">—</div>
+          <div class="detail-badges">
+            <span class="status-badge s-inprogress" id="detailStatus">In Progress</span>
+            <span style="font-size:10px;color:var(--muted);padding:4px 0">—</span>
+          </div>
+        </div>
+        <button class="detail-close" id="closeDetail" onclick="closeDetail()">✕</button>
+      </div>
+
+      <div class="detail-body">
+
+        <!-- Timer -->
+        <div class="timer-box" id="timerBox">
+          <div>
+            <div class="timer-label">Time Remaining</div>
+            <div class="timer-value" id="timerValue">00:00:00:00</div>
+          </div>
+          <div class="timer-icon"><i class="ti ti-stopwatch"></i></div>
+        </div>
+
+        <!-- Client Info -->
+        <div class="detail-section">
+          <div class="client-row">
+            <div class="client-avatar" id="detailClientAvatar"><span id="detailClientInitials">RA</span></div>
+            <div>
+              <div class="client-info-name" id="detailClientName">—</div>
+              <div class="client-info-detail" id="detailClientInfo">—</div>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-field"><label>Type</label><span id="detailType">—</span></div>
+            <div class="detail-field"><label>Pages</label><span id="detailPages">—</span></div>
+            <div class="detail-field"><label>Chapters</label><span id="detailChapters">—</span></div>
+            <div class="detail-field"><label>Wordcount</label><span id="detailWordcount">—</span></div>
+            <div class="detail-field"><label>Department</label><span id="detailDept">—</span></div>
+            <div class="detail-field"><label>Amount</label><span id="detailValue">—</span></div>
+            <div class="detail-field"><label>Deadline</label><span id="detailDeadline">—</span></div>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="detail-section">
+          <div class="detail-section-title">Chapter Breakdown</div>
+          <div class="chapter-list" id="chapterBreakdown"></div>
+          <div style="margin-top:10px">
+            <div class="overall-row">
+              <span class="overall-label">Overall</span>
+              <span class="overall-pct" id="overallPct">0%</span>
+            </div>
+            <div class="overall-bar">
+              <div id="overallBar" class="progress-fill pf-purple" style="width:0%"></div>
+            </div>
+            <div class="overall-sub" id="overallDrafted"></div>
+          </div>
+        </div>
+
+        <!-- Milestone -->
+        <div class="detail-section">
+          <div class="detail-section-title">Milestone Timeline</div>
+          <div class="milestone-list" id="milestoneList"></div>
+        </div>
+
+        <!-- Files -->
+        <div class="detail-section">
+          <div class="detail-section-title">Files</div>
+          <div class="file-list" id="fileList"></div>
+          <button class="btn-upload"><i class="ti ti-upload"></i> Upload New File</button>
+        </div>
+
+        <!-- Update Status -->
+        <div class="detail-section">
+          <div class="detail-section-title">Update Status</div>
+          <div class="status-select-wrap">
+            <select class="status-select" id="detailStatusSelect">
+              <option value="pending">Pending</option>
+              <option value="writing">In Progress</option>
+              <option value="draft_ready">In Review</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <button class="btn-update-status" onclick="updateOrderStatus()">
+            <i class="ti ti-check"></i> Update Status
+          </button>
+        </div>
+
+        <!-- Notes -->
+        <div class="detail-section">
+          <div class="detail-section-title">Notes</div>
+          <div class="admin-notes-box" id="adminNotes">—</div>
+        </div>
+
+      </div>
+
+      <div class="action-btns">
+        <button class="btn-escalate"><i class="ti ti-arrow-up"></i> Escalate Order</button>
+        <div class="btn-row">
+          <button class="btn-secondary"><i class="ti ti-message"></i> Message</button>
+          <button class="btn-secondary"><i class="ti ti-download"></i> Download</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script src="js/sidebar.js" data-page="orders"></script>
+<script src="js/order-management.js"></script>
+</body>
+</html>
