@@ -27,7 +27,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 // ── Email Confirmation Setting ──────────────────────────────────────────────
 // Supabase Dashboard → Authentication → Email → "Confirm email" ON/OFF
 // নিচের value আপনার Supabase setting এর সাথে মিলিয়ে সেট করুন
-const EMAIL_CONFIRM_ENABLED = true; // false হলে register করেই সরাসরি login হবে
+const EMAIL_CONFIRM_ENABLED = false; // false হলে register করেই সরাসরি login হবে
 
 
 // ── Password show/hide ──────────────────────────────────────────────────────
@@ -313,7 +313,15 @@ async function handleRegister() {
     localStorage.setItem('scriptora_role',      'client');
 
     setLoading(false);
-    showSuccess(fullName, EMAIL_CONFIRM_ENABLED);
+
+    // সরাসরি dashboard এ redirect
+    const redirect = sessionStorage.getItem('scriptora_redirect');
+    sessionStorage.removeItem('scriptora_redirect');
+    if (redirect === 'payment') {
+      window.location.href = '../Payment page/payment.html';
+    } else {
+      window.location.href = '../Client Dashbaord/dashboard.html';
+    }
 
   } catch (err) {
     console.error('Unexpected register error:', err);
@@ -516,16 +524,4 @@ document.addEventListener('keydown', function (e) {
 });
 
 
-// ── Already logged in → redirect ────────────────────────────────────────────
-// Page load এ check করো — already logged in থাকলে register এ আসার দরকার নেই
-(async function checkExistingSession() {
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      window.location.href = '../Client Dashbaord/dashboard.html';
-    }
-  } catch (err) {
-    // Network error বা Supabase down — silently ignore, register page দেখাও
-    console.warn('Session check failed:', err.message);
-  }
-})();
+// Session check removed — register page loads always
