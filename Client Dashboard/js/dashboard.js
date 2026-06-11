@@ -68,7 +68,7 @@ async function loadAllData() {
 }
 
 async function loadOrders() {
-  const { data:orders } = await sb.from('orders').select('*').eq('client_id',currentUser.id).order('order_date',{ascending:false});
+  const { data:orders } = await sb.from('orders').select('*').eq('client_id',currentUser.id).order('created_at',{ascending:false});
   allOrders = orders || [];
   renderHomePage();
   renderOrdersPage();
@@ -290,7 +290,7 @@ async function loadLatestAdminMsg(orderId) {
 
 async function loadFilesPage() {
   if(allOrders.length===0) return;
-  const {data:files}=await sb.from('files').select('*, orders(title,due_amount)').in('order_id',allOrders.map(o=>o.id)).order('order_date',{ascending:false});
+  const {data:files}=await sb.from('files').select('*, orders(title,due_amount)').in('order_id',allOrders.map(o=>o.id)).order('created_at',{ascending:false});
   const container=document.getElementById('allFilesList');
   const empty=document.getElementById('filesEmpty');
   if(!files||files.length===0){empty.style.display='flex';return;}

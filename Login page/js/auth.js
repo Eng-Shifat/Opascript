@@ -20,12 +20,18 @@ const ADMIN_PASSWORD = 'Scriptora@123'; // ← শুধু admin এর জন�
 // ════════════════════════════════════════════════════════════════
 //  DOM Ready
 // ════════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
 
   // ── Already logged in? Redirect করো ──────────────────────────────────
-  const role = localStorage.getItem('scriptora_role');
-  if (role === 'admin')  { window.location.href = '../Admin Dashboard/admin.html';    return; }
-  if (role === 'client') { window.location.href = '../Client Dashboard/dashboard.html'; return; }
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const role = localStorage.getItem('scriptora_role');
+      if (role === 'admin') { window.location.href = '../Admin Dashboard/admin.html'; return; }
+      window.location.href = '../Client Dashboard/dashboard.html';
+      return;
+    }
+  } catch(e) { /* ignore */ }
 
   // ── Password show/hide ────────────────────────────────────────────────
   const eyeBtn    = document.getElementById('eyeBtn');
@@ -212,7 +218,7 @@ async function handleGoogleLogin() {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/Client Dashboard/dashboard.html',
+        redirectTo: window.location.origin + '/Client%20Dashbaord/dashboard.html',
       },
     });
     if (error) {

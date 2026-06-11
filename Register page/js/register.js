@@ -320,7 +320,7 @@ async function handleRegister() {
     if (redirect === 'payment') {
       window.location.href = '../Payment page/payment.html';
     } else {
-      window.location.href = '../Client Dashbaord/dashboard.html';
+      window.location.href = '../Client Dashboard/dashboard.html';
     }
 
   } catch (err) {
@@ -481,7 +481,7 @@ async function goToDashboard() {
   if (redirect === 'payment') {
     window.location.href = '../Payment page/payment.html';
   } else {
-    window.location.href = '../Client Dashbaord/dashboard.html';
+    window.location.href = '../Client Dashboard/dashboard.html';
   }
 }
 
