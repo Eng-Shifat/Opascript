@@ -4,146 +4,401 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard — Scriptora</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/dashboard.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
-<div id="sidebarMount"></div>
+<!-- ── LAYOUT ─────────────────────────────────────────────────────────── -->
+<div class="db-layout">
 
-<main class="main">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
 
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">স্বাগতম, <span id="headerName">Rahim</span> ভাই 👋</h1>
-      <p class="page-sub">আপনার active orders এক নজরে দেখুন</p>
-    </div>
-    <a href="../Order page/order.html" class="new-order-btn">+ নতুন Order</a>
-  </div>
-
-  <!-- STAT CARDS -->
-  <div class="stat-row">
-    <div class="stat-card">
-      <div class="stat-icon blue">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </div>
-      <div><div class="stat-num" id="totalOrders">4</div><div class="stat-lbl">মোট Order</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon blue">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <div><div class="stat-num" style="color:#60a5fa" id="activeOrders">2</div><div class="stat-lbl">চলছে</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon gold">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      </div>
-      <div><div class="stat-num gold-text" id="pendingOrders">1</div><div class="stat-lbl">Pending</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon green">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <div><div class="stat-num green-text" id="completedOrders">1</div><div class="stat-lbl">Completed</div></div>
-    </div>
-  </div>
-
-  <!-- ACTIVE ORDERS -->
-  <div class="section-title-row">
-    <div class="section-dot green pulse-dot"></div>
-    <span>ACTIVE ORDERS</span>
-  </div>
-
-  <!-- ORDER 1 — urgent -->
-  <div class="order-card urgent">
-    <div class="oc-top">
-      <div>
-        <div class="oc-title">Impact of AI on Software Development in Bangladesh</div>
-        <div class="oc-meta">#SCR-2026-005 · CSE/SWE · <span class="oc-price">৳১৬,০০০</span></div>
-      </div>
-      <span class="oc-badge writing"><span class="status-dot"></span> Writing চলছে</span>
+    <div class="sb-brand">
+      <div class="sb-logo">S</div>
+      <span>Scriptora</span>
     </div>
 
-    <div class="oc-cd urgent-cd">
-      <div class="cd-left">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Deadline বাকি — <strong>20 Jun</strong>
-      </div>
-      <div class="cd-nums urgent-nums">
-        <span id="cd1D">02</span>d <span id="cd1H">04</span>h <span id="cd1M">59</span>m <span id="cd1S">22</span>s
-      </div>
-    </div>
-
-    <div class="oc-prog-bar"><div class="oc-prog-fill" style="width:75%;background:#f87171"></div></div>
-
-    <div class="oc-foot">
-      <a href="order-detail.html" class="oc-det-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        Details দেখুন
+    <nav class="sb-nav">
+      <div class="sb-section-label">MAIN</div>
+      <a class="sb-item active" data-page="home" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
       </a>
-      <span class="oc-due">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        ৳৮,০০০ বাকি
-      </span>
-    </div>
-  </div>
-
-  <!-- ORDER 2 — safe -->
-  <div class="order-card safe">
-    <div class="oc-top">
-      <div>
-        <div class="oc-title">E-commerce Consumer Behavior Study in Dhaka</div>
-        <div class="oc-meta">#SCR-2026-006 · BBA/MBA · <span class="oc-price">৳১৬,০০০</span></div>
-      </div>
-      <span class="oc-badge writing"><span class="status-dot"></span> Writing চলছে</span>
-    </div>
-
-    <div class="oc-cd safe-cd">
-      <div class="cd-left">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Deadline বাকি — <strong>03 Jul</strong>
-      </div>
-      <div class="cd-nums safe-nums">
-        <span id="cd2D">14</span>d <span id="cd2H">17</span>h <span id="cd2M">59</span>m <span id="cd2S">22</span>s
-      </div>
-    </div>
-
-    <div class="oc-prog-bar"><div class="oc-prog-fill" style="width:30%;background:#4ade80"></div></div>
-
-    <div class="oc-foot">
-      <a href="order-detail.html" class="oc-det-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        Details দেখুন
+      <a class="sb-item" data-page="orders" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        আমার Orders
       </a>
-      <span class="oc-paid">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        Advance paid ✓
-      </span>
-    </div>
-  </div>
-
-  <!-- COMPLETED -->
-  <div class="section-title-row" style="margin-top:1.75rem">
-    <div class="section-dot blue"></div>
-    <span>COMPLETED</span>
-  </div>
-
-  <div class="completed-card">
-    <div>
-      <div class="cc-title">Digital Marketing ROI Analysis</div>
-      <div class="cc-meta">#SCR-2026-004 · Delivered: 10 May 2026</div>
-    </div>
-    <div class="cc-right">
-      <span class="cc-done">✓ Done</span>
-      <a href="downloads.html" class="cc-dl-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download
+      <a class="sb-item" data-page="messages" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Messages
+        <span class="sb-badge" id="msgBadge" style="display:none">0</span>
       </a>
-    </div>
-  </div>
+      <a class="sb-item" data-page="files" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Files
+      </a>
+      <a class="sb-item" data-page="payments" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Payments
+      </a>
+      <a class="sb-item" data-page="profile" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+    </nav>
 
-</main>
+    <div class="sb-bottom">
+      <a href="../Order page/order.html" class="new-order-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        নতুন Order
+      </a>
+      <div class="sb-user">
+        <div class="sb-avatar" id="sbAvatar">?</div>
+        <div class="sb-userinfo">
+          <div class="sb-uname" id="sbName">Loading...</div>
+          <div class="sb-uemail" id="sbEmail"></div>
+        </div>
+        <button class="sb-logout" id="logoutBtn" title="Logout">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="db-main">
+
+    <!-- ── PAGE: HOME ──────────────────────────────────────────────────────── -->
+    <section class="page active" id="page-home">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">স্বাগতম, <span id="headerName">...</span> ভাই 👋</h1>
+          <p class="page-sub">আপনার active orders এক নজরে দেখুন</p>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stat-row" id="statRow">
+        <div class="stat-card">
+          <div class="stat-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div><div class="stat-num" id="totalOrders">—</div><div class="stat-lbl">মোট Order</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div><div class="stat-num blue-text" id="activeOrders">—</div><div class="stat-lbl">চলছে</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div><div class="stat-num gold-text" id="pendingOrders">—</div><div class="stat-lbl">Pending</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="stat-num green-text" id="completedOrders">—</div><div class="stat-lbl">Completed</div></div>
+        </div>
+      </div>
+
+      <!-- Active Orders -->
+      <div class="section-title-row">
+        <div class="section-dot green pulse-dot"></div>
+        <span>ACTIVE ORDERS</span>
+      </div>
+      <div id="activeOrdersList">
+        <div class="empty-state" id="activeEmpty" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <p>কোনো active order নেই</p>
+          <a href="../Order page/order.html" class="empty-cta">প্রথম Order দিন →</a>
+        </div>
+      </div>
+
+      <!-- Completed Orders -->
+      <div class="section-title-row" style="margin-top:1.5rem">
+        <div class="section-dot blue"></div>
+        <span>COMPLETED</span>
+      </div>
+      <div id="completedOrdersList">
+        <div class="empty-note" id="completedEmpty" style="display:none">কোনো completed order নেই</div>
+      </div>
+    </section>
+
+    <!-- ── PAGE: ORDERS ────────────────────────────────────────────────────── -->
+    <section class="page" id="page-orders">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">আমার Orders</h1>
+          <p class="page-sub">সব orders এক জায়গায়</p>
+        </div>
+        <a href="../Order page/order.html" class="new-order-btn-top">+ নতুন Order</a>
+      </div>
+
+      <!-- Order Detail View -->
+      <div id="orderDetailView" style="display:none">
+        <button class="back-btn" id="backToOrders">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Orders এ ফিরে যান
+        </button>
+
+        <div class="od-header-card">
+          <div class="od-header-left">
+            <div class="od-title" id="detailTitle">—</div>
+            <div class="od-meta" id="detailMeta">—</div>
+          </div>
+          <span class="status-badge" id="detailStatus">—</span>
+        </div>
+
+        <!-- Countdown -->
+        <div class="countdown-card" id="countdownCard">
+          <div class="cd-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Deadline countdown চলছে
+          </div>
+          <div class="cd-blocks">
+            <div class="cd-block"><div class="cd-num" id="cdDays">00</div><div class="cd-unit">days</div></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-block"><div class="cd-num" id="cdHours">00</div><div class="cd-unit">hours</div></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-block"><div class="cd-num" id="cdMins">00</div><div class="cd-unit">mins</div></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-block"><div class="cd-num" id="cdSecs">00</div><div class="cd-unit">secs</div></div>
+          </div>
+          <div class="cd-footer">
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Deadline: <strong id="cdDeadline">—</strong></span>
+            <span id="cdDaysLeft" class="cd-days-left"></span>
+          </div>
+        </div>
+
+        <!-- Progress Stepper -->
+        <div class="progress-card">
+          <div class="progress-label">PROGRESS STATUS</div>
+          <div class="stepper" id="progressStepper">
+            <!-- JS দিয়ে render হবে -->
+          </div>
+        </div>
+
+        <!-- Payment + Files -->
+        <div class="detail-two-col">
+          <div class="detail-panel">
+            <div class="panel-head">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              PAYMENT
+            </div>
+            <div class="pay-row"><span>মোট মূল্য</span><span id="detailTotal">—</span></div>
+            <div class="pay-row"><span>Advance paid</span><span class="green-text" id="detailAdvance">—</span></div>
+            <div class="pay-row total-row"><span>Due amount</span><span class="red-text" id="detailDue">—</span></div>
+            <div class="pay-badges" id="payBadges"></div>
+          </div>
+
+          <div class="detail-panel">
+            <div class="panel-head">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              FILES
+            </div>
+            <div id="filesList">
+              <div class="empty-note">কোনো file নেই</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Message Preview -->
+        <div class="admin-msg-card" id="adminMsgCard" style="display:none">
+          <div class="panel-head">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            ADMIN MESSAGE
+          </div>
+          <div class="admin-msg-text" id="adminMsgText"></div>
+          <button class="go-chat-btn" id="goChatBtn">সম্পূর্ণ চ্যাট দেখুন →</button>
+        </div>
+      </div>
+
+      <!-- Orders List View -->
+      <div id="ordersListView">
+        <div id="allOrdersList"></div>
+        <div class="empty-state" id="ordersEmpty" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <p>এখনো কোনো order নেই</p>
+          <a href="../Order page/order.html" class="empty-cta">প্রথম Order দিন →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PAGE: MESSAGES ──────────────────────────────────────────────────── -->
+    <section class="page" id="page-messages">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Messages</h1>
+          <p class="page-sub">Admin এর সাথে কথা বলুন</p>
+        </div>
+        <select class="order-select" id="chatOrderSelect">
+          <option value="">Order বেছে নিন</option>
+        </select>
+      </div>
+
+      <div class="chat-container" id="chatContainer">
+        <div class="chat-select-prompt" id="chatSelectPrompt">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <p>উপরে Order বেছে নিন</p>
+        </div>
+
+        <div class="chat-box" id="chatBox" style="display:none">
+          <div class="chat-head">
+            <div class="chat-head-left">
+              <div class="chat-admin-av">SA</div>
+              <div>
+                <div class="chat-admin-name">Scriptora Admin</div>
+                <div class="chat-online"><span class="online-dot"></span> Online</div>
+              </div>
+            </div>
+            <div class="chat-order-id" id="chatOrderId"></div>
+          </div>
+
+          <div class="chat-body" id="chatBody">
+            <div class="chat-loading" id="chatLoading">
+              <div class="spinner"></div>
+            </div>
+          </div>
+
+          <div class="chat-input-row">
+            <textarea class="chat-input" id="chatInput" placeholder="Message লিখুন..." rows="1"></textarea>
+            <button class="chat-send-btn" id="chatSendBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PAGE: FILES ─────────────────────────────────────────────────────── -->
+    <section class="page" id="page-files">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Files</h1>
+          <p class="page-sub">সব order এর files এক জায়গায়</p>
+        </div>
+      </div>
+      <div id="allFilesList">
+        <div class="empty-state" id="filesEmpty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <p>কোনো file নেই</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PAGE: PAYMENTS ──────────────────────────────────────────────────── -->
+    <section class="page" id="page-payments">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Payments</h1>
+          <p class="page-sub">Payment history ও status</p>
+        </div>
+      </div>
+      <div id="paymentsList">
+        <div class="empty-state" id="paymentsEmpty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <p>কোনো payment নেই</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PAGE: PROFILE ───────────────────────────────────────────────────── -->
+    <section class="page" id="page-profile">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">আমার Profile</h1>
+          <p class="page-sub">তথ্য আপডেট করুন</p>
+        </div>
+      </div>
+
+      <!-- Avatar Section -->
+      <div class="profile-avatar-card">
+        <div class="profile-av-wrap">
+          <div class="profile-avatar" id="profileAvatar">?</div>
+          <label class="av-cam-btn" title="Avatar পরিবর্তন">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <input type="file" id="avatarInput" accept="image/*" style="display:none"/>
+          </label>
+        </div>
+        <div>
+          <div class="profile-av-name" id="profileAvName">—</div>
+          <div class="profile-av-since" id="profileAvSince">—</div>
+          <div class="profile-av-orders" id="profileAvOrders">— orders</div>
+        </div>
+      </div>
+
+      <!-- Personal Info -->
+      <div class="profile-card">
+        <div class="profile-section-label">ব্যক্তিগত তথ্য</div>
+        <div class="profile-grid-2">
+          <div class="profile-field">
+            <label>প্রথম নাম</label>
+            <input type="text" id="pFirstName" placeholder="Rahim"/>
+          </div>
+          <div class="profile-field">
+            <label>শেষ নাম</label>
+            <input type="text" id="pLastName" placeholder="Hossain"/>
+          </div>
+        </div>
+        <div class="profile-field">
+          <label>Email <span class="verified-badge">✓ verified</span></label>
+          <input type="email" id="pEmail" readonly class="readonly-input"/>
+        </div>
+        <div class="profile-field">
+          <label>Phone</label>
+          <input type="tel" id="pPhone" placeholder="01XXXXXXXXX"/>
+        </div>
+
+        <div class="profile-section-label" style="margin-top:1rem">একাডেমিক তথ্য</div>
+        <div class="profile-field">
+          <label>University</label>
+          <input type="text" id="pUniversity" placeholder="যেমন: BUET, DU, NSU, BRAC..."/>
+        </div>
+        <div class="profile-grid-2">
+          <div class="profile-field">
+            <label>Department / Subject</label>
+            <input type="text" id="pSubject" placeholder="যেমন: CSE, BBA, EEE..."/>
+          </div>
+          <div class="profile-field">
+            <label>Academic Year</label>
+            <input type="text" id="pYear" placeholder="যেমন: 4th Year, Masters..."/>
+          </div>
+        </div>
+
+        <button class="profile-save-btn" id="profileSaveBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Profile Save করুন
+        </button>
+        <div class="profile-msg" id="profileMsg"></div>
+      </div>
+
+      <!-- Password Change -->
+      <div class="profile-card">
+        <div class="profile-section-label">Password পরিবর্তন</div>
+        <div class="profile-field">
+          <label>বর্তমান Password</label>
+          <input type="password" id="pCurrentPass" placeholder="Current password"/>
+        </div>
+        <div class="profile-field">
+          <label>নতুন Password</label>
+          <input type="password" id="pNewPass" placeholder="New password (min 8 chars)"/>
+        </div>
+        <div class="profile-field">
+          <label>নতুন Password নিশ্চিত করুন</label>
+          <input type="password" id="pConfirmPass" placeholder="Confirm new password"/>
+        </div>
+        <button class="profile-pass-btn" id="passChangeBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Password Update করুন
+        </button>
+        <div class="profile-msg" id="passMsg"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script src="js/dashboard.js"></script>
 </body>

@@ -1,428 +1,540 @@
 /* ================================================
-   SCRIPTORA — dashboard.js  (Supabase version)
-   ================================================
-   - Login check + auto redirect
-   - Real user info from localStorage + Supabase
-   - Real orders from Supabase (realtime)
-   - Dynamic order cards with live countdown
-   - Logout clears Supabase session
+   SCRIPTORA — dashboard.js  (Supabase connected)
    ================================================ */
 
-// ── Supabase Config ─────────────────────────────────────────────────────────
 const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
-
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+const LOGIN_PATH = '../Login page/login.html';
 
-// ════════════════════════════════════════════════════════════════
-//  Helpers
-// ════════════════════════════════════════════════════════════════
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
-function pad(n) { return String(n).padStart(2, '0'); }
+const STEPS = [
+  { label: 'Order\nconfirmed' },
+  { label: 'Payment\nreceived' },
+  { label: 'Writing\nচলছে' },
+  { label: 'Draft\nDelivery' },
+  { label: 'Final\nPayment' },
+  { label: 'File\nUnlock' },
+];
 
-function getInitials(name) {
-  return (name || 'U')
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-// ── Status config ─────────────────────────────────────────────────────────
-const STATUS_CONFIG = {
-  pending:     { label:'Payment Pending', cls:'pending',   dot:true  },
-  confirmed:   { label:'Confirmed',       cls:'confirmed', dot:false },
-  in_progress: { label:'Writing চলছে',   cls:'writing',   dot:true  },
-  review:      { label:'Review এ আছে',   cls:'review',    dot:false },
-  delivered:   { label:'Delivered',       cls:'done',      dot:false },
-  completed:   { label:'Completed',       cls:'done',      dot:false },
-  cancelled:   { label:'Cancelled',       cls:'cancelled', dot:false },
+const STATUS_STEP_MAP = {
+  'pending':0,'confirmed':1,'payment_done':2,
+  'writing':3,'draft_sent':4,'final_payment':5,'completed':6,
 };
 
-// ── Deadline urgency ───────────────────────────────────────────────────────
-function getUrgencyClass(deadlineStr) {
-  if (!deadlineStr) return 'safe';
-  const days = Math.ceil((new Date(deadlineStr) - new Date()) / 86400000);
-  if (days < 0)  return 'overdue';
-  if (days <= 2) return 'urgent';
-  if (days <= 7) return 'warning';
-  return 'safe';
-}
-function urgencyColor(cls) {
-  return { urgent:'#f87171', warning:'#fbbf24', safe:'#4ade80', overdue:'#ef4444' }[cls] || '#4ade80';
-}
+let currentUser=null, currentClient=null, allOrders=[], currentOrderId=null;
+let countdownTimer=null, chatOrderId=null, realtimeSubs=[];
 
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkSession();
+  initNav();
+  initChat();
+  initProfile();
+});
 
-// ════════════════════════════════════════════════════════════════
-//  Countdown Timer
-// ════════════════════════════════════════════════════════════════
-const countdownIntervals = {};
+async function checkSession() {
+  const { data:{ session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = LOGIN_PATH; return; }
+  currentUser = session.user;
 
-function startCountdown(deadlineStr, orderId) {
-  if (!deadlineStr) return;
-  const target = new Date(deadlineStr);
-  target.setHours(23, 59, 59, 0);
-
-  if (countdownIntervals[orderId]) clearInterval(countdownIntervals[orderId]);
-
-  countdownIntervals[orderId] = setInterval(() => {
-    const diff = target - new Date();
-    const dEl  = document.getElementById(`cd-${orderId}-d`);
-    const hEl  = document.getElementById(`cd-${orderId}-h`);
-    const mEl  = document.getElementById(`cd-${orderId}-m`);
-    const sEl  = document.getElementById(`cd-${orderId}-s`);
-    if (!dEl) { clearInterval(countdownIntervals[orderId]); return; }
-
-    if (diff <= 0) {
-      [dEl,hEl,mEl,sEl].forEach(el => { if(el) el.textContent = '00'; });
-      clearInterval(countdownIntervals[orderId]);
-      return;
-    }
-    if (dEl) dEl.textContent = pad(Math.floor(diff / 86400000));
-    if (hEl) hEl.textContent = pad(Math.floor((diff % 86400000) / 3600000));
-    if (mEl) mEl.textContent = pad(Math.floor((diff % 3600000)  / 60000));
-    if (sEl) sEl.textContent = pad(Math.floor((diff % 60000)    / 1000));
-  }, 1000);
-}
-
-
-// ════════════════════════════════════════════════════════════════
-//  Render Order Cards
-// ════════════════════════════════════════════════════════════════
-function renderOrders(orders) {
-  const activeSection    = document.getElementById('activeOrdersSection');
-  const completedSection = document.getElementById('completedOrdersSection');
-  const emptyState       = document.getElementById('emptyState');
-
-  if (!orders || orders.length === 0) {
-    if (activeSection)    activeSection.innerHTML    = '';
-    if (completedSection) completedSection.innerHTML = '';
-    if (emptyState)       emptyState.style.display   = 'flex';
-    updateStats([], []);
-    return;
+  const { data:client } = await sb.from('clients').select('*').eq('id',currentUser.id).single();
+  if (!client) {
+    const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+    await sb.from('clients').insert({ id:currentUser.id, name, email:currentUser.email, phone:currentUser.user_metadata?.phone||'', created_at:new Date().toISOString() });
+    currentClient = { id:currentUser.id, name, email:currentUser.email };
+  } else {
+    currentClient = client;
   }
-  if (emptyState) emptyState.style.display = 'none';
+  updateSidebarUser();
+  await loadAllData();
+  setupRealtime();
+}
 
-  const active    = orders.filter(o => !['completed','delivered','cancelled'].includes(o.status));
-  const completed = orders.filter(o => ['completed','delivered'].includes(o.status));
-
-  updateStats(orders, active);
-
-  // ── Active Orders ─────────────────────────────────────────────────────
-  if (activeSection) {
-    activeSection.innerHTML = active.length === 0
-      ? '<p style="color:rgba(255,255,255,0.35);font-size:13px;padding:1rem 0;">কোনো active order নেই</p>'
-      : active.map(o => renderActiveCard(o)).join('');
-
-    active.forEach(o => {
-      if (o.deadline && !['completed','delivered','cancelled'].includes(o.status)) {
-        startCountdown(o.deadline, o.id);
-      }
-    });
-  }
-
-  // ── Completed Orders ──────────────────────────────────────────────────
-  if (completedSection) {
-    completedSection.innerHTML = completed.length === 0
-      ? '<p style="color:rgba(255,255,255,0.35);font-size:13px;padding:1rem 0;">কোনো completed order নেই</p>'
-      : completed.map(o => renderCompletedCard(o)).join('');
+function updateSidebarUser() {
+  const name = currentClient.name||'Client';
+  setText('sbName', name); setText('sbEmail', currentClient.email||'');
+  setText('headerName', name.split(' ')[0]); setText('sbAvatar', getInitials(name));
+  if (currentClient.avatar_url) {
+    document.getElementById('sbAvatar').innerHTML = `<img src="${currentClient.avatar_url}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
   }
 }
 
-function renderActiveCard(o) {
-  const urg    = getUrgencyClass(o.deadline);
-  const color  = urgencyColor(urg);
-  const status = STATUS_CONFIG[o.status] || { label: o.status, cls:'pending', dot:false };
-  const pct    = o.progress_pct || 0;
-  const shortId = o.id?.slice(0,8).toUpperCase() || '—';
-  const deadlineFormatted = o.deadline
-    ? new Date(o.deadline).toLocaleDateString('bn-BD', { day:'numeric', month:'short' })
-    : '—';
+async function loadAllData() {
+  await loadOrders();
+  loadPaymentsPage();
+  loadFilesPage();
+  loadProfileData();
+}
 
-  return `
-  <div class="order-card ${urg}">
+async function loadOrders() {
+  const { data:orders } = await sb.from('orders').select('*').eq('client_id',currentUser.id).order('order_date',{ascending:false});
+  allOrders = orders || [];
+  renderHomePage();
+  renderOrdersPage();
+  populateChatOrderSelect();
+}
+
+function renderHomePage() {
+  const total=allOrders.length;
+  const active=allOrders.filter(o=>!['completed','cancelled'].includes(o.status)).length;
+  const pending=allOrders.filter(o=>o.status==='pending').length;
+  const completed=allOrders.filter(o=>o.status==='completed').length;
+  setText('totalOrders',total); setText('activeOrders',active);
+  setText('pendingOrders',pending); setText('completedOrders',completed);
+
+  const activeList=document.getElementById('activeOrdersList');
+  const activeOrders=allOrders.filter(o=>o.status!=='completed');
+  if(activeList) {
+    activeList.innerHTML='';
+    const activeEmpty=document.getElementById('activeEmpty');
+    if(activeEmpty) activeEmpty.style.display = activeOrders.length===0?'flex':'none';
+    activeOrders.forEach(o=>activeList.appendChild(buildOrderCard(o)));
+  }
+
+  const completedList=document.getElementById('completedOrdersList');
+  const completedOrders=allOrders.filter(o=>o.status==='completed');
+  if(completedList) {
+    completedList.innerHTML='';
+    const completedEmpty=document.getElementById('completedEmpty');
+    if(completedEmpty) completedEmpty.style.display = completedOrders.length===0?'block':'none';
+  completedOrders.forEach(o=>completedList.appendChild(buildCompletedCard(o)));
+  }
+}
+
+function buildOrderCard(order) {
+  const deadline=new Date(order.deadline), now=new Date();
+  const diffMs=deadline-now, daysLeft=Math.floor(diffMs/86400000);
+  const isUrgent=daysLeft<=3, isPending=order.status==='pending';
+  const card=document.createElement('div');
+  card.className=`order-card ${isPending?'pending':isUrgent?'urgent':'safe'}`;
+  card.onclick=()=>openOrderDetail(order.id);
+  const badge=getStatusBadge(order.status);
+  const cdColor=isUrgent?'cd-nums-urgent':'cd-nums-safe';
+  const prog=order.progress_pct||0;
+  const progColor=isUrgent?'#ef4444':'#22c55e';
+  const due=(order.due_amount||0)>0;
+  card.innerHTML=`
     <div class="oc-top">
-      <div style="flex:1;min-width:0">
-        <div class="oc-title">${o.title || 'Untitled Order'}</div>
-        <div class="oc-meta">#SCR-${shortId} · ${o.dept || '—'} · <span class="oc-price">৳${(o.total_price||0).toLocaleString()}</span></div>
+      <div>
+        <div class="oc-title">${escHtml(order.title||'Untitled')}</div>
+        <div class="oc-meta">#SCR-${String(order.id).slice(-6).toUpperCase()} · ${escHtml(order.dept||'')} · <span class="oc-price">৳${fmt(order.total_price)}</span></div>
       </div>
-      <span class="oc-badge ${status.cls}">
-        ${status.dot ? '<span class="status-dot"></span>' : ''}
-        ${status.label}
-      </span>
+      <span class="status-badge ${badge.cls}">${badge.label}</span>
     </div>
-
-    ${o.deadline ? `
-    <div class="oc-cd ${urg}-cd">
+    <div class="oc-cd">
       <div class="cd-left">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Deadline বাকি — <strong>${deadlineFormatted}</strong>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Deadline — <strong>${fmtDate(order.deadline)}</strong>
       </div>
-      <div class="cd-nums ${urg}-nums">
-        <span id="cd-${o.id}-d">--</span>d
-        <span id="cd-${o.id}-h">--</span>h
-        <span id="cd-${o.id}-m">--</span>m
-        <span id="cd-${o.id}-s">--</span>s
-      </div>
-    </div>` : ''}
-
-    <div class="oc-prog-bar">
-      <div class="oc-prog-fill" style="width:${pct}%;background:${color}"></div>
+      <div class="${cdColor}">${diffMs>0?formatCountdown(diffMs):'সময় শেষ!'}</div>
     </div>
-    <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;text-align:right">${pct}% সম্পন্ন</div>
-
+    <div class="oc-prog-bar"><div class="oc-prog-fill" style="width:${prog}%;background:${progColor}"></div></div>
     <div class="oc-foot">
-      <button class="oc-det-btn" onclick="viewOrderDetail('${o.id}')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <button class="oc-det-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         Details দেখুন
       </button>
-      ${o.due_amount > 0
-        ? `<span class="oc-due">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            ৳${o.due_amount.toLocaleString()} বাকি
-          </span>`
-        : `<span class="oc-paid">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Advance paid ✓
-          </span>`
+      ${due
+        ?`<span class="oc-due"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>৳${fmt(order.due_amount)} বাকি</span>`
+        :`<span class="oc-paid"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Advance paid ✓</span>`
       }
-    </div>
-  </div>`;
+    </div>`;
+  return card;
 }
 
-function renderCompletedCard(o) {
-  const shortId   = o.id?.slice(0,8).toUpperCase() || '—';
-  const delivered = o.updated_at
-    ? new Date(o.updated_at).toLocaleDateString('en-BD', { day:'numeric', month:'short', year:'numeric' })
-    : '—';
-  return `
-  <div class="completed-card">
-    <div>
-      <div class="cc-title">${o.title || 'Untitled'}</div>
-      <div class="cc-meta">#SCR-${shortId} · Delivered: ${delivered}</div>
-    </div>
+function buildCompletedCard(order) {
+  const card=document.createElement('div');
+  card.className='completed-card'; card.onclick=()=>openOrderDetail(order.id);
+  card.innerHTML=`
+    <div><div class="cc-title">${escHtml(order.title||'Untitled')}</div><div class="cc-meta">#SCR-${String(order.id).slice(-6).toUpperCase()} · ${fmtDate(order.created_at)}</div></div>
     <div class="cc-right">
       <span class="cc-done">✓ Done</span>
-      <button class="cc-dl-btn" onclick="viewOrderDetail('${o.id}')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <button class="cc-dl-btn" onclick="event.stopPropagation();showPage('files')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download
       </button>
-    </div>
-  </div>`;
-}
-
-function viewOrderDetail(orderId) {
-  sessionStorage.setItem('scriptora_view_order', orderId);
-  window.location.href = 'order-detail.html';
-}
-
-
-// ════════════════════════════════════════════════════════════════
-//  Stats Update
-// ════════════════════════════════════════════════════════════════
-function updateStats(all, active) {
-  const pending   = all.filter(o => o.status === 'pending').length;
-  const completed = all.filter(o => ['completed','delivered'].includes(o.status)).length;
-
-  setText('totalOrders',     all.length);
-  setText('activeOrders',    active.length);
-  setText('pendingOrders',   pending);
-  setText('completedOrders', completed);
-}
-
-
-// ════════════════════════════════════════════════════════════════
-//  Load Orders from Supabase
-// ════════════════════════════════════════════════════════════════
-async function loadOrders(clientId) {
-  // Loading state
-  const activeSection = document.getElementById('activeOrdersSection');
-  if (activeSection) activeSection.innerHTML = `
-    <div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.35);">
-      <div style="font-size:24px;margin-bottom:8px">⏳</div>
-      Orders লোড হচ্ছে…
     </div>`;
-
-  const { data: orders, error } = await sb
-    .from('orders')
-    .select('*')
-    .eq('client_id', clientId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Orders fetch error:', error);
-    if (activeSection) activeSection.innerHTML = `
-      <div style="padding:2rem;text-align:center;color:#f87171;">
-        Orders লোড করতে সমস্যা হয়েছে। Page refresh করুন।
-      </div>`;
-    return;
-  }
-
-  renderOrders(orders || []);
-
-  // ── Realtime subscription — order update হলে auto refresh ────────────
-  sb.channel('orders-changes')
-    .on('postgres_changes', {
-      event:  '*',
-      schema: 'public',
-      table:  'orders',
-      filter: `client_id=eq.${clientId}`,
-    }, () => {
-      loadOrders(clientId); // re-fetch on any change
-    })
-    .subscribe();
+  return card;
 }
 
-
-// ════════════════════════════════════════════════════════════════
-//  Logout
-// ════════════════════════════════════════════════════════════════
-async function handleLogout() {
-  await sb.auth.signOut();
-  localStorage.removeItem('scriptora_client_id');
-  localStorage.removeItem('scriptora_name');
-  localStorage.removeItem('scriptora_email');
-  localStorage.removeItem('scriptora_role');
-  window.location.href = '../Login page/login.html';
-}
-
-
-// ════════════════════════════════════════════════════════════════
-//  Sidebar Inject (আগের মতোই, logout updated)
-// ════════════════════════════════════════════════════════════════
-function injectSidebar(name, email, initials) {
-  const NAV = [
-    { href:'dashboard.html', label:'Dashboard',   svg:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>' },
-    { href:'orders.html',    label:'আমার Order',  svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>' },
-    { href:'downloads.html', label:'Downloads',    svg:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>' },
-    { divider: true },
-    { href:'profile.html',   label:'Profile',      svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
-    { href:'help.html',      label:'সাহায্য',      svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
-  ];
-  const cur  = location.pathname.split('/').pop() || 'dashboard.html';
-  const icon = d => `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${d}</svg>`;
-  const navHTML = NAV.map(n => {
-    if (n.divider) return '<div class="sb-divider"></div>';
-    const active = cur === n.href ? ' active' : '';
-    return `<a href="${n.href}" class="sb-link${active}">${icon(n.svg)} ${n.label}</a>`;
-  }).join('');
-
-  const html = `
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-<aside class="sidebar" id="sidebar">
-  <div class="sb-logo"><div class="logo-icon">S</div><span>Scriptora</span></div>
-  <nav class="sb-nav">${navHTML}</nav>
-  <div class="sb-bottom">
-    <div class="sb-user">
-      <div class="sb-avatar" id="sbAvatar">${initials}</div>
-      <div class="sb-userinfo">
-        <div class="sb-name"  id="sbName">${name}</div>
-        <div class="sb-email" id="sbEmail">${email}</div>
+function renderOrdersPage() {
+  const list=document.getElementById('allOrdersList');
+  const empty=document.getElementById('ordersEmpty');
+  list.innerHTML='';
+  if(allOrders.length===0){empty.style.display='flex';return;}
+  empty.style.display='none';
+  allOrders.forEach(order=>{
+    const item=document.createElement('div');
+    item.className='order-list-item'; item.onclick=()=>openOrderDetail(order.id);
+    const badge=getStatusBadge(order.status);
+    item.innerHTML=`
+      <div class="oli-left">
+        <div class="oli-title">${escHtml(order.title||'Untitled')}</div>
+        <div class="oli-meta">#SCR-${String(order.id).slice(-6).toUpperCase()} · ${escHtml(order.dept||'')} · ${fmtDate(order.deadline)}</div>
       </div>
-    </div>
-    <button class="sb-logout" onclick="handleLogout()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Logout
-    </button>
-  </div>
-</aside>
-<div class="mobile-topbar">
-  <button class="menu-btn" onclick="toggleSidebar()">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-  </button>
-  <div class="mobile-logo"><div class="logo-icon">S</div> Scriptora</div>
-  <div class="sb-avatar sm" id="mobileAvatar">${initials}</div>
-</div>`;
-
-  const mount = document.getElementById('sidebarMount');
-  if (mount) mount.outerHTML = html;
-}
-
-function toggleSidebar() {
-  document.getElementById('sidebar')?.classList.toggle('open');
-  document.getElementById('sidebarOverlay')?.classList.toggle('show');
-}
-
-
-// ════════════════════════════════════════════════════════════════
-//  dashboard.html এ dynamic sections inject
-// ════════════════════════════════════════════════════════════════
-function injectDynamicSections() {
-  const main = document.querySelector('main.main');
-  if (!main) return;
-
-  // stat cards এর পরে dynamic sections যোগ করো
-  const existingStatRow = main.querySelector('.stat-row');
-  if (!existingStatRow) return;
-
-  const sectionsHTML = `
-  <!-- ACTIVE ORDERS SECTION -->
-  <div class="section-title-row" style="margin-top:1.75rem">
-    <div class="section-dot green pulse-dot"></div>
-    <span>ACTIVE ORDERS</span>
-  </div>
-  <div id="activeOrdersSection"></div>
-
-  <!-- COMPLETED SECTION -->
-  <div class="section-title-row" style="margin-top:1.75rem">
-    <div class="section-dot blue"></div>
-    <span>COMPLETED</span>
-  </div>
-  <div id="completedOrdersSection"></div>
-
-  <!-- EMPTY STATE -->
-  <div id="emptyState" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center;">
-    <div style="font-size:48px;margin-bottom:1rem">📄</div>
-    <div style="font-size:16px;font-weight:600;color:white;margin-bottom:8px">কোনো order নেই</div>
-    <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:1.5rem">আপনার প্রথম thesis order দিন</p>
-    <a href="../Order page/order.html" style="padding:10px 24px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:10px;color:white;text-decoration:none;font-size:14px;font-weight:600;">+ নতুন Order দিন</a>
-  </div>`;
-
-  existingStatRow.insertAdjacentHTML('afterend', sectionsHTML);
-
-  // HTML এ hardcoded order cards সরিয়ে দাও
-  main.querySelectorAll('.order-card, .completed-card, .section-title-row:not(:first-of-type)').forEach(el => {
-    // শুধু dynamically created sections এর বাইরেরগুলো রাখো
+      <div class="oli-right">
+        <span class="status-badge ${badge.cls}">${badge.label}</span>
+        <span class="oli-price">৳${fmt(order.total_price)}</span>
+        <svg class="oli-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`;
+    list.appendChild(item);
   });
 }
 
+async function openOrderDetail(orderId) {
+  currentOrderId=orderId;
+  const order=allOrders.find(o=>o.id===orderId);
+  if(!order) return;
+  showPage('orders');
+  document.getElementById('ordersListView').style.display='none';
+  document.getElementById('orderDetailView').style.display='block';
+  setText('detailTitle',order.title||'Untitled');
+  setText('detailMeta',`#SCR-${String(order.id).slice(-6).toUpperCase()} · ${order.dept||''} · Order: ${fmtDate(order.created_at)}`);
+  const badge=getStatusBadge(order.status);
+  const statusEl=document.getElementById('detailStatus');
+  statusEl.textContent=badge.label; statusEl.className=`status-badge ${badge.cls}`;
+  startCountdown(order.deadline);
+  renderStepper(order.status);
+  setText('detailTotal',`৳${fmt(order.total_price)}`);
+  setText('detailAdvance',`৳${fmt(order.advance_paid)}`);
+  setText('detailDue',`৳${fmt(order.due_amount)}`);
+  const payBadges=document.getElementById('payBadges');
+  payBadges.innerHTML='';
+  if((order.advance_paid||0)>0) payBadges.innerHTML+=`<span class="pay-badge confirmed">✓ Advance paid</span>`;
+  if((order.due_amount||0)>0) payBadges.innerHTML+=`<span class="pay-badge pending">✗ Due pending</span>`;
+  await loadOrderFiles(orderId,(order.due_amount||0)>0);
+  await loadLatestAdminMsg(orderId);
+}
 
-// ════════════════════════════════════════════════════════════════
-//  MAIN INIT
-// ════════════════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', async () => {
+document.getElementById('backToOrders').onclick=()=>{
+  document.getElementById('ordersListView').style.display='block';
+  document.getElementById('orderDetailView').style.display='none';
+  clearInterval(countdownTimer);
+};
 
-  // ── Login check ───────────────────────────────────────────────────────
-  const clientId = localStorage.getItem('scriptora_client_id');
-  const role     = localStorage.getItem('scriptora_role');
-
-  if (!clientId || role !== 'client') {
-    window.location.href = '../Login page/login.html';
-    return;
+function startCountdown(deadlineStr) {
+  clearInterval(countdownTimer);
+  const deadline=new Date(deadlineStr);
+  function tick() {
+    const diff=deadline-new Date();
+    if(diff<=0){
+      ['cdDays','cdHours','cdMins','cdSecs'].forEach(id=>setText(id,'00'));
+      setText('cdDaysLeft','সময় শেষ!'); clearInterval(countdownTimer); return;
+    }
+    const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000);
+    const m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+    setText('cdDays',pad(d)); setText('cdHours',pad(h));
+    setText('cdMins',pad(m)); setText('cdSecs',pad(s));
+    setText('cdDeadline',fmtDateLong(deadlineStr));
+    setText('cdDaysLeft',`আর মাত্র ${d} দিন বাকি`);
   }
+  tick(); countdownTimer=setInterval(tick,1000);
+}
 
-  // ── User info ─────────────────────────────────────────────────────────
-  const name     = localStorage.getItem('scriptora_name')  || 'User';
-  const email    = localStorage.getItem('scriptora_email') || '';
-  const initials = getInitials(name);
-  const firstName = name.split(' ')[0];
+function renderStepper(status) {
+  const stepper=document.getElementById('progressStepper');
+  const currentStep=STATUS_STEP_MAP[status]??0;
+  stepper.innerHTML='';
+  STEPS.forEach((step,i)=>{
+    const isDone=i<currentStep, isActive=i===currentStep;
+    const cls=isDone?'done':isActive?'active':'pending';
+    const icon=isDone
+      ?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`
+      :isActive
+        ?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`
+        :`${i+1}`;
+    const div=document.createElement('div');
+    div.className=`step ${cls}`;
+    div.innerHTML=`<div class="step-circle ${cls}">${icon}</div><div class="step-label ${cls}">${step.label.replace('\n','<br>')}</div>`;
+    stepper.appendChild(div);
+  });
+}
 
-  // ── Sidebar inject ────────────────────────────────────────────────────
-  injectSidebar(name, email, initials);
+async function loadOrderFiles(orderId,hasDue) {
+  const {data:files}=await sb.from('files').select('*').eq('order_id',orderId).order('id',{ascending:true});
+  const list=document.getElementById('filesList');
+  if(!files||files.length===0){list.innerHTML='<div class="empty-note">কোনো file নেই</div>';return;}
+  list.innerHTML='';
+  files.forEach(file=>{
+    const isLocked=file.locked&&hasDue;
+    const ext=(file.name||'').split('.').pop().toUpperCase();
+    const iconCls=isLocked?'fi-lock':ext==='PDF'?'fi-pdf':'fi-doc';
+    const iconTxt=isLocked?`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`:ext;
+    const div=document.createElement('div');
+    div.className='file-item';
+    div.innerHTML=`
+      <div class="file-icon ${iconCls}">${iconTxt}</div>
+      <div class="file-info">
+        <div class="file-name" style="${isLocked?'color:var(--text-muted)':''}">${escHtml(file.name)}</div>
+        <div class="file-meta">${fmtDate(file.created_at)}</div>
+        ${isLocked?'<div class="file-locked-label">Due payment করলে unlock হবে</div>':''}
+      </div>
+      ${isLocked
+        ?`<button class="file-unlock-btn" onclick="showPage('payments')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>Unlock</button>`
+        :`<a class="file-dl-btn" href="${escHtml(file.url)}" target="_blank" download><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</a>`
+      }`;
+    list.appendChild(div);
+  });
+}
 
-  // ── Header ────────────────────────────────────────────────────────────
-  setText('headerName',   firstName);
-  setText('headerAvatar', initials);
+async function loadLatestAdminMsg(orderId) {
+  const {data:msgs}=await sb.from('messages').select('*').eq('order_id',orderId).eq('from_admin',true).order('sent_at',{ascending:false}).limit(1);
+  const card=document.getElementById('adminMsgCard');
+  if(msgs&&msgs.length>0){
+    card.style.display='block';
+    document.getElementById('adminMsgText').textContent=msgs[0].text;
+    document.getElementById('goChatBtn').onclick=()=>{showPage('messages');document.getElementById('chatOrderSelect').value=orderId;loadChat(orderId);};
+  } else { card.style.display='none'; }
+}
 
-  // ── Dynamic sections inject ───────────────────────────────────────────
-  injectDynamicSections();
+async function loadFilesPage() {
+  if(allOrders.length===0) return;
+  const {data:files}=await sb.from('files').select('*, orders(title,due_amount)').in('order_id',allOrders.map(o=>o.id)).order('order_date',{ascending:false});
+  const container=document.getElementById('allFilesList');
+  const empty=document.getElementById('filesEmpty');
+  if(!files||files.length===0){empty.style.display='flex';return;}
+  empty.style.display='none';
+  const grouped={};
+  files.forEach(f=>{
+    if(!grouped[f.order_id]) grouped[f.order_id]={title:f.orders?.title||'Order',files:[]};
+    grouped[f.order_id].files.push(f);
+  });
+  container.innerHTML='';
+  Object.entries(grouped).forEach(([orderId,group])=>{
+    const groupDiv=document.createElement('div'); groupDiv.className='files-group';
+    groupDiv.innerHTML=`<div class="files-group-label">${escHtml(group.title)}</div>`;
+    const card=document.createElement('div'); card.className='files-card';
+    group.files.forEach(file=>{
+      const order=allOrders.find(o=>o.id===Number(orderId));
+      const isLocked=file.locked&&(order?.due_amount||0)>0;
+      const ext=(file.name||'').split('.').pop().toUpperCase();
+      const iconCls=isLocked?'fi-lock':ext==='PDF'?'fi-pdf':'fi-doc';
+      const iconTxt=isLocked?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`:ext;
+      const item=document.createElement('div'); item.className='file-item';
+      item.innerHTML=`
+        <div class="file-icon ${iconCls}">${iconTxt}</div>
+        <div class="file-info"><div class="file-name">${escHtml(file.name)}</div><div class="file-meta">${fmtDate(file.created_at)}</div></div>
+        ${isLocked?`<span class="file-locked-label">🔒 Locked</span>`:`<a class="file-dl-btn" href="${escHtml(file.url)}" target="_blank" download><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</a>`}`;
+      card.appendChild(item);
+    });
+    groupDiv.appendChild(card); container.appendChild(groupDiv);
+  });
+}
 
-  // ── Load real orders ──────────────────────────────────────────────────
-  await loadOrders(clientId);
-});
+async function loadPaymentsPage() {
+  const {data:payments}=await sb.from('payments').select('*').eq('client_id',currentUser.id).order('id',{ascending:false});
+  const container=document.getElementById('paymentsList');
+  const empty=document.getElementById('paymentsEmpty');
+  if(!payments||payments.length===0){empty.style.display='flex';return;}
+  empty.style.display='none'; container.innerHTML='';
+  payments.forEach(pay=>{
+    const cls=pay.confirmed?'confirmed':'pending';
+    const lbl=pay.confirmed?'✓ Confirmed':'⏳ Pending';
+    const item=document.createElement('div'); item.className='payment-item';
+    item.innerHTML=`
+      <div class="pi-left">
+        <div class="pi-order">${escHtml(pay.orders?.title||'Order')}</div>
+        <div class="pi-method">${escHtml(pay.method||'')}${pay.txn_id?` · TXN: ${escHtml(pay.txn_id)}`:''}</div>
+        <div class="pi-txn">${fmtDateLong(pay.created_at)}</div>
+      </div>
+      <div class="pi-right">
+        <div><div class="pi-amount">৳${fmt(pay.amount)}</div><div><span class="pay-badge ${cls}">${lbl}</span></div></div>
+      </div>`;
+    container.appendChild(item);
+  });
+}
+
+function initChat() {
+  const select=document.getElementById('chatOrderSelect');
+  const sendBtn=document.getElementById('chatSendBtn');
+  const input=document.getElementById('chatInput');
+  select.addEventListener('change',()=>{const id=parseInt(select.value);if(!id)return;chatOrderId=id;loadChat(id);});
+  sendBtn.addEventListener('click',sendChatMessage);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage();}});
+  input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,100)+'px';});
+}
+
+function populateChatOrderSelect() {
+  const select=document.getElementById('chatOrderSelect');
+  select.innerHTML='<option value="">Order বেছে নিন</option>';
+  allOrders.forEach(order=>{
+    const opt=document.createElement('option');
+    opt.value=order.id; opt.textContent=`#SCR-${String(order.id).slice(-6).toUpperCase()} — ${truncate(order.title,30)}`;
+    select.appendChild(opt);
+  });
+}
+
+async function loadChat(orderId) {
+  document.getElementById('chatSelectPrompt').style.display='none';
+  document.getElementById('chatBox').style.display='flex';
+  document.getElementById('chatOrderId').textContent=`#SCR-${String(orderId).slice(-6).toUpperCase()}`;
+  const body=document.getElementById('chatBody');
+  const loading=document.getElementById('chatLoading');
+  body.innerHTML=''; body.appendChild(loading); loading.style.display='flex';
+  const {data:msgs}=await sb.from('messages').select('*').eq('order_id',orderId).order('sent_at',{ascending:true});
+  loading.style.display='none'; body.innerHTML='';
+  if(!msgs||msgs.length===0){body.innerHTML='<div class="empty-note">এখনো কোনো message নেই। Admin কে message করুন!</div>';}
+  else{msgs.forEach(msg=>appendChatMsg(msg));}
+  scrollChatToBottom();
+  const chatSub=sb.channel(`chat-${orderId}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`order_id=eq.${orderId}`},payload=>{appendChatMsg(payload.new);scrollChatToBottom();if(payload.new.from_admin)updateMsgBadge(1);}).subscribe();
+  realtimeSubs.push(chatSub);
+}
+
+function appendChatMsg(msg) {
+  const body=document.getElementById('chatBody');
+  const isAdmin=msg.from_admin;
+  const emptyNote=body.querySelector('.empty-note');
+  if(emptyNote) emptyNote.remove();
+  const div=document.createElement('div');
+  div.className=`chat-msg ${isAdmin?'admin':'client'}`;
+  div.innerHTML=`<div class="msg-meta-label">${isAdmin?'Scriptora Admin':'আপনি'} · ${fmtTime(msg.sent_at)}</div><div class="msg-bubble">${escHtml(msg.text)}</div>`;
+  body.appendChild(div);
+}
+
+async function sendChatMessage() {
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text||!chatOrderId) return;
+  input.value=''; input.style.height='auto';
+  const {error}=await sb.from('messages').insert({order_id:chatOrderId,client_id:currentUser.id,text,from_admin:false,sent_at:new Date().toISOString()});
+  if(error){showToast('Message পাঠানো যায়নি','error');input.value=text;}
+}
+
+function scrollChatToBottom(){const body=document.getElementById('chatBody');setTimeout(()=>{body.scrollTop=body.scrollHeight;},50);}
+
+function loadProfileData() {
+  if(!currentClient) return;
+  const name=currentClient.name||'';
+  const parts=name.split(' ');
+  setVal('pFirstName',parts[0]||''); setVal('pLastName',parts.slice(1).join(' ')||'');
+  setVal('pEmail',currentClient.email||''); setVal('pPhone',currentClient.phone||'');
+  setVal('pUniversity',currentClient.university||''); setVal('pSubject',currentClient.subject||'');
+  setVal('pYear',currentClient.academic_year||'');
+  const av=document.getElementById('profileAvatar');
+  if(currentClient.avatar_url){av.innerHTML=`<img src="${currentClient.avatar_url}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;}
+  else{av.textContent=getInitials(name);}
+  setText('profileAvName',name||'—');
+  setText('profileAvSince',`Member since ${fmtDate(currentClient.created_at)}`);
+  setText('profileAvOrders',`${allOrders.length} orders`);
+}
+
+function initProfile() {
+  document.getElementById('profileSaveBtn').addEventListener('click',saveProfile);
+  document.getElementById('passChangeBtn').addEventListener('click',changePassword);
+  document.getElementById('avatarInput').addEventListener('change',uploadAvatar);
+  document.getElementById('logoutBtn').addEventListener('click',logout);
+}
+
+async function saveProfile() {
+  const btn=document.getElementById('profileSaveBtn');
+  const firstName=getVal('pFirstName').trim(), lastName=getVal('pLastName').trim();
+  if(!firstName){showProfileMsg('profileMsg','নাম দিন','error');return;}
+  btn.textContent='Saving...'; btn.disabled=true;
+  const fullName=`${firstName} ${lastName}`.trim();
+  const {error}=await sb.from('clients').update({name:fullName,phone:getVal('pPhone').trim(),university:getVal('pUniversity').trim(),subject:getVal('pSubject').trim(),academic_year:getVal('pYear').trim()}).eq('id',currentUser.id);
+  btn.textContent='Profile Save করুন'; btn.disabled=false;
+  if(error){showProfileMsg('profileMsg','Save হয়নি: '+error.message,'error');}
+  else{currentClient.name=fullName;updateSidebarUser();showProfileMsg('profileMsg','✓ Profile save হয়েছে!','success');showToast('Profile update হয়েছে','success');}
+}
+
+async function changePassword() {
+  const btn=document.getElementById('passChangeBtn');
+  const current=getVal('pCurrentPass'),newPass=getVal('pNewPass'),confirm=getVal('pConfirmPass');
+  if(!current||!newPass||!confirm){showProfileMsg('passMsg','সব field পূরণ করুন','error');return;}
+  if(newPass.length<8){showProfileMsg('passMsg','কমপক্ষে ৮ অক্ষর হতে হবে','error');return;}
+  if(newPass!==confirm){showProfileMsg('passMsg','নতুন password মিলছে না','error');return;}
+  btn.textContent='Updating...'; btn.disabled=true;
+  const {error:signInErr}=await sb.auth.signInWithPassword({email:currentUser.email,password:current});
+  if(signInErr){showProfileMsg('passMsg','বর্তমান password ভুল','error');btn.textContent='Password Update করুন';btn.disabled=false;return;}
+  const {error}=await sb.auth.updateUser({password:newPass});
+  btn.textContent='Password Update করুন'; btn.disabled=false;
+  if(error){showProfileMsg('passMsg','Password পরিবর্তন হয়নি','error');}
+  else{setVal('pCurrentPass','');setVal('pNewPass','');setVal('pConfirmPass','');showProfileMsg('passMsg','✓ Password পরিবর্তন হয়েছে!','success');showToast('Password update হয়েছে','success');}
+}
+
+async function uploadAvatar(e) {
+  const file=e.target.files[0];
+  if(!file) return;
+  if(file.size>2*1024*1024){showToast('File size max 2MB','error');return;}
+  showToast('Uploading...');
+  const ext=file.name.split('.').pop();
+  const path=`avatars/${currentUser.id}.${ext}`;
+  const {error:upErr}=await sb.storage.from('scriptora-files').upload(path,file,{upsert:true});
+  if(upErr){showToast('Upload হয়নি','error');return;}
+  const {data:urlData}=sb.storage.from('scriptora-files').getPublicUrl(path);
+  const avatarUrl=urlData.publicUrl;
+  await sb.from('clients').update({avatar_url:avatarUrl}).eq('id',currentUser.id);
+  currentClient.avatar_url=avatarUrl;
+  const avImg=`<img src="${avatarUrl}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+  document.getElementById('sbAvatar').innerHTML=avImg;
+  document.getElementById('profileAvatar').innerHTML=avImg;
+  showToast('Avatar update হয়েছে!','success');
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  ['scriptora_client_id','scriptora_name','scriptora_email','scriptora_role'].forEach(k=>localStorage.removeItem(k));
+  window.location.href=LOGIN_PATH;
+}
+
+function setupRealtime() {
+  const orderSub=sb.channel('orders-realtime').on('postgres_changes',{event:'*',schema:'public',table:'orders',filter:`client_id=eq.${currentUser.id}`},async payload=>{
+    await loadOrders();
+    if(currentOrderId&&payload.new?.id===currentOrderId) openOrderDetail(currentOrderId);
+    showToast('Order update হয়েছে!','success');
+  }).subscribe();
+  realtimeSubs.push(orderSub);
+}
+
+function updateMsgBadge(n) {
+  const badge=document.getElementById('msgBadge');
+  badge.textContent=parseInt(badge.textContent||'0')+n;
+  badge.style.display='inline';
+}
+
+function initNav() {
+  document.querySelectorAll('.sb-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      e.preventDefault();
+      const page=item.dataset.page;
+      showPage(page,item);
+      if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}
+    });
+  });
+}
+
+function showPage(pageId,clickedItem) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=document.getElementById('page-'+pageId);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(clickedItem){clickedItem.classList.add('active');}
+  else{const n=document.querySelector(`[data-page="${pageId}"]`);if(n)n.classList.add('active');}
+  if(pageId==='orders'){
+    document.getElementById('ordersListView').style.display='block';
+    document.getElementById('orderDetailView').style.display='none';
+    clearInterval(countdownTimer);
+  }
+}
+
+function showToast(msg,type='') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast show ${type}`;
+  setTimeout(()=>{t.classList.remove('show');},3000);
+}
+
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val??'—';}
+function setVal(id,val){const el=document.getElementById(id);if(el)el.value=val??'';}
+function getVal(id){return document.getElementById(id)?.value||'';}
+function escHtml(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmt(num){return Number(num||0).toLocaleString('en-BD');}
+function pad(n){return String(Math.max(0,n)).padStart(2,'0');}
+function truncate(str,len){return str&&str.length>len?str.slice(0,len)+'…':str||'';}
+function getInitials(name){return(name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+function fmtDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-BD',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDateLong(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-BD',{day:'numeric',month:'long',year:'numeric'});}
+function fmtTime(d){if(!d)return'';return new Date(d).toLocaleTimeString('en-BD',{hour:'2-digit',minute:'2-digit'});}
+function formatCountdown(ms){if(ms<=0)return'সময় শেষ!';const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);if(d>0)return`${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`;return`${pad(h)}h ${pad(m)}m ${pad(s)}s`;}
+function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed ✓'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
+function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
