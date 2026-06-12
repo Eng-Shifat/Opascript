@@ -97,7 +97,7 @@
     .nav-avatar { width:26px; height:26px; border-radius:50%; background:#2d6ef7; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; }
     .nav-dashboard-btn span { font-size:13.5px; font-weight:500; }
     .hamburger { display:none; background:none; border:none; color:white; font-size:22px; cursor:pointer; }
-    .mobile-menu { display:none; flex-direction:column; background:#0a1428; padding:1rem 2rem; border-bottom:0.5px solid rgba(255,255,255,0.08); }
+    .mobile-menu { display:none; flex-direction:column; background:transparent; padding:1rem 2rem; border-bottom:0.5px solid rgba(255,255,255,0.08); }
     .mobile-menu a { color:rgba(255,255,255,0.75); font-size:15px; text-decoration:none; padding:10px 0; border-bottom:0.5px solid rgba(255,255,255,0.06); }
     .mobile-menu.open { display:flex; }
     @media (max-width:768px) {
@@ -114,7 +114,17 @@
   document.addEventListener('DOMContentLoaded', function () {
     const btn = document.getElementById('hamburgerBtn');
     const menu = document.getElementById('mobileMenu');
-    if (btn && menu) btn.addEventListener('click', () => menu.classList.toggle('open'));
+    if (btn && menu) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.toggle('open');
+      });
+      document.addEventListener('click', (e) => {
+        if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn) {
+          menu.classList.remove('open');
+        }
+      });
+    }
   });
 
 })();
