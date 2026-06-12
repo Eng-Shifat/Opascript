@@ -26,19 +26,26 @@
   }
 
   const authButtons = isLoggedIn ? `
-    <a href="${dashboardLink()}" class="nav-dashboard-btn">
-      <div class="nav-avatar">${initials}</div>
-      <span>${firstName}</span>
-    </a>
-    <button class="btn-logout" onclick="scriptoraLogout()">Logout</button>
+    <div class="profile-wrap" id="profileWrap">
+      <button class="nav-dashboard-btn" id="profileBtn">
+        <div class="nav-avatar">${initials}</div>
+        <span>${firstName}</span>
+      </button>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="${dashboardLink()}">Dashboard</a>
+        <a href="${dashboardLink()}">Profile</a>
+        <button class="dropdown-logout" onclick="scriptoraLogout()">Logout</button>
+      </div>
+    </div>
   ` : `
     ${!isLogin    ? `<button class="btn-login"    onclick="window.location.href='../Login page/login.html'">Login</button>` : ''}
     ${!isRegister ? `<button class="btn-register" onclick="window.location.href='../Register page/register.html'">Register</button>` : ''}
   `;
 
   const mobileAuthButtons = isLoggedIn ? `
+    <a href="${dashboardLink()}" style="text-decoration:none;">Dashboard</a>
+    <a href="${dashboardLink()}" style="text-decoration:none;">Profile</a>
     <div style="display:flex;gap:10px;padding-top:6px;">
-      <a href="${dashboardLink()}" class="btn-register" style="flex:1;text-align:center;text-decoration:none;">Dashboard</a>
       <button class="btn-login" style="flex:1" onclick="scriptoraLogout()">Logout</button>
     </div>
   ` : `
@@ -92,19 +99,26 @@
     .btn-register:hover { background:#1d5de0; }
     .btn-logout { padding:7px 18px; border:0.5px solid rgba(239,68,68,0.4); border-radius:7px; background:transparent; color:#fca5a5; font-size:13.5px; cursor:pointer; font-family:inherit; }
     .btn-logout:hover { background:rgba(239,68,68,0.1); border-color:#ef4444; color:#ef4444; }
-    .nav-dashboard-btn { display:flex; align-items:center; gap:8px; text-decoration:none; color:white; padding:5px 12px; border:0.5px solid rgba(255,255,255,0.15); border-radius:20px; }
+    .nav-dashboard-btn { display:flex; align-items:center; gap:8px; text-decoration:none; color:white; padding:5px 12px; border:0.5px solid rgba(255,255,255,0.15); border-radius:20px; background:transparent; cursor:pointer; font-family:inherit; }
     .nav-dashboard-btn:hover { background:rgba(255,255,255,0.08); }
     .nav-avatar { width:26px; height:26px; border-radius:50%; background:#2d6ef7; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; }
     .nav-dashboard-btn span { font-size:13.5px; font-weight:500; }
+    .profile-wrap { position:relative; }
+    .profile-dropdown { display:none; flex-direction:column; position:absolute; top:calc(100% + 8px); right:0; background:#0f1a33; border:0.5px solid rgba(255,255,255,0.1); border-radius:10px; min-width:150px; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:1001; }
+    .profile-dropdown.open { display:flex; }
+    .profile-dropdown a, .profile-dropdown button { color:rgba(255,255,255,0.8); font-size:13.5px; text-decoration:none; padding:8px 10px; border-radius:6px; text-align:left; background:transparent; border:none; cursor:pointer; font-family:inherit; }
+    .profile-dropdown a:hover, .profile-dropdown button:hover { background:rgba(255,255,255,0.06); color:white; }
+    .dropdown-logout { color:#fca5a5 !important; }
+    .dropdown-logout:hover { color:#ef4444 !important; }
     .hamburger { display:none; background:none; border:none; color:white; font-size:22px; cursor:pointer; }
-    .mobile-menu { display:none; flex-direction:column; background:transparent; padding:1rem 2rem; border-bottom:0.5px solid rgba(255,255,255,0.08); }
+    .mobile-menu { display:none; flex-direction:column; background:rgba(15,27,61,0.55); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); padding:1rem 2rem; border-bottom:0.5px solid rgba(255,255,255,0.08); position:fixed; top:58px; left:0; right:0; z-index:99; box-shadow:0 8px 32px rgba(0,0,0,0.25); }
     .mobile-menu a { color:rgba(255,255,255,0.75); font-size:15px; text-decoration:none; padding:10px 0; border-bottom:0.5px solid rgba(255,255,255,0.06); }
     .mobile-menu.open { display:flex; }
     @media (max-width:768px) {
       #shared-nav { padding:0 1.2rem; }
       .nav-links { display:none; }
       .hamburger { display:block; }
-      .btn-login,.btn-register,.btn-logout,.nav-dashboard-btn { display:none; }
+      .btn-login,.btn-register,.profile-wrap { display:none; }
     }
   </style>`;
 
@@ -125,6 +139,20 @@
         }
       });
     }
+
+    const profileBtn = document.getElementById('profileBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn && profileDropdown) {
+      profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        profileDropdown.classList.toggle('open');
+      });
+      document.addEventListener('click', (e) => {
+        if (profileDropdown.classList.contains('open') && !profileDropdown.contains(e.target) && e.target !== profileBtn) {
+          profileDropdown.classList.remove('open');
+        }
+      });
+    }
   });
 
 })();
@@ -136,9 +164,9 @@ async function scriptoraLogout() {
         'https://hivrmntxpmpwthmjtoem.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI'
       );
-      await sb.auth.signOut();
+      await sb.auth.signOut({ scope: 'local' });
     }
-  } catch(e) {}
-  ['scriptora_client_id','scriptora_name','scriptora_email','scriptora_role'].forEach(k => localStorage.removeItem(k));
+  } catch(e) { console.error('Logout error:', e); }
+  localStorage.clear();
   window.location.href = '../Homepage/index.html';
 }

@@ -611,25 +611,7 @@
   </footer>
 
   <script>
-    // Hamburger menu toggle + outside click to close
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-
-    hamburgerBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      mobileMenu.classList.toggle('open');
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!mobileMenu.contains(e.target) && e.target !== hamburgerBtn) {
-        mobileMenu.classList.remove('open');
-      }
-    });
-
-    // Close menu when a link inside is clicked
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => mobileMenu.classList.remove('open'));
-    });
+    // Hamburger menu handled by shared/navbar.js
     const hiwSection = document.querySelector('.hiw-section');
     const hiwObserver = new IntersectionObserver((entries) => {
       entries.forEach(e => {
