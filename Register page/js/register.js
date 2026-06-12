@@ -368,10 +368,10 @@ function handleAuthError(err) {
   style.textContent = `
     @keyframes popIn {
       from { transform: scale(0.85); opacity: 0; }
-      to   { transform: scale(1);    opacity: 1; }
+      to   { transform: scale(1);    opacity: 1; } 
     }
     @keyframes toastIn {
-      from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+      from { transform: translateX(-50%)~translateY(20px); opacity: 0; }
       to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
     }
   `;
