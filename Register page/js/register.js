@@ -1,8 +1,3 @@
-/* ================================================
-   SCRIPTORA — register.js  (Supabase Auth version)
-   ================================================
-   Dependencies: Supabase JS SDK via CDN
-   Add to your HTML <head> BEFORE this script:
 
    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
