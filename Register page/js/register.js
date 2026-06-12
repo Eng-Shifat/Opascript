@@ -18,7 +18,7 @@
    ================================================ */
 
 // ── Supabase Config ─────────────────────────────────────────────────────────
-const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
+const SUPABASE_URL = 'https://hivrmntxpmpwthmjtoem.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
 
 const { createClient } = supabase;
@@ -37,11 +37,11 @@ function togglePass(inputId, btnId) {
   if (!inp || !btn) return;
 
   if (inp.type === 'password') {
-    inp.type        = 'text';
+    inp.type = 'text';
     btn.style.color = 'rgba(255,255,255,0.75)';
     btn.setAttribute('aria-label', 'পাসওয়ার্ড লুকান');
   } else {
-    inp.type        = 'password';
+    inp.type = 'password';
     btn.style.color = 'rgba(255,255,255,0.3)';
     btn.setAttribute('aria-label', 'পাসওয়ার্ড দেখুন');
   }
@@ -52,7 +52,7 @@ function togglePass(inputId, btnId) {
 const passwordInput = document.getElementById('password');
 if (passwordInput) {
   passwordInput.addEventListener('input', function () {
-    const val  = this.value;
+    const val = this.value;
     const hint = document.getElementById('passStrength');
     if (!hint) return;
     if (!val) { hint.textContent = ''; hint.className = 'pass-strength'; return; }
@@ -64,9 +64,9 @@ if (passwordInput) {
       /[^A-Za-z0-9]/.test(val),
     ].filter(Boolean).length;
 
-    if (score <= 1)      { hint.textContent = '● দুর্বল পাসওয়ার্ড';      hint.className = 'pass-strength weak'; }
-    else if (score <= 3) { hint.textContent = '●● মধ্যম পাসওয়ার্ড';      hint.className = 'pass-strength medium'; }
-    else                 { hint.textContent = '●●● শক্তিশালী পাসওয়ার্ড'; hint.className = 'pass-strength strong'; }
+    if (score <= 1) { hint.textContent = '● দুর্বল পাসওয়ার্ড'; hint.className = 'pass-strength weak'; }
+    else if (score <= 3) { hint.textContent = '●● মধ্যম পাসওয়ার্ড'; hint.className = 'pass-strength medium'; }
+    else { hint.textContent = '●●● শক্তিশালী পাসওয়ার্ড'; hint.className = 'pass-strength strong'; }
   });
 }
 
@@ -77,7 +77,7 @@ if (confirmInput) {
   confirmInput.addEventListener('input', function () {
     const pass = document.getElementById('password').value;
     // 'confirm' id দিয়ে err দেখাও (নিচে showErr() এ 'confirm' prefix)
-    const err  = document.getElementById('err-confirm') || document.getElementById('err-confirmPassword');
+    const err = document.getElementById('err-confirm') || document.getElementById('err-confirmPassword');
     if (this.value && pass !== this.value) {
       if (err) err.textContent = 'পাসওয়ার্ড মিলছে না';
       this.classList.add('invalid');
@@ -94,26 +94,26 @@ if (confirmInput) {
 // ── Error helpers ───────────────────────────────────────────────────────────
 function showErr(id, msg) {
   // err-confirm বা err-confirmPassword যেটা HTML এ থাকে দুটোই try করে
-  const el  = document.getElementById('err-' + id);
+  const el = document.getElementById('err-' + id);
   const inp = document.getElementById(id);
-  if (el)  el.textContent = msg;
+  if (el) el.textContent = msg;
   if (inp) { inp.classList.add('invalid'); inp.classList.remove('valid'); }
 }
 
 function clearErr(id) {
-  const el  = document.getElementById('err-' + id);
+  const el = document.getElementById('err-' + id);
   const inp = document.getElementById(id);
-  if (el)  el.textContent = '';
+  if (el) el.textContent = '';
   if (inp) inp.classList.remove('invalid');
 }
 
 function setLoading(on) {
-  const btnText    = document.getElementById('btnText');
+  const btnText = document.getElementById('btnText');
   const btnSpinner = document.getElementById('btnSpinner');
-  const submitBtn  = document.getElementById('submitBtn');
-  if (btnText)    btnText.style.display    = on ? 'none'         : 'inline';
+  const submitBtn = document.getElementById('submitBtn');
+  if (btnText) btnText.style.display = on ? 'none' : 'inline';
   if (btnSpinner) btnSpinner.style.display = on ? 'inline-block' : 'none';
-  if (submitBtn)  submitBtn.disabled       = on;
+  if (submitBtn) submitBtn.disabled = on;
 }
 
 // Toast notification (optional — HTML এ #toast div না থাকলেও কাজ করবে)
@@ -188,7 +188,7 @@ async function handleRegister() {
 
   // ── Phone ──────────────────────────────────────────────────────────────
   const phoneRaw = document.getElementById('phone')?.value || '';
-  const phone    = normalizePhone(phoneRaw);
+  const phone = normalizePhone(phoneRaw);
   clearErr('phone');
   if (!phoneRaw.trim()) {
     showErr('phone', 'ফোন নম্বর দিন');
@@ -227,7 +227,7 @@ async function handleRegister() {
 
   // ── Terms ──────────────────────────────────────────────────────────────
   const termsEl = document.getElementById('termsCheck');
-  const terms   = termsEl ? termsEl.checked : true; // checkbox না থাকলে skip
+  const terms = termsEl ? termsEl.checked : true; // checkbox না থাকলে skip
   const termsErr = document.getElementById('err-terms');
   if (termsErr) termsErr.textContent = terms ? '' : 'Terms এ সম্মত হতে হবে';
   if (!terms) valid = false;
@@ -283,8 +283,8 @@ async function handleRegister() {
     const { error: dbError } = await sb
       .from('clients')
       .insert({
-        id:    authUser.id,  // Auth UUID = clients.id
-        name:  fullName,
+        id: authUser.id,  // Auth UUID = clients.id
+        name: fullName,
         email: email,
         phone: phone,
         // password column নেই — Supabase Auth নিজেই manage করে
@@ -308,9 +308,9 @@ async function handleRegister() {
     // ── STEP 5: localStorage save ──────────────────────────────────────
     // শুধু non-sensitive info রাখুন
     localStorage.setItem('scriptora_client_id', authUser.id);
-    localStorage.setItem('scriptora_name',      fullName);
-    localStorage.setItem('scriptora_email',     email);
-    localStorage.setItem('scriptora_role',      'client');
+    localStorage.setItem('scriptora_name', fullName);
+    localStorage.setItem('scriptora_email', email);
+    localStorage.setItem('scriptora_role', 'client');
 
     setLoading(false);
 
@@ -356,132 +356,6 @@ function handleAuthError(err) {
     showToast('Registration বন্ধ আছে, Admin এর সাথে যোগাযোগ করুন');
   } else {
     showErr('email', err.message || 'কিছু একটা সমস্যা হয়েছে');
-  }
-}
-
-
-// ── Success overlay ─────────────────────────────────────────────────────────
-function showSuccess(name, needsEmailVerify = true) {
-  const overlay = document.createElement('div');
-  overlay.id = 'reg-success-overlay';
-  overlay.style.cssText = `
-    position: fixed; inset: 0;
-    background: rgba(10,5,20,0.92);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  `;
-
-  const verifyNote = needsEmailVerify
-    ? `<div style="
-        background: rgba(124,58,237,0.12);
-        border: 1px solid rgba(124,58,237,0.3);
-        border-radius: 8px;
-        padding: 10px 14px;
-        margin: 12px 0 20px;
-        font-size: 12.5px;
-        color: rgba(255,255,255,0.6);
-        line-height: 1.6;
-      ">
-        📧 <strong style="color:rgba(255,255,255,0.85);">${name.split(' ')[0]}</strong>,
-        আপনার inbox এ একটি verification email পাঠানো হয়েছে।<br>
-        Email verify করার পর login করতে পারবেন।
-      </div>`
-    : `<div style="
-        background: rgba(34,197,94,0.1);
-        border: 1px solid rgba(34,197,94,0.3);
-        border-radius: 8px;
-        padding: 10px 14px;
-        margin: 12px 0 20px;
-        font-size: 12.5px;
-        color: rgba(255,255,255,0.6);
-      ">
-        ✅ Account সফলভাবে তৈরি হয়েছে! এখন dashboard এ যেতে পারবেন।
-      </div>`;
-
-  overlay.innerHTML = `
-    <div style="
-      background: linear-gradient(135deg, #0d1b3e, #111e3f);
-      border: 1px solid rgba(124,58,237,0.35);
-      border-radius: 20px;
-      padding: 3rem 2.5rem;
-      text-align: center;
-      max-width: 360px;
-      width: 100%;
-      animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
-      box-shadow: 0 0 80px rgba(124,58,237,0.2), 0 0 0 1px rgba(255,255,255,0.04);
-    ">
-      <div style="font-size:56px;margin-bottom:1rem;line-height:1;">🎉</div>
-      <div style="font-size:21px;font-weight:700;color:white;margin-bottom:6px;letter-spacing:-0.3px;">
-        Account তৈরি হয়েছে!
-      </div>
-      <div style="font-size:14px;color:rgba(255,255,255,0.45);margin-bottom:4px;">
-        স্বাগতম, <strong style="color:rgba(255,255,255,0.85);">${name}</strong>
-      </div>
-
-      ${verifyNote}
-
-      <button
-        onclick="goToDashboard()"
-        style="
-          width: 100%;
-          padding: 13px 28px;
-          border-radius: 12px;
-          border: none;
-          background: linear-gradient(135deg, #7c3aed, #4f46e5);
-          color: white;
-          font-size: 14.5px;
-          font-weight: 600;
-          font-family: inherit;
-          cursor: pointer;
-          transition: all 0.2s;
-          letter-spacing: 0.2px;
-        "
-        onmouseover="this.style.opacity='0.85';this.style.transform='translateY(-1px)'"
-        onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'"
-      >
-        ${needsEmailVerify ? 'Login পেজে যান →' : 'Dashboard এ যান →'}
-      </button>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  // Overlay click করে close করা যাবে না (intentional)
-  // keyboard escape দিয়ে close করা যাবে না (intentional — redirect enforce করতে)
-}
-
-
-// ── Dashboard / Login redirect ──────────────────────────────────────────────
-async function goToDashboard() {
-  // Email confirmation ON → login page এ পাঠাও
-  if (EMAIL_CONFIRM_ENABLED) {
-    const redirect = sessionStorage.getItem('scriptora_redirect');
-    sessionStorage.removeItem('scriptora_redirect');
-    window.location.href = redirect === 'payment'
-      ? '../Payment page/payment.html'
-      : '../Login page/login.html';
-    return;
-  }
-
-  // Email confirmation OFF → session check করে dashboard এ যাও
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    window.location.href = '../Login page/login.html';
-    return;
-  }
-
-  const redirect = sessionStorage.getItem('scriptora_redirect');
-  sessionStorage.removeItem('scriptora_redirect');
-
-  if (redirect === 'payment') {
-    window.location.href = '../Payment page/payment.html';
-  } else {
-    window.location.href = '../Client Dashboard/dashboard.html';
   }
 }
 
