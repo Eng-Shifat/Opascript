@@ -1,3 +1,8 @@
+/* ================================================
+   SCRIPTORA — register.js  (Supabase Auth version)
+   ================================================
+   Dependencies: Supabase JS SDK via CDN
+   Add to your HTML <head> BEFORE this script:
 
    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
@@ -13,7 +18,7 @@
    ================================================ */
 
 // ── Supabase Config ─────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://hivrmntxpmpwthmjtoem.supabase.co';
+const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
 
 const { createClient } = supabase;
@@ -32,11 +37,11 @@ function togglePass(inputId, btnId) {
   if (!inp || !btn) return;
 
   if (inp.type === 'password') {
-    inp.type = 'text';
+    inp.type        = 'text';
     btn.style.color = 'rgba(255,255,255,0.75)';
     btn.setAttribute('aria-label', 'পাসওয়ার্ড লুকান');
   } else {
-    inp.type = 'password';
+    inp.type        = 'password';
     btn.style.color = 'rgba(255,255,255,0.3)';
     btn.setAttribute('aria-label', 'পাসওয়ার্ড দেখুন');
   }
@@ -47,7 +52,7 @@ function togglePass(inputId, btnId) {
 const passwordInput = document.getElementById('password');
 if (passwordInput) {
   passwordInput.addEventListener('input', function () {
-    const val = this.value;
+    const val  = this.value;
     const hint = document.getElementById('passStrength');
     if (!hint) return;
     if (!val) { hint.textContent = ''; hint.className = 'pass-strength'; return; }
@@ -59,9 +64,9 @@ if (passwordInput) {
       /[^A-Za-z0-9]/.test(val),
     ].filter(Boolean).length;
 
-    if (score <= 1) { hint.textContent = '● দুর্বল পাসওয়ার্ড'; hint.className = 'pass-strength weak'; }
-    else if (score <= 3) { hint.textContent = '●● মধ্যম পাসওয়ার্ড'; hint.className = 'pass-strength medium'; }
-    else { hint.textContent = '●●● শক্তিশালী পাসওয়ার্ড'; hint.className = 'pass-strength strong'; }
+    if (score <= 1)      { hint.textContent = '● দুর্বল পাসওয়ার্ড';      hint.className = 'pass-strength weak'; }
+    else if (score <= 3) { hint.textContent = '●● মধ্যম পাসওয়ার্ড';      hint.className = 'pass-strength medium'; }
+    else                 { hint.textContent = '●●● শক্তিশালী পাসওয়ার্ড'; hint.className = 'pass-strength strong'; }
   });
 }
 
@@ -72,7 +77,7 @@ if (confirmInput) {
   confirmInput.addEventListener('input', function () {
     const pass = document.getElementById('password').value;
     // 'confirm' id দিয়ে err দেখাও (নিচে showErr() এ 'confirm' prefix)
-    const err = document.getElementById('err-confirm') || document.getElementById('err-confirmPassword');
+    const err  = document.getElementById('err-confirm') || document.getElementById('err-confirmPassword');
     if (this.value && pass !== this.value) {
       if (err) err.textContent = 'পাসওয়ার্ড মিলছে না';
       this.classList.add('invalid');
@@ -89,26 +94,26 @@ if (confirmInput) {
 // ── Error helpers ───────────────────────────────────────────────────────────
 function showErr(id, msg) {
   // err-confirm বা err-confirmPassword যেটা HTML এ থাকে দুটোই try করে
-  const el = document.getElementById('err-' + id);
+  const el  = document.getElementById('err-' + id);
   const inp = document.getElementById(id);
-  if (el) el.textContent = msg;
+  if (el)  el.textContent = msg;
   if (inp) { inp.classList.add('invalid'); inp.classList.remove('valid'); }
 }
 
 function clearErr(id) {
-  const el = document.getElementById('err-' + id);
+  const el  = document.getElementById('err-' + id);
   const inp = document.getElementById(id);
-  if (el) el.textContent = '';
+  if (el)  el.textContent = '';
   if (inp) inp.classList.remove('invalid');
 }
 
 function setLoading(on) {
-  const btnText = document.getElementById('btnText');
+  const btnText    = document.getElementById('btnText');
   const btnSpinner = document.getElementById('btnSpinner');
-  const submitBtn = document.getElementById('submitBtn');
-  if (btnText) btnText.style.display = on ? 'none' : 'inline';
+  const submitBtn  = document.getElementById('submitBtn');
+  if (btnText)    btnText.style.display    = on ? 'none'         : 'inline';
   if (btnSpinner) btnSpinner.style.display = on ? 'inline-block' : 'none';
-  if (submitBtn) submitBtn.disabled = on;
+  if (submitBtn)  submitBtn.disabled       = on;
 }
 
 // Toast notification (optional — HTML এ #toast div না থাকলেও কাজ করবে)
@@ -183,7 +188,7 @@ async function handleRegister() {
 
   // ── Phone ──────────────────────────────────────────────────────────────
   const phoneRaw = document.getElementById('phone')?.value || '';
-  const phone = normalizePhone(phoneRaw);
+  const phone    = normalizePhone(phoneRaw);
   clearErr('phone');
   if (!phoneRaw.trim()) {
     showErr('phone', 'ফোন নম্বর দিন');
@@ -222,7 +227,7 @@ async function handleRegister() {
 
   // ── Terms ──────────────────────────────────────────────────────────────
   const termsEl = document.getElementById('termsCheck');
-  const terms = termsEl ? termsEl.checked : true; // checkbox না থাকলে skip
+  const terms   = termsEl ? termsEl.checked : true; // checkbox না থাকলে skip
   const termsErr = document.getElementById('err-terms');
   if (termsErr) termsErr.textContent = terms ? '' : 'Terms এ সম্মত হতে হবে';
   if (!terms) valid = false;
@@ -278,8 +283,8 @@ async function handleRegister() {
     const { error: dbError } = await sb
       .from('clients')
       .insert({
-        id: authUser.id,  // Auth UUID = clients.id
-        name: fullName,
+        id:    authUser.id,  // Auth UUID = clients.id
+        name:  fullName,
         email: email,
         phone: phone,
         // password column নেই — Supabase Auth নিজেই manage করে
@@ -303,9 +308,9 @@ async function handleRegister() {
     // ── STEP 5: localStorage save ──────────────────────────────────────
     // শুধু non-sensitive info রাখুন
     localStorage.setItem('scriptora_client_id', authUser.id);
-    localStorage.setItem('scriptora_name', fullName);
-    localStorage.setItem('scriptora_email', email);
-    localStorage.setItem('scriptora_role', 'client');
+    localStorage.setItem('scriptora_name',      fullName);
+    localStorage.setItem('scriptora_email',     email);
+    localStorage.setItem('scriptora_role',      'client');
 
     setLoading(false);
 
@@ -363,10 +368,10 @@ function handleAuthError(err) {
   style.textContent = `
     @keyframes popIn {
       from { transform: scale(0.85); opacity: 0; }
-      to   { transform: scale(1);    opacity: 1; } 
+      to   { transform: scale(1);    opacity: 1; }
     }
     @keyframes toastIn {
-      from { transform: translateX(-50%)~translateY(20px); opacity: 0; }
+      from { transform: translateX(-50%) translateY(20px); opacity: 0; }
       to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
     }
   `;
