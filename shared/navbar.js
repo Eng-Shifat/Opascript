@@ -28,7 +28,10 @@
   const authButtons = isLoggedIn ? `
     <div class="profile-wrap" id="profileWrap">
       <button class="nav-dashboard-btn" id="profileBtn">
-        <div class="nav-avatar">${initials}</div>
+        <div class="nav-avatar-wrap">
+          <div class="nav-avatar">${initials}</div>
+          <span class="nav-avatar-arrow">▾</span>
+        </div>
         <span>${firstName}</span>
       </button>
       <div class="profile-dropdown" id="profileDropdown">
@@ -42,18 +45,7 @@
     ${!isRegister ? `<button class="btn-register" onclick="window.location.href='../Register page/register.html'">Register</button>` : ''}
   `;
 
-  const mobileAuthButtons = isLoggedIn ? `
-    <a href="${dashboardLink()}" style="text-decoration:none;">Dashboard</a>
-    <a href="${dashboardLink()}" style="text-decoration:none;">Profile</a>
-    <div style="display:flex;gap:10px;padding-top:6px;">
-      <button class="btn-login" style="flex:1" onclick="scriptoraLogout()">Logout</button>
-    </div>
-  ` : `
-    <div style="display:flex;gap:10px;padding-top:6px;">
-      ${!isLogin    ? `<button class="btn-login"    style="flex:1" onclick="window.location.href='../Login page/login.html'">Login</button>` : ''}
-      ${!isRegister ? `<button class="btn-register" style="flex:1" onclick="window.location.href='../Register page/register.html'">Register</button>` : ''}
-    </div>
-  `;
+  const mobileAuthButtons = '';
 
   const navHTML = `
   <nav id="shared-nav">
@@ -102,6 +94,8 @@
     .nav-dashboard-btn { display:flex; align-items:center; gap:8px; text-decoration:none; color:white; padding:5px 12px; border:0.5px solid rgba(255,255,255,0.15); border-radius:20px; background:transparent; cursor:pointer; font-family:inherit; }
     .nav-dashboard-btn:hover { background:rgba(255,255,255,0.08); }
     .nav-avatar { width:26px; height:26px; border-radius:50%; background:#2d6ef7; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; }
+    .nav-avatar-wrap { position:relative; display:flex; }
+    .nav-avatar-arrow { position:absolute; bottom:-4px; right:-4px; width:14px; height:14px; border-radius:50%; background:#0a1428; border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:9px; line-height:1; color:rgba(255,255,255,0.8); }
     .nav-dashboard-btn span { font-size:13.5px; font-weight:500; }
     .profile-wrap { position:relative; }
     .profile-dropdown { display:none; flex-direction:column; position:absolute; top:calc(100% + 8px); right:0; background:#0f1a33; border:0.5px solid rgba(255,255,255,0.1); border-radius:10px; min-width:150px; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:1001; }
@@ -118,7 +112,9 @@
       #shared-nav { padding:0 1.2rem; }
       .nav-links { display:none; }
       .hamburger { display:block; }
-      .btn-login,.btn-register,.profile-wrap { display:none; }
+      .btn-login, .btn-register { padding:6px 12px; font-size:12.5px; }
+      .nav-dashboard-btn { padding:4px; border:none; }
+      .nav-dashboard-btn span { display:none; }
     }
   </style>`;
 
