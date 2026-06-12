@@ -6,14 +6,14 @@
    ============================================ */
 
 // ── Supabase Config ─────────────────────────────────────────────────────────
-const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
+const SUPABASE_URL = 'https://hivrmntxpmpwthmjtoem.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── Admin emails (Supabase Auth bypass করবে) ────────────────────────────────
-const ADMIN_EMAILS   = ['admin@scriptora.com'];
+const ADMIN_EMAILS = ['admin@scriptora.com'];
 const ADMIN_PASSWORD = 'Scriptora@123'; // ← শুধু admin এর জন্য, বদলে নাও
 
 
@@ -31,21 +31,21 @@ document.addEventListener('DOMContentLoaded', async function () {
       window.location.href = '../Client Dashboard/dashboard.html';
       return;
     }
-  } catch(e) { /* ignore */ }
+  } catch (e) { /* ignore */ }
 
   // ── Password show/hide ────────────────────────────────────────────────
-  const eyeBtn    = document.getElementById('eyeBtn');
+  const eyeBtn = document.getElementById('eyeBtn');
   const passInput = document.getElementById('password');
-  const eyeIcon   = document.getElementById('eyeIcon');
+  const eyeIcon = document.getElementById('eyeIcon');
 
   const eyeOffPath = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
-  const eyeOnPath  = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  const eyeOnPath = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
 
   let passVisible = false;
   if (eyeBtn) {
     eyeBtn.addEventListener('click', () => {
-      passVisible       = !passVisible;
-      passInput.type    = passVisible ? 'text' : 'password';
+      passVisible = !passVisible;
+      passInput.type = passVisible ? 'text' : 'password';
       eyeIcon.innerHTML = passVisible ? eyeOffPath : eyeOnPath;
     });
   }
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 function showError(id, msg) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.textContent   = msg;
+  el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
 }
 
@@ -83,27 +83,27 @@ function clearErrors() {
   ['emailError', 'passError', 'authError'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.textContent   = '';
+    el.textContent = '';
     el.style.display = 'none';
   });
-  document.getElementById('email')   ?.classList.remove('input-error');
+  document.getElementById('email')?.classList.remove('input-error');
   document.getElementById('password')?.classList.remove('input-error');
 }
 
 function setLoading(on) {
-  const btnText   = document.getElementById('loginBtnText');
-  const spinner   = document.getElementById('loginSpinner');
-  const btn       = document.getElementById('loginBtn');
-  if (btnText) btnText.style.display  = on ? 'none'         : 'inline';
-  if (spinner) spinner.style.display  = on ? 'inline-block' : 'none';
-  if (btn)     btn.disabled           = on;
+  const btnText = document.getElementById('loginBtnText');
+  const spinner = document.getElementById('loginSpinner');
+  const btn = document.getElementById('loginBtn');
+  if (btnText) btnText.style.display = on ? 'none' : 'inline';
+  if (spinner) spinner.style.display = on ? 'inline-block' : 'none';
+  if (btn) btn.disabled = on;
 }
 
 function saveClientSession(user, name, email) {
   localStorage.setItem('scriptora_client_id', user.id);
-  localStorage.setItem('scriptora_name',      name || user.user_metadata?.full_name || '');
-  localStorage.setItem('scriptora_email',     email || user.email);
-  localStorage.setItem('scriptora_role',      'client');
+  localStorage.setItem('scriptora_name', name || user.user_metadata?.full_name || '');
+  localStorage.setItem('scriptora_email', email || user.email);
+  localStorage.setItem('scriptora_role', 'client');
 }
 
 function redirectAfterLogin() {
@@ -124,8 +124,8 @@ async function handleLogin() {
   clearErrors();
 
   const email = document.getElementById('email').value.trim().toLowerCase();
-  const pass  = document.getElementById('password').value;
-  let valid   = true;
+  const pass = document.getElementById('password').value;
+  let valid = true;
 
   // ── Validation ────────────────────────────────────────────────────────
   if (!email) {
@@ -159,7 +159,7 @@ async function handleLogin() {
       setLoading(false);
       return;
     }
-    localStorage.setItem('scriptora_role',  'admin');
+    localStorage.setItem('scriptora_role', 'admin');
     localStorage.setItem('scriptora_email', email);
     window.location.href = '../Admin Dashboard/admin.html';
     return;
@@ -195,7 +195,7 @@ async function handleLogin() {
 
     saveClientSession(
       authUser,
-      clientData?.name  || authUser.user_metadata?.full_name,
+      clientData?.name || authUser.user_metadata?.full_name,
       clientData?.email || authUser.email
     );
 
