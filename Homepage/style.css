@@ -280,7 +280,7 @@ nav {
 /* -------- SERVICES -------- */
 .services-section {
   background: linear-gradient(180deg, #0f1b3d 0%, #162458 100%);
-  padding: 4rem 2.5rem;
+  padding: 2.5rem 2.5rem;
 }
 .section-header { text-align: center; margin-bottom: 2.5rem; }
 .section-badge {
@@ -420,7 +420,7 @@ nav {
 /* -------- WHY CHOOSE US -------- */
 .wcu-section {
   background: linear-gradient(180deg, #0d1830 0%, #0f1b3d 100%);
-  padding: 4.5rem 2.5rem;
+  padding: 2.5rem 2.5rem;
   border-top: 0.5px solid rgba(255,255,255,0.06);
 }
 .wcu-grid {
@@ -489,11 +489,15 @@ nav {
 }
 
 @media (max-width: 360px) {
-  .wcu-grid { grid-template-columns: 1fr; }
+  .wcu-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .wcu-card { padding: 1rem 0.7rem; }
+  .wcu-icon-wrap { width: 38px; height: 38px; }
+  .wcu-title { font-size: 12px; }
+  .wcu-desc { font-size: 11px; }
 }
 .hiw-section {
   background: linear-gradient(180deg, #0f1b3d 0%, #0d1830 100%);
-  padding: 4.5rem 2.5rem;
+  padding: 2.5rem 2.5rem;
   overflow-x: auto;
 }
 
@@ -797,6 +801,65 @@ nav {
   .footer-top { grid-template-columns: 1fr 1fr; padding: 1.5rem 1rem; }
 }
 /* -------- ANIMATED ICONS -------- */
+/* ── WCU ICON COLORS ── */
+.wcu-confidential svg { stroke: #60a5fa; stroke-width: 1.8; }
+
+.wcu-writers svg { stroke: #a78bfa; stroke-width: 1.8; }
+.wcu-writers .anim-fade { stroke: #f472b6 !important; }
+
+.wcu-delivery svg { stroke: #34d399; stroke-width: 1.8; }
+.wcu-delivery .anim-draw:nth-child(2) { stroke: #fbbf24; }
+
+.wcu-revision svg { stroke: #f97316; stroke-width: 1.8; }
+.wcu-revision .anim-fade { stroke: #fbbf24 !important; }
+
+.wcu-plagiarism svg { stroke: #06b6d4; stroke-width: 1.8; }
+.wcu-plagiarism .anim-draw:nth-child(2) { stroke: #a78bfa; }
+.wcu-plagiarism .anim-fade { stroke: #34d399 !important; }
+
+.wcu-support svg { stroke: #f472b6; stroke-width: 1.8; }
+.wcu-support .anim-draw:nth-child(2) { stroke: #818cf8; }
+
+/* ── SERVICE ICON COLORS ── */
+/* Thesis Writing — blue + purple + green */
+.svc-thesis svg { stroke: #60a5fa; stroke-width: 1.8; }
+.svc-thesis .anim-draw:nth-child(2) { stroke: #a78bfa; }
+.svc-thesis .svc-line1 { stroke: #a78bfa !important; stroke-width: 2 !important; }
+.svc-thesis .svc-line2 { stroke: #34d399 !important; stroke-width: 2 !important; }
+
+/* Assignment Writing — pink + purple + cyan */
+.svc-assign svg { stroke: #f472b6; stroke-width: 1.8; }
+.svc-assign .anim-draw:nth-child(2) { stroke: #a78bfa; }
+
+/* Research Paper — yellow + orange + cyan */
+.svc-research svg { stroke: #fbbf24; stroke-width: 1.8; }
+.svc-research .anim-draw:nth-child(1) { stroke: #fbbf24; }
+.svc-research .anim-fade { stroke: #fb923c !important; stroke-width: 2 !important; }
+
+/* Proofreading — pink + purple + green */
+.svc-proof svg { stroke: #f472b6; stroke-width: 1.8; }
+.svc-proof .anim-draw:nth-child(1) { stroke: #60a5fa; }
+.svc-proof .anim-fade { stroke: #34d399 !important; stroke-width: 2 !important; }
+
+/* Formatting — green + cyan + purple */
+.svc-format svg { stroke: #34d399; stroke-width: 1.8; }
+.svc-format .anim-draw:nth-child(2) { stroke: #06b6d4; }
+.svc-format .anim-draw:nth-child(3) { stroke: #a78bfa; }
+
+/* SPSS Analysis — purple + pink + blue */
+.svc-spss svg { stroke: #818cf8; stroke-width: 1.8; }
+.svc-spss .anim-draw:nth-child(2) { stroke: #f472b6; }
+.svc-spss .anim-draw:nth-child(3) { stroke: #60a5fa; }
+
+/* CSE/SWE Technical — cyan + green + yellow */
+.svc-cse svg { stroke: #06b6d4; stroke-width: 1.8; }
+.svc-cse .anim-fade:nth-child(2) { stroke: #34d399 !important; stroke-width: 2 !important; }
+.svc-cse .anim-fade:nth-child(3) { stroke: #fbbf24 !important; stroke-width: 2 !important; }
+
+/* Presentation — orange + yellow + pink */
+.svc-pres svg { stroke: #f97316; stroke-width: 1.8; }
+.svc-pres .anim-fade { stroke: #fbbf24 !important; stroke-width: 2 !important; }
+
 .anim-icon {
   width: 52px;
   height: 52px;
