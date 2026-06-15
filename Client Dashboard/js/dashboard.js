@@ -502,6 +502,15 @@ function initNav() {
       if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}
     });
   });
+
+  document.querySelectorAll('.mbn-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      e.preventDefault();
+      const page=item.dataset.page;
+      showPage(page);
+      if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}
+    });
+  });
 }
 
 function showPage(pageId,clickedItem) {
@@ -509,8 +518,12 @@ function showPage(pageId,clickedItem) {
   const target=document.getElementById('page-'+pageId);
   if(target) target.classList.add('active');
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll('.mbn-item').forEach(i=>i.classList.remove('active'));
   if(clickedItem){clickedItem.classList.add('active');}
-  else{const n=document.querySelector(`[data-page="${pageId}"]`);if(n)n.classList.add('active');}
+  else{
+    const n=document.querySelector(`.sb-item[data-page="${pageId}"]`);if(n)n.classList.add('active');
+    const m=document.querySelector(`.mbn-item[data-page="${pageId}"]`);if(m)m.classList.add('active');
+  }
   if(pageId==='orders'){
     document.getElementById('ordersListView').style.display='block';
     document.getElementById('orderDetailView').style.display='none';
