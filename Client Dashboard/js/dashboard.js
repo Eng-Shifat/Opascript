@@ -534,6 +534,18 @@ function initNav() {
   document.querySelectorAll('.mbn-item').forEach(item=>{
     item.addEventListener('click',e=>{
       e.preventDefault();
+
+      // Ripple effect
+      const ripple = document.createElement('span');
+      ripple.classList.add('sb-ripple-span');
+      const rect = item.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+      item.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 850);
+
       const page=item.dataset.page;
       showPage(page);
       if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}
