@@ -27,6 +27,22 @@ let currentUser=null, currentClient=null, allOrders=[], currentOrderId=null;
 let countdownTimer=null, chatOrderId=null, realtimeSubs=[];
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Inject ripple styles
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes sbRipple { 
+      0% { transform:scale(0); opacity:0.6; } 
+      100% { transform:scale(5); opacity:0; } 
+    }
+    .sb-ripple-span {
+      position:absolute; border-radius:50%;
+      background:rgba(147,197,253,0.5);
+      transform:scale(0); 
+      animation:sbRipple 0.8s ease-out forwards;
+      pointer-events:none;
+    }
+  `;
+  document.head.appendChild(style);
   await checkSession();
   initNav();
   initChat();
@@ -497,6 +513,18 @@ function initNav() {
   document.querySelectorAll('.sb-item').forEach(item=>{
     item.addEventListener('click',e=>{
       e.preventDefault();
+
+      // Ripple effect
+      const ripple = document.createElement('span');
+      ripple.classList.add('sb-ripple-span');
+      const rect = item.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+      item.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 850);
+
       const page=item.dataset.page;
       showPage(page,item);
       if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}

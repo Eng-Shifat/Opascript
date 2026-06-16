@@ -114,6 +114,7 @@ input, select, textarea { font-family: inherit; }
   font-weight: 500;
   transition: all .15s;
   position: relative;
+  overflow: hidden;
 }
 .sb-item svg { flex-shrink: 0; opacity: .7; }
 .sb-item:hover { background: var(--accent-glow); color: #c5d5f5; }
