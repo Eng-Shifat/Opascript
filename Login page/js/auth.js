@@ -5,16 +5,16 @@
    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
    ============================================ */
 
-// ── Supabase Config ─────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://hivrmntxpmpwthmjtoem.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
+// ── Supabase Client ──────────────────────────────────────────────────────
+// ⚠️ এখানে আর createClient() কল করা হচ্ছে না — supabaseClient.js এ বানানো
+// একমাত্র shared client-টাই reuse করা হচ্ছে (multiple GoTrueClient ইস্যু
+// এড়ানোর জন্য, যেটা login ↔ admin loop-এর কারণ ছিল)।
+const sb = window.scriptoraSupabase;
 
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-
-// ── Admin emails (Supabase Auth bypass করবে) ────────────────────────────────
-const ADMIN_EMAILS = ['admin@scriptora.com'];
-const ADMIN_PASSWORD = 'Scriptora@123'; // ← শুধু admin এর জন্য, বদলে নাও
+// ── Admin email ──────────────────────────────────────────────────────────
+// এই email-টা Supabase Authentication → Users এ login দিয়েই admin হিসেবে
+// গণ্য হবে (আলাদা password hardcode করা নিরাপদ না, তাই বাদ দেওয়া হয়েছে)।
+const ADMIN_EMAIL = 'yeasinkabirshifat@gmail.com';
 
 
 // ════════════════════════════════════════════════════════════════
@@ -26,8 +26,8 @@ document.addEventListener('DOMContentLoaded', async function () {
   try {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
-      const role = localStorage.getItem('scriptora_role');
-      if (role === 'admin') { window.location.href = '../Admin Dashboard/admin.html'; return; }
+      const isAdmin = session.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      if (isAdmin) { window.location.href = '../Admin Dashboard/admin.html'; return; }
       window.location.href = '../Client Dashboard/dashboard.html';
       return;
     }
@@ -152,20 +152,7 @@ async function handleLogin() {
 
   setLoading(true);
 
-  // ── ADMIN LOGIN (hardcoded bypass) ────────────────────────────────────
-  if (ADMIN_EMAILS.includes(email)) {
-    if (pass !== ADMIN_PASSWORD) {
-      showError('authError', 'Admin পাসওয়ার্ড সঠিক নয়।');
-      setLoading(false);
-      return;
-    }
-    localStorage.setItem('scriptora_role', 'admin');
-    localStorage.setItem('scriptora_email', email);
-    window.location.href = '../Admin Dashboard/admin.html';
-    return;
-  }
-
-  // ── CLIENT LOGIN — Supabase Auth ──────────────────────────────────────
+  // ── REAL Supabase Auth login (admin ও client দুজনেই এই পথেই যাবে) ──────
   try {
     const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
 
@@ -186,7 +173,16 @@ async function handleLogin() {
 
     const authUser = data.user;
 
-    // ── clients table থেকে name নিয়ে আসো ────────────────────────────────
+    // ── এই email-টা admin email কিনা চেক করুন ───────────────────────────
+    if (authUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+      localStorage.setItem('scriptora_role', 'admin');
+      localStorage.setItem('scriptora_email', authUser.email);
+      setLoading(false);
+      window.location.href = '../Admin Dashboard/admin.html';
+      return;
+    }
+
+    // ── CLIENT — clients table থেকে name নিয়ে আসো ───────────────────────
     const { data: clientData } = await sb
       .from('clients')
       .select('name, email, phone')

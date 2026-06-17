@@ -73,6 +73,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Default deadline to today
   document.getElementById('m-deadline').value = new Date().toISOString().split('T')[0];
+
+  loadAdminMessages();
 });
 
 /* ═══════════════════════════════════════════
@@ -435,6 +437,105 @@ document.addEventListener('keydown', e => {
 });
 
 /* ═══════════════════════════════════════════
+   TOPBAR MESSAGES — real Supabase data
+   (sb = window.scriptoraSupabase, supabaseClient.js
+   এ বানানো single shared client)
+═══════════════════════════════════════════ */
+async function loadAdminMessages() {
+  if (!window.scriptoraSupabase) return;
+  const sb = window.scriptoraSupabase;
+
+  const list     = document.querySelector('#msg-panel .dp-list');
+  const badgeTxt = document.querySelector('#msg-panel .dp-badge');
+  const dot      = document.getElementById('msgDot');
+
+  const { data: unread, error } = await sb
+    .from('messages')
+    .select('order_id, text, sent_at')
+    .eq('from_admin', false)
+    .eq('read', false)
+    .order('sent_at', { ascending: false });
+
+  if (error) { console.error('Message load error:', error); return; }
+
+  if (!unread || !unread.length) {
+    if (list) list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text">কোনো নতুন message নেই</div></div></div>';
+    if (badgeTxt) badgeTxt.style.display = 'none';
+    if (dot) dot.style.display = 'none';
+    return;
+  }
+
+  /* প্রতিটা order এর জন্য latest message + unread count */
+  const grouped = {};
+  unread.forEach(m => {
+    if (!grouped[m.order_id]) grouped[m.order_id] = { latest: m, count: 0 };
+    grouped[m.order_id].count++;
+    if (new Date(m.sent_at) > new Date(grouped[m.order_id].latest.sent_at)) {
+      grouped[m.order_id].latest = m;
+    }
+  });
+  const orderIds = Object.keys(grouped);
+
+  const { data: ordersData } = await sb
+    .from('orders')
+    .select('id, title, service_type, client_id')
+    .in('id', orderIds);
+
+  const orderMap = {};
+  (ordersData || []).forEach(o => orderMap[o.id] = o);
+
+  const clientIds = [...new Set((ordersData || []).map(o => o.client_id).filter(Boolean))];
+  let clientMap = {};
+  if (clientIds.length) {
+    const { data: clientsData } = await sb.from('clients').select('id, name, email').in('id', clientIds);
+    (clientsData || []).forEach(c => clientMap[c.id] = c);
+  }
+
+  const rows = orderIds.map(oid => {
+    const o      = orderMap[oid] || {};
+    const client = clientMap[o.client_id] || {};
+    return {
+      orderId: oid,
+      name:    client.name || client.email || 'Client',
+      title:   o.title || o.service_type || 'Order',
+      preview: grouped[oid].latest.text,
+      time:    grouped[oid].latest.sent_at,
+      count:   grouped[oid].count,
+    };
+  }).sort((a, b) => new Date(b.time) - new Date(a.time));
+
+  if (list) {
+    list.innerHTML = rows.slice(0, 5).map(r => `
+      <div class="dp-item unread" onclick="window.location.href='admin-messages.html?order=${r.orderId}'" style="cursor:pointer">
+        <div class="dp-avatar dp-av-purple">${escapeHtmlAdmin(r.name).substring(0, 2).toUpperCase()}</div>
+        <div class="dp-body">
+          <div class="dp-text"><b>${escapeHtmlAdmin(r.name)}</b></div>
+          <div class="dp-sub">${escapeHtmlAdmin(r.preview)}</div>
+          <div class="dp-time">${formatRelativeTimeAdmin(r.time)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  const totalUnread = rows.reduce((s, r) => s + r.count, 0);
+  if (badgeTxt) { badgeTxt.textContent = totalUnread + ' new'; badgeTxt.style.display = ''; }
+  if (dot) dot.style.display = '';
+}
+
+function escapeHtmlAdmin(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatRelativeTimeAdmin(isoStr) {
+  const diffMin = Math.floor((Date.now() - new Date(isoStr)) / 60000);
+  if (diffMin < 1)  return 'এখনই';
+  if (diffMin < 60) return diffMin + ' min ago';
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return diffHr + ' hours ago';
+  const diffDay = Math.floor(diffHr / 24);
+  return diffDay === 1 ? 'গতকাল' : diffDay + ' days ago';
+}
+
+/* ═══════════════════════════════════════════
    DROPDOWN PANELS
 ═══════════════════════════════════════════ */
 function toggleDropdown(id, e) {
@@ -446,7 +547,10 @@ function toggleDropdown(id, e) {
   document.querySelectorAll('.dropdown-panel').forEach(p => p.classList.remove('open'));
 
   // Open clicked one if it was closed
-  if (!isOpen) panel.classList.add('open');
+  if (!isOpen) {
+    panel.classList.add('open');
+    if (id === 'msg-panel') loadAdminMessages(); // খোলার সময় fresh data আনো
+  }
 }
 
 // Close all dropdowns on outside click

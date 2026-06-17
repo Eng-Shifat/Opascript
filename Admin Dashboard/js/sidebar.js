@@ -4,10 +4,18 @@
    Usage: Add to any page:
    <link rel="stylesheet" href="css/sidebar.css">
    <script src="js/sidebar.js" data-page="dashboard"></script>
+
+   SECURITY: এই ফাইল প্রতিটা admin page-এ একবার লোড হওয়ার সাথে সাথেই
+   চেক করে যে real logged-in Supabase user-এর email admin email কিনা।
+   না হলে সাথে সাথে redirect করে দেয় — তাই admin.html, admin-messages.html,
+   order-management.html ইত্যাদি কোনো পেজই non-admin কেউ সরাসরি URL
+   টাইপ করে খুলতে পারবে না।
 ═══════════════════════════════════════ */
 
 (function () {
-  // ── 1. Inject sidebar CSS & Tabler icons if not already loaded
+  /* ⚠️ একমাত্র admin email — পরিবর্তন লাগলে এখানেই করুন */
+  const ADMIN_EMAIL = 'yeasinkabirshifat@gmail.com';
+
   function loadCSS(href) {
     if (!document.querySelector(`link[href="${href}"]`)) {
       const link = document.createElement('link');
@@ -19,13 +27,13 @@
   loadCSS('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
   loadCSS('css/sidebar.css');
 
-  // ── 2. Determine current page
   const scriptTag   = document.currentScript;
   const currentPage = scriptTag ? scriptTag.getAttribute('data-page') : detectPage();
 
   function detectPage() {
     const path = window.location.pathname;
     if (path.includes('order-management')) return 'orders';
+    if (path.includes('messages'))         return 'messages';
     if (path.includes('admin'))            return 'dashboard';
     if (path.includes('client'))           return 'clients';
     if (path.includes('payment'))          return 'payments';
@@ -34,7 +42,6 @@
     return 'dashboard';
   }
 
-  // ── 3. Sidebar HTML
   const sidebarHTML = `
   <aside class="s-sidebar" id="globalSidebar">
     <div class="s-logo">
@@ -52,14 +59,18 @@
       </a>
       <a class="s-nav-item" href="order-management.html" data-page="orders">
         <i class="ti ti-clipboard-list"></i> Orders Management
-        <span class="s-badge">5</span>
+        <span class="s-badge" id="ordersBadge" style="display:none">0</span>
+      </a>
+      <a class="s-nav-item" href="admin-messages.html" data-page="messages">
+        <i class="ti ti-message-circle"></i> Messages
+        <span class="s-badge" id="sidebarMsgBadge" style="display:none">0</span>
       </a>
       <a class="s-nav-item" href="#" data-page="clients">
         <i class="ti ti-users"></i> Client List
       </a>
       <a class="s-nav-item" href="#" data-page="payments">
         <i class="ti ti-credit-card"></i> Payments &amp; Billing
-        <span class="s-badge">3</span>
+        <span class="s-badge" id="payBadge" style="display:none">0</span>
       </a>
       <a class="s-nav-item" href="#" data-page="files">
         <i class="ti ti-folder"></i> File Manager
@@ -79,28 +90,62 @@
         <div class="s-avatar">SA</div>
         <div class="s-admin-info">
           <strong>Super Admin</strong>
-          <span>admin@scriptora.com</span>
+          <span id="sidebarAdminEmail">admin@scriptora.com</span>
         </div>
-        <span class="s-dots">⋯</span>
+        <span class="s-dots" onclick="handleAdminLogout()">⋯</span>
       </div>
     </div>
   </aside>
   <div class="s-overlay" id="sidebarOverlay" onclick="toggleGlobalSidebar()"></div>
   `;
 
-  // ── 4. Inject into body
-  document.addEventListener('DOMContentLoaded', function () {
-    // Insert sidebar at start of body
+  /* ── SECURITY GUARD ─────────────────────────────────────────────────
+     এই page render হওয়ার আগেই চেক হয়: সত্যিই login করা আছে কিনা,
+     এবং login করা email-টা admin email এর সাথে মিলে কিনা।
+  ─────────────────────────────────────────────────────────────────── */
+  async function verifyAdminAccess() {
+    try {
+      if (!window.scriptoraSupabase) {
+        window.location.href = '../Login Page/login.html';
+        return null;
+      }
+      const sb = window.scriptoraSupabase;
+      const { data: { session } } = await sb.auth.getSession();
+
+      if (!session) {
+        window.location.href = '../Login Page/login.html';
+        return null;
+      }
+      const user = session.user;
+      if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        /* Valid login কিন্তু admin না — client dashboard এ পাঠিয়ে দিন */
+        window.location.href = '../Client Dashboard/dashboard.html';
+        return null;
+      }
+      return user;
+    } catch (e) {
+      window.location.href = '../Login Page/login.html';
+      return null;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    const adminUser = await verifyAdminAccess();
+    if (!adminUser) return; /* redirect হয়ে গেছে, আর কিছু render করার দরকার নেই */
+
     document.body.insertAdjacentHTML('afterbegin', sidebarHTML);
 
-    // Set active item
     document.querySelectorAll('.s-nav-item[data-page]').forEach(item => {
       if (item.getAttribute('data-page') === currentPage) {
         item.classList.add('active');
       }
     });
 
-    // Push main content right on desktop only
+    /* আসল logged-in admin email দেখান (sidebar footer + topbar profile panel) */
+    document.querySelectorAll('#sidebarAdminEmail, .dp-profile-email').forEach(el => {
+      el.textContent = adminUser.email;
+    });
+
     const main = document.querySelector('.main');
     function updateMargin() {
       if (main) {
@@ -109,14 +154,45 @@
     }
     updateMargin();
     window.addEventListener('resize', updateMargin);
+
+    /* Check unread messages badge */
+    loadUnreadBadge();
   });
 
-  // ── 5. Toggle sidebar (mobile)
+  /* Unread message count for sidebar badge */
+  async function loadUnreadBadge() {
+    try {
+      if (!window.scriptoraSupabase) return;
+      const sb = window.scriptoraSupabase;
+
+      const { count } = await sb
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('from_admin', false)
+        .eq('read', false);
+
+      const badge = document.getElementById('sidebarMsgBadge');
+      if (badge && count > 0) {
+        badge.textContent = count;
+        badge.style.display = '';
+      }
+    } catch(e) { /* silently ignore */ }
+  }
+
   window.toggleGlobalSidebar = function () {
-    const sidebar  = document.getElementById('globalSidebar');
-    const overlay  = document.getElementById('sidebarOverlay');
+    const sidebar = document.getElementById('globalSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
     sidebar.classList.toggle('open');
     overlay.classList.toggle('open');
+  };
+
+  window.handleAdminLogout = async function () {
+    try {
+      if (window.scriptoraSupabase) {
+        await window.scriptoraSupabase.auth.signOut();
+      }
+    } catch(e) {}
+    window.location.href = '../Login Page/login.html';
   };
 
 })();

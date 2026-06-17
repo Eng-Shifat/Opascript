@@ -31,7 +31,7 @@
         <i class="ti ti-bell"></i><span class="dot"></span>
       </div>
       <div class="icon-btn" id="msg-btn" onclick="toggleDropdown('msg-panel', event)">
-        <i class="ti ti-mail"></i>
+        <i class="ti ti-mail"></i><span class="dot" id="msgDot" style="display:none"></span>
       </div>
       <div class="topbar-avatar" id="avatar-btn" onclick="toggleDropdown('profile-panel', event)">SA</div>
     </div>
@@ -380,6 +380,8 @@
   </div>
 </nav>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabaseClient.js"></script>
 <script src="js/sidebar.js" data-page="dashboard"></script>
 <script src="js/admin.js"></script>
 </body>
