@@ -96,18 +96,41 @@
     </div>
   </section>
 
-  <!-- ADDITIONAL SERVICES -->
-  <section class="pr-additional">
-    <div class="pr-section-label">Additional Academic Services</div>
-    <div class="pr-add-grid">
-      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Assignment Writing</span></div><span class="pr-add-price">৳৪০০+</span></div>
-      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Presentation Slides</span></div><span class="pr-add-price">৳৬০০+</span></div>
-      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Proofreading</span></div><span class="pr-add-price">৳১,০০০+</span></div>
-      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>APA / MLA Formatting</span></div><span class="pr-add-price">৳৯০০+</span></div>
-      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Plagiarism Reduction</span></div><span class="pr-add-price">৳১,৫০০+</span></div>
-      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>SPSS Analysis</span></div><span class="pr-add-price">৳২,০০০+</span></div>
-      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Research Proposal</span></div><span class="pr-add-price">৳২,৫০০+</span></div>
-      <div class="pr-add-item"><div class="pr-add-left"><div class="pr-add-icon"></div><span>Case Study Report</span></div><span class="pr-add-price">৳১,২০০+</span></div>
+  <!-- ADDITIONAL SERVICES — INTERACTIVE PRICING CALCULATOR -->
+  <section class="pr-calculator" id="prCalculator">
+    <div class="pr-calc-head">
+      <h2>Pricing &amp; Quote Calculator</h2>
+      <p>Configure your order below. প্রতিটি সার্ভিসের জন্য আপনার প্রয়োজন অনুযায়ী কোয়ান্টিটি ও আর্জেন্সি সেট করুন।</p>
+      <div class="pr-calc-legend">
+        <span class="pr-legend-item"><i class="pr-dot normal"></i>Normal <small>– Standard turnaround</small></span>
+        <span class="pr-legend-item"><i class="pr-dot urgent"></i>Urgent <small>– 1.4x rate</small></span>
+        <span class="pr-legend-item"><i class="pr-dot critical"></i>Critical <small>– 1.8x rate</small></span>
+      </div>
+    </div>
+
+    <!-- Cards are rendered here dynamically by js/pricing-calculator.js -->
+    <div class="pr-calc-grid" id="prCalcGrid"></div>
+
+    <div class="pr-calc-summary">
+      <div class="pr-calc-summary-top">
+        <div class="pr-calc-summary-left">
+          <div class="pr-calc-summary-label">Combined Total (All Services)</div>
+          <div class="pr-calc-summary-price">
+            ৳<span id="prCombinedTotal">0</span>
+          </div>
+          <div class="pr-calc-summary-sub">across <span id="prServiceCount">8</span> services · Urgency adjustments applied</div>
+        </div>
+        <div class="pr-calc-summary-actions">
+          <button class="pr-btn outline" id="prGetQuoteBtn">Get Full Quote</button>
+          <button class="pr-btn filled" id="prBundleBtn">Bundle করুন · Save 15%</button>
+        </div>
+      </div>
+      <div class="pr-calc-stats">
+        <div class="pr-calc-stat"><div class="pr-calc-stat-num">50+</div><div class="pr-calc-stat-lbl">Expert Writers<br><span>বিশেষজ্ঞ লেখক</span></div></div>
+        <div class="pr-calc-stat"><div class="pr-calc-stat-num">98.7%</div><div class="pr-calc-stat-lbl">Satisfaction Rate<br><span>সন্তুষ্টির হার</span></div></div>
+        <div class="pr-calc-stat"><div class="pr-calc-stat-num">12,000+</div><div class="pr-calc-stat-lbl">Orders Delivered<br><span>সম্পন্ন অর্ডার</span></div></div>
+        <div class="pr-calc-stat"><div class="pr-calc-stat-num">&lt; 30 min</div><div class="pr-calc-stat-lbl">Response Time<br><span>প্রতিক্রিয়া সময়</span></div></div>
+      </div>
     </div>
   </section>
 
@@ -179,5 +202,6 @@
   </section>
 
   <script src="js/pricing.js"></script>
+  <script src="js/pricing-calculator.js"></script>
 </body>
 </html>
