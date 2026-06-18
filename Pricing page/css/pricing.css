@@ -462,12 +462,58 @@ body {
   flex-direction: column;
   position: relative;
   transition: border-color 0.25s, transform 0.2s;
+  overflow: visible;
 }
-.pr-calc-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.22); }
+
+.pr-calc-card::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 17px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    #ff0080, #ff4500, #ffcc00,
+    #00ff88, #00cfff, #7b2fff,
+    #ff0080
+  );
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s;
+  animation: spin-border 3s linear infinite paused;
+}
+
+.pr-calc-card::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 15px;
+  background: #111e3f;
+  z-index: -1;
+}
+
+.pr-calc-card:hover {
+  transform: translateY(-3px);
+  border-color: transparent;
+}
+
+.pr-calc-card:hover::before {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-border {
+  to { --angle: 360deg; }
+}
 
 .pr-calc-badge {
   position: absolute;
-  top: 14px; right: 14px;
+  top: -11px; right: 14px;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -770,8 +816,4 @@ body {
   .pr-calc-body { display: none; }
   .pr-calc-card.expanded { border-color: #2d6ef7; }
   .pr-calc-card.expanded .pr-calc-body { display: block; margin-top: 6px; }
-
-  /* badge would otherwise overlap the start-price/chevron block on mobile —
-     pop it above the card edge instead, like the popular-tag on the plan cards */
-  .pr-calc-badge { top: -9px; right: 16px; }
 }
