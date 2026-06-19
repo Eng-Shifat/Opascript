@@ -54,46 +54,35 @@
 
     <div class="s-nav">
       <div class="s-nav-label">Main Menu</div>
-      <a class="s-nav-item" href="admin.html" data-page="dashboard">
-        <i class="ti ti-layout-dashboard"></i> Dashboard Overview
+      <a class="s-nav-item" href="admin.html" data-page="dashboard" data-tooltip="Dashboard Overview">
+        <i class="ti ti-layout-dashboard"></i><span class="s-nav-item-label">Dashboard Overview</span>
       </a>
-      <a class="s-nav-item" href="order-management.html" data-page="orders">
-        <i class="ti ti-clipboard-list"></i> Orders Management
+      <a class="s-nav-item" href="order-management.html" data-page="orders" data-tooltip="Orders Management">
+        <i class="ti ti-clipboard-list"></i><span class="s-nav-item-label">Orders Management</span>
         <span class="s-badge" id="ordersBadge" style="display:none">0</span>
       </a>
-      <a class="s-nav-item" href="admin-messages.html" data-page="messages">
-        <i class="ti ti-message-circle"></i> Messages
+      <a class="s-nav-item" href="admin-messages.html" data-page="messages" data-tooltip="Messages">
+        <i class="ti ti-message-circle"></i><span class="s-nav-item-label">Messages</span>
         <span class="s-badge" id="sidebarMsgBadge" style="display:none">0</span>
       </a>
-      <a class="s-nav-item" href="#" data-page="clients">
-        <i class="ti ti-users"></i> Client List
+      <a class="s-nav-item" href="#" data-page="clients" data-tooltip="Client List">
+        <i class="ti ti-users"></i><span class="s-nav-item-label">Client List</span>
       </a>
-      <a class="s-nav-item" href="#" data-page="payments">
-        <i class="ti ti-credit-card"></i> Payments &amp; Billing
+      <a class="s-nav-item" href="#" data-page="payments" data-tooltip="Payments &amp; Billing">
+        <i class="ti ti-credit-card"></i><span class="s-nav-item-label">Payments &amp; Billing</span>
         <span class="s-badge" id="payBadge" style="display:none">0</span>
       </a>
-      <a class="s-nav-item" href="#" data-page="files">
-        <i class="ti ti-folder"></i> File Manager
+      <a class="s-nav-item" href="#" data-page="files" data-tooltip="File Manager">
+        <i class="ti ti-folder"></i><span class="s-nav-item-label">File Manager</span>
       </a>
 
       <div class="s-nav-label">System</div>
-      <a class="s-nav-item" href="#" data-page="settings">
-        <i class="ti ti-settings"></i> Settings
+      <a class="s-nav-item" href="#" data-page="settings" data-tooltip="Settings">
+        <i class="ti ti-settings"></i><span class="s-nav-item-label">Settings</span>
       </a>
-      <a class="s-nav-item" href="#" data-page="help">
-        <i class="ti ti-help-circle"></i> Help &amp; Support
+      <a class="s-nav-item" href="#" data-page="help" data-tooltip="Help &amp; Support">
+        <i class="ti ti-help-circle"></i><span class="s-nav-item-label">Help &amp; Support</span>
       </a>
-    </div>
-
-    <div class="s-footer">
-      <div class="s-admin-card">
-        <div class="s-avatar">SA</div>
-        <div class="s-admin-info">
-          <strong>Super Admin</strong>
-          <span id="sidebarAdminEmail">admin@scriptora.com</span>
-        </div>
-        <span class="s-dots" onclick="handleAdminLogout()">⋯</span>
-      </div>
     </div>
   </aside>
   <div class="s-overlay" id="sidebarOverlay" onclick="toggleGlobalSidebar()"></div>
@@ -141,15 +130,15 @@
       }
     });
 
-    /* আসল logged-in admin email দেখান (sidebar footer + topbar profile panel) */
-    document.querySelectorAll('#sidebarAdminEmail, .dp-profile-email').forEach(el => {
+    /* আসল logged-in admin email দেখান (topbar profile panel) */
+    document.querySelectorAll('.dp-profile-email').forEach(el => {
       el.textContent = adminUser.email;
     });
 
     const main = document.querySelector('.main');
     function updateMargin() {
       if (main) {
-        main.style.marginLeft = window.innerWidth > 768 ? '260px' : '0';
+        main.style.marginLeft = window.innerWidth > 768 ? '76px' : '0';
       }
     }
     updateMargin();

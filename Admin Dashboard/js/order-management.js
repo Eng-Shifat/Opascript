@@ -37,6 +37,9 @@ const ORDERS = [
       overallColor: '#ff5a5a',
       email: 'emma.t@oxford.ac.uk',
       clientLabel: 'Oxford University · 4 orders · Gold',
+      subject: 'Quantum Physics / Cryptography',
+      citationStyle: 'IEEE',
+      financials: { total: '$1,240', paid: '$620', due: '$620', paidPct: 50 },
     }
   },
   {
@@ -183,12 +186,7 @@ function selectOrder(id) {
   renderTable();
   const order = ORDERS.find(o => o.id === id);
   if (order) {
-    if (order.detail) {
-      renderDetailPanel(order);
-    } else {
-      renderBasicPanel(order);
-    }
-    document.getElementById('detailPanel').classList.add('open');
+    openOrderDetailsPanel(order);
   }
 }
 
@@ -369,9 +367,7 @@ function openNewOrder() {
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   renderTable();
-  const first = ORDERS.find(o => o.id === activeOrderId);
-  if (first && first.detail) { renderDetailPanel(first); document.getElementById('detailPanel').classList.add('open'); }
-  else if (first) { renderBasicPanel(first); document.getElementById('detailPanel').classList.add('open'); }
+  // old detail panel auto-open removed — new panel opens on row click
   startTimer();
   initTabs();
   initSearch();

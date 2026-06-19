@@ -3,6 +3,7 @@
 ═══════════════════════════════════════ */
 :root {
   --s-sidebar-w: 260px;
+  --s-sidebar-collapsed-w: 76px;
   --s-bg:       #080a14;
   --s-card:     #131629;
   --s-border:   rgba(255,255,255,0.07);
@@ -93,34 +94,6 @@
   padding: 2px 7px; border-radius: 20px;
 }
 
-/* Footer */
-.s-footer {
-  padding: 14px;
-  border-top: 1px solid var(--s-border);
-}
-.s-admin-card {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px;
-  background: var(--s-card);
-  border-radius: 12px;
-  border: 1px solid var(--s-border);
-}
-.s-avatar {
-  width: 34px; height: 34px;
-  background: linear-gradient(135deg, #6c63ff, #a78bfa);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .75rem; font-weight: 700; color: #fff;
-  flex-shrink: 0;
-}
-.s-admin-info strong {
-  font-size: .8rem; display: block; color: var(--s-text);
-}
-.s-admin-info span {
-  font-size: .65rem; color: var(--s-muted2);
-}
-.s-dots { color: var(--s-muted); cursor: pointer; margin-left: auto; }
-
 /* Overlay (mobile) */
 .s-overlay {
   display: none;
@@ -135,11 +108,123 @@
    RESPONSIVE
 ══════════════════════════════════════ */
 
-/* Desktop: always visible, fixed */
+/* ── Desktop: collapsed by default, hover → expand (overlay, content fixed) ── */
 @media (min-width: 769px) {
+
   .s-sidebar {
     transform: translateX(0) !important;
     display: flex !important;
+    width: var(--s-sidebar-collapsed-w);
+    transition: width .22s cubic-bezier(.4,0,.2,1), box-shadow .22s ease;
+    overflow: hidden;
+  }
+
+  .s-sidebar:hover {
+    width: var(--s-sidebar-w);
+    box-shadow: 4px 0 28px rgba(0,0,0,0.45);
+  }
+
+  /* Logo: collapse to icon-only, centered */
+  .s-sidebar .s-logo {
+    padding: 22px 0 18px;
+    justify-content: center;
+    gap: 0;
+  }
+  .s-sidebar:hover .s-logo {
+    padding: 22px 20px 18px;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  .s-logo-text {
+    white-space: nowrap;
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: opacity .15s ease, width .22s ease;
+  }
+  .s-sidebar:hover .s-logo-text {
+    opacity: 1;
+    width: auto;
+  }
+
+  /* Nav labels (Main Menu / System): hide collapsed */
+  .s-nav-label {
+    white-space: nowrap;
+    opacity: 0;
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+    transition: opacity .15s ease;
+  }
+  .s-sidebar:hover .s-nav-label {
+    opacity: 1;
+    height: auto;
+    margin: 12px 0 4px;
+  }
+  .s-sidebar:hover .s-nav-label:first-child { margin-top: 0; }
+
+  /* Nav items: center icon when collapsed */
+  .s-nav-item {
+    justify-content: center;
+    padding: 9px 0;
+    gap: 0;
+    position: relative;
+  }
+  .s-sidebar:hover .s-nav-item {
+    justify-content: flex-start;
+    padding: 9px 12px;
+    gap: 10px;
+  }
+  .s-nav-item-label {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity .15s ease, width .22s ease;
+  }
+  .s-sidebar:hover .s-nav-item-label {
+    opacity: 1;
+    width: auto;
+  }
+  .s-badge {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: opacity .15s ease, width .22s ease;
+  }
+  .s-sidebar:hover .s-badge {
+    opacity: 1;
+    width: auto;
+  }
+
+  /* Simple tooltip on collapsed icons */
+  .s-nav-item {
+    position: relative;
+  }
+  .s-nav-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1a1d2e;
+    color: var(--s-text);
+    font-size: .75rem;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--s-border);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease .1s;
+    z-index: 200;
+  }
+  .s-sidebar:not(:hover) .s-nav-item:hover::after {
+    opacity: 1;
+  }
+  .s-sidebar:hover .s-nav-item::after {
+    display: none;
   }
 }
 

@@ -761,14 +761,246 @@ function prevStep() {
   document.querySelector('.modal-body').scrollTop=0;
 }
 
+// ════════════════════════════════════════════════════
+// SERVICE-AWARE ORDER FORM
+// Reads URL params sent by pricing-calculator.js and
+// customises the order form for each of the 15 services.
+// ════════════════════════════════════════════════════
+
+const SERVICE_CONFIG = {
+  // step1Heading : replaces "Academic Details" heading
+  // step1Desc    : replaces subtitle under heading
+  // navLabel     : replaces the nav pill text
+  // step2Desc    : replaces Step 2 subtitle
+  // uploadHint   : shown in the file upload zone (Step 4)
+  // citationAuto : citation style to pre-select (optional)
+
+  "assignment-writing": {
+    navLabel:    "📝 Assignment Writing",
+    step1Heading:"Assignment Details",
+    step1Desc:   "আপনার assignment-এর topic, university ও guidelines দিন",
+    step2Desc:   "Assignment-এর scope ও special requirements জানান",
+    uploadHint:  "Assignment brief, reference list, বা instructor guideline আপলোড করুন"
+  },
+  "presentation-slides": {
+    navLabel:    "🖥️ Presentation Slides",
+    step1Heading:"Presentation Details",
+    step1Desc:   "প্রেজেন্টেশনের topic ও design preference জানান",
+    step2Desc:   "Slide content ও structure সম্পর্কে বিস্তারিত দিন",
+    uploadHint:  "Content file, notes, বা reference slides আপলোড করুন"
+  },
+  "proofreading": {
+    navLabel:    "🔍 Proofreading",
+    step1Heading:"Proofreading Details",
+    step1Desc:   "কোন document proofread করতে চান তা জানান",
+    step2Desc:   "Tone, style এবং specific requirements বলুন",
+    uploadHint:  "Proofread করার document এখানে আপলোড করুন (DOCX/PDF)"
+  },
+  "apa-mla-formatting": {
+    navLabel:    "📑 APA/MLA Formatting",
+    step1Heading:"Formatting Details",
+    step1Desc:   "কোন citation style চান এবং document-এর ধরন জানান",
+    step2Desc:   "Formatting requirements ও special instructions দিন",
+    uploadHint:  "Format করার document আপলোড করুন",
+    citationAuto:"APA"
+  },
+  "plagiarism-reduction": {
+    navLabel:    "🛡️ Plagiarism Reduction",
+    step1Heading:"Plagiarism Reduction Details",
+    step1Desc:   "Document জমা দিন — আমরা similarity কমিয়ে দেব",
+    step2Desc:   "Target similarity % ও special requirements জানান",
+    uploadHint:  "Plagiarism কমাতে হবে এমন document আপলোড করুন"
+  },
+  "spss-analysis": {
+    navLabel:    "📊 SPSS Analysis",
+    step1Heading:"SPSS Analysis Details",
+    step1Desc:   "আপনার dataset ও analysis requirements জানান",
+    step2Desc:   "Variables, hypothesis ও test type বিস্তারিত দিন",
+    uploadHint:  "Dataset বা Excel file আপলোড করুন (.xlsx/.csv)"
+  },
+  "research-proposal": {
+    navLabel:    "🔎 Research Proposal",
+    step1Heading:"Research Proposal Details",
+    step1Desc:   "আপনার research topic ও supervisor-এর requirements জানান",
+    step2Desc:   "Methodology ও scope বিস্তারিত দিন",
+    uploadHint:  "Supervisor guidelines বা reference proposal আপলোড করুন"
+  },
+  "case-study-report": {
+    navLabel:    "📁 Case Study Report",
+    step1Heading:"Case Study Details",
+    step1Desc:   "Case study-র topic ও analysis framework জানান",
+    step2Desc:   "Analysis scope ও requirements বিস্তারিত দিন",
+    uploadHint:  "Reference material বা case data আপলোড করুন"
+  },
+  "cv-writing": {
+    navLabel:    "📄 CV Writing",
+    step1Heading:"CV Details",
+    step1Desc:   "আপনার career লক্ষ্য ও background জানান",
+    step2Desc:   "Education, experience ও skills বিস্তারিত দিন",
+    uploadHint:  "পুরনো CV বা reference format আপলোড করুন (optional)"
+  },
+  "ai-plagiarism-remover": {
+    navLabel:    "🧠 AI Plagiarism Remover",
+    step1Heading:"AI Content Details",
+    step1Desc:   "AI-generated text জমা দিন — human-written করে দেওয়া হবে",
+    step2Desc:   "Tone, style ও target requirements বলুন",
+    uploadHint:  "AI-generated document আপলোড করুন (DOCX/PDF/TXT)"
+  },
+  "sop-writing": {
+    navLabel:    "📜 SOP Writing",
+    step1Heading:"SOP Details",
+    step1Desc:   "Target university, program ও background জানান",
+    step2Desc:   "Motivation, goals ও special requirements দিন",
+    uploadHint:  "University guideline বা sample SOP আপলোড করুন (optional)"
+  },
+  "lab-report-writing": {
+    navLabel:    "🧪 Lab Report Writing",
+    step1Heading:"Lab Report Details",
+    step1Desc:   "Experiment-এর বিস্তারিত ও data জানান",
+    step2Desc:   "Lab data, results ও instructor requirements দিন",
+    uploadHint:  "Lab data sheet বা experiment notes আপলোড করুন"
+  },
+  "project-assignment-planning": {
+    navLabel:    "🧭 Project Planning",
+    step1Heading:"Project Details",
+    step1Desc:   "Project বা assignment-এর topic ও scope জানান",
+    step2Desc:   "Requirements ও deliverables বিস্তারিত দিন",
+    uploadHint:  "Project brief বা assignment guidelines আপলোড করুন"
+  },
+  "ai-detection-report": {
+    navLabel:    "🕵️ AI Detection Report",
+    step1Heading:"AI Detection Details",
+    step1Desc:   "কোন document check করতে চান তা জমা দিন",
+    step2Desc:   "Detection scope ও requirements জানান",
+    uploadHint:  "Check করার document আপলোড করুন (DOCX/PDF)"
+  },
+  "research-article-writing": {
+    navLabel:    "📰 Research Article / Journal Paper",
+    step1Heading:"Research Article Details",
+    step1Desc:   "আপনার research topic, target journal ও requirements জানান",
+    step2Desc:   "Methodology, scope ও journal guidelines দিন",
+    uploadHint:  "Reference papers বা data file আপলোড করুন (optional)"
+  }
+};
+
+function initServiceAware() {
+  const params   = new URLSearchParams(window.location.search);
+  const serviceId = params.get("service");
+  const price     = parseInt(params.get("price") || "0", 10);
+  const urgency   = params.get("urgency")   || "normal";
+  const qty       = parseInt(params.get("qty") || "0", 10);
+  const unit      = params.get("unit")      || "";
+  const tier      = params.get("tier")      || "";
+
+  const cfg = serviceId ? SERVICE_CONFIG[serviceId] : null;
+
+  // ── 1. Nav pill label ──
+  if (cfg) {
+    const navPkg = document.getElementById("navPkg");
+    if (navPkg) navPkg.textContent = cfg.navLabel;
+  }
+
+  // ── 2. Step 1 heading + subtitle ──
+  if (cfg) {
+    const h2 = document.querySelector("#p1 .panel-head h2");
+    const p  = document.querySelector("#p1 .panel-head p");
+    if (h2) h2.textContent = cfg.step1Heading;
+    if (p)  p.textContent  = cfg.step1Desc;
+  }
+
+  // ── 3. Step 2 subtitle ──
+  if (cfg) {
+    const p2desc = document.getElementById("p2Desc");
+    if (p2desc) p2desc.textContent = cfg.step2Desc;
+  }
+
+  // ── 4. File upload hint (Step 4) ──
+  if (cfg) {
+    const hint = document.getElementById("uploadDeptHint");
+    if (hint) hint.textContent = cfg.uploadHint || "";
+  }
+
+  // ── 5. Pre-select citation style if specified ──
+  if (cfg && cfg.citationAuto) {
+    const sel = document.getElementById("citationStyle");
+    if (sel) {
+      [...sel.options].forEach(o => {
+        if (o.text === cfg.citationAuto) o.selected = true;
+      });
+    }
+  }
+
+  // ── 6. Pre-fill price from pricing calculator ──
+  if (price > 0) {
+    // override pkgData pricing with the exact price from the card
+    // store in a global so updateCalc() can use it
+    window._svcBasePrice = price;
+
+    // show qty/tier info in the calc note
+    let qtyNote = "";
+    if (qty && unit) qtyNote = ` · ${qty.toLocaleString("en-US")} ${unit}`;
+    else if (tier)   qtyNote = ` · ${tier} tier`;
+    const note = document.getElementById("calc-note");
+    if (note) note.textContent = `Pricing Calculator থেকে নির্বাচিত মূল্য${qtyNote}`;
+
+    // patch updateCalc to use service price
+    const _origUpdateCalc = window.updateCalc;
+    window.updateCalc = function() {
+      if (window._svcBasePrice) {
+        const urgencyMap   = { standard: 1, urgent: 1.2, express: 1.5 };
+        const addOnTotal   = Object.entries(activeAddons)
+          .filter(([,v]) => v)
+          .reduce((sum, [k]) => {
+            const priceMap = { slides: 500, datacollection: 1000, coverpage: 100, figures: 300 };
+            return sum + (priceMap[k] || 0);
+          }, 0);
+        const multiplier   = urgencyMap[selectedUrgencyVal] || 1;
+        const total        = Math.round(window._svcBasePrice * multiplier) + addOnTotal;
+
+        const baseEl   = document.getElementById("calc-base");
+        const totalEl  = document.getElementById("calc-total");
+        const pagesEl  = document.getElementById("calc-pages");
+        const urgEl    = document.getElementById("calc-urgency-val");
+
+        if (baseEl)  baseEl.textContent  = "৳" + window._svcBasePrice.toLocaleString("en-US");
+        if (pagesEl) pagesEl.textContent = qty ? `${Math.ceil(qty / 250)} পাতা (আনুমানিক)` : "—";
+        if (urgEl)   urgEl.textContent   = selectedUrgencyVal.charAt(0).toUpperCase() + selectedUrgencyVal.slice(1);
+        if (totalEl) totalEl.textContent = "৳" + total.toLocaleString("en-US");
+
+        // update addon rows
+        const addonRows = document.getElementById("calc-addon-rows");
+        if (addonRows) {
+          addonRows.innerHTML = Object.entries(activeAddons)
+            .filter(([,v]) => v)
+            .map(([k]) => {
+              const labels = { slides:"Presentation Slides", datacollection:"Data Collection", coverpage:"Custom Cover Page", figures:"Figures & Charts" };
+              const prices = { slides:500, datacollection:1000, coverpage:100, figures:300 };
+              return `<div class="calc-row"><span class="calc-label">${labels[k]||k}</span><span class="calc-val">+৳${(prices[k]||0).toLocaleString("en-US")}</span></div>`;
+            }).join("");
+        }
+      } else {
+        _origUpdateCalc && _origUpdateCalc();
+      }
+    };
+  }
+
+  // ── 7. Pre-select urgency from card selection ──
+  const urgencyMap = { normal: "standard", urgent: "urgent", critical: "express" };
+  const mappedUrgency = urgencyMap[urgency] || "standard";
+  selectUrgency(mappedUrgency);
+
+  // trigger recalc with new base price
+  updateCalc();
+}
+
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   switchDept('bba');
   toggleVariableFields('survey');
   updateWcDisplay(5000);
   updateUrgencyCardPrices();
-  updateCalc();
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('deadlineDate').min = today;
   updateProgress();
+  initServiceAware(); // must come after base init so updateCalc can be patched
 });

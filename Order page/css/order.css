@@ -661,3 +661,30 @@ color:white;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;curs
 .coupon-msg { padding: 0 14px 10px; font-size: 12.5px; min-height: 18px; }
 .coupon-msg.success { color: #4ade80; }
 .coupon-msg.error   { color: #f87171; }
+
+/* ── Service Context Banner ── */
+.svc-banner {
+  background: rgba(45,110,247,0.08);
+  border: 1px solid rgba(45,110,247,0.25);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+.svc-banner-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.svc-banner-icon { font-size: 18px; }
+.svc-banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #60a5fa;
+}
+.svc-banner-desc {
+  font-size: 13px;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+}

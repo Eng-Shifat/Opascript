@@ -494,13 +494,85 @@ async function logout() {
   window.location.href=LOGIN_PATH;
 }
 
+const STATUS_LABELS_CLIENT = {
+  'writing':     'In Progress — লেখা চলছে',
+  'completed':   'Completed — সম্পন্ন হয়েছে ✓',
+  'pending':     'Pending — অপেক্ষায় আছে',
+  'draft_ready': 'In Review — রিভিউ চলছে',
+  'overdue':     'Overdue — সময় পার হয়ে গেছে',
+  'hold':        'On Hold — বিরতিতে আছে',
+};
+
 function setupRealtime() {
-  const orderSub=sb.channel('orders-realtime').on('postgres_changes',{event:'*',schema:'public',table:'orders',filter:`client_id=eq.${currentUser.id}`},async payload=>{
-    await loadOrders();
-    if(currentOrderId&&payload.new?.id===currentOrderId) openOrderDetail(currentOrderId);
-    showToast('Order update হয়েছে!','success');
-  }).subscribe();
+  /* Order status change */
+  const orderSub = sb.channel('orders-realtime')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'orders',
+      filter: `client_id=eq.${currentUser.id}`
+    }, async payload => {
+      const oldStatus = payload.old?.status;
+      const newStatus = payload.new?.status;
+      const label = STATUS_LABELS_CLIENT[newStatus] || newStatus;
+
+      await loadOrders();
+      if (currentOrderId && payload.new?.id === currentOrderId) {
+        openOrderDetail(currentOrderId);
+      }
+
+      /* Status badge in sidebar notification dot */
+      if (oldStatus !== newStatus) {
+        showToast(`📋 Status update: ${label}`, 'success');
+        /* Flash the active order card */
+        const orderId = payload.new?.id;
+        if (orderId) {
+          setTimeout(() => {
+            const cards = document.querySelectorAll('.order-card, .order-list-item');
+            cards.forEach(c => {
+              if (c.dataset.orderId === orderId || c.onclick?.toString().includes(orderId)) {
+                c.style.transition = 'box-shadow 0.3s';
+                c.style.boxShadow = '0 0 0 2px #6366f1';
+                setTimeout(() => c.style.boxShadow = '', 2000);
+              }
+            });
+          }, 300);
+        }
+      } else {
+        showToast('Order update হয়েছে!', 'success');
+      }
+    })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'orders',
+      filter: `client_id=eq.${currentUser.id}`
+    }, async () => {
+      await loadOrders();
+      showToast('নতুন Order তৈরি হয়েছে!', 'success');
+    })
+    .subscribe();
   realtimeSubs.push(orderSub);
+
+  /* Realtime unread message badge from admin */
+  const msgSub = sb.channel('client-messages-realtime')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `from_admin=eq.true`
+    }, async payload => {
+      /* Check if this message belongs to current user's orders */
+      const myOrderIds = allOrders.map(o => o.id);
+      if (!myOrderIds.includes(payload.new?.order_id)) return;
+
+      updateMsgBadge(1);
+
+      const preview = (payload.new?.text || '').substring(0, 60);
+      showToast(`💬 Admin: ${preview}${preview.length >= 60 ? '…' : ''}`, 'info');
+    })
+    .subscribe();
+  realtimeSubs.push(msgSub);
 }
 
 function updateMsgBadge(n) {
