@@ -27,18 +27,26 @@
   z-index: 100;
 }
 
-/* Logo */
+/* Logo (fixed at top — link to homepage, never collapses) */
 .s-logo {
-  padding: 22px 20px 18px;
+  height: 60px;
+  padding: 0 20px;
   display: flex; align-items: center; gap: 12px;
   border-bottom: 1px solid var(--s-border);
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity .15s ease;
+  box-sizing: border-box;
 }
+.s-logo:hover { opacity: 0.85; }
 .s-logo-icon {
-  width: 40px; height: 40px;
+  width: 36px; height: 36px;
   background: linear-gradient(135deg, #6c63ff, #a78bfa);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem; font-weight: 800; color: #fff;
+  font-size: 1rem; font-weight: 800; color: #fff;
   box-shadow: 0 0 20px rgba(108,99,255,0.35);
   flex-shrink: 0;
 }
@@ -46,16 +54,19 @@
   font-size: 1.1rem; font-weight: 700;
   display: block; color: var(--s-text);
   letter-spacing: -.2px;
+  white-space: nowrap;
 }
 .s-logo-text span {
   font-size: .65rem; color: var(--s-muted2);
   text-transform: uppercase; letter-spacing: .5px;
+  white-space: nowrap;
+  display: block;
 }
 
 /* Nav */
 .s-nav {
   padding: 16px 12px;
-  flex: 1; overflow-y: auto;
+  flex: 1; overflow-y: auto; overflow-x: hidden;
   display: flex; flex-direction: column; gap: 2px;
 }
 .s-nav-label {
@@ -124,14 +135,14 @@
     box-shadow: 4px 0 28px rgba(0,0,0,0.45);
   }
 
-  /* Logo: collapse to icon-only, centered */
+  /* Logo: icon stays centered when collapsed, shifts left + text fades in on hover */
   .s-sidebar .s-logo {
-    padding: 22px 0 18px;
+    padding: 0;
     justify-content: center;
     gap: 0;
   }
   .s-sidebar:hover .s-logo {
-    padding: 22px 20px 18px;
+    padding: 0 20px;
     justify-content: flex-start;
     gap: 12px;
   }
@@ -139,12 +150,15 @@
     white-space: nowrap;
     opacity: 0;
     width: 0;
+    min-width: 0;
+    max-width: 0;
     overflow: hidden;
     transition: opacity .15s ease, width .22s ease;
   }
   .s-sidebar:hover .s-logo-text {
     opacity: 1;
     width: auto;
+    max-width: 200px;
   }
 
   /* Nav labels (Main Menu / System): hide collapsed */
@@ -154,12 +168,14 @@
     height: 0;
     margin: 0;
     overflow: hidden;
+    max-width: 0;
     transition: opacity .15s ease;
   }
   .s-sidebar:hover .s-nav-label {
     opacity: 1;
     height: auto;
     margin: 12px 0 4px;
+    max-width: none;
   }
   .s-sidebar:hover .s-nav-label:first-child { margin-top: 0; }
 
@@ -178,6 +194,8 @@
   .s-nav-item-label {
     opacity: 0;
     width: 0;
+    min-width: 0;
+    max-width: 0;
     overflow: hidden;
     white-space: nowrap;
     transition: opacity .15s ease, width .22s ease;
@@ -185,16 +203,20 @@
   .s-sidebar:hover .s-nav-item-label {
     opacity: 1;
     width: auto;
+    max-width: 200px;
   }
   .s-badge {
     opacity: 0;
     width: 0;
+    min-width: 0;
+    max-width: 0;
     overflow: hidden;
     transition: opacity .15s ease, width .22s ease;
   }
   .s-sidebar:hover .s-badge {
     opacity: 1;
     width: auto;
+    max-width: 60px;
   }
 
   /* Simple tooltip on collapsed icons */

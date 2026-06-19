@@ -12,6 +12,16 @@
   /* ── SUPABASE HELPER ── */
   function sb() { return window.scriptoraSupabase; }
 
+  /* ── UUID VALIDATION ──
+     Mock orders use '#SCR-XXXX' style IDs, not real UUIDs.
+     Supabase UUID columns reject these with "invalid input syntax for type uuid".
+     Any function that does .eq('id', _currentOrderId) must call this first.
+  ── */
+  function isRealUUID(id) {
+    if (!id) return false;
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  }
+
   /* ── ESCAPE HTML ── */
   function esc(str) {
     if (!str) return '';
@@ -122,7 +132,6 @@
     <div class="odp-topbar-actions">
       <button class="odp-icon-btn" title="Print" onclick="window.print()"><i class="ti ti-printer"></i></button>
       <button class="odp-icon-btn" title="More"><i class="ti ti-dots"></i></button>
-      <button class="odp-btn-confirm" onclick="odpConfirmOrder()"><i class="ti ti-circle-check"></i> Confirm Order</button>
     </div>
   </div>
 
@@ -163,7 +172,7 @@
 
     <!-- ══ OVERVIEW ══ -->
     <div class="odp-pane odp-pane-active" data-odp-pane="overview">
-      ${buildOverviewHTML(order)}
+      ${buildOverviewHTML(order, statusClass)}
     </div>
 
     <!-- ══ FILES ══ -->
@@ -220,9 +229,9 @@
   }
 
   /* ══ OVERVIEW HTML ══ */
-  function buildOverviewHTML(order) {
+  function buildOverviewHTML(order, statusClass) {
     const d = order.detail || {};
-    const statusClass = order.statusClass || 's-pending';
+    statusClass = statusClass || order.statusClass || 's-pending';
     const pct = d.overall || order.progressPct || 0;
     const pfClass = pct >= 80 ? 'pf-green' : pct >= 40 ? 'pf-yellow' : 'pf-red';
     const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
@@ -236,27 +245,6 @@
       </div>`;
     }).join('');
 
-    const milestones = (d.milestones || [
-      { name:'Order Confirmed', date:'', state:'done' },
-      { name:'Brief & Outline', date:'', state:'done' },
-      { name:'Writing in Progress', date:'', state:'active' },
-      { name:'QA Review', date:'Pending', state:'pending' },
-      { name:'Final Delivery', date:'Pending', state:'pending' },
-    ]).map((ms, i, arr) => {
-      const icon = ms.state==='done' ? 'ti-check' : ms.state==='active' ? 'ti-loader' : 'ti-circle';
-      const last = i===arr.length-1;
-      return `<div class="odp-milestone-item">
-        <div class="odp-ms-left">
-          <div class="odp-ms-dot ${ms.state}"><i class="ti ${icon}"></i></div>
-          ${!last ? '<div class="odp-ms-line"></div>' : ''}
-        </div>
-        <div class="odp-ms-content">
-          <div class="odp-ms-name ${ms.state==='done'?'done':''}">${esc(ms.name)}</div>
-          <div class="odp-ms-date">${esc(ms.date||'')}</div>
-          ${ms.sub ? `<div class="odp-ms-sub">${esc(ms.sub)}</div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
 
     return `
     <div class="odp-grid-2">
@@ -309,7 +297,7 @@
         <div class="odp-card">
           <div class="odp-card-title"><i class="ti ti-adjustments-horizontal"></i> Status & Milestone</div>
           <div class="odp-field"><label>Order Status</label>
-            <select class="odp-select" id="odpStatusSelect" onchange="odpUpdateStatus(this.value)">
+            <select class="odp-select" id="odpStatusSelect">
               <option value="writing"     ${statusClass==='s-inprogress'?'selected':''}>🔵 In Progress</option>
               <option value="completed"   ${statusClass==='s-completed' ?'selected':''}>🟢 Completed</option>
               <option value="pending"     ${statusClass==='s-pending'   ?'selected':''}>🟡 Pending</option>
@@ -318,28 +306,11 @@
               <option value="hold">⚫ On Hold</option>
             </select>
           </div>
-          <div class="odp-field" style="margin-top:10px"><label>Current Milestone</label>
-            <select class="odp-select" id="odpMilestoneSelect" onchange="odpUpdateMilestone(this.value)">
-              <option>Chapter 1 — Introduction</option>
-              <option>Chapter 2 — Literature Review</option>
-              <option selected>Chapter 3 — Methodology</option>
-              <option>Chapter 4 — Data Analysis</option>
-              <option>Chapter 5 — Discussion</option>
-              <option>QA Review</option>
-              <option>Final Delivery</option>
-            </select>
-          </div>
-          <div class="odp-confirm-row">
-            <button class="odp-btn odp-btn-sm" onclick="odpSwitchTab('messages')"><i class="ti ti-send"></i> Notify Client</button>
-            <button class="odp-btn odp-btn-accent odp-btn-sm" onclick="odpConfirmOrder()"><i class="ti ti-circle-check"></i> Confirm Order</button>
+          <div class="odp-confirm-row" style="justify-content:flex-end">
+            <button class="odp-btn odp-btn-accent odp-btn-sm" onclick="odpUpdateStatus(document.getElementById('odpStatusSelect').value)"><i class="ti ti-check"></i> Update Status</button>
           </div>
         </div>
 
-        <!-- Milestone Timeline -->
-        <div class="odp-card">
-          <div class="odp-card-title"><i class="ti ti-flag"></i> Milestone Timeline</div>
-          <div class="odp-milestone-list">${milestones}</div>
-        </div>
       </div>
     </div>
 `;
@@ -413,6 +384,14 @@
     if (!area) return;
     area.insertAdjacentHTML('beforeend', buildShell(order));
 
+    /* Sync status select IMMEDIATELY after HTML is in DOM */
+    const _statusSel = document.getElementById('odpStatusSelect');
+    if (_statusSel && order.statusClass) {
+      const _valMap = { 's-inprogress':'writing', 's-completed':'completed', 's-pending':'pending', 's-review':'draft_ready', 's-overdue':'overdue' };
+      const _val = _valMap[order.statusClass];
+      if (_val) _statusSel.value = _val;
+    }
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const ov = document.getElementById('odpOverlay');
@@ -436,6 +415,21 @@
   /* ══ LOAD FULL ORDER DATA FROM SUPABASE ══ */
   async function loadFullOrderData() {
     if (!sb()) return;
+    /* Mock orders (e.g. '#SCR-2891') are not real UUIDs — skip DB query */
+    if (!isRealUUID(_currentOrderId)) {
+      /* Still render the thesis details card from mock detail data */
+      if (_currentOrder && _currentOrder.detail) {
+        renderThesisDetailsCard(_currentOrder, null);
+      } else {
+        const el = document.getElementById('odpThesisDetailsCard');
+        if (el) el.innerHTML = `<div class="odp-card-title"><i class="ti ti-forms"></i> Client Submission Details</div>
+          <div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">
+            <i class="ti ti-info-circle" style="font-size:18px;display:block;margin-bottom:6px"></i>
+            Mock order — real Supabase data নেই।
+          </div>`;
+      }
+      return;
+    }
     try {
       const { data: ord } = await sb().from('orders').select('*').eq('id', _currentOrderId).single();
       if (!ord) return;
@@ -447,6 +441,20 @@
       renderClientSubmission(ord, client);
       renderClientInfoFromDB(ord, client);
       renderThesisDetailsCard(ord, client);
+
+      /* Sync status select from DB */
+      const statusSel = document.getElementById('odpStatusSelect');
+      if (statusSel && ord.status) {
+        statusSel.value = ord.status;
+        /* Also update header pill */
+        const pill = document.querySelector('.odp-status-pill');
+        if (pill) {
+          const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' };
+          const lblMap = { writing:'In Progress', completed:'Completed', pending:'Pending', draft_ready:'In Review', overdue:'Overdue', hold:'On Hold' };
+          pill.className = 'odp-status-pill ' + (clsMap[ord.status] || 's-pending');
+          pill.textContent = lblMap[ord.status] || ord.status;
+        }
+      }
     } catch(e) {}
   }
 
@@ -658,7 +666,7 @@
     const list = document.getElementById('odpMsgList');
     if (!list) return;
 
-    if (!sb()) {
+    if (!sb() || !isRealUUID(_currentOrderId)) {
       list.innerHTML = renderFallbackMessages();
       return;
     }
@@ -772,7 +780,7 @@
       list.innerHTML = d.files.map(f => renderFileRow(f)).join('');
     }
 
-    if (!sb()) return;
+    if (!sb() || !isRealUUID(_currentOrderId)) return;
 
     try {
       const path = `orders/${_currentOrderId}`;
@@ -900,7 +908,7 @@
     const el = document.getElementById('odpPayHistory');
     if (!el) return;
 
-    if (!sb()) { el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">Payment history unavailable.</div>'; return; }
+    if (!sb() || !isRealUUID(_currentOrderId)) { el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">Payment history unavailable.</div>'; return; }
 
     try {
       const { data } = await sb().from('payments').select('*').eq('order_id', _currentOrderId).order('created_at', { ascending: false });
@@ -941,26 +949,82 @@
   };
 
   window.odpApprovePayment = async function() {
-    if (sb()) {
-      try { await sb().from('orders').update({ payment_status: 'approved' }).eq('id', _currentOrderId); } catch(e) {}
+    if (sb() && isRealUUID(_currentOrderId)) {
+      try {
+        await sb().from('orders').update({ payment_status: 'approved' }).eq('id', _currentOrderId);
+        await sb().from('payments').insert({ order_id: _currentOrderId, label: 'Payment Approved', type: 'approval', method: 'Admin', amount: 0, created_at: new Date().toISOString() });
+      } catch(e) {}
     }
+    _appendPayHistoryItem({ label: 'Payment Approved', type: 'approval', method: 'Admin', amount: 0, created_at: new Date().toISOString() });
     toast('✓ Payment approved!', 'var(--green)');
     logActivity('payment', 'Payment approved by admin');
   };
 
   window.odpMarkPaid = async function() {
-    if (sb()) {
-      try { await sb().from('orders').update({ payment_status: 'paid' }).eq('id', _currentOrderId); } catch(e) {}
+    if (sb() && isRealUUID(_currentOrderId)) {
+      try {
+        await sb().from('orders').update({ payment_status: 'paid' }).eq('id', _currentOrderId);
+        await sb().from('payments').insert({ order_id: _currentOrderId, label: 'Marked as Paid', type: 'paid', method: 'Admin', amount: 0, created_at: new Date().toISOString() });
+      } catch(e) {}
     }
+    _appendPayHistoryItem({ label: 'Marked as Paid', type: 'paid', method: 'Admin', amount: 0, created_at: new Date().toISOString() });
     toast('✓ Order marked as paid!', 'var(--accent)');
     logActivity('payment', 'Order marked as fully paid');
   };
 
-  window.odpSavePayNote = function() {
+  window.odpSavePayNote = async function() {
     const note = document.getElementById('odpPayNote');
     if (!note || !note.value.trim()) return;
-    toast('✓ Payment note saved!', 'var(--green)');
+    const text = note.value.trim();
+
+    /* Mock order — শুধু UI তে history add করো */
+    if (!sb() || !isRealUUID(_currentOrderId)) {
+      _appendPayHistoryItem({ label: 'Internal Note', type: 'note', method: 'Admin', amount: null, created_at: new Date().toISOString(), note: text });
+      note.value = '';
+      toast('✓ Note saved (mock mode)!', 'var(--green)');
+      return;
+    }
+
+    /* Real order — Supabase payments table এ insert */
+    try {
+      const { error } = await sb().from('payments').insert({
+        order_id:   _currentOrderId,
+        label:      'Internal Note',
+        type:       'note',
+        method:     'Admin',
+        amount:     0,
+        note:       text,
+        created_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+      _appendPayHistoryItem({ label: 'Internal Note', type: 'note', method: 'Admin', amount: 0, created_at: new Date().toISOString(), note: text });
+      note.value = '';
+      toast('✓ Payment note saved!', 'var(--green)');
+      logActivity('payment', 'Internal note added');
+    } catch(e) {
+      toast('⚠ Note save failed: ' + (e.message || ''), 'var(--red)');
+    }
   };
+
+  /* Payment History এ নতুন item append করার helper */
+  function _appendPayHistoryItem(p) {
+    const el = document.getElementById('odpPayHistory');
+    if (!el) return;
+    /* যদি এখনো "unavailable / no records" দেখাচ্ছে, clear করো */
+    if (el.querySelector('div[style]')) el.innerHTML = '';
+    const isNote = p.type === 'note';
+    const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '';
+    const amtDisplay = (p.amount === 0 || p.amount === null) ? (p.note ? `<span style="font-size:11px;color:var(--muted2);font-style:italic">${esc(p.note.substring(0,40))}${p.note.length>40?'…':''}</span>` : '—') : `<span class="odp-pay-hist-val ${p.amount>0?'green':'orange'}">${p.amount>0?'+':''}${esc(String(p.amount))}</span>`;
+    const row = document.createElement('div');
+    row.className = 'odp-pay-hist-item';
+    row.innerHTML = `
+      <div>
+        <div class="odp-pay-hist-label">${esc(p.label || p.type || 'Payment')}</div>
+        <div class="odp-pay-hist-sub">${dateStr}${p.method ? ' · ' + esc(p.method) : ''}</div>
+      </div>
+      ${amtDisplay}`;
+    el.insertBefore(row, el.firstChild);
+  }
 
   /* ══════════════════════════════════════════════════════════
      STATUS & MILESTONE UPDATE
@@ -989,8 +1053,37 @@
       return;
     }
 
-    const btn = document.getElementById('odpStatusSelect');
-    if (btn) btn.disabled = true;
+    const sel = document.getElementById('odpStatusSelect');
+    const btn = document.querySelector('.odp-btn-accent.odp-btn-sm');
+    if (sel) sel.disabled = true;
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+
+    /* Mock order — শুধু UI update, DB skip */
+    if (!isRealUUID(_currentOrderId)) {
+      const label = STATUS_LABELS[val] || val;
+      const pill = document.querySelector('.odp-status-pill');
+      if (pill) {
+        pill.className = 'odp-status-pill';
+        const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
+        pill.classList.add(cls);
+        pill.textContent = label;
+      }
+      /* Update mock ORDERS array in order-management.js if accessible */
+      if (window.ORDERS && _currentOrder) {
+        const o = window.ORDERS.find(x => x.id === _currentOrderId);
+        if (o) {
+          const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' };
+          const lblMap = STATUS_LABELS;
+          o.status = lblMap[val] || val;
+          o.statusClass = clsMap[val] || 's-pending';
+          if (typeof renderTable === 'function') renderTable();
+        }
+      }
+      if (sel) sel.disabled = false;
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+      toast(`✓ Status → "${label}" (mock mode — DB update বাদ)`, 'var(--green)');
+      return;
+    }
 
     try {
       /* 1. Update order status in DB */
@@ -1039,7 +1132,8 @@
       console.error('Status update error:', e);
       toast('⚠ Update failed: ' + (e.message || 'Unknown error'), 'var(--red)');
     } finally {
-      if (btn) btn.disabled = false;
+      if (sel) sel.disabled = false;
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     }
   };
 
@@ -1089,7 +1183,7 @@
     ];
 
     let extraEvents = [];
-    if (sb()) {
+    if (sb() && isRealUUID(_currentOrderId)) {
       try {
         const { data } = await sb().from('messages').select('sent_at,from_admin,text').eq('order_id', _currentOrderId).order('sent_at',{ascending:false}).limit(5);
         extraEvents = (data||[]).map(m => ({
@@ -1129,9 +1223,8 @@
   ══════════════════════════════════════════════════════════ */
   async function loadClientOrderCount() {
     const el = document.getElementById('odpClientOrders');
-    if (!el || !sb() || !_currentOrder) return;
+    if (!el || !sb() || !_currentOrder || !isRealUUID(_currentOrderId)) return;
     try {
-      /* Try to find client by name in clients table */
       const { count } = await sb().from('orders').select('id',{count:'exact',head:true}).eq('client_id', _currentOrder.clientId || '');
       if (count !== null) el.textContent = count + ' orders';
     } catch(e) {}

@@ -442,22 +442,20 @@ function initStatusUpdate() {
   // Use event delegation on detail panel
   document.addEventListener('click', (e) => {
     if (e.target.closest('.btn-update-status')) {
-      const select = document.querySelector('.status-select');
+      const select = document.getElementById('detailStatusSelect') || document.querySelector('.status-select');
       if (!select || !activeOrderId) return;
 
       const newStatus = select.value;
       const order = ORDERS.find(o => o.id === activeOrderId);
       if (!order) return;
 
-      // Map select value → statusClass and status text
+      // Map select value → statusClass and status text (matches HTML option values)
       const statusMap = {
-        'Overdue':     { status: 'OVERDUE',     statusClass: 's-overdue',    rowClass: 'row-overdue' },
-
-        'In Progress': { status: 'In Progress', statusClass: 's-inprogress', rowClass: '' },
-        'In Review':   { status: 'In Review',   statusClass: 's-review',     rowClass: '' },
-        'QA Review':   { status: 'QA Review',   statusClass: 's-review',     rowClass: '' },
-        'Pending':     { status: 'Pending',     statusClass: 's-pending',    rowClass: '' },
-        'Completed':   { status: 'Completed',   statusClass: 's-completed',  rowClass: 'row-completed' },
+        'pending':     { status: 'Pending',     statusClass: 's-pending',    rowClass: '' },
+        'writing':     { status: 'In Progress', statusClass: 's-inprogress', rowClass: '' },
+        'draft_ready': { status: 'In Review',   statusClass: 's-review',     rowClass: '' },
+        'completed':   { status: 'Completed',   statusClass: 's-completed',  rowClass: 'row-completed' },
+        'overdue':     { status: 'OVERDUE',     statusClass: 's-overdue',    rowClass: 'row-overdue' },
       };
 
       const mapped = statusMap[newStatus];

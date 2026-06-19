@@ -44,13 +44,13 @@
 
   const sidebarHTML = `
   <aside class="s-sidebar" id="globalSidebar">
-    <div class="s-logo">
+    <a class="s-logo" href="../Homepage/index.html">
       <div class="s-logo-icon">S</div>
       <div class="s-logo-text">
         <strong>Scriptora</strong>
         <span>Admin Panel</span>
       </div>
-    </div>
+    </a>
 
     <div class="s-nav">
       <div class="s-nav-label">Main Menu</div>
@@ -134,6 +134,15 @@
     document.querySelectorAll('.dp-profile-email').forEach(el => {
       el.textContent = adminUser.email;
     });
+
+    /* পুরনো hamburger button সরিয়ে দিন — sidebar-এর নিজস্ব fixed
+       "Scriptora" লোগো-ই এখন একমাত্র ব্র্যান্ডিং, আলাদা topbar logo লাগবে না */
+    const oldMenuBtn = document.querySelector(
+      '.menu-btn, .topbar-menu-btn, [onclick*="toggleSidebar"], [onclick*="toggleGlobalSidebar"]'
+    );
+    if (oldMenuBtn) {
+      oldMenuBtn.remove();
+    }
 
     const main = document.querySelector('.main');
     function updateMargin() {
