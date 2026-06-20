@@ -14,34 +14,27 @@
 
 <div class="main">
 
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <div class="topbar-top">
-      <button class="topbar-menu-btn" onclick="toggleGlobalSidebar()">&#9776;</button>
-      <div class="topbar-title-group">
-        <div class="topbar-title">Orders Management</div>
-        <div class="topbar-date">Thursday, 5 June 2025 &nbsp;·&nbsp; <strong>57</strong> total orders</div>
-      </div>
-      <div class="om-spacer"></div>
-      <div class="topbar-search">
-        <i class="ti ti-search"></i>
-        <input id="searchInput" type="text" placeholder="Search orders, clients…" oninput="handleSearch(this.value)" />
-        <span class="om-kbd">⌘K</span>
-      </div>
-      <div class="topbar-bell">
-        <i class="ti ti-bell"></i>
-        <div class="bell-dot">5</div>
-      </div>
-      <div class="topbar-mail">
-        <i class="ti ti-mail"></i>
-      </div>
-      <div class="topbar-avatar">SA</div>
-    </div>
-  </header>
+  
 
   <!-- CONTENT -->
   <div class="content-area">
     <div class="center-panel">
+
+
+      <!-- STATUS TABS + NEW ORDER -->
+      <div class="om-tabs-bar">
+        <div class="topbar-tabs" id="statusTabs">
+          <button class="tab-btn active" onclick="filterStatus('all', this)">All <span class="tab-count" id="count-all">—</span></button>
+          <button class="tab-btn" onclick="filterStatus('overdue', this)">Overdue <span class="tab-count" id="count-overdue">—</span></button>
+          <button class="tab-btn" onclick="filterStatus('pending', this)">Pending <span class="tab-count" id="count-pending">—</span></button>
+          <button class="tab-btn" onclick="filterStatus('writing', this)">In Progress <span class="tab-count" id="count-writing">—</span></button>
+          <button class="tab-btn" onclick="filterStatus('draft_ready', this)">In Review <span class="tab-count" id="count-draft_ready">—</span></button>
+          <button class="tab-btn" onclick="filterStatus('completed', this)">Completed <span class="tab-count" id="count-completed">—</span></button>
+        </div>
+        <button class="btn-new-order" onclick="openNewOrderModal()">
+          <i class="ti ti-plus"></i> New Order
+        </button>
+      </div>
 
       <!-- STAT CARDS — screenshot style -->
       <div class="om-stat-row">
@@ -253,6 +246,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabaseClient.js"></script>
+<script src="js/topbar.js" data-title="Orders Management" data-sub=""></script>
 <script src="js/sidebar.js" data-page="orders"></script>
 <script src="js/order-management.js"></script>
 <script src="js/order-details-panel.js"></script>

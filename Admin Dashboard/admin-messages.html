@@ -14,21 +14,12 @@
 
 <!-- sidebar.js inject করবে automatically -->
 <script src="js/supabaseClient.js"></script>
+<script src="js/topbar.js" data-title="Messages" data-sub="Client দের সাথে chat করুন"></script>
 <script src="js/sidebar.js" data-page="messages"></script>
 
 <div class="main">
 
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <button class="icon-btn menu-btn" onclick="toggleGlobalSidebar()">☰</button>
-    <div class="topbar-title">
-      <h1>Messages</h1>
-      <p>Client দের সাথে chat করুন</p>
-    </div>
-    <div class="topbar-actions">
-      <span id="adminMsgBadge" style="display:none; background:#ef4444; color:#fff; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:20px; margin-right:8px;">0</span>
-    </div>
-  </header>
+  
 
   <!-- CONTENT -->
   <div class="content" style="padding:0; overflow:hidden; height:calc(100vh - 60px);">

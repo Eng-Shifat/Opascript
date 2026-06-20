@@ -607,3 +607,8 @@ tbody td { padding: 11px 9px; font-size: .78rem; border-bottom: 1px solid rgba(2
     border-radius: 0 0 5px 5px;
   }
 }
+
+/* ── Shared Topbar dropdown positions ── */
+#topbar-notif-panel   { right: 84px; }
+#topbar-msg-panel     { right: 48px; }
+#topbar-profile-panel { right: 8px; }

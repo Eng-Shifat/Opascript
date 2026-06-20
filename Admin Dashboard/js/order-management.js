@@ -844,3 +844,169 @@ function parseDeadline(str) {
 
   return isNaN(d.getTime()) ? null : d;
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   SUPABASE — REAL ORDERS LOAD
+   Mock ORDERS array কে Supabase real data দিয়ে replace করে।
+   বাকি সব function (renderTable, selectOrder, filterStatus...)
+   unchanged থাকে — শুধু ORDERS array টা পাল্টায়।
+══════════════════════════════════════════════════════════ */
+
+function mapSupabaseOrderToLocal(o) {
+  /* status mapping */
+  const statusMap = {
+    'pending':    { label: 'Pending',     cls: 's-pending',    row: '' },
+    'confirmed':  { label: 'Confirmed',   cls: 's-inprogress', row: '' },
+    'writing':    { label: 'In Progress', cls: 's-inprogress', row: '' },
+    'draft_ready':{ label: 'In Review',   cls: 's-review',     row: '' },
+    'completed':  { label: 'Completed',   cls: 's-completed',  row: '' },
+    'overdue':    { label: 'Overdue',     cls: 's-overdue',    row: 'row-overdue' },
+    'hold':       { label: 'On Hold',     cls: 's-pending',    row: '' },
+  };
+  const s = statusMap[o.status] || { label: o.status || 'Pending', cls: 's-pending', row: '' };
+
+  /* deadline display */
+  let deadlineDisplay = '—';
+  let deadlineTime    = '';
+  let deadlineCls     = '';
+  if (o.deadline) {
+    const d    = new Date(o.deadline);
+    const now  = new Date();
+    const diff = d - now;
+    deadlineDisplay = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+    deadlineTime    = d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    if (diff < 0)           deadlineCls = 'deadline-overdue';
+    else if (diff < 86400000) deadlineCls = 'deadline-today';
+  }
+
+  /* client name from metadata */
+  const meta      = o.clients || {};
+  const clientName = meta.name || meta.email || 'Client';
+  const uni        = meta.university || o.university || '—';
+  const initials   = clientName.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+
+  return {
+    id:            o.id,          /* real UUID */
+    orderId:       o.order_number || o.id.slice(0,8).toUpperCase(),
+    client:        clientName,
+    uni:           uni,
+    topic:         o.title || 'Untitled',
+    pkg:           o.package || '—',
+    pkgClass:      'pkg-msc',
+    chapters:      o.pages ? Math.ceil(o.pages / 30) : '—',
+    wordcount:     o.pages ? (o.pages * 250).toLocaleString() + ' w' : '—',
+    progressPct:   o.progress || 0,
+    progressBars:  [o.progress || 0, 0, 0],
+    deadline:      deadlineDisplay,
+    deadlineTime:  deadlineTime,
+    deadlineClass: deadlineCls,
+    status:        s.label,
+    statusClass:   s.cls,
+    amount:        o.total_price ? '৳' + Number(o.total_price).toLocaleString() : '—',
+    rowClass:      s.row,
+    avatarColor:   '#6366f1',
+    initials:      initials,
+    /* full raw data for detail panel */
+    detail: {
+      pages:        o.pages ? o.pages + ' pp' : '—',
+      type:         o.package || '—',
+      chapters:     o.pages ? Math.ceil(o.pages / 30) : '—',
+      wordcount:    o.pages ? (o.pages * 250).toLocaleString() + ' w' : '—',
+      value:        o.total_price ? '৳' + Number(o.total_price).toLocaleString() : '—',
+      deadline:     deadlineDisplay + ' ' + deadlineTime,
+      overall:      o.progress || 0,
+      drafted:      (o.progress || 0) + '% complete',
+      chapterBreakdown: [],
+      milestones: [
+        { name: 'Order Placed',    date: o.order_date ? new Date(o.order_date).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '—', state: 'done' },
+        { name: 'Payment Review',  date: o.payment_status === 'confirmed' ? 'Confirmed' : 'Pending', state: o.payment_status === 'confirmed' ? 'done' : 'pending' },
+        { name: 'Work Started',    date: o.status === 'writing' || o.status === 'confirmed' ? 'In Progress' : 'Pending', state: ['writing','confirmed','draft_ready','completed'].includes(o.status) ? 'active' : 'pending' },
+        { name: 'Draft Ready',     date: o.status === 'draft_ready' ? 'Ready' : 'Pending', state: o.status === 'draft_ready' || o.status === 'completed' ? 'done' : 'pending' },
+        { name: 'Delivered',       date: o.status === 'completed' ? 'Delivered' : 'Pending', state: o.status === 'completed' ? 'done' : 'pending' },
+      ],
+      files: [],
+      notes:        o.citation ? 'Citation: ' + o.citation : '',
+      overallColor: o.progress > 70 ? '#22c987' : o.progress > 30 ? '#f5a623' : '#6366f1',
+      email:        meta.email || '',
+      clientLabel:  uni,
+      subject:      o.department || '—',
+      citationStyle: o.citation || '—',
+      financials: {
+        total:   o.total_price  ? '৳' + Number(o.total_price).toLocaleString()  : '—',
+        paid:    o.advance_paid ? '৳' + Number(o.advance_paid).toLocaleString() : '৳0',
+        due:     o.due_amount   ? '৳' + Number(o.due_amount).toLocaleString()   : '—',
+        paidPct: o.total_price  ? Math.round((o.advance_paid / o.total_price) * 100) : 0,
+      },
+    },
+  };
+}
+
+async function loadRealOrders() {
+  const sb = window.scriptoraSupabase;
+  if (!sb) return;
+
+  try {
+    /* Step 1: orders load */
+    const { data, error } = await sb
+      .from('orders')
+      .select('*')
+      .order('order_date', { ascending: false });
+
+    if (error) throw error;
+    if (!data || !data.length) return; /* no real orders — keep mock data */
+
+    /* Step 2: client names load */
+    const clientIds = [...new Set(data.map(o => o.client_id).filter(Boolean))];
+    let clientMap = {};
+    if (clientIds.length) {
+      const { data: clients } = await sb
+        .from('clients')
+        .select('id, name, email, university')
+        .in('id', clientIds);
+      if (clients) clients.forEach(c => { clientMap[c.id] = c; });
+    }
+
+    /* Merge client info into orders */
+    const enriched = data.map(o => ({ ...o, clients: clientMap[o.client_id] || {} }));
+
+    /* Replace mock ORDERS with real data */
+    ORDERS.length = 0;
+    enriched.forEach(o => ORDERS.push(mapSupabaseOrderToLocal(o)));
+
+    /* Re-render everything */
+    renderTable();
+    updateStatCounts();
+
+    /* Update tab counts */
+    const all       = ORDERS.length;
+    const overdue   = ORDERS.filter(o => o.statusClass === 's-overdue').length;
+    const pending   = ORDERS.filter(o => o.statusClass === 's-pending').length;
+    const writing   = ORDERS.filter(o => o.statusClass === 's-inprogress').length;
+    const review    = ORDERS.filter(o => o.statusClass === 's-review').length;
+    const completed = ORDERS.filter(o => o.statusClass === 's-completed').length;
+
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    set('count-all', all);
+    set('count-overdue', overdue);
+    set('count-pending', pending);
+    set('count-writing', writing);
+    set('count-draft_ready', review);
+    set('count-completed', completed);
+    set('s-total', all);
+    set('s-inprogress', writing);
+    set('s-pending', pending);
+    set('s-completed', completed);
+    set('s-overdue', overdue);
+
+  } catch(e) {
+    console.error('[Scriptora] Order load error:', e.message);
+    /* Silently keep mock data on error */
+  }
+}
+
+/* DOMContentLoaded এ hook করি */
+document.addEventListener('DOMContentLoaded', () => {
+  /* sidebar.js এর admin check শেষ হওয়ার পরে load করতে হবে */
+  setTimeout(loadRealOrders, 800);
+});
