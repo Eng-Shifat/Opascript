@@ -4,15 +4,16 @@
 :root {
   --s-sidebar-w: 260px;
   --s-sidebar-collapsed-w: 64px;
-  --s-bg:       #0a0a0d;
-  --s-card:     #131629;
-  --s-border:   rgba(255,255,255,0.06);
-  --s-accent:   #6c63ff;
-  --s-accent2:  #a78bfa;
+  --s-bg:       #07050f;
+  --s-card:     #161229;
+  --s-border:   rgba(167,139,250,0.10);
+  --s-accent:   #7c5cff;
+  --s-accent2:  #b69dfd;
+  --s-gold:     #d4af6a;
   --s-red:      #f87171;
-  --s-text:     #e8eaf6;
-  --s-muted:    #6b7280;
-  --s-muted2:   #8a8f9c;
+  --s-text:     #f1eefb;
+  --s-muted:    #6f6a85;
+  --s-muted2:   #a79fc4;
 }
 
 .s-sidebar {
@@ -43,11 +44,11 @@
 .s-logo:hover { opacity: 0.85; }
 .s-logo-icon {
   width: 32px; height: 32px;
-  background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  background: linear-gradient(135deg, #7c5cff, #b69dfd);
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   font-size: .9rem; font-weight: 800; color: #fff;
-  box-shadow: 0 0 16px rgba(108,99,255,0.3);
+  box-shadow: 0 0 16px rgba(124,92,255,0.3), 0 0 0 1px rgba(212,175,106,0.35);
   flex-shrink: 0;
 }
 .s-logo-text strong {
@@ -90,9 +91,9 @@
   color: var(--s-text);
 }
 .s-nav-item.active {
-  background: linear-gradient(135deg, rgba(108,99,255,0.22), rgba(167,139,250,0.1));
+  background: linear-gradient(135deg, rgba(124,92,255,0.22), rgba(182,157,253,0.1));
   color: var(--s-accent2);
-  border-color: rgba(108,99,255,0.2);
+  border-color: rgba(124,92,255,0.2);
 }
 .s-nav-item i {
   font-size: 1.05rem; width: 20px;

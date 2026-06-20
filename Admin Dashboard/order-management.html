@@ -43,26 +43,8 @@
   <div class="content-area">
     <div class="center-panel">
 
-      <!-- STATUS TABS -->
-      <div class="topbar-tabs om-tabs-row" id="statusTabs">
-        <button class="tab-btn active" onclick="filterStatus('all', this)">All <span class="tab-count" id="count-all">57</span></button>
-        <button class="tab-btn" onclick="filterStatus('overdue', this)">Overdue <span class="tab-count" id="count-overdue">5</span></button>
-        <button class="tab-btn" onclick="filterStatus('pending', this)">Pending <span class="tab-count" id="count-pending">12</span></button>
-        <button class="tab-btn" onclick="filterStatus('writing', this)">In Progress <span class="tab-count" id="count-writing">18</span></button>
-        <button class="tab-btn" onclick="filterStatus('draft_ready', this)">In Review <span class="tab-count" id="count-draft_ready">0</span></button>
-        <button class="tab-btn" onclick="filterStatus('completed', this)">Completed <span class="tab-count" id="count-completed">22</span></button>
-      </div>
-
       <!-- STAT CARDS — screenshot style -->
       <div class="om-stat-row">
-
-        <div class="om-stat-card">
-          <div class="om-stat-icon purple"><i class="ti ti-stack-2"></i></div>
-          <div class="om-stat-info">
-            <div class="om-stat-num" id="s-total">57</div>
-            <div class="om-stat-label">All Orders</div>
-          </div>
-        </div>
 
         <div class="om-stat-card">
           <div class="om-stat-icon blue"><i class="ti ti-loader"></i></div>
@@ -85,6 +67,14 @@
           <div class="om-stat-info">
             <div class="om-stat-num green" id="s-completed">22</div>
             <div class="om-stat-label">Completed</div>
+          </div>
+        </div>
+
+        <div class="om-stat-card">
+          <div class="om-stat-icon purple"><i class="ti ti-eye-search"></i></div>
+          <div class="om-stat-info">
+            <div class="om-stat-num" id="s-review">0</div>
+            <div class="om-stat-label">In Review</div>
           </div>
         </div>
 

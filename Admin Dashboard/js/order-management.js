@@ -784,6 +784,7 @@ function updateStatCounts() {
   const sp = document.getElementById('s-pending');     if (sp) sp.textContent = counts.pending;
   const sc = document.getElementById('s-completed');   if (sc) sc.textContent = counts.completed;
   const so = document.getElementById('s-overdue');     if (so) so.textContent = counts.overdue;
+  const sr = document.getElementById('s-review');      if (sr) sr.textContent = counts.draft_ready;
 }
 
 
