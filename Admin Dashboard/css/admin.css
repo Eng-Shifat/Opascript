@@ -25,7 +25,6 @@ body {
   font-family: 'Sora', sans-serif;
   background: var(--bg);
   color: var(--text);
-  display: flex;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -42,11 +41,14 @@ body {
 
 /* ══════════════════ MAIN ══════════════════ */
 .main {
-  flex: 1;
+  width: auto;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   transition: margin-left .22s ease;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 /* ── TOPBAR ── */
@@ -104,7 +106,7 @@ body {
 }
 
 /* ── CONTENT ── */
-.content { padding: 22px 24px; flex: 1; }
+.content { padding: 22px 24px; flex: 1; min-width: 0; }
 
 /* ══════════════════ STAT CARDS ══════════════════ */
 .stats-grid {
@@ -112,6 +114,7 @@ body {
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin-bottom: 20px;
+  min-width: 0;
 }
 .stat-card {
   background: var(--card);
@@ -119,6 +122,7 @@ body {
   border-radius: var(--radius);
   padding: 18px;
   position: relative; overflow: hidden;
+  min-width: 0;
   transition: transform .18s, border-color .18s;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: rgba(108,99,255,0.22); }
@@ -197,16 +201,19 @@ body {
   grid-template-columns: 1fr 280px;
   gap: 14px;
   align-items: start;
+  min-width: 0;
 }
-.left-col  { display: flex; flex-direction: column; gap: 14px; }
-.right-col { display: flex; flex-direction: column; gap: 0; }
+.left-col  { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.right-col { display: flex; flex-direction: column; gap: 0; min-width: 0; }
 .chart-card, .donut-card, .table-card, .activity-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
   height: fit-content;
+  min-width: 0;
 }
+.table-card { overflow-x: auto; }
 .card-header {
   display: flex; align-items: flex-start; justify-content: space-between;
   margin-bottom: 16px;
@@ -225,7 +232,7 @@ body {
 }
 .tab-btn.active { background: rgba(108,99,255,0.15); color: var(--accent2); border-color: rgba(108,99,255,0.28); }
 .tab-btn:hover:not(.active) { background: var(--card2); color: var(--text); }
-.chart-wrap { height: 280px; }
+.chart-wrap { height: 280px; min-width: 0; position: relative; }
 
 .donut-card { display: flex; flex-direction: column; height: fit-content; }
 .donut-header { margin-bottom: 0; }

@@ -137,17 +137,22 @@
 
     /* পুরনো hamburger button সরিয়ে দিন — sidebar-এর নিজস্ব fixed
        "Scriptora" লোগো-ই এখন একমাত্র ব্র্যান্ডিং, আলাদা topbar logo লাগবে না */
-    const oldMenuBtn = document.querySelector(
-      '.menu-btn, .topbar-menu-btn, [onclick*="toggleSidebar"], [onclick*="toggleGlobalSidebar"]'
-    );
-    if (oldMenuBtn) {
-      oldMenuBtn.remove();
+    function removeOldMenuButtons() {
+      const btns = document.querySelectorAll(
+        '.menu-btn, .topbar-menu-btn, [onclick*="toggleSidebar"], [onclick*="toggleGlobalSidebar"]'
+      );
+      btns.forEach(btn => btn.remove());
+      return btns.length;
+    }
+    const removedCount = removeOldMenuButtons();
+    if (removedCount === 0) {
+      console.warn('[Scriptora sidebar.js] পুরনো hamburger button খুঁজে পাওয়া যায়নি — HTML-এ class/selector মিলছে কিনা চেক করুন।');
     }
 
     const main = document.querySelector('.main');
     function updateMargin() {
       if (main) {
-        main.style.marginLeft = window.innerWidth > 768 ? '76px' : '0';
+        main.style.marginLeft = window.innerWidth > 768 ? '64px' : '0';
       }
     }
     updateMargin();

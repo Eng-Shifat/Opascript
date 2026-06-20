@@ -147,14 +147,15 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   border-bottom: 1px solid var(--border);
   width: 100%;
   box-sizing: border-box;
+  overflow-x: auto;
 }
 
 .topbar-bottom {
   height: 44px;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   padding: 0 20px;
-  gap: 0;
+  gap: 10px;
   overflow-x: auto;
   border-bottom: 1px solid var(--border);
 }
@@ -167,6 +168,7 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   display: flex; align-items: center; gap: 6px;
   font-size: 11px; color: var(--muted2);
   margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .status-dot {
@@ -176,7 +178,7 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   box-shadow: 0 0 6px var(--green);
 }
 
-.topbar-tabs { display: flex; gap: 0; align-items: stretch; }
+.topbar-tabs { display: flex; gap: 0; align-items: stretch; flex-shrink: 0; }
 
 .tab-btn {
   padding: 0 16px;
@@ -260,11 +262,18 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 .btn-new-order:hover { background: #5a52e0; }
 .btn-new-order svg { width: 14px; height: 14px; }
 
-.topbar-bell {
+.topbar-bell,
+.topbar-mail {
   position: relative; cursor: pointer; color: var(--muted2);
-  width: 32px; height: 32px;
+  width: 36px; height: 36px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
+  transition: all .18s;
 }
+.topbar-bell:hover,
+.topbar-mail:hover { border-color: rgba(108,99,255,0.4); color: var(--text); }
 
 .topbar-bell svg { width: 18px; height: 18px; }
 .bell-dot {
@@ -276,6 +285,16 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   font-size: 8px; color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-weight: 700;
+}
+
+.topbar-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 700; color: #fff;
+  cursor: pointer; border: 2px solid rgba(108,99,255,0.4);
+  flex-shrink: 0;
 }
 
 /* ── CONTENT ── */
@@ -932,6 +951,17 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
   .om-sidebar { transform: translateX(-100%); }
   .om-sidebar.open { transform: translateX(0); }
   .main { margin-left: 0 !important; }
+}
+
+/* ══ STATUS TABS ROW (moved into content area, above stat cards) ══ */
+.om-tabs-row {
+  height: 44px;
+  display: flex;
+  align-items: stretch;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
 }
 
 /* ══ SCREENSHOT-STYLE STAT CARDS ══ */

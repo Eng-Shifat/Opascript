@@ -188,6 +188,27 @@
             <div class="pay-row"><span>Advance paid</span><span class="green-text" id="detailAdvance">—</span></div>
             <div class="pay-row total-row"><span>Due amount</span><span class="red-text" id="detailDue">—</span></div>
             <div class="pay-badges" id="payBadges"></div>
+            <!-- Payment Proof Submit -->
+            <div class="proof-submit-section" id="proofSubmitSection" style="display:none">
+              <div class="proof-submit-title">💳 Payment Proof পাঠান</div>
+              <div class="proof-field">
+                <label>Transaction ID / Reference</label>
+                <input type="text" id="proofTxnId" placeholder="যেমন: bKash TXN: 8N7XA2..." />
+              </div>
+              <div class="proof-field">
+                <label>Payment Screenshot</label>
+                <label class="proof-upload-btn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span id="proofFileName">Screenshot বেছে নিন</span>
+                  <input type="file" id="proofScreenshot" accept="image/*" style="display:none"/>
+                </label>
+              </div>
+              <div class="proof-status" id="proofStatus"></div>
+              <button class="proof-send-btn" id="proofSendBtn">💸 Proof পাঠান</button>
+            </div>
+            <div class="proof-submitted" id="proofSubmitted" style="display:none">
+              ✓ Payment proof পাঠানো হয়েছে। Admin review করছেন।
+            </div>
           </div>
 
           <div class="detail-panel">
@@ -395,6 +416,19 @@
     </section>
 
   </main>
+</div>
+
+<!-- ORDER CONFIRMED POPUP -->
+<div class="confirm-overlay" id="confirmOverlay" style="display:none">
+  <div class="confirm-popup" id="confirmPopup">
+    <div class="confirm-icon">🎉</div>
+    <div class="confirm-title">Order Confirmed!</div>
+    <div class="confirm-msg" id="confirmMsg">আপনার order confirm হয়েছে এবং কাজ শুরু হয়েছে।</div>
+    <div class="confirm-order-id" id="confirmOrderId"></div>
+    <div class="confirm-timer-label">Deadline countdown শুরু হয়েছে</div>
+    <div class="confirm-cd" id="confirmCd">00d 00:00:00</div>
+    <button class="confirm-close-btn" onclick="closeConfirmPopup()">চলুন শুরু করি →</button>
+  </div>
 </div>
 
 <!-- TOAST -->

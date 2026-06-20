@@ -221,6 +221,7 @@ async function openOrderDetail(orderId) {
   if((order.due_amount||0)>0) payBadges.innerHTML+=`<span class="pay-badge pending">✗ Due pending</span>`;
   await loadOrderFiles(orderId,(order.due_amount||0)>0);
   await loadLatestAdminMsg(orderId);
+  await checkAndShowProofSection(order);
 }
 
 document.getElementById('backToOrders').onclick=()=>{
@@ -524,6 +525,11 @@ function setupRealtime() {
       /* Status badge in sidebar notification dot */
       if (oldStatus !== newStatus) {
         showToast(`📋 Status update: ${label}`, 'success');
+        /* Order confirmed → show popup */
+        if (newStatus === 'confirmed' && oldStatus !== 'confirmed') {
+          const confirmedOrder = allOrders.find(o => o.id === payload.new?.id) || payload.new;
+          setTimeout(() => showConfirmPopup(confirmedOrder), 500);
+        }
         /* Flash the active order card */
         const orderId = payload.new?.id;
         if (orderId) {
@@ -663,3 +669,164 @@ function fmtTime(d){if(!d)return'';return new Date(d).toLocaleTimeString('en-BD'
 function formatCountdown(ms){if(ms<=0)return'সময় শেষ!';const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);if(d>0)return`${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`;return`${pad(h)}h ${pad(m)}m ${pad(s)}s`;}
 function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed ✓'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
+/* ═══════════════════════════════════════════
+   PAYMENT PROOF SUBMIT — Client Side
+═══════════════════════════════════════════ */
+
+function handleProofFileSelect(input) {
+  const file = input.files[0];
+  const label = document.getElementById('proofFileName');
+  if (file && label) label.textContent = file.name;
+}
+
+async function submitPaymentProof() {
+  const order = allOrders.find(o => o.id === currentOrderId);
+  if (!order) return;
+
+  const txnId     = document.getElementById('proofTxnId')?.value.trim();
+  const fileInput = document.getElementById('proofScreenshot');
+  const file      = fileInput?.files[0];
+  const statusEl  = document.getElementById('proofStatus');
+  const btn       = document.getElementById('proofSendBtn');
+
+  if (!txnId && !file) {
+    if (statusEl) { statusEl.textContent = 'Transaction ID বা screenshot দিন।'; statusEl.style.color = '#f87171'; }
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'পাঠানো হচ্ছে...';
+  if (statusEl) { statusEl.textContent = ''; }
+
+  let screenshotUrl = null;
+
+  /* Upload screenshot to Supabase Storage */
+  if (file) {
+    const ext  = file.name.split('.').pop();
+    const path = `payment-proofs/${currentOrderId}/${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('scriptora-files').upload(path, file, { upsert: true });
+    if (upErr) {
+      if (statusEl) { statusEl.textContent = 'Screenshot upload হয়নি: ' + upErr.message; statusEl.style.color = '#f87171'; }
+      btn.disabled = false; btn.textContent = '💸 Proof পাঠান';
+      return;
+    }
+    const { data: urlData } = sb.storage.from('scriptora-files').getPublicUrl(path);
+    screenshotUrl = urlData.publicUrl;
+  }
+
+  /* Insert into payments table */
+  const { error } = await sb.from('payments').insert({
+    order_id:       currentOrderId,
+    client_id:      currentUser.id,
+    amount:         order.advance_paid || 0,
+    type:           'advance',
+    txn_id:         txnId || null,
+    method:         'Client submitted',
+    screenshot_url: screenshotUrl,
+    confirmed:      false,
+    paid_at:        new Date().toISOString(),
+  });
+
+  /* Update order payment_status → under_review */
+  await sb.from('orders').update({ payment_status: 'under_review', updated_at: new Date().toISOString() }).eq('id', currentOrderId);
+
+  btn.disabled = false;
+  if (error) {
+    btn.textContent = '💸 Proof পাঠান';
+    if (statusEl) { statusEl.textContent = 'Error: ' + error.message; statusEl.style.color = '#f87171'; }
+    return;
+  }
+
+  /* UI: hide form, show submitted state */
+  document.getElementById('proofSubmitSection').style.display = 'none';
+  document.getElementById('proofSubmitted').style.display     = 'flex';
+  showToast('✅ Payment proof পাঠানো হয়েছে! Admin review করবেন।', 'success');
+}
+
+/* ═══════════════════════════════════════════
+   ORDER CONFIRMED POPUP
+═══════════════════════════════════════════ */
+let _confirmCdInterval = null;
+
+function showConfirmPopup(order) {
+  const overlay = document.getElementById('confirmOverlay');
+  if (!overlay) return;
+
+  document.getElementById('confirmMsg').textContent =
+    `"${order.title || 'আপনার order'}" confirm হয়েছে এবং কাজ শুরু হয়েছে!`;
+  document.getElementById('confirmOrderId').textContent =
+    `Order: #SCR-${String(order.id).slice(-6).toUpperCase()}`;
+
+  /* Start mini countdown inside popup */
+  if (_confirmCdInterval) clearInterval(_confirmCdInterval);
+  const deadline = new Date(order.deadline);
+
+  function tickConfirm() {
+    const diff = deadline - new Date();
+    const cdEl = document.getElementById('confirmCd');
+    if (!cdEl) { clearInterval(_confirmCdInterval); return; }
+    if (diff <= 0) { cdEl.textContent = 'সময় শেষ!'; clearInterval(_confirmCdInterval); return; }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    cdEl.textContent = `${d}d ${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+  tickConfirm();
+  _confirmCdInterval = setInterval(tickConfirm, 1000);
+
+  overlay.style.display = 'flex';
+  /* Animate in */
+  setTimeout(() => overlay.classList.add('visible'), 10);
+}
+
+function closeConfirmPopup() {
+  const overlay = document.getElementById('confirmOverlay');
+  if (overlay) { overlay.classList.remove('visible'); setTimeout(() => { overlay.style.display = 'none'; }, 300); }
+  if (_confirmCdInterval) { clearInterval(_confirmCdInterval); _confirmCdInterval = null; }
+}
+
+/* ═══════════════════════════════════════════
+   PROOF SUBMIT SECTION — show/hide in order detail
+═══════════════════════════════════════════ */
+async function checkAndShowProofSection(order) {
+  const section   = document.getElementById('proofSubmitSection');
+  const submitted = document.getElementById('proofSubmitted');
+  if (!section || !submitted) return;
+
+  /* Reset */
+  section.style.display   = 'none';
+  submitted.style.display = 'none';
+
+  /* Only show if due_amount > 0 or advance_paid > 0 and status is pending */
+  if (!['pending','under_review'].includes(order.payment_status || order.status)) return;
+
+  /* Check if proof already submitted */
+  const { data: existingProof } = await sb
+    .from('payments')
+    .select('id, confirmed')
+    .eq('order_id', order.id)
+    .eq('client_id', currentUser.id)
+    .limit(1);
+
+  if (existingProof && existingProof.length > 0) {
+    submitted.style.display = 'flex';
+  } else {
+    /* Show proof submit form */
+    section.style.display = 'block';
+    /* Reset inputs */
+    const txn = document.getElementById('proofTxnId');
+    const fi  = document.getElementById('proofScreenshot');
+    const fn  = document.getElementById('proofFileName');
+    const st  = document.getElementById('proofStatus');
+    if (txn) txn.value = '';
+    if (fi)  fi.value  = '';
+    if (fn)  fn.textContent = 'Screenshot বেছে নিন';
+    if (st)  st.textContent = '';
+    /* File input change handler */
+    if (fi) fi.onchange = () => handleProofFileSelect(fi);
+    /* Send button handler */
+    const btn = document.getElementById('proofSendBtn');
+    if (btn) { btn.textContent = '💸 Proof পাঠান'; btn.disabled = false; }
+  }
+}

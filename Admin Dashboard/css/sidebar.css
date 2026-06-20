@@ -3,16 +3,16 @@
 ═══════════════════════════════════════ */
 :root {
   --s-sidebar-w: 260px;
-  --s-sidebar-collapsed-w: 76px;
-  --s-bg:       #080a14;
+  --s-sidebar-collapsed-w: 64px;
+  --s-bg:       #0a0a0d;
   --s-card:     #131629;
-  --s-border:   rgba(255,255,255,0.07);
+  --s-border:   rgba(255,255,255,0.06);
   --s-accent:   #6c63ff;
   --s-accent2:  #a78bfa;
   --s-red:      #f87171;
   --s-text:     #e8eaf6;
   --s-muted:    #6b7280;
-  --s-muted2:   #9ca3af;
+  --s-muted2:   #8a8f9c;
 }
 
 .s-sidebar {
@@ -29,8 +29,8 @@
 
 /* Logo (fixed at top — link to homepage, never collapses) */
 .s-logo {
-  height: 60px;
-  padding: 0 20px;
+  height: 56px;
+  padding: 0 16px;
   display: flex; align-items: center; gap: 12px;
   border-bottom: 1px solid var(--s-border);
   overflow: hidden;
@@ -42,12 +42,12 @@
 }
 .s-logo:hover { opacity: 0.85; }
 .s-logo-icon {
-  width: 36px; height: 36px;
+  width: 32px; height: 32px;
   background: linear-gradient(135deg, #6c63ff, #a78bfa);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; font-weight: 800; color: #fff;
-  box-shadow: 0 0 20px rgba(108,99,255,0.35);
+  font-size: .9rem; font-weight: 800; color: #fff;
+  box-shadow: 0 0 16px rgba(108,99,255,0.3);
   flex-shrink: 0;
 }
 .s-logo-text strong {
@@ -65,9 +65,9 @@
 
 /* Nav */
 .s-nav {
-  padding: 16px 12px;
+  padding: 12px 10px;
   flex: 1; overflow-y: auto; overflow-x: hidden;
-  display: flex; flex-direction: column; gap: 2px;
+  display: flex; flex-direction: column; gap: 3px;
 }
 .s-nav-label {
   font-size: .62rem; text-transform: uppercase;
@@ -78,15 +78,15 @@
 
 .s-nav-item {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px; border-radius: 10px;
+  padding: 8px 10px; border-radius: 8px;
   cursor: pointer; color: var(--s-muted2);
   font-size: .85rem; font-weight: 500;
-  transition: all .18s; text-decoration: none;
+  transition: all .15s; text-decoration: none;
   border: 1px solid transparent;
   font-family: 'Sora', sans-serif;
 }
 .s-nav-item:hover {
-  background: rgba(108,99,255,0.08);
+  background: rgba(255,255,255,0.06);
   color: var(--s-text);
 }
 .s-nav-item.active {
@@ -112,6 +112,14 @@
   background: rgba(0,0,0,0.5);
 }
 .s-overlay.open { display: block; }
+
+/* পুরনো hamburger menu button সবসময়ের জন্য hide — sidebar.js এটাকে DOM থেকে
+   remove করার চেষ্টা করে, কিন্তু কোনো timing issue হলেও এই CSS guaranteed
+   visually hide করে রাখবে */
+.menu-btn,
+.topbar-menu-btn {
+  display: none !important;
+}
 
 /* Mobile */
 
@@ -142,7 +150,7 @@
     gap: 0;
   }
   .s-sidebar:hover .s-logo {
-    padding: 0 20px;
+    padding: 0 16px;
     justify-content: flex-start;
     gap: 12px;
   }
@@ -182,13 +190,13 @@
   /* Nav items: center icon when collapsed */
   .s-nav-item {
     justify-content: center;
-    padding: 9px 0;
+    padding: 8px 0;
     gap: 0;
     position: relative;
   }
   .s-sidebar:hover .s-nav-item {
     justify-content: flex-start;
-    padding: 9px 12px;
+    padding: 8px 10px;
     gap: 10px;
   }
   .s-nav-item-label {

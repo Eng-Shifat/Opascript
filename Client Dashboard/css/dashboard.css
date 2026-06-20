@@ -1137,3 +1137,191 @@ input, select, textarea { font-family: inherit; }
     stroke: currentColor;
   }
 }
+
+/* ═══════════════════════════════════════════
+   PAYMENT PROOF SUBMIT SECTION
+═══════════════════════════════════════════ */
+.proof-submit-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.proof-submit-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.proof-field {
+  margin-bottom: 10px;
+}
+.proof-field label {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.proof-field input[type="text"] {
+  width: 100%;
+  background: #1e2130;
+  border: 1px solid #2e3347;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.proof-field input[type="text"]:focus { border-color: #6366f1; }
+.proof-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e2130;
+  border: 1px dashed #2e3347;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 12.5px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.proof-upload-btn:hover { border-color: #6366f1; color: #e2e8f0; }
+.proof-status {
+  font-size: 12px;
+  min-height: 16px;
+  margin-bottom: 4px;
+}
+.proof-send-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+.proof-send-btn:hover { opacity: 0.9; }
+.proof-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.proof-submitted {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(34,201,135,0.1);
+  border: 1px solid rgba(34,201,135,0.25);
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: #22c987;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════
+   ORDER CONFIRMED POPUP
+═══════════════════════════════════════════ */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.confirm-overlay.visible { opacity: 1; }
+
+.confirm-popup {
+  background: linear-gradient(135deg, #131629, #1a1d2e);
+  border: 1px solid rgba(108,99,255,0.3);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 80px rgba(108,99,255,0.2), 0 32px 64px rgba(0,0,0,0.6);
+  transform: scale(0.85);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.confirm-overlay.visible .confirm-popup { transform: scale(1); }
+
+.confirm-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  animation: popBounce 0.6s ease 0.3s both;
+}
+@keyframes popBounce {
+  0%   { transform: scale(0); }
+  70%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.confirm-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #e8eaf6;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #a78bfa, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.confirm-msg {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+.confirm-order-id {
+  font-size: 0.8rem;
+  color: #6366f1;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+.confirm-timer-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b7280;
+  margin-bottom: 0.4rem;
+}
+.confirm-cd {
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  color: #22c987;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 20px rgba(34,201,135,0.4);
+}
+.confirm-close-btn {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  width: 100%;
+}
+.confirm-close-btn:hover { opacity: 0.9; transform: translateY(-1px); }

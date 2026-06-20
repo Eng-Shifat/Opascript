@@ -22,33 +22,29 @@
         <div class="topbar-title">Orders Management</div>
         <div class="topbar-date">Thursday, 5 June 2025 &nbsp;·&nbsp; <strong>57</strong> total orders</div>
       </div>
-      <div class="topbar-status">
-        <div class="status-dot"></div>
-        System Operational
-      </div>
       <div class="om-spacer"></div>
       <div class="topbar-search">
         <i class="ti ti-search"></i>
         <input id="searchInput" type="text" placeholder="Search orders, clients…" oninput="handleSearch(this.value)" />
         <span class="om-kbd">⌘K</span>
       </div>
-      <div class="topbar-deadline">
-        <i class="ti ti-calendar"></i>
-        Deadline: This Week
-        <i class="ti ti-chevron-down"></i>
-      </div>
-      <button class="btn-new-order" id="btnNewOrder" onclick="openNewOrderModal()">
-        <i class="ti ti-plus"></i> New Order
-      </button>
       <div class="topbar-bell">
         <i class="ti ti-bell"></i>
         <div class="bell-dot">5</div>
       </div>
+      <div class="topbar-mail">
+        <i class="ti ti-mail"></i>
+      </div>
+      <div class="topbar-avatar">SA</div>
     </div>
+  </header>
 
-    <!-- TABS ROW -->
-    <div class="topbar-bottom">
-      <div class="topbar-tabs" id="statusTabs">
+  <!-- CONTENT -->
+  <div class="content-area">
+    <div class="center-panel">
+
+      <!-- STATUS TABS -->
+      <div class="topbar-tabs om-tabs-row" id="statusTabs">
         <button class="tab-btn active" onclick="filterStatus('all', this)">All <span class="tab-count" id="count-all">57</span></button>
         <button class="tab-btn" onclick="filterStatus('overdue', this)">Overdue <span class="tab-count" id="count-overdue">5</span></button>
         <button class="tab-btn" onclick="filterStatus('pending', this)">Pending <span class="tab-count" id="count-pending">12</span></button>
@@ -56,12 +52,6 @@
         <button class="tab-btn" onclick="filterStatus('draft_ready', this)">In Review <span class="tab-count" id="count-draft_ready">0</span></button>
         <button class="tab-btn" onclick="filterStatus('completed', this)">Completed <span class="tab-count" id="count-completed">22</span></button>
       </div>
-    </div>
-  </header>
-
-  <!-- CONTENT -->
-  <div class="content-area">
-    <div class="center-panel">
 
       <!-- STAT CARDS — screenshot style -->
       <div class="om-stat-row">
