@@ -1161,7 +1161,7 @@
 
   window.odpConfirmOrder = async function() {
     if (sb()) {
-      try { await sb().from('orders').update({ confirmed: true }).eq('id', _currentOrderId); } catch(e) {}
+      try { await sb().from('orders').update({ confirmed_at: new Date().toISOString() }).eq('id', _currentOrderId); } catch(e) {}
     }
     toast('✓ Order confirmed and activated!', 'var(--green)');
     logActivity('confirm', 'Order confirmed by admin');

@@ -1,5 +1,3 @@
-const API = 'http://localhost:5000';
-
 // ── Page Load — order summary দেখাও ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   const data = JSON.parse(sessionStorage.getItem('scriptora_order') || '{}');
@@ -103,7 +101,7 @@ async function submitPayment() {
   // Session data
   const data      = JSON.parse(sessionStorage.getItem('scriptora_order') || '{}');
   const client_id = localStorage.getItem('scriptora_client_id');
-  const order_id  = data.dbOrderId; // order form submit এর সময় save হয়েছে
+  const order_id  = data.orderId; // order.js এ Supabase insert এর সময় save হয়েছে (real UUID)
 
   // Login check
   if (!client_id) {
@@ -123,7 +121,7 @@ async function submitPayment() {
 
   // Amount = ৫০% advance
   const total  = data.total || 0;
-  const amount = Math.round(total / 2);
+  const amount = data.advance || Math.round(total / 2);
 
   // Button loading state
   const btn = document.querySelector('.pay-btn');
@@ -131,31 +129,34 @@ async function submitPayment() {
   btn.textContent  = '⏳ Submit হচ্ছে...';
 
   try {
-    const res = await fetch(`${API}/api/payments`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        order_id,
-        client_id,
-        amount,
-        method,
-        txn_id:         txn,
-        screenshot_url: '',  // future: Supabase storage upload
-      }),
+    // payments table এ insert — Client Dashboard এর existing working pattern অনুযায়ী
+    const { error: payErr } = await window.scriptoraSupabase.from('payments').insert({
+      order_id,
+      client_id,
+      amount,
+      type:           'advance',
+      txn_id:         txn,
+      method,
+      confirmed:      false,
+      paid_at:        new Date().toISOString(),
+      screenshot_url: '', // future: Supabase storage upload
     });
 
-    const result = await res.json();
+    if (payErr) throw payErr;
 
-    if (!res.ok) {
-      throw new Error(result.error || 'Payment submit failed');
-    }
+    // orders.payment_status → under_review, admin manually verify করবে
+    const { error: updErr } = await window.scriptoraSupabase
+      .from('orders')
+      .update({ payment_status: 'under_review', updated_at: new Date().toISOString() })
+      .eq('id', order_id);
 
-    // Payment id save করো (order-confirm page এ status check করবে)
-    data.paymentId     = result.id;
+    if (updErr) throw updErr;
+
+    // sessionStorage update (order-confirm page এ দেখানোর জন্য)
     data.txnId         = txn;
     data.paymentMethod = method;
-    data.paidAt        = new Date().toISOString();
-    data.paymentStatus = 'pending'; // admin verify করবে
+    data.paidAt         = new Date().toISOString();
+    data.paymentStatus  = 'under_review';
     sessionStorage.setItem('scriptora_order', JSON.stringify(data));
 
     // Redirect to confirmation page

@@ -84,7 +84,8 @@ async function loadAllData() {
 }
 
 async function loadOrders() {
-  const { data:orders } = await sb.from('orders').select('*').eq('client_id',currentUser.id).order('created_at',{ascending:false});
+  const { data:orders, error } = await sb.from('orders').select('*').eq('client_id',currentUser.id).order('order_date',{ascending:false});
+  if (error) console.error('loadOrders error:', error);
   allOrders = orders || [];
   renderHomePage();
   renderOrdersPage();
@@ -93,7 +94,7 @@ async function loadOrders() {
 
 function renderHomePage() {
   const total=allOrders.length;
-  const active=allOrders.filter(o=>!['completed','cancelled'].includes(o.status)).length;
+  const active=allOrders.filter(o=>!['completed','cancelled','pending'].includes(o.status)).length;
   const pending=allOrders.filter(o=>o.status==='pending').length;
   const completed=allOrders.filter(o=>o.status==='completed').length;
   setText('totalOrders',total); setText('activeOrders',active);
@@ -127,14 +128,14 @@ function buildOrderCard(order) {
   card.onclick=()=>openOrderDetail(order.id);
   const badge=getStatusBadge(order.status);
   const cdColor=isUrgent?'cd-nums-urgent':'cd-nums-safe';
-  const prog=order.progress_pct||0;
+  const prog=order.progress||0;
   const progColor=isUrgent?'#ef4444':'#22c55e';
   const due=(order.due_amount||0)>0;
   card.innerHTML=`
     <div class="oc-top">
       <div>
         <div class="oc-title">${escHtml(order.title||'Untitled')}</div>
-        <div class="oc-meta">#SCR-${String(order.id).slice(-6).toUpperCase()} · ${escHtml(order.dept||'')} · <span class="oc-price">৳${fmt(order.total_price)}</span></div>
+        <div class="oc-meta">${escHtml(order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase()))} · ${escHtml(order.department||'')} · <span class="oc-price">৳${fmt(order.total_price)}</span></div>
       </div>
       <span class="status-badge ${badge.cls}">${badge.label}</span>
     </div>
@@ -163,7 +164,7 @@ function buildCompletedCard(order) {
   const card=document.createElement('div');
   card.className='completed-card'; card.onclick=()=>openOrderDetail(order.id);
   card.innerHTML=`
-    <div><div class="cc-title">${escHtml(order.title||'Untitled')}</div><div class="cc-meta">#SCR-${String(order.id).slice(-6).toUpperCase()} · ${fmtDate(order.created_at)}</div></div>
+    <div><div class="cc-title">${escHtml(order.title||'Untitled')}</div><div class="cc-meta">${escHtml(order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase()))} · ${fmtDate(order.order_date)}</div></div>
     <div class="cc-right">
       <span class="cc-done">✓ Done</span>
       <button class="cc-dl-btn" onclick="event.stopPropagation();showPage('files')">
@@ -187,7 +188,7 @@ function renderOrdersPage() {
     item.innerHTML=`
       <div class="oli-left">
         <div class="oli-title">${escHtml(order.title||'Untitled')}</div>
-        <div class="oli-meta">#SCR-${String(order.id).slice(-6).toUpperCase()} · ${escHtml(order.dept||'')} · ${fmtDate(order.deadline)}</div>
+        <div class="oli-meta">${escHtml(order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase()))} · ${escHtml(order.department||'')} · ${fmtDate(order.deadline)}</div>
       </div>
       <div class="oli-right">
         <span class="status-badge ${badge.cls}">${badge.label}</span>
@@ -206,7 +207,7 @@ async function openOrderDetail(orderId) {
   document.getElementById('ordersListView').style.display='none';
   document.getElementById('orderDetailView').style.display='block';
   setText('detailTitle',order.title||'Untitled');
-  setText('detailMeta',`#SCR-${String(order.id).slice(-6).toUpperCase()} · ${order.dept||''} · Order: ${fmtDate(order.created_at)}`);
+  setText('detailMeta',`${order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase())} · ${order.department||''} · Order: ${fmtDate(order.order_date)}`);
   const badge=getStatusBadge(order.status);
   const statusEl=document.getElementById('detailStatus');
   statusEl.textContent=badge.label; statusEl.className=`status-badge ${badge.cls}`;

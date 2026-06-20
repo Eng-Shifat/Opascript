@@ -695,9 +695,17 @@ function jumpToStep(target) {
   document.querySelector('.modal-body').scrollTop = 0;
 }
 
-function nextStep() {
+async function nextStep() {
   if (step===total) {
     if (!validate(step)) return;
+
+    // Login check — orders.client_id লাগবে, লগইন ছাড়া order করা যাবে না
+    const client_id = localStorage.getItem('scriptora_client_id');
+    if (!client_id) {
+      window.location.href = '../Login page/login.html';
+      return;
+    }
+
     // Save order data for payment page
     const wc = getSelectedWordCount();
     const base = calcBase(wc);
@@ -719,18 +727,74 @@ function nextStep() {
       ? (document.getElementById('researchAreaText')?.value.trim() || '—')
       : (document.getElementById('thesisTopic')?.options?.[document.getElementById('thesisTopic')?.selectedIndex]?.text || document.getElementById('thesisTopic')?.value || '—');
 
+    const dept = selectedDept === 'premium'
+      ? (document.getElementById('departmentText')?.value.trim() || '—')
+      : (document.getElementById('department')?.value || '—');
+
+    const titleVal      = document.getElementById('thesisTitle')?.value.trim() || '';
+    const universityVal = document.getElementById('university')?.value.trim() || '';
+    const packageVal    = pkgData[selectedDept]?.label || '';
+    const citationVal   = document.getElementById('citationStyle')?.value || '—';
+    const urgencyLabel  = { standard:'Standard', urgent:'Urgent +২০%', express:'Express +৫০%' }[selectedUrgencyVal];
+    const deadlineVal   = document.getElementById('deadlineDate')?.value || null;
+    const totalVal      = finalTotal || grand || 0;
+    const advanceVal    = Math.round(totalVal / 2);
+    const dueVal        = totalVal - advanceVal;
+    const pagesVal      = pages ? pages + ' পাতা (~' + wc + ' words)' : '—';
+    const orderNumber   = 'SCR-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
+
+    if (!deadlineVal) { se('deadlineDate','Deadline date নির্বাচন করুন'); return; }
+
+    // Button loading state
+    const btn = document.getElementById('btnNext');
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Order করা হচ্ছে...'; }
+
+    // ── Real Supabase insert — orders table এর actual column অনুযায়ী ──
+    const { data: orderRow, error } = await window.scriptoraSupabase
+      .from('orders')
+      .insert({
+        client_id:    client_id,
+        order_number: orderNumber,
+        title:        titleVal,
+        package:      packageVal,
+        pages:        pagesVal,
+        citation:     citationVal,
+        department:   dept,
+        university:   universityVal,
+        total_price:  totalVal,
+        advance_paid: 0,
+        status:       'pending',
+        payment_status: 'unpaid',
+        deadline:     deadlineVal,
+        order_date:   new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay Now'; }
+      alert('Order সেভ করতে সমস্যা হয়েছে: ' + error.message);
+      return;
+    }
+
+    // sessionStorage — UI display এর জন্য (পরবর্তী page গুলোতে দেখানোর জন্য, এগুলো DB column না)
     sessionStorage.setItem('scriptora_order', JSON.stringify({
-      title:    document.getElementById('thesisTitle')?.value.trim() || '',
-      dept:     pkgData[selectedDept]?.label || '',
-      university: document.getElementById('university')?.value.trim() || '',
-      pkg:      pkgData[selectedDept]?.label || '',
+      orderId:     orderRow.id,           // real UUID — payments.order_id এ যাবে
+      orderNumber: orderRow.order_number, // human-readable, badge এ দেখানোর জন্য
+      title:    titleVal,
+      dept:     dept,
+      university: universityVal,
+      pkg:      packageVal,
       research: researchArea,
-      pages:    pages ? pages + ' পাতা (~' + wc + ' words)' : '—',
-      citation: document.getElementById('citationStyle')?.value || '—',
-      urgency:  { standard:'Standard', urgent:'Urgent +২০%', express:'Express +৫০%' }[selectedUrgencyVal],
-      deadline: document.getElementById('deadlineDate')?.value || '—',
+      pages:    pagesVal,
+      citation: citationVal,
+      urgency:  urgencyLabel,
+      deadline: deadlineVal,
       addons:   addonLabels,
-      total:    finalTotal || grand || 0,
+      total:    totalVal,
+      advance:  advanceVal,
+      due:      dueVal,
       coupon:   appliedCoupon || null,
       discount: discountAmount || 0
     }));

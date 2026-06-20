@@ -1,11 +1,9 @@
-const API = 'http://localhost:5000';
-
 // ── Page Load ────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   const data = JSON.parse(sessionStorage.getItem('scriptora_order') || '{}');
 
-  // Order ID
-  const orderId = data.orderId || '—';
+  // Order ID — human-readable order_number দেখাও, fallback এ raw UUID
+  const orderId = data.orderNumber || data.orderId || '—';
   setText('orderId', orderId);
 
   // Summary fields
@@ -36,11 +34,8 @@ window.addEventListener('DOMContentLoaded', () => {
     startCountdown(demoStr);
   }
 
-  // Payment status check
+  // Payment status — admin manually verify করবে, Client Dashboard এ গিয়ে status দেখা যাবে
   showPaymentStatus(data.paymentStatus || 'pending');
-  if (data.paymentId) {
-    pollPaymentStatus(data.paymentId);
-  }
 
   // Confetti
   runConfetti();
@@ -57,51 +52,22 @@ function showPaymentStatus(status) {
   const el = document.getElementById('paymentStatusBadge');
   if (!el) return;
 
+  const icons = {
+    confirmed: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    rejected:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    pending:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+  };
+
   if (status === 'confirmed') {
-    el.innerHTML  = '✅ Payment Confirmed';
+    el.innerHTML  = icons.confirmed + 'Payment Confirmed';
     el.className  = 'payment-status-badge confirmed';
   } else if (status === 'rejected') {
-    el.innerHTML  = '❌ Payment Rejected — Admin এর সাথে যোগাযোগ করুন';
+    el.innerHTML  = icons.rejected + 'Payment Rejected — Admin এর সাথে যোগাযোগ করুন';
     el.className  = 'payment-status-badge rejected';
   } else {
-    el.innerHTML  = '⏳ Payment Verification চলছে...';
+    el.innerHTML  = icons.pending + 'Payment Verification চলছে...';
     el.className  = 'payment-status-badge pending';
   }
-}
-
-// ── Poll payment status every 15 seconds ─────────────────────────────────────
-function pollPaymentStatus(paymentId) {
-  const interval = setInterval(async () => {
-    try {
-      const data      = JSON.parse(sessionStorage.getItem('scriptora_order') || '{}');
-      const order_id  = data.dbOrderId;
-      if (!order_id) return;
-
-      const res    = await fetch(`${API}/api/payments/${order_id}`);
-      const payments = await res.json();
-
-      // এই payment খোঁজো
-      const payment = Array.isArray(payments)
-        ? payments.find(p => p.id === paymentId)
-        : null;
-
-      if (!payment) return;
-
-      if (payment.confirmed === true) {
-        showPaymentStatus('confirmed');
-        data.paymentStatus = 'confirmed';
-        sessionStorage.setItem('scriptora_order', JSON.stringify(data));
-        clearInterval(interval);
-      } else if (payment.confirmed === false && payment.rejected) {
-        showPaymentStatus('rejected');
-        data.paymentStatus = 'rejected';
-        sessionStorage.setItem('scriptora_order', JSON.stringify(data));
-        clearInterval(interval);
-      }
-    } catch (err) {
-      // silent — network error হলে আবার try করবে
-    }
-  }, 15000); // ১৫ সেকেন্ড পরপর check
 }
 
 // ── Countdown Timer ──────────────────────────────────────────────────────────
