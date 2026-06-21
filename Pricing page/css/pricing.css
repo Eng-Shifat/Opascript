@@ -987,3 +987,291 @@ body {
     padding: 3px 7px !important;
   }
 }
+
+/* ══════════════════════════════════════════
+   MOBILE ACCORDION — Other Academic Services
+   (≤768px এ cards → collapsed list)
+══════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Hide grid, show accordion */
+  .oas-grid {
+    display: none !important;
+  }
+  .oas-accordion {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Accordion item */
+  .acc-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .acc-item.open {
+    border-color: rgba(45,110,247,0.4);
+  }
+
+  /* Header row */
+  .acc-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    position: relative;
+  }
+  .acc-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .acc-info { flex: 1; min-width: 0; }
+  .acc-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .acc-title-bn { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+  .acc-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+  .acc-price-lbl { font-size: 10px; color: rgba(255,255,255,0.4); }
+  .acc-price-val { font-size: 16px; font-weight: 800; color: #fff; }
+  .acc-chevron {
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    transition: transform 0.25s, background 0.2s;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+  }
+  .acc-item.open .acc-chevron {
+    transform: rotate(180deg);
+    background: rgba(45,110,247,0.25);
+    color: #7eb3ff;
+  }
+
+  /* Body */
+  .acc-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+  .acc-item.open .acc-body {
+    max-height: 600px;
+  }
+  .acc-body-inner {
+    padding: 0 1.1rem 1.2rem;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-top: 1rem;
+  }
+
+  /* Reuse osc styles inside accordion */
+  .acc-body-inner .osc-desc {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.55;
+  }
+  .acc-body-inner .osc-field-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.38);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .acc-body-inner .osc-counter {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 4px 8px;
+  }
+  .acc-body-inner .osc-count-btn {
+    background: rgba(255,255,255,0.1); border: none; color: #fff;
+    width: 28px; height: 28px; border-radius: 6px; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .acc-body-inner .osc-count-val {
+    flex: 1; text-align: center; font-size: 13px; font-weight: 700; color: #fff;
+  }
+  .acc-body-inner .osc-dl-btns,
+  .acc-body-inner .osc-tier-btns {
+    display: flex; gap: 6px;
+  }
+  .acc-body-inner .osc-dl-btn,
+  .acc-body-inner .osc-tier-btn {
+    flex: 1; padding: 7px 0; border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: transparent; color: rgba(255,255,255,0.5);
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+  }
+  .acc-body-inner .osc-dl-btn.active,
+  .acc-body-inner .osc-tier-btn.active {
+    background: #2d6ef7; border-color: #2d6ef7; color: #fff; font-weight: 600;
+  }
+  .acc-order-btn {
+    width: 100%;
+    background: #2d6ef7; border: none; color: #fff;
+    padding: 12px; border-radius: 10px;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    margin-top: 0.3rem;
+    transition: opacity 0.15s;
+  }
+  .acc-order-btn:hover { opacity: 0.85; }
+  .acc-fixed-note {
+    font-size: 12px; color: rgba(255,255,255,0.35); font-style: italic;
+  }
+}
+
+/* Desktop এ accordion hide */
+@media (min-width: 769px) {
+  .oas-accordion { display: none !important; }
+}
+
+/* ── Accordion footer (delivery + order btn) ── */
+@media (max-width: 768px) {
+  .acc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.3rem;
+  }
+  .acc-del-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .acc-del-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .acc-del-txt {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 500;
+  }
+  .acc-order-btn {
+    background: #2d6ef7;
+    border: none; color: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+    width: auto !important;
+    margin-top: 0 !important;
+  }
+  .acc-order-btn:hover { opacity: 0.85; }
+}
+
+/* ── Badge position fix — right side ── */
+@media (max-width: 768px) {
+  .acc-item { position: relative; }
+  .acc-badge {
+    position: absolute;
+    top: -10px; right: 14px; left: auto !important;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .acc-badge.popular { background: #2d6ef7; color: #fff; }
+  .acc-badge.expert  { background: #22c55e; color: #fff; }
+}
+
+/* ── Badge overlap fix ── */
+@media (max-width: 768px) {
+  .acc-item {
+    margin-top: 12px;
+  }
+  .acc-item:first-child {
+    margin-top: 0;
+  }
+  .acc-badge {
+    position: absolute;
+    top: -11px; right: 14px;
+    z-index: 2;
+  }
+}
+
+/* ── Badge final fix — mobile ── */
+@media (max-width: 768px) {
+  .acc-item {
+    margin-top: 0 !important;
+  }
+  .acc-badge {
+    position: absolute;
+    top: 10px; right: 50px;
+    left: auto !important;
+    z-index: 2;
+  }
+}
+
+/* ── Badge inside header (mobile + desktop) ── */
+.acc-badge, .osc-badge {
+  position: static !important;
+  top: auto !important; right: auto !important; left: auto !important;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+  padding: 3px 10px; border-radius: 20px;
+  flex-shrink: 0;
+}
+.acc-badge.popular, .osc-badge.popular { background: #2d6ef7; color: #fff; }
+.acc-badge.expert,  .osc-badge.expert  { background: #22c55e; color: #fff; }
+
+/* desktop osc-card badge stays absolute */
+.osc-card .osc-badge {
+  position: absolute !important;
+  top: -10px !important; right: 14px !important; left: auto !important;
+}
+
+/* ── Badge top — gap fix ── */
+@media (max-width: 768px) {
+  .oas-accordion {
+    gap: 18px !important;
+  }
+  .acc-badge {
+    position: absolute !important;
+    top: -11px !important;
+    right: 14px !important;
+    left: auto !important;
+    z-index: 2;
+  }
+  /* inline badge সরিয়ে দাও */
+  .acc-header .acc-badge {
+    display: none;
+  }
+}
+
+/* ── Badge clip fix ── */
+@media (max-width: 768px) {
+  .acc-item {
+    overflow: visible !important;
+  }
+  .oas-accordion {
+    gap: 20px !important;
+    padding-top: 8px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .acc-body-inner {
+    border-radius: 0 0 14px 14px;
+  }
+}

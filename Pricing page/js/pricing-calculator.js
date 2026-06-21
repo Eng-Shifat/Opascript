@@ -272,3 +272,176 @@ document.addEventListener('DOMContentLoaded', () => {
   buildTabs();
   renderGrid();
 });
+
+/* ══════════════════════════════════════════
+   MOBILE ACCORDION
+══════════════════════════════════════════ */
+
+function buildAccordion(services) {
+  return services.map(s => {
+    const st    = state[s.id];
+    const price = calcPrice(s, st.urgency);
+    const days  = s.deadlineDays[st.urgency];
+
+    /* qty block */
+    let qtyBlock = '';
+    if (s.unitType === 'words' || s.unitType === 'slides' || s.unitType === 'pages') {
+      const labelMap = {
+        words:  `শব্দ (WORDS) — কমপক্ষে ${fmtNum(s.min)}`,
+        slides: `স্লাইড (SLIDES) — কমপক্ষে ${s.min}`,
+        pages:  `পৃষ্ঠা (PAGES) — কমপক্ষে ${s.min}`,
+      };
+      qtyBlock = `
+        <div class="osc-field-label">${labelMap[s.unitType]}</div>
+        <div class="osc-counter">
+          <button class="osc-count-btn" onclick="accChangeQty('${s.id}',-${s.step})">−</button>
+          <span class="osc-count-val" id="acc-qty-${s.id}">${fmtNum(st.qty)} ${esc(s.unitLabel)}</span>
+          <button class="osc-count-btn" onclick="accChangeQty('${s.id}',${s.step})">+</button>
+        </div>`;
+    } else if (s.unitType === 'tier') {
+      const tierBtns = s.tiers.map((t, i) =>
+        `<button class="osc-tier-btn${i === st.tierIndex ? ' active' : ''}" onclick="accSetTier('${s.id}',${i})">${esc(t.name)}<span style="display:block;font-size:10px;opacity:.7">৳${fmtNum(t.price)}</span></button>`
+      ).join('');
+      qtyBlock = `<div class="osc-field-label">প্যাকেজ (PACKAGE)</div><div class="osc-tier-btns">${tierBtns}</div>`;
+    } else {
+      qtyBlock = `<div class="acc-fixed-note">Fixed Price Service</div>`;
+    }
+
+    const urgencyBtns = Object.entries(URGENCY).map(([key, val]) =>
+      `<button class="osc-dl-btn${st.urgency === key ? ' active' : ''}" onclick="accSetUrgency('${s.id}','${key}')">${esc(val.label)}</button>`
+    ).join('');
+
+    return `
+    <div class="acc-item" id="acc-${s.id}">
+      ${s.badge ? `<div class="acc-badge ${s.badge}">${s.badge.toUpperCase()}</div>` : ""}
+
+      <div class="acc-header" onclick="toggleAcc('${s.id}')">
+        <div class="acc-icon" style="background:${s.iconBg}">${s.icon}</div>
+        <div class="acc-info">
+          <div class="acc-title">${esc(s.title)}</div>
+          <div class="acc-title-bn">${esc(s.titleBn)}</div>
+        </div>
+
+        <div class="acc-right">
+          <div class="acc-price-lbl">শুরু থেকে</div>
+          <div class="acc-price-val">৳<span id="acc-price-${s.id}">${fmtNum(price)}</span></div>
+        </div>
+        <div class="acc-chevron">▾</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <p class="osc-desc">${esc(s.desc)}</p>
+          ${qtyBlock}
+          <div class="osc-field-label">ডেডলাইন (Deadline)</div>
+          <div class="osc-dl-btns">${urgencyBtns}</div>
+          <div class="acc-footer">
+            <div class="acc-del-wrap"><span class="acc-del-dot" id="acc-del-dot-${s.id}"></span><span class="acc-del-txt" id="acc-del-${s.id}">${fmtDays(days)}</span></div>
+            <button class="acc-order-btn" onclick="orderFromCard('${s.id}')">Order Now →</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleAcc = function(id) {
+  const item = document.getElementById(`acc-${id}`);
+  if (!item) return;
+  const isOpen = item.classList.contains('open');
+  /* close all */
+  document.querySelectorAll('.acc-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+};
+
+window.accChangeQty = function(id, delta) {
+  const s = SERVICES.find(x => x.id === id);
+  if (!s) return;
+  state[id].qty = Math.max(s.min, (state[id].qty || s.min) + delta);
+  const el = document.getElementById(`acc-qty-${id}`);
+  if (el) el.textContent = `${fmtNum(state[id].qty)} ${s.unitLabel || ''}`;
+  /* update price in header */
+  const prEl = document.getElementById(`acc-price-${id}`);
+  if (prEl) prEl.textContent = fmtNum(calcPrice(s, state[id].urgency));
+  /* sync desktop card too */
+  updateCard(id);
+};
+
+window.accSetUrgency = function(id, level) {
+  if (!URGENCY[level]) return;
+  state[id].urgency = level;
+  const item = document.getElementById(`acc-${id}`);
+  if (item) {
+    item.querySelectorAll('.osc-dl-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', Object.keys(URGENCY)[i] === level);
+    });
+  }
+  const prEl = document.getElementById(`acc-price-${id}`);
+  const s = SERVICES.find(x => x.id === id);
+  if (prEl && s) prEl.textContent = fmtNum(calcPrice(s, level));
+  updateCard(id);
+};
+
+window.accSetTier = function(id, index) {
+  const s = SERVICES.find(x => x.id === id);
+  if (!s || !s.tiers || index >= s.tiers.length) return;
+  state[id].tierIndex = index;
+  const item = document.getElementById(`acc-${id}`);
+  if (item) {
+    item.querySelectorAll('.osc-tier-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === index);
+    });
+  }
+  const prEl = document.getElementById(`acc-price-${id}`);
+  if (prEl) prEl.textContent = fmtNum(calcPrice(s, state[id].urgency));
+  updateCard(id);
+};
+
+/* Inject accordion container after grid, render on DOMContentLoaded */
+function renderAccordion(list) {
+  let acc = document.getElementById('oasAccordion');
+  if (!acc) {
+    acc = document.createElement('div');
+    acc.id = 'oasAccordion';
+    acc.className = 'oas-accordion';
+    const grid = document.getElementById('prCalcGrid');
+    if (grid) grid.parentNode.insertBefore(acc, grid.nextSibling);
+  }
+  acc.innerHTML = buildAccordion(list);
+}
+
+/* Patch renderGrid to also rebuild accordion */
+const _origRenderGrid = window.setCategory;
+window.setCategory = function(id) {
+  activeCategory = id;
+  buildTabs();
+  renderGrid();
+  const list = id === 'all' ? SERVICES : SERVICES.filter(s => s.category === id);
+  renderAccordion(list);
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderAccordion(SERVICES);
+});
+
+/* ── Patch accSetUrgency to update delivery text + dot color ── */
+const _origAccSetUrgency = window.accSetUrgency;
+window.accSetUrgency = function(id, level) {
+  _origAccSetUrgency(id, level);
+  const s = SERVICES.find(x => x.id === id);
+  if (!s) return;
+  const delEl  = document.getElementById(`acc-del-${id}`);
+  const dotEl  = document.getElementById(`acc-del-dot-${id}`);
+  if (delEl) delEl.textContent = fmtDays(s.deadlineDays[level]);
+  if (dotEl) {
+    const colors = { normal: '#22c55e', urgent: '#f59e0b', critical: '#ef4444' };
+    dotEl.style.background = colors[level] || '#22c55e';
+  }
+};
+
+/* Init dots on load */
+document.addEventListener('DOMContentLoaded', () => {
+  SERVICES.forEach(s => {
+    const dotEl = document.getElementById(`acc-del-dot-${s.id}`);
+    if (dotEl) dotEl.style.background = '#22c55e';
+  });
+});
