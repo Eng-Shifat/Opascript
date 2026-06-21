@@ -17,7 +17,7 @@
   <section class="pricing-wrap">
 
     <div class="thesis-card">
-      <!-- LEFT: Image + Badge -->
+      <!-- LEFT: Image + Badge (Desktop only) -->
       <div class="tc-left">
         <img src="thesis-book.png" alt="Thesis Book" class="tc-book-img"/>
         <div class="tc-most-badge">
@@ -29,16 +29,27 @@
       <!-- CENTER: Content -->
       <div class="tc-center">
         <div class="tc-premium-badge">⭐ PREMIUM SERVICE</div>
-        <h1 class="tc-title"><span class="tc-blue">Thesis</span> Writing Services</h1>
-        <p class="tc-desc">Complete thesis &amp; research support from topic to final submission.<br>Research, writing, formatting, plagiarism check &amp; revisions — all in one place.</p>
+
+        <!-- MOBILE: Image + Title + Desc row -->
+        <div class="tc-mob-img-row">
+          <div class="tc-mob-text-col">
+            <h1 class="tc-title"><span class="tc-blue">Expert Thesis</span> Writing</h1>
+            <p class="tc-desc tc-desc-mobile">Complete thesis &amp; research support from topic to final submission — research, writing, formatting, plagiarism check &amp; revisions, all in one place.</p>
+          </div>
+          <img src="thesis-book.png" alt="Thesis Book" class="tc-mob-book"/>
+        </div>
+
+        <!-- DESKTOP title (hidden on mobile) -->
+        <h1 class="tc-title tc-title-desktop"><span class="tc-blue">Thesis</span> Writing Services</h1>
+        <p class="tc-desc tc-desc-desktop">Complete thesis &amp; research support from topic to final submission.<br>Research, writing, formatting, plagiarism check &amp; revisions — all in one place.</p>
 
         <div class="tc-features">
           <span>✏️ Topic Selection</span>
-          <span>📚 Literature Review</span>
+          <span>📚 Literature</span>
           <span>⚙️ Methodology</span>
           <span>📄 Formatting</span>
-          <span>🔍 Turnitin Report</span>
-          <span>🔄 Revision Support</span>
+          <span>🔍 Turnitin Check</span>
+          <span>🔄 Revisions</span>
           <span>🎤 Viva Support</span>
         </div>
 
@@ -52,40 +63,32 @@
             </select>
           </div>
           <div class="tc-cg">
-            <label>Words (Minimum 5000)</label>
+            <label>Words (Minimum 5,000)</label>
             <div class="tc-counter">
               <button onclick="changeThesisWords(-1)">−</button>
-              <span id="thesisWords">5000 words</span>
+              <span id="thesisWords">5,000 words</span>
               <button onclick="changeThesisWords(1)">+</button>
             </div>
           </div>
-          <div class="tc-cg">
-            <label>Deadline</label>
-            <div class="tc-dl-btns">
-              <button class="tc-dl active" onclick="setThesisDl(this,'standard')">Standard</button>
-              <button class="tc-dl" onclick="setThesisDl(this,'express')">Express</button>
-              <button class="tc-dl" onclick="setThesisDl(this,'rush')">Rush</button>
-            </div>
-          </div>
-          <div class="tc-cg">
-            <label>Estimated Delivery</label>
-            <div class="tc-delivery">📅 <span id="thesisDelivery">10 – 15 Days</span></div>
-          </div>
         </div>
       </div>
 
-      <!-- RIGHT: Price Box -->
+      <!-- RIGHT: Price Box (Desktop sidebar / Mobile inline) -->
       <div class="tc-right">
         <div class="tc-price-box">
-          <div class="tc-price-lbl">Total Price</div>
-          <div class="tc-price">৳<span id="thesisPrice">5,000</span></div>
-          <div class="tc-price-note">* Starting Price</div>
-          <button class="tc-cta" onclick="orderThesis()">Start Thesis Project →</button>
+          <div class="tc-price-left-mob">
+            <div class="tc-price-lbl">TOTAL PRICE</div>
+            <div class="tc-price">৳<span id="thesisPrice">5,000</span></div>
+            <div class="tc-price-note">* Updates live</div>
+          </div>
+          <!-- Desktop only CTA inside price box -->
+          <button class="tc-cta tc-cta-desktop" onclick="orderThesis()">Start Thesis Project →</button>
         </div>
       </div>
 
-      <!-- BOTTOM: Guarantees row (full width divider, content aligned to center column) -->
+      <!-- BOTTOM: Guarantees (with mobile heading) -->
       <div class="tc-guarantees-wrap">
+        <div class="tc-guarantees-heading">✅ Our Guarantees</div>
         <div class="tc-guarantees">
           <span>
             <svg class="tc-g-icon icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -119,6 +122,12 @@
           </span>
         </div>
       </div>
+
+      <!-- Mobile CTA (full width, after guarantees) -->
+      <div class="tc-cta-wrap-mob">
+        <button class="tc-cta tc-cta-mobile" onclick="orderThesis()">Start Thesis Project →</button>
+      </div>
+
     </div>
 
     <!-- ═══════════════════════════════════════════

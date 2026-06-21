@@ -44,6 +44,9 @@ function setThesisDl(btn, type) {
   btn.classList.add('active');
   const del = document.getElementById('thesisDelivery');
   if (del) del.textContent = THC.deliveryText[type];
+  /* Sync mobile badge */
+  const badge = document.getElementById('thesisPriceBadge');
+  if (badge) badge.textContent = THC.deliveryText[type];
   calcThesisPrice();
 }
 

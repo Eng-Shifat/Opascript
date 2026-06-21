@@ -1409,3 +1409,632 @@ body {
     padding-top: 6px;
   }
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   THESIS CARD — NEW MOBILE REDESIGN (≤480px)
+   Image design অনুযায়ী সম্পূর্ণ নতুন layout
+   Desktop/Tablet এ কোনো effect নেই
+══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* ── Card wrapper ── */
+  .thesis-card {
+    flex-direction: column !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    border-radius: 20px !important;
+    background: #0a1628 !important;
+    overflow: hidden !important;
+  }
+
+  /* Hide desktop left panel (book image + badge handled differently) */
+  .tc-left {
+    display: none !important;
+  }
+
+  /* ── Center content: full width ── */
+  .tc-center {
+    width: 100% !important;
+    padding: 1.2rem 1.1rem 0.5rem !important;
+    text-align: left !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Premium badge — pill style, centered */
+  .tc-premium-badge {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    background: rgba(45, 110, 247, 0.18) !important;
+    border: 1px solid rgba(45, 110, 247, 0.35) !important;
+    color: #7eb3ff !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    padding: 5px 14px !important;
+    border-radius: 20px !important;
+    margin: 0 auto !important;
+    width: fit-content !important;
+  }
+
+  /* ── Book image + writer avatars row ── */
+  .tc-mob-img-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  /* Title */
+  .tc-title {
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    text-align: left !important;
+    line-height: 1.2;
+    margin: 0 !important;
+  }
+  .tc-title .tc-blue { color: #4d8ef0; }
+
+  /* Description */
+  .tc-desc {
+    font-size: 12px !important;
+    color: rgba(255,255,255,0.55) !important;
+    line-height: 1.5;
+    text-align: left !important;
+    margin: 0 !important;
+  }
+
+  /* ── Writer avatars + count (inject via CSS ::before trick won't work, handled below) ── */
+  .tc-mob-writers {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0.2rem 0 0.4rem;
+  }
+  .tc-mob-writers .tc-avatars {
+    display: flex;
+  }
+  .tc-mob-writers .tc-avatars span {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid #0a1628;
+    margin-left: -7px;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: #2d6ef7;
+    overflow: hidden;
+  }
+  .tc-mob-writers .tc-avatars span:first-child { margin-left: 0; background: #7c3aed; }
+  .tc-mob-writers .tc-avatars span:nth-child(2) { background: #2d6ef7; }
+  .tc-mob-writers .tc-avatars span:nth-child(3) { background: #22c55e; }
+  .tc-mob-writers-count {
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 500;
+  }
+  .tc-mob-writers-count strong {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* ── Thesis book image in mobile (injected row) ── */
+  .tc-mob-book {
+    display: block;
+    width: 90px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  /* ── Feature tags ── */
+  .tc-features {
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    justify-content: flex-start !important;
+    gap: 5px !important;
+    margin: 0 !important;
+  }
+  .tc-features span {
+    font-size: 10px !important;
+    padding: 4px 9px !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 20px !important;
+    color: rgba(255,255,255,0.7) !important;
+    white-space: nowrap !important;
+  }
+
+  /* ── Controls section ── */
+  .tc-controls {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    padding: 0 1.1rem 1rem !important;
+    grid-template-columns: unset !important;
+  }
+
+  .tc-cg {
+    width: 100% !important;
+    min-width: unset !important;
+    grid-column: unset !important;
+  }
+
+  .tc-cg label {
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: rgba(255,255,255,0.4) !important;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  /* Thesis type select */
+  .tc-cg select {
+    width: 100% !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    padding: 11px 14px !important;
+    height: auto !important;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+  }
+
+  /* Word counter */
+  .tc-counter {
+    display: flex !important;
+    align-items: center !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 10px !important;
+    height: 46px !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .tc-counter button {
+    width: 46px !important;
+    height: 46px !important;
+    background: rgba(255,255,255,0.08) !important;
+    border: none !important;
+    color: #fff !important;
+    font-size: 20px !important;
+    flex-shrink: 0 !important;
+    cursor: pointer;
+    border-radius: 0 !important;
+  }
+  .tc-counter span {
+    flex: 1 !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+  }
+
+  /* Deadline buttons */
+  .tc-dl-btns {
+    display: flex !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+  .tc-dl {
+    flex: 1 !important;
+    padding: 11px 0 !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: rgba(255,255,255,0.6) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    text-align: center !important;
+    transition: all 0.15s;
+  }
+  .tc-dl.active {
+    background: #fff !important;
+    border-color: #fff !important;
+    color: #0a1628 !important;
+    font-weight: 700 !important;
+  }
+
+  /* Estimated delivery text */
+  .tc-delivery {
+    font-size: 12px !important;
+    color: rgba(255,255,255,0.5) !important;
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+  }
+
+  /* ── Right price box ── */
+  .tc-right {
+    width: 100% !important;
+    padding: 0 1.1rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .tc-price-box {
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Price label hidden — show inline label instead */
+  .tc-price-lbl {
+    display: block !important;
+    font-size: 9px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: rgba(255,255,255,0.4) !important;
+    margin-bottom: 1px !important;
+  }
+
+  .tc-price {
+    font-size: 2.6rem !important;
+    font-weight: 900 !important;
+    color: #fff !important;
+    line-height: 1 !important;
+  }
+
+  .tc-price-note {
+    font-size: 10px !important;
+    color: rgba(255,255,255,0.35) !important;
+    margin-top: 2px !important;
+  }
+
+  /* Delivery badge — green pill on right side of price row */
+  .tc-mob-delivery-badge {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34, 197, 94, 0.15) !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    color: #22c55e !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 7px 12px !important;
+    border-radius: 20px !important;
+    white-space: nowrap;
+  }
+
+  /* CTA button */
+  .tc-cta {
+    width: 100% !important;
+    padding: 14px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #2d6ef7 0%, #5b8fff 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    cursor: pointer;
+    margin: 0.5rem 0 0 !important;
+    display: block !important;
+    letter-spacing: 0.01em;
+  }
+
+  /* CTA wrapper */
+  .tc-cta-wrap-mob {
+    padding: 0 1.1rem 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ── Guarantees ── */
+  .tc-guarantees-wrap {
+    padding: 0.8rem 1.1rem 1rem !important;
+    border-top: 1px solid rgba(255,255,255,0.07) !important;
+    margin-top: 0.25rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .tc-guarantees {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.55rem 0.5rem !important;
+  }
+
+  .tc-guarantees span {
+    font-size: 10.5px !important;
+    color: rgba(255,255,255,0.55) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+  }
+
+  .tc-g-icon {
+    width: 14px !important;
+    height: 14px !important;
+    color: #4d8ef0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* ── Price + delivery row inside tc-center ── */
+  .tc-mob-price-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 1.1rem 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tc-price-left-mob {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+
+/* ══════════════════════════════════════
+   MOBILE/DESKTOP ELEMENT TOGGLE
+══════════════════════════════════════ */
+
+/* Mobile-only elements — hidden on desktop */
+.tc-mob-img-row,
+.tc-mob-writers,
+.tc-mob-book,
+.tc-mob-delivery-badge,
+.tc-cta-wrap-mob,
+.tc-cta-mobile {
+  display: none;
+}
+
+/* Desktop-only elements */
+.tc-title-desktop,
+.tc-desc-desktop,
+.tc-cta-desktop {
+  display: block;
+}
+
+@media (max-width: 480px) {
+  /* Show mobile elements */
+  .tc-mob-img-row { display: flex !important; align-items: flex-start; gap: 0.75rem; }
+  .tc-mob-writers { display: flex !important; }
+  .tc-mob-book { display: block !important; }
+  .tc-mob-delivery-badge { display: inline-flex !important; }
+  .tc-cta-wrap-mob { display: block !important; }
+  .tc-cta-mobile { display: block !important; }
+
+  /* Hide desktop-only elements */
+  .tc-title-desktop { display: none !important; }
+  .tc-desc-desktop { display: none !important; }
+  .tc-cta-desktop { display: none !important; }
+
+  /* Price box row layout on mobile */
+  .tc-price-box {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+}
+
+/* tc-desc-mobile — mobile only, desktop hide */
+.tc-desc-mobile { display: none; }
+@media (max-width: 480px) {
+  .tc-desc-mobile {
+    display: block !important;
+    font-size: 12px !important;
+    color: rgba(255,255,255,0.55) !important;
+    line-height: 1.5;
+    text-align: left !important;
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tc-desc-mobile {
+    font-size: 12.5px !important;
+    color: rgba(255,255,255,0.5) !important;
+    line-height: 1.6 !important;
+    text-align: left !important;
+    margin: 0.1rem 0 0.2rem !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tc-mob-img-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  .tc-mob-text-col {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  /* Image — fixed size, right aligned, no shrink */
+  .tc-mob-book {
+    width: 90px !important;
+    height: 90px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+    align-self: flex-start !important;
+    margin-top: 2px !important;
+  }
+
+  /* Title inside row */
+  .tc-mob-text-col .tc-title {
+    font-size: 1.3rem !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    text-align: left !important;
+  }
+
+  /* Description inside row */
+  .tc-desc-mobile {
+    display: block !important;
+    font-size: 11.5px !important;
+    color: rgba(255,255,255,0.5) !important;
+    line-height: 1.55 !important;
+    text-align: left !important;
+    margin: 0 !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tc-mob-book {
+    width: 115px !important;
+    height: 115px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+    align-self: flex-start !important;
+    margin-top: 0 !important;
+  }
+
+  .tc-mob-text-col {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .tc-mob-text-col .tc-title {
+    font-size: 1.2rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .tc-desc-mobile {
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+  }
+}
+
+/* ══════════════════════════════════════
+   MOBILE — Controls box remove + Guarantees heading
+══════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Controls — no box, just plain layout */
+  .tc-controls {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 1.1rem !important;
+  }
+
+  /* Price box — no box styling on mobile */
+  .tc-price-box {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.5rem 1.1rem 0 !important;
+  }
+
+  /* Guarantees wrap — comes before CTA on mobile */
+  .tc-guarantees-wrap {
+    order: 0;
+    padding: 0.75rem 1.1rem !important;
+    border-top: 1px solid rgba(255,255,255,0.07) !important;
+    margin-top: 0.5rem !important;
+  }
+
+  /* Guarantees heading — mobile only */
+  .tc-guarantees-heading {
+    display: block !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: rgba(255,255,255,0.6) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    margin-bottom: 0.6rem !important;
+  }
+
+  /* CTA wrap comes after guarantees */
+  .tc-cta-wrap-mob {
+    order: 1;
+  }
+}
+
+/* Desktop — hide guarantees heading */
+@media (min-width: 481px) {
+  .tc-guarantees-heading { display: none !important; }
+}
+
+/* Mobile — hide controls and price box completely */
+@media (max-width: 480px) {
+  .tc-controls { display: none !important; }
+  .tc-right { display: none !important; }
+}
+
+/* ══════════════════════════════════════
+   PREMIUM SERVICE BADGE — ANIMATION
+══════════════════════════════════════ */
+@media (max-width: 480px) {
+  .tc-premium-badge {
+    position: relative !important;
+    overflow: hidden !important;
+    animation: premiumPulse 2.5s ease-in-out infinite !important;
+  }
+
+  /* Shimmer sweep */
+  .tc-premium-badge::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 60% !important;
+    height: 100% !important;
+    background: linear-gradient(
+      105deg,
+      transparent 20%,
+      rgba(255,255,255,0.25) 50%,
+      transparent 80%
+    ) !important;
+    animation: premiumShimmer 2.5s ease-in-out infinite !important;
+  }
+}
+
+@keyframes premiumPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(45, 110, 247, 0);
+    border-color: rgba(45, 110, 247, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 12px 3px rgba(45, 110, 247, 0.35);
+    border-color: rgba(100, 160, 255, 0.7);
+  }
+}
+
+@keyframes premiumShimmer {
+  0%   { left: -100%; }
+  60%  { left: 160%; }
+  100% { left: 160%; }
+}
+
+/* Premium badge — blood red glow override */
+@keyframes premiumPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(180, 0, 0, 0);
+    border-color: rgba(180, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px rgba(180, 0, 0, 0.5);
+    border-color: rgba(220, 20, 20, 0.85);
+  }
+}
