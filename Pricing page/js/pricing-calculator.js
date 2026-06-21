@@ -86,8 +86,9 @@ function buildCard(s) {
   ).join('');
 
   return `
+  <div class="osc-card-wrap">
+  ${badgeHtml}
   <div class="osc-card" id="card-${s.id}">
-    ${badgeHtml}
     <div class="osc-card-head">
       <div class="osc-icon" style="background:${s.iconBg}">${s.icon}</div>
       <div>
@@ -103,13 +104,13 @@ function buildCard(s) {
       <div>
         <div class="osc-from">Starting from</div>
         <div class="osc-price">৳<span id="price-${s.id}">${fmtNum(price)}</span></div>
-        <div class="osc-delivery" id="del-${s.id}">${fmtDays(days)}</div>
+        <div class="osc-delivery" id="del-${s.id}" style="color:#2d6ef7">${fmtDays(days)}</div>
       </div>
       <button class="osc-order-btn" onclick="orderFromCard('${s.id}')">Order Now →</button>
     </div>
+  </div>
   </div>`;
 }
-
 /* ── Update card (no re-render, just update values) ── */
 function updateCard(id) {
   const s  = SERVICES.find(x => x.id === id);
@@ -122,7 +123,11 @@ function updateCard(id) {
 
   /* Delivery */
   const delEl = document.getElementById(`del-${id}`);
-  if (delEl) delEl.textContent = fmtDays(s.deadlineDays[st.urgency]);
+  if (delEl) {
+    delEl.textContent = fmtDays(s.deadlineDays[st.urgency]);
+    const dlColors = { normal: '#2d6ef7', urgent: '#f59e0b', critical: '#ef4444' };
+    delEl.style.color = dlColors[st.urgency] || '#2d6ef7';
+  }
 
   /* Qty display */
   const qtyEl = document.getElementById(`qty-${id}`);
@@ -335,7 +340,7 @@ function buildAccordion(services) {
           <div class="osc-field-label">ডেডলাইন (Deadline)</div>
           <div class="osc-dl-btns">${urgencyBtns}</div>
           <div class="acc-footer">
-            <div class="acc-del-wrap"><span class="acc-del-dot" id="acc-del-dot-${s.id}"></span><span class="acc-del-txt" id="acc-del-${s.id}">${fmtDays(days)}</span></div>
+            <div class="acc-del-wrap"><span class="acc-del-dot" id="acc-del-dot-${s.id}"></span><span class="acc-del-txt standard"  id="acc-del-${s.id}">${fmtDays(days)}</span></div>
             <button class="acc-order-btn" onclick="orderFromCard('${s.id}')">Order Now →</button>
           </div>
         </div>
@@ -431,7 +436,11 @@ window.accSetUrgency = function(id, level) {
   if (!s) return;
   const delEl  = document.getElementById(`acc-del-${id}`);
   const dotEl  = document.getElementById(`acc-del-dot-${id}`);
-  if (delEl) delEl.textContent = fmtDays(s.deadlineDays[level]);
+  const colorMap = { normal: 'standard', urgent: 'express', critical: 'rush' };
+  if (delEl) {
+    delEl.textContent = fmtDays(s.deadlineDays[level]);
+    delEl.className = `acc-del-txt ${colorMap[level] || 'standard'}`;
+  }
   if (dotEl) {
     const colors = { normal: '#22c55e', urgent: '#f59e0b', critical: '#ef4444' };
     dotEl.style.background = colors[level] || '#22c55e';

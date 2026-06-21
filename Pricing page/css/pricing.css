@@ -626,7 +626,6 @@ body {
   transition: border-color 0.2s, transform 0.2s;
 }
 .osc-card:hover {
-  border-color: rgba(45,110,247,0.4);
   transform: translateY(-3px);
 }
 .osc-badge {
@@ -1211,11 +1210,6 @@ body {
   }
 }
 
-/* ── Badge final fix — mobile ── */
-@media (max-width: 768px) {
-  .acc-item {
-    margin-top: 0 !important;
-  }
   .acc-badge {
     position: absolute;
     top: 10px; right: 50px;
@@ -1224,28 +1218,7 @@ body {
   }
 }
 
-/* ── Badge inside header (mobile + desktop) ── */
-.acc-badge, .osc-badge {
-  position: static !important;
-  top: auto !important; right: auto !important; left: auto !important;
-  font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
-  padding: 3px 10px; border-radius: 20px;
-  flex-shrink: 0;
-}
-.acc-badge.popular, .osc-badge.popular { background: #2d6ef7; color: #fff; }
-.acc-badge.expert,  .osc-badge.expert  { background: #22c55e; color: #fff; }
 
-/* desktop osc-card badge stays absolute */
-.osc-card .osc-badge {
-  position: absolute !important;
-  top: -10px !important; right: 14px !important; left: auto !important;
-}
-
-/* ── Badge top — gap fix ── */
-@media (max-width: 768px) {
-  .oas-accordion {
-    gap: 18px !important;
-  }
   .acc-badge {
     position: absolute !important;
     top: -11px !important;
@@ -1259,11 +1232,6 @@ body {
   }
 }
 
-/* ── Badge clip fix ── */
-@media (max-width: 768px) {
-  .acc-item {
-    overflow: visible !important;
-  }
   .oas-accordion {
     gap: 20px !important;
     padding-top: 8px !important;
@@ -1273,5 +1241,171 @@ body {
 @media (max-width: 768px) {
   .acc-body-inner {
     border-radius: 0 0 14px 14px;
+  }
+}
+
+/* ── Delivery text color matches deadline ── */
+@media (max-width: 768px) {
+  .acc-del-txt {
+    font-size: 12px;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+  .acc-del-txt.standard { color: #22c55e; }
+  .acc-del-txt.express  { color: #f59e0b; }
+  .acc-del-txt.rush     { color: #ef4444; }
+}
+
+/* ── Delivery text color matches active deadline ── */
+@media (max-width: 768px) {
+  .acc-del-txt {
+    color: #2d6ef7; /* default: Standard = blue */
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+  .acc-del-dot {
+    display: none; /* dot বাদ, শুধু color দিয়েই বোঝা যাবে */
+  }
+}
+
+@media (max-width: 768px) {
+  .acc-del-txt.standard { color: #2d6ef7; } /* Standard = blue */
+  .acc-del-txt.express  { color: #f59e0b; } /* Express  = amber */
+  .acc-del-txt.rush     { color: #ef4444; } /* Rush     = red */
+}
+
+/* ── Card hover glow effect (like hero card) ── */
+.osc-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.osc-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(45,110,247,0.45);
+  box-shadow:
+    0 0 0 1px rgba(45,110,247,0.15),
+    0 8px 32px rgba(0,0,0,0.4),
+    0 0 40px rgba(45,110,247,0.12),
+    inset 0 0 60px rgba(45,110,247,0.04);
+}
+
+/* ── Moving light sweep on hover ── */
+
+.osc-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(45,110,247,0.12) 40%,
+    rgba(120,160,255,0.18) 50%,
+    rgba(45,110,247,0.12) 60%,
+    transparent 80%
+  );
+  transform: skewX(-15deg);
+  transition: none;
+  pointer-events: none;
+  opacity: 0;
+}
+.osc-card:hover::after {
+  animation: cardSweep 0.65s ease forwards;
+  opacity: 1;
+}
+@keyframes cardSweep {
+  0%   { left: -100%; }
+  100% { left: 160%; }
+}
+
+.osc-card {
+  overflow: visible !important;
+}
+
+.osc-card-wrap .osc-badge {
+  position: absolute;
+  top: 0; right: 14px;
+  z-index: 3;
+}
+.osc-card {
+  overflow: hidden !important;
+}
+.osc-card::after {
+  border-radius: 16px;
+}
+
+
+
+/* ══════════════════════════════════════════
+   CARD WRAPPER + BADGE — Final Clean Version
+══════════════════════════════════════════ */
+.osc-card-wrap {
+  position: relative;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.osc-card-wrap .osc-badge {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  left: auto;
+  width: fit-content;
+  z-index: 3;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.osc-card-wrap .osc-badge.popular { background: #2d6ef7; color: #fff; }
+.osc-card-wrap .osc-badge.expert  { background: #22c55e; color: #fff; }
+
+.osc-card {
+  overflow: hidden !important;
+  flex: 1;
+}
+
+/* Grid — equal height rows */
+.oas-grid {
+  align-items: stretch;
+  grid-template-rows: auto;
+}
+.oas-grid > .osc-card-wrap {
+  height: 100%;
+}
+
+/* Sweep stays inside card */
+.osc-card::after {
+  border-radius: 16px;
+}
+
+/* ── Mobile accordion badge — card এর উপরে ── */
+@media (max-width: 768px) {
+  .acc-item {
+    overflow: visible !important;
+    margin-top: 14px;
+  }
+  .acc-item:first-child {
+    margin-top: 0;
+  }
+  .acc-badge {
+    position: absolute;
+    top: -11px;
+    right: 14px;
+    left: auto !important;
+    width: fit-content;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    z-index: 3;
+  }
+  .acc-badge.popular { background: #2d6ef7; color: #fff; }
+  .acc-badge.expert  { background: #22c55e; color: #fff; }
+  .oas-accordion {
+    gap: 4px !important;
+    padding-top: 6px;
   }
 }
