@@ -761,8 +761,229 @@ body {
   .tc-guarantees span { justify-content: flex-start; }
 }
 
-/* ── Most Requested badge position fix ── */
-.tc-most-badge {
-  top: 8% !important;
-  right: -8px !important;
+/* ═══════════════════════════════════════════════════════════
+   SCRIPTORA PRICING — FULL RESPONSIVE (Mobile First Fix)
+   সব screen এ ঠিকঠাক দেখাবে
+═══════════════════════════════════════════════════════════ */
+
+/* ── Tablet (max 1024px) ── */
+@media (max-width: 1024px) {
+  .pricing-wrap { padding: 1.5rem 1rem; }
+  .thesis-card  { padding: 1.5rem; gap: 1.2rem; }
+  .oas-grid     { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .tc-controls  { gap: 0.6rem; }
+  .tc-cg        { min-width: 140px; }
+}
+
+/* ── Mobile Large (max 768px) ── */
+@media (max-width: 768px) {
+  /* Thesis hero card */
+  .thesis-card {
+    flex-direction: column;
+    padding: 1.25rem;
+    gap: 1rem;
+    border-radius: 16px;
+  }
+  .tc-left {
+    width: 100%;
+    justify-content: center;
+    min-height: auto;
+  }
+  .tc-book-img  { width: 120px; }
+  .tc-most-badge { top: 5% !important; right: -5px !important; width: 52px; height: 52px; }
+
+  .tc-center    { padding: 0; text-align: center; }
+  .tc-premium-badge { margin: 0 auto 0.5rem; }
+  .tc-title     { font-size: 1.5rem; text-align: center; }
+  .tc-desc      { font-size: 13px; text-align: center; }
+
+  .tc-features  {
+    justify-content: center;
+    gap: 5px;
+  }
+  .tc-features span { font-size: 11px; padding: 4px 8px; }
+
+  .tc-controls  {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    width: 100%;
+  }
+  .tc-cg        { width: 100%; }
+  .tc-cg label  { font-size: 11px; }
+
+  .tc-counter   { justify-content: space-between; }
+  .tc-dl-btns   { justify-content: stretch; }
+  .tc-dl        { flex: 1; text-align: center; }
+  .tc-delivery  { font-size: 13px; }
+
+  .tc-right     { width: 100%; }
+  .tc-price-box {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.25rem;
+    border-radius: 14px;
+    height: auto;
+  }
+  .tc-price     { font-size: 2.5rem; }
+  .tc-cta       { width: 100%; }
+
+  .tc-guarantees-wrap { padding: 1rem 0 0; }
+  .tc-guarantees {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+  .tc-guarantees span { font-size: 11px; }
+
+  /* Other Services */
+  .oas-head h2  { font-size: 1.3rem; }
+  .oas-sub      { font-size: 13px; }
+
+  .oas-tabs     { gap: 0.4rem; margin-bottom: 1.2rem; }
+  .oas-tab      { font-size: 12px; padding: 7px 12px; }
+
+  .oas-grid     { grid-template-columns: 1fr; gap: 1rem; }
+  .osc-card     { padding: 1.1rem; }
+  .osc-price    { font-size: 1.5rem; }
+
+  .osc-footer   {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .osc-order-btn { padding: 8px 14px; font-size: 12px; }
+
+  /* Trust bar */
+  .trust-bar    {
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+  }
+  .trust-item   {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 0.9rem 1.25rem;
+    justify-content: flex-start;
+  }
+  .trust-item:last-child { border-bottom: none; }
+
+  /* FAQ */
+  .pr-faq       { padding: 2rem 1rem; }
+  .pr-sec-title { font-size: 1.3rem; }
+  .pr-faq-q     { font-size: 14px; }
+  .pr-faq-a     { font-size: 13px; }
+
+  /* CTA */
+  .pr-cta-inner { padding: 2rem 1.25rem; }
+  .pr-cta-inner h2 { font-size: 1.4rem; }
+  .pr-cta-btns  { flex-direction: column; gap: 0.6rem; }
+  .pr-cta-btn   { width: 100%; }
+}
+
+/* ── Mobile Small (max 480px) ── */
+@media (max-width: 480px) {
+  .pricing-wrap { padding: 1rem 0.75rem; }
+
+  .thesis-card  { padding: 1rem; border-radius: 14px; }
+  .tc-book-img  { width: 100px; }
+  .tc-title     { font-size: 1.3rem; }
+  .tc-price     { font-size: 2rem; }
+
+  .tc-guarantees { grid-template-columns: 1fr; }
+
+  .oas-tabs     { gap: 0.35rem; }
+  .oas-tab      { font-size: 11.5px; padding: 6px 10px; }
+  .oas-tab-icon { font-size: 13px; }
+
+  .osc-card     { padding: 1rem; border-radius: 12px; }
+  .osc-title    { font-size: 14px; }
+  .osc-price    { font-size: 1.35rem; }
+  .osc-order-btn { padding: 7px 12px; font-size: 11.5px; }
+
+  .osc-dl-btns, .osc-tier-btns { gap: 4px; }
+  .osc-dl-btn, .osc-tier-btn   { font-size: 11px; padding: 5px 0; }
+
+  .pr-faq-q     { font-size: 13px; }
+}
+
+/* ── Very small (max 360px) ── */
+@media (max-width: 360px) {
+  .tc-title  { font-size: 1.15rem; }
+  .oas-tab   { font-size: 11px; padding: 5px 8px; }
+  .osc-price { font-size: 1.2rem; }
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE SPECIFIC FIXES (targeted)
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Features row — wrap করবে, scroll না */
+  .tc-features {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    justify-content: center;
+    gap: 5px;
+  }
+  .tc-features span {
+    font-size: 10.5px !important;
+    padding: 4px 8px !important;
+    white-space: nowrap;
+  }
+
+  /* Controls — 2 column grid for Type + Words, rest full width */
+  .tc-controls {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem !important;
+    width: 100%;
+    align-items: end;
+  }
+  /* Deadline + Delivery — full width (span 2 columns) */
+  .tc-controls .tc-cg:nth-child(3),
+  .tc-controls .tc-cg:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+  .tc-cg {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+
+  /* Thesis Type select আর Word Counter একই height */
+  .tc-cg select {
+    width: 100%;
+    box-sizing: border-box;
+    height: 42px;
+  }
+
+  /* Word counter — full width, same height as select */
+  .tc-counter {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
+    height: 42px;
+  }
+
+  /* Deadline buttons — full width equal */
+  .tc-dl-btns {
+    width: 100%;
+  }
+  .tc-dl {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* Estimated Delivery — full width */
+  .tc-delivery {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .tc-features span {
+    font-size: 10px !important;
+    padding: 3px 7px !important;
+  }
 }
