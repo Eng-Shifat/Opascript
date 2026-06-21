@@ -11,153 +11,136 @@
   <!-- SHARED NAVBAR -->
   <script src="../shared/navbar.js"></script>
 
-  <!-- HERO -->
-  <section class="pr-hero">
-    <div class="pr-badge"><span class="pr-badge-dot"></span> Transparent Pricing</div>
-    <h1>সঠিক Plan বেছে নিন <span class="blue">আপনার জন্য</span></h1>
-    <p>কোনো hidden charge নেই — যা দেখছেন তাই পাবেন</p>
-    <div class="pr-toggle">
-      <button class="pr-toggle-btn active" id="togOnce" onclick="switchToggle('once')">One-time</button>
-      <button class="pr-toggle-btn" id="togMonthly" onclick="switchToggle('monthly')">Monthly</button>
-    </div>
-  </section>
+  <!-- ═══════════════════════════════════════════
+       THESIS WRITING SERVICES — HERO CARD
+  ════════════════════════════════════════════ -->
+  <section class="pricing-wrap">
 
-  <!-- PLAN CARDS -->
-  <section class="pr-plans">
-    <div class="pr-cards">
-
-      <!-- Essential -->
-      <div class="pr-card">
-        <div class="pr-plan-icon">📝</div>
-        <div class="pr-plan-name">Essential</div>
-        <div class="pr-plan-price">
-          <span class="price-val" data-once="৳৮,০০০" data-monthly="৳৬,৫০০">৳৮,০০০</span>
-          <span class="price-from">থেকে</span>
+    <div class="thesis-card">
+      <!-- LEFT: Image + Badge -->
+      <div class="tc-left">
+        <img src="thesis-book.png" alt="Thesis Book" class="tc-book-img"/>
+        <div class="tc-most-badge">
+          <span class="tc-most-crown">👑</span>
+          <span>MOST<br>REQUESTED</span>
         </div>
-        <div class="pr-plan-for">Assignment ও Short Report এর জন্য</div>
-        <div class="pr-feats">
-          <div class="pr-feat yes">৫,০০০ words পর্যন্ত</div>
-          <div class="pr-feat yes">১টি revision</div>
-          <div class="pr-feat yes">APA / MLA format</div>
-          <div class="pr-feat yes">Plagiarism-free</div>
-          <div class="pr-feat yes">৭ দিনের মধ্যে delivery</div>
-          <div class="pr-feat no">Data Analysis</div>
-          <div class="pr-feat no">Turnitin Report</div>
-          <div class="pr-feat no">Priority support</div>
-        </div>
-        <button class="pr-btn outline" onclick="window.location.href='../Order page/order.html'">Order করুন</button>
       </div>
 
-      <!-- Standard (Popular) -->
-      <div class="pr-card popular">
-        <div class="popular-tag">⭐ Most Popular</div>
-        <div class="pr-plan-icon">🎓</div>
-        <div class="pr-plan-name">Standard</div>
-        <div class="pr-plan-price">
-          <span class="price-val" data-once="৳১৫,০০০" data-monthly="৳১২,০০০">৳১৫,০০০</span>
-          <span class="price-from">থেকে</span>
+      <!-- CENTER: Content -->
+      <div class="tc-center">
+        <div class="tc-premium-badge">⭐ PREMIUM SERVICE</div>
+        <h1 class="tc-title"><span class="tc-blue">Thesis</span> Writing Services</h1>
+        <p class="tc-desc">Complete thesis &amp; research support from topic to final submission.<br>Research, writing, formatting, plagiarism check &amp; revisions — all in one place.</p>
+
+        <div class="tc-features">
+          <span>✏️ Topic Selection</span>
+          <span>📚 Literature Review</span>
+          <span>⚙️ Methodology</span>
+          <span>📄 Formatting</span>
+          <span>🔍 Turnitin Report</span>
+          <span>🔄 Revision Support</span>
+          <span>🎤 Viva Support</span>
         </div>
-        <div class="pr-plan-for">BSc ও MSc Thesis এর জন্য</div>
-        <div class="pr-feats">
-          <div class="pr-feat yes">১৫,০০০ words পর্যন্ত</div>
-          <div class="pr-feat yes">৩টি revision</div>
-          <div class="pr-feat yes">সব Citation format</div>
-          <div class="pr-feat yes">Plagiarism-free</div>
-          <div class="pr-feat yes">১৪ দিনের মধ্যে delivery</div>
-          <div class="pr-feat yes">Data Analysis</div>
-          <div class="pr-feat no">Turnitin Report</div>
-          <div class="pr-feat no">Priority support</div>
-        </div>
-        <button class="pr-btn filled" onclick="window.location.href='../Order page/order.html'">Order করুন</button>
-      </div>
 
-      <!-- Advanced -->
-      <div class="pr-card">
-        <div class="pr-plan-icon">🏆</div>
-        <div class="pr-plan-name">Advanced</div>
-        <div class="pr-plan-price">
-          <span class="price-val" data-once="৳২৭,০০০" data-monthly="৳২২,০০০">৳২৭,০০০</span>
-          <span class="price-from">থেকে</span>
-        </div>
-        <div class="pr-plan-for">PhD ও Complex Research এর জন্য</div>
-        <div class="pr-feats">
-          <div class="pr-feat yes">Unlimited words</div>
-          <div class="pr-feat yes">Unlimited revision</div>
-          <div class="pr-feat yes">সব Citation format</div>
-          <div class="pr-feat yes">Plagiarism-free</div>
-          <div class="pr-feat yes">Deadline অনুযায়ী</div>
-          <div class="pr-feat yes">Data Analysis</div>
-          <div class="pr-feat yes">Turnitin Report</div>
-          <div class="pr-feat yes">Priority support</div>
-        </div>
-        <button class="pr-btn outline" onclick="window.location.href='../Order page/order.html'">Order করুন</button>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ADDITIONAL SERVICES — INTERACTIVE PRICING CALCULATOR -->
-  <section class="pr-calculator" id="prCalculator">
-    <div class="pr-calc-head">
-      <h2>Pricing &amp; Quote Calculator</h2>
-      <p>Configure your order below. প্রতিটি সার্ভিসের জন্য আপনার প্রয়োজন অনুযায়ী কোয়ান্টিটি ও আর্জেন্সি সেট করুন।</p>
-      <div class="pr-calc-legend">
-        <span class="pr-legend-item"><i class="pr-dot normal"></i>Normal <small>– Standard turnaround</small></span>
-        <span class="pr-legend-item"><i class="pr-dot urgent"></i>Urgent <small>– 1.4x rate</small></span>
-        <span class="pr-legend-item"><i class="pr-dot critical"></i>Critical <small>– 1.8x rate</small></span>
-      </div>
-    </div>
-
-    <!-- Cards are rendered here dynamically by js/pricing-calculator.js -->
-    <div class="pr-calc-grid" id="prCalcGrid"></div>
-
-    <div class="pr-calc-summary">
-      <div class="pr-calc-summary-top">
-        <div class="pr-calc-summary-left">
-          <div class="pr-calc-summary-label">Combined Total (All Services)</div>
-          <div class="pr-calc-summary-price">
-            ৳<span id="prCombinedTotal">0</span>
+        <div class="tc-controls">
+          <div class="tc-cg">
+            <label>Thesis Type</label>
+            <select id="thesisType" onchange="calcThesisPrice()">
+              <option value="full">Full Thesis</option>
+              <option value="chapter">Single Chapter</option>
+              <option value="proposal">Proposal Only</option>
+            </select>
           </div>
-          <div class="pr-calc-summary-sub">across <span id="prServiceCount">8</span> services · Urgency adjustments applied</div>
-        </div>
-        <div class="pr-calc-summary-actions">
-          <button class="pr-btn outline" id="prGetQuoteBtn">Get Full Quote</button>
-          <button class="pr-btn filled" id="prBundleBtn">Bundle করুন · Save 15%</button>
+          <div class="tc-cg">
+            <label>Words (Minimum 5000)</label>
+            <div class="tc-counter">
+              <button onclick="changeThesisWords(-1000)">−</button>
+              <span id="thesisWords">5000 words</span>
+              <button onclick="changeThesisWords(1000)">+</button>
+            </div>
+          </div>
+          <div class="tc-cg">
+            <label>Deadline</label>
+            <div class="tc-dl-btns">
+              <button class="tc-dl active" onclick="setThesisDl(this,'standard')">Standard</button>
+              <button class="tc-dl" onclick="setThesisDl(this,'express')">Express</button>
+              <button class="tc-dl" onclick="setThesisDl(this,'rush')">Rush</button>
+            </div>
+          </div>
+          <div class="tc-cg">
+            <label>Estimated Delivery</label>
+            <div class="tc-delivery">📅 <span id="thesisDelivery">10 – 15 Days</span></div>
+          </div>
         </div>
       </div>
-      <div class="pr-calc-stats">
-        <div class="pr-calc-stat"><div class="pr-calc-stat-num">50+</div><div class="pr-calc-stat-lbl">Expert Writers<br><span>বিশেষজ্ঞ লেখক</span></div></div>
-        <div class="pr-calc-stat"><div class="pr-calc-stat-num">98.7%</div><div class="pr-calc-stat-lbl">Satisfaction Rate<br><span>সন্তুষ্টির হার</span></div></div>
-        <div class="pr-calc-stat"><div class="pr-calc-stat-num">12,000+</div><div class="pr-calc-stat-lbl">Orders Delivered<br><span>সম্পন্ন অর্ডার</span></div></div>
-        <div class="pr-calc-stat"><div class="pr-calc-stat-num">&lt; 30 min</div><div class="pr-calc-stat-lbl">Response Time<br><span>প্রতিক্রিয়া সময়</span></div></div>
+
+      <!-- RIGHT: Price Box -->
+      <div class="tc-right">
+        <div class="tc-price-box">
+          <div class="tc-price-lbl">Total Price</div>
+          <div class="tc-price">৳<span id="thesisPrice">5,000</span></div>
+          <div class="tc-price-note">* Starting Price</div>
+          <button class="tc-cta" onclick="window.location.href='../Order page/order.html'">Start Thesis Project →</button>
+        </div>
+      </div>
+
+      <!-- BOTTOM: Guarantees row (full width divider, content aligned to center column) -->
+      <div class="tc-guarantees-wrap">
+        <div class="tc-guarantees">
+          <span>
+            <svg class="tc-g-icon icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 13c0 5-3.5 7.5-7.35 8.95a1 1 0 0 1-.6.01C8.5 20.5 5 18 5 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C15.51 3.81 18 5 20 5a1 1 0 0 1 1 1z"/>
+              <path class="icon-shield-check" d="m9 12 2 2 4-4"/>
+            </svg>
+            Plagiarism Free Content
+          </span>
+          <span>
+            <svg class="tc-g-icon icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+              <path d="M8 16H3v5"/>
+            </svg>
+            Unlimited Revisions (Policy Applied)
+          </span>
+          <span>
+            <svg class="tc-g-icon icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <polyline class="icon-clock-hands" points="12 7 12 12 15.5 13.8"/>
+            </svg>
+            On-time Delivery Guarantee
+          </span>
+          <span>
+            <svg class="tc-g-icon icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="11" width="16" height="9" rx="2"/>
+              <path class="icon-lock-shackle" d="M7.5 11V7.5a4.5 4.5 0 0 1 9 0V11"/>
+            </svg>
+            100% Confidential
+          </span>
+        </div>
       </div>
     </div>
+
+    <!-- ═══════════════════════════════════════════
+         OTHER ACADEMIC SERVICES
+    ════════════════════════════════════════════ -->
+    <div class="oas-head">
+      <div class="oas-line"></div>
+      <h2>Other Academic Services</h2>
+      <div class="oas-line"></div>
+    </div>
+    <p class="oas-sub">High-quality academic support for all your needs.</p>
+
+    <div class="oas-grid" id="prCalcGrid"></div>
+
   </section>
 
-  <!-- TRUST BADGES -->
-  <section class="pr-trust">
-    <div class="pr-trust-grid">
-      <div class="pr-trust-card">
-        <div class="pr-trust-icon">🔒</div>
-        <div class="pr-trust-title">Confidential Service</div>
-        <div class="pr-trust-sub">তথ্য সম্পূর্ণ নিরাপদ</div>
-      </div>
-      <div class="pr-trust-card">
-        <div class="pr-trust-icon">✍️</div>
-        <div class="pr-trust-title">Experienced Writers</div>
-        <div class="pr-trust-sub">Expert academic team</div>
-      </div>
-      <div class="pr-trust-card">
-        <div class="pr-trust-icon">⏰</div>
-        <div class="pr-trust-title">On-Time Delivery</div>
-        <div class="pr-trust-sub">Deadline guarantee</div>
-      </div>
-      <div class="pr-trust-card">
-        <div class="pr-trust-icon">🔄</div>
-        <div class="pr-trust-title">Flexible Revision</div>
-        <div class="pr-trust-sub">Package অনুযায়ী</div>
-      </div>
-    </div>
+  <!-- TRUST BAR -->
+  <section class="trust-bar">
+    <div class="trust-item"><span class="trust-icon">💬</span><div><div class="trust-t">24/7 Support</div><div class="trust-s">We're here to help anytime</div></div></div>
+    <div class="trust-item"><span class="trust-icon">🔐</span><div><div class="trust-t">Secure Payment</div><div class="trust-s">100% safe &amp; secure</div></div></div>
+    <div class="trust-item"><span class="trust-icon">🛡️</span><div><div class="trust-t">Money-back Guarantee</div><div class="trust-s">Risk-free service</div></div></div>
+    <div class="trust-item"><span class="trust-icon">👥</span><div><div class="trust-t">Trusted by 1000+ Students</div><div class="trust-s">Across Bangladesh</div></div></div>
   </section>
 
   <!-- FAQ -->
@@ -175,7 +158,7 @@
       </div>
       <div class="pr-faq-item" onclick="toggleFaq(this)">
         <div class="pr-faq-q"><span>কতদিনে কাজ পাব?</span><span class="pr-faq-icon">+</span></div>
-        <div class="pr-faq-a">Essential: ৭ দিন, Standard: ১৪ দিন, Advanced: আপনার deadline অনুযায়ী। Urgent order-এর জন্য আলাদা যোগাযোগ করুন।</div>
+        <div class="pr-faq-a">Standard: ১০-১৫ দিন, Express: ৫-৭ দিন, Rush: ২-৩ দিন। Urgent order-এর জন্য আলাদা যোগাযোগ করুন।</div>
       </div>
       <div class="pr-faq-item" onclick="toggleFaq(this)">
         <div class="pr-faq-q"><span>Deadline miss হলে কী হবে?</span><span class="pr-faq-icon">+</span></div>
@@ -203,6 +186,5 @@
 
   <script src="js/pricing.js"></script>
   <script src="js/pricing-calculator.js"></script>
-
 </body>
 </html>

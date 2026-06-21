@@ -319,26 +319,99 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: opacity 0.2s, transform 0.1s, width 0.35s ease, border-radius 0.35s ease, padding 0.35s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   font-family: 'Segoe UI', sans-serif;
   margin-bottom: 1.25rem;
+  overflow: hidden;
 }
 .auth-submit-btn:hover { opacity: 0.88; }
 .auth-submit-btn:active { transform: scale(0.98); }
 .auth-submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-.auth-spinner {
-  width: 17px; height: 17px;
-  border: 2.5px solid rgba(255,255,255,0.35);
-  border-top-color: white;
+/* Morph state: button becomes a circular biometric pad (used for both
+   the scanning phase and the success-tick phase) */
+.auth-submit-btn.morph {
+  width: 52px;
+  min-width: 52px;
+  height: 52px;
+  padding: 0;
   border-radius: 50%;
-  animation: spin 0.75s linear infinite;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 1;
+  background: radial-gradient(circle at 35% 30%, #3b7af9, #1d4fbf 70%);
+  animation: tcSuccessPop 0.35s ease;
+  box-shadow: 0 0 0 0 rgba(45,110,247,0.5);
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+.auth-submit-btn.scanning {
+  animation: tcSuccessPop 0.35s ease, tcScanPulse 1.4s ease-in-out infinite;
+}
+@keyframes tcScanPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(45,110,247,0.45); }
+  50%      { box-shadow: 0 0 0 8px rgba(45,110,247,0); }
+}
+@keyframes tcSuccessPop {
+  0%   { transform: scale(0.9); }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* Fingerprint icon + scan line (Touch-ID style) */
+.auth-fp-wrap {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.auth-fp-icon {
+  width: 22px;
+  height: 22px;
+  position: relative;
+  z-index: 1;
+}
+.auth-fp-icon.fp-fade-out {
+  animation: tcFpFadeOut 0.25s ease forwards;
+}
+@keyframes tcFpFadeOut {
+  to { opacity: 0; transform: scale(0.75); }
+}
+.auth-fp-scanline {
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  height: 3px;
+  top: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.85));
+  animation: tcFpScan 1.15s ease-in-out infinite;
+}
+@keyframes tcFpScan {
+  0%   { top: 0%;   opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Success checkmark — draws in once the fingerprint scan confirms login */
+.auth-success-check {
+  flex-shrink: 0;
+}
+.auth-success-check polyline {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: tcCheckDraw 0.35s ease forwards 0.1s;
+}
+@keyframes tcCheckDraw {
+  to { stroke-dashoffset: 0; }
+}
 
 .auth-divider {
   display: flex;

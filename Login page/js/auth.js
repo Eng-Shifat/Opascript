@@ -91,12 +91,66 @@ function clearErrors() {
 }
 
 function setLoading(on) {
+  if (on) {
+    showScanning();
+  } else {
+    hideScanning();
+  }
+}
+
+// Login submit হলে button circle-এ morph করে fingerprint scan দেখায়
+function showScanning() {
   const btnText = document.getElementById('loginBtnText');
-  const spinner = document.getElementById('loginSpinner');
+  const fp = document.getElementById('loginFingerprint');
+  const check = document.getElementById('loginSuccessCheck');
   const btn = document.getElementById('loginBtn');
-  if (btnText) btnText.style.display = on ? 'none' : 'inline';
-  if (spinner) spinner.style.display = on ? 'inline-block' : 'none';
-  if (btn) btn.disabled = on;
+
+  if (btnText) btnText.style.display = 'none';
+  if (check) check.style.display = 'none';
+  if (fp) {
+    fp.style.display = 'flex';
+    fp.querySelector('.auth-fp-icon')?.classList.remove('fp-fade-out');
+  }
+  if (btn) {
+    btn.classList.add('morph', 'scanning');
+    btn.disabled = true;
+  }
+}
+
+// Login fail হলে button আগের shape-এ ফিরে আসবে
+function hideScanning() {
+  const btnText = document.getElementById('loginBtnText');
+  const fp = document.getElementById('loginFingerprint');
+  const btn = document.getElementById('loginBtn');
+
+  if (btnText) btnText.style.display = 'inline';
+  if (fp) fp.style.display = 'none';
+  if (btn) {
+    btn.classList.remove('morph', 'scanning');
+    btn.disabled = false;
+  }
+}
+
+// Login সফল হলে fingerprint scan বন্ধ হয়ে blue tick draw হয়, তারপর redirect করে
+function showLoginSuccess(redirectFn, delay = 750) {
+  const fp = document.getElementById('loginFingerprint');
+  const fpIcon = fp?.querySelector('.auth-fp-icon');
+  const check = document.getElementById('loginSuccessCheck');
+  const btn = document.getElementById('loginBtn');
+
+  if (btn) {
+    btn.classList.add('morph');
+    btn.classList.remove('scanning'); // pulse বন্ধ, scan confirmed
+    btn.disabled = true;
+  }
+  if (fpIcon) fpIcon.classList.add('fp-fade-out');
+
+  setTimeout(() => {
+    if (fp) fp.style.display = 'none';
+    if (check) check.style.display = 'block';
+  }, 200);
+
+  setTimeout(redirectFn, delay);
 }
 
 function saveClientSession(user, name, email) {
@@ -177,8 +231,7 @@ async function handleLogin() {
     if (authUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
       localStorage.setItem('scriptora_role', 'admin');
       localStorage.setItem('scriptora_email', authUser.email);
-      setLoading(false);
-      window.location.href = '../Admin Dashboard/admin.html';
+      showLoginSuccess(() => { window.location.href = '../Admin Dashboard/admin.html'; });
       return;
     }
 
@@ -195,8 +248,7 @@ async function handleLogin() {
       clientData?.email || authUser.email
     );
 
-    setLoading(false);
-    redirectAfterLogin();
+    showLoginSuccess(redirectAfterLogin);
 
   } catch (err) {
     console.error('Login error:', err);
