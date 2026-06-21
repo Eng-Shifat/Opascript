@@ -2038,3 +2038,45 @@ body {
     border-color: rgba(220, 20, 20, 0.85);
   }
 }
+
+/* ══════════════════════════════════════
+   MOBILE CTA — Split row (More About | Start Project)
+══════════════════════════════════════ */
+@media (max-width: 480px) {
+  .tc-cta-wrap-mob {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    padding: 0 1.1rem 1.1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Left — More About (outline style) */
+  .tc-cta-outline-mob {
+    flex: 0 0 auto !important;
+    padding: 13px 18px !important;
+    border-radius: 12px !important;
+    background: transparent !important;
+    border: 1.5px solid rgba(255,255,255,0.2) !important;
+    color: rgba(255,255,255,0.75) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+    white-space: nowrap !important;
+    transition: border-color 0.2s, color 0.2s !important;
+  }
+  .tc-cta-outline-mob:hover {
+    border-color: rgba(255,255,255,0.5) !important;
+    color: #fff !important;
+  }
+
+  /* Right — Start Thesis Project (fill style) */
+  .tc-cta-mobile {
+    flex: 1 !important;
+    padding: 13px !important;
+    font-size: 13px !important;
+    margin: 0 !important;
+  }
+}
