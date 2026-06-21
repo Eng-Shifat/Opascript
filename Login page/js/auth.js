@@ -161,9 +161,14 @@ function saveClientSession(user, name, email) {
 }
 
 function redirectAfterLogin() {
-  const redirect = sessionStorage.getItem('scriptora_redirect');
-  if (redirect === 'payment') {
-    sessionStorage.removeItem('scriptora_redirect');
+  const returnUrl = sessionStorage.getItem('scriptora_return_url');
+  const redirect  = sessionStorage.getItem('scriptora_redirect');
+  sessionStorage.removeItem('scriptora_return_url');
+  sessionStorage.removeItem('scriptora_redirect');
+
+  if (returnUrl) {
+    window.location.href = returnUrl;
+  } else if (redirect === 'payment') {
     window.location.href = '../Payment page/payment.html';
   } else {
     window.location.href = '../Client Dashboard/dashboard.html';

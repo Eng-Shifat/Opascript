@@ -45,7 +45,7 @@
         <div class="tc-controls">
           <div class="tc-cg">
             <label>Thesis Type</label>
-            <select id="thesisType" onchange="calcThesisPrice()">
+            <select id="thesisType" onchange="onThesisTypeChange()">
               <option value="full">Full Thesis</option>
               <option value="chapter">Single Chapter</option>
               <option value="proposal">Proposal Only</option>
@@ -54,9 +54,9 @@
           <div class="tc-cg">
             <label>Words (Minimum 5000)</label>
             <div class="tc-counter">
-              <button onclick="changeThesisWords(-1000)">−</button>
+              <button onclick="changeThesisWords(-1)">−</button>
               <span id="thesisWords">5000 words</span>
-              <button onclick="changeThesisWords(1000)">+</button>
+              <button onclick="changeThesisWords(1)">+</button>
             </div>
           </div>
           <div class="tc-cg">
@@ -80,7 +80,7 @@
           <div class="tc-price-lbl">Total Price</div>
           <div class="tc-price">৳<span id="thesisPrice">5,000</span></div>
           <div class="tc-price-note">* Starting Price</div>
-          <button class="tc-cta" onclick="window.location.href='../Order page/order.html'">Start Thesis Project →</button>
+          <button class="tc-cta" onclick="orderThesis()">Start Thesis Project →</button>
         </div>
       </div>
 
@@ -131,6 +131,8 @@
     </div>
     <p class="oas-sub">High-quality academic support for all your needs.</p>
 
+    <div class="oas-tabs" id="oasTabs"></div>
+
     <div class="oas-grid" id="prCalcGrid"></div>
 
   </section>
@@ -178,12 +180,13 @@
       <h2>এখনই শুরু করুন</h2>
       <p>৫০০+ satisfied client-দের সাথে যোগ দিন — আজই আপনার order দিন</p>
       <div class="pr-cta-btns">
-        <button class="pr-cta-btn filled" onclick="window.location.href='../Order page/order.html'">Order করুন</button>
+        <button class="pr-cta-btn filled" onclick="orderThesis()">Order করুন</button>
         <button class="pr-cta-btn outline" onclick="window.open('https://wa.me/8801XXXXXXXXX','_blank')">WhatsApp করুন</button>
       </div>
     </div>
   </section>
 
+  <script src="js/pricing-config.js"></script>
   <script src="js/pricing.js"></script>
   <script src="js/pricing-calculator.js"></script>
 </body>

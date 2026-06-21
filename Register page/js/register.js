@@ -314,10 +314,15 @@ async function handleRegister() {
 
     setLoading(false);
 
-    // সরাসরি dashboard এ redirect
-    const redirect = sessionStorage.getItem('scriptora_redirect');
+    // Return URL check — authGuard থেকে আসা হলে সেখানে ফিরে যাও
+    const returnUrl = sessionStorage.getItem('scriptora_return_url');
+    const redirect  = sessionStorage.getItem('scriptora_redirect');
+    sessionStorage.removeItem('scriptora_return_url');
     sessionStorage.removeItem('scriptora_redirect');
-    if (redirect === 'payment') {
+
+    if (returnUrl) {
+      window.location.href = returnUrl;
+    } else if (redirect === 'payment') {
       window.location.href = '../Payment page/payment.html';
     } else {
       window.location.href = '../Client Dashboard/dashboard.html';

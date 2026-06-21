@@ -560,12 +560,57 @@ body {
   text-align: center;
   color: rgba(255,255,255,0.4);
   font-size: 13px;
-  margin: 0 0 1.8rem;
+  margin: 0 0 1.4rem;
 }
+
+/* ── CATEGORY TABS ── */
+.oas-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 1.8rem;
+}
+.oas-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 9px 18px;
+  border-radius: 30px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+}
+.oas-tab-icon { font-size: 14px; }
+.oas-tab:hover {
+  border-color: rgba(45,110,247,0.4);
+  color: #fff;
+}
+.oas-tab.active {
+  background: linear-gradient(135deg, #2d6ef7, #6366f1);
+  border-color: transparent;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(45,110,247,0.35);
+}
+
 .oas-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.2rem;
+}
+.oas-grid-fade {
+  animation: oasGridFadeIn 0.35s ease;
+}
+@keyframes oasGridFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── SERVICE CARDS ── */
@@ -714,4 +759,10 @@ body {
   .trust-item:last-child { border-bottom: none; }
   .tc-guarantees { grid-template-columns: 1fr; gap: 0.5rem; }
   .tc-guarantees span { justify-content: flex-start; }
+}
+
+/* ── Most Requested badge position fix ── */
+.tc-most-badge {
+  top: 8% !important;
+  right: -8px !important;
 }
