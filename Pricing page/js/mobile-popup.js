@@ -179,7 +179,7 @@
     requestAnimationFrame(() => {
       const sheet = document.getElementById('mpSheet');
       const overlay = document.getElementById('mpOverlay');
-      if (sheet) sheet.classList.add('open');
+      if (sheet) { sheet.classList.add('open'); initSwipeDismiss(sheet); }
       if (overlay) overlay.classList.add('open');
     });
   };
@@ -195,6 +195,95 @@
       if (m) m.remove();
     }, 340);
   };
+
+  /* ────────────────────────────────
+     SWIPE TO DISMISS (drag handle)
+  ──────────────────────────────── */
+  function initSwipeDismiss(sheet) {
+    const handle   = sheet.querySelector('.mp-drag-handle');
+    const body     = sheet.querySelector('.mp-body');
+    if (!handle) return;
+
+    let startY      = 0;
+    let currentY    = 0;
+    let dragging    = false;
+    let sheetHeight = 0;
+
+    /* Drag starts only on handle OR when body is scrolled to top */
+    function canDragFromBody(e) {
+      if (!body) return true;
+      return body.scrollTop <= 0;
+    }
+
+    function onStart(e) {
+      const target = e.target;
+      const isHandle = handle.contains(target) || target === handle;
+      const isBody   = body && body.contains(target);
+
+      if (!isHandle && !(isBody && canDragFromBody(e))) return;
+
+      dragging    = true;
+      startY      = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      currentY    = startY;
+      sheetHeight = sheet.offsetHeight;
+
+      sheet.style.transition = 'none'; /* disable transition while dragging */
+    }
+
+    function onMove(e) {
+      if (!dragging) return;
+
+      currentY       = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      const deltaY   = currentY - startY;
+
+      if (deltaY < 0) {
+        /* Swiping UP — resist a little (rubber-band), max 40px */
+        const resistance = Math.min(Math.abs(deltaY) * 0.2, 40);
+        sheet.style.transform = `translateY(${-resistance}px)`;
+      } else {
+        /* Swiping DOWN — follow finger 1:1 */
+        sheet.style.transform = `translateY(${deltaY}px)`;
+        /* Prevent body scroll while dragging down */
+        if (e.cancelable) e.preventDefault();
+      }
+    }
+
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+
+      const deltaY  = currentY - startY;
+      const DISMISS = sheetHeight * 0.35; /* dismiss threshold: 35% of sheet height */
+      const QUICK   = 6;                  /* px/ms — fast flick threshold */
+
+      sheet.style.transition = ''; /* restore transition */
+
+      if (deltaY > DISMISS) {
+        /* Enough drag — close */
+        sheet.style.transform = `translateY(100%)`;
+        const overlay = document.getElementById('mpOverlay');
+        if (overlay) overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+          const m = document.getElementById('mpMount');
+          if (m) m.remove();
+        }, 340);
+      } else {
+        /* Snap back */
+        sheet.style.transform = 'translateY(0)';
+      }
+    }
+
+    /* Touch events */
+    handle.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchmove',  onMove,  { passive: false });
+    document.addEventListener('touchend',   onEnd,   { passive: true });
+
+    /* Body drag (only when scrolled to top) */
+    if (body) {
+      body.addEventListener('touchstart', onStart, { passive: true });
+    }
+  }
 
   /* ────────────────────────────────
      POPUP CONTROLS

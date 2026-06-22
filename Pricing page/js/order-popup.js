@@ -177,6 +177,83 @@
   }
 
   /* ────────────────────────────────
+     SWIPE TO DISMISS (drag handle)
+  ──────────────────────────────── */
+  function initSwipeDismiss(sheet) {
+    const handle = sheet.querySelector('.op-drag-handle');
+    const body   = sheet.querySelector('.op-body');
+    if (!handle) return;
+
+    let startY      = 0;
+    let currentY    = 0;
+    let dragging    = false;
+    let sheetHeight = 0;
+
+    function canDragFromBody() {
+      if (!body) return true;
+      return body.scrollTop <= 0;
+    }
+
+    function onStart(e) {
+      const target   = e.target;
+      const isHandle = handle.contains(target) || target === handle;
+      const isBody   = body && body.contains(target);
+      if (!isHandle && !(isBody && canDragFromBody())) return;
+
+      dragging    = true;
+      startY      = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      currentY    = startY;
+      sheetHeight = sheet.offsetHeight;
+      sheet.style.transition = 'none';
+    }
+
+    function onMove(e) {
+      if (!dragging) return;
+      currentY     = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      const deltaY = currentY - startY;
+
+      if (deltaY < 0) {
+        const resistance = Math.min(Math.abs(deltaY) * 0.2, 40);
+        sheet.style.transform = `translateY(${-resistance}px)`;
+      } else {
+        sheet.style.transform = `translateY(${deltaY}px)`;
+        if (e.cancelable) e.preventDefault();
+      }
+    }
+
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+
+      const deltaY  = currentY - startY;
+      const DISMISS = sheetHeight * 0.35;
+
+      sheet.style.transition = '';
+
+      if (deltaY > DISMISS) {
+        sheet.style.transform = `translateY(100%)`;
+        const overlay = document.getElementById('opOverlay');
+        if (overlay) overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+          const m = document.getElementById('opMount');
+          if (m) m.remove();
+        }, 340);
+      } else {
+        sheet.style.transform = 'translateY(0)';
+      }
+    }
+
+    handle.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchmove',  onMove,  { passive: false });
+    document.addEventListener('touchend',   onEnd,   { passive: true });
+
+    if (body) {
+      body.addEventListener('touchstart', onStart, { passive: true });
+    }
+  }
+
+  /* ────────────────────────────────
      OPEN / CLOSE
   ──────────────────────────────── */
   window.opOpen = function(opts) {
@@ -194,7 +271,7 @@
     requestAnimationFrame(() => {
       const sheet   = document.getElementById('opSheet');
       const overlay = document.getElementById('opOverlay');
-      if (sheet)   sheet.classList.add('open');
+      if (sheet)   { sheet.classList.add('open'); initSwipeDismiss(sheet); }
       if (overlay) overlay.classList.add('open');
     });
   };
