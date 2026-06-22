@@ -2080,3 +2080,8 @@ body {
     margin: 0 !important;
   }
 }
+
+/* Desktop — hide controls (Thesis Type + Words) */
+@media (min-width: 481px) {
+  .tc-controls { display: none !important; }
+}
