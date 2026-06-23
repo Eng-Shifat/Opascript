@@ -180,57 +180,74 @@
      SWIPE TO DISMISS (drag handle)
   ──────────────────────────────── */
   function initSwipeDismiss(sheet) {
-    const handle = sheet.querySelector('.op-drag-handle');
-    const body   = sheet.querySelector('.op-body');
-    if (!handle) return;
+    const body = sheet.querySelector('.op-body');
 
     let startY      = 0;
     let currentY    = 0;
     let dragging    = false;
     let sheetHeight = 0;
-
-    function canDragFromBody() {
-      if (!body) return true;
-      return body.scrollTop <= 0;
-    }
+    let startBodyScroll = 0;
+    let intentDecided   = false;
+    let isSwipeIntent   = false;
 
     function onStart(e) {
-      const target   = e.target;
-      const isHandle = handle.contains(target) || target === handle;
-      const isBody   = body && body.contains(target);
-      if (!isHandle && !(isBody && canDragFromBody())) return;
+      /* Never hijack interactive elements */
+      const t = e.target;
+      if (t.closest && (
+        t.closest('.op-close') ||
+        t.closest('button') ||
+        t.closest('input') ||
+        t.closest('textarea') ||
+        t.closest('select') ||
+        t.closest('a')
+      )) return;
 
-      dragging    = true;
-      startY      = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-      currentY    = startY;
-      sheetHeight = sheet.offsetHeight;
+      startY          = e.touches[0].clientY;
+      currentY        = startY;
+      sheetHeight     = sheet.offsetHeight;
+      startBodyScroll = body ? body.scrollTop : 0;
+      dragging        = true;
+      intentDecided   = false;
+      isSwipeIntent   = false;
       sheet.style.transition = 'none';
     }
 
     function onMove(e) {
       if (!dragging) return;
-      currentY     = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      currentY     = e.touches[0].clientY;
       const deltaY = currentY - startY;
 
-      if (deltaY < 0) {
-        const resistance = Math.min(Math.abs(deltaY) * 0.2, 40);
-        sheet.style.transform = `translateY(${-resistance}px)`;
-      } else {
-        sheet.style.transform = `translateY(${deltaY}px)`;
-        if (e.cancelable) e.preventDefault();
+      /* Decide intent once we have 6px of movement */
+      if (!intentDecided && Math.abs(deltaY) > 6) {
+        intentDecided = true;
+        /* Swipe down = dismiss intent IF body is scrolled to top */
+        isSwipeIntent = deltaY > 0 && startBodyScroll <= 0;
       }
+
+      if (!intentDecided) return;
+
+      if (isSwipeIntent) {
+        /* Follow finger — prevent page scroll */
+        if (e.cancelable) e.preventDefault();
+        if (deltaY < 0) {
+          const r = Math.min(Math.abs(deltaY) * 0.15, 30);
+          sheet.style.transform = `translateY(${-r}px)`;
+        } else {
+          sheet.style.transform = `translateY(${deltaY}px)`;
+        }
+      }
+      /* else: normal body scroll — don't interfere */
     }
 
     function onEnd() {
       if (!dragging) return;
-      dragging = false;
-
-      const deltaY  = currentY - startY;
-      const DISMISS = sheetHeight * 0.35;
-
+      dragging      = false;
+      intentDecided = false;
       sheet.style.transition = '';
 
-      if (deltaY > DISMISS) {
+      const deltaY = currentY - startY;
+
+      if (isSwipeIntent && deltaY > sheetHeight * 0.20) {
         sheet.style.transform = `translateY(100%)`;
         const overlay = document.getElementById('opOverlay');
         if (overlay) overlay.classList.remove('open');
@@ -242,15 +259,14 @@
       } else {
         sheet.style.transform = 'translateY(0)';
       }
+
+      isSwipeIntent = false;
     }
 
-    handle.addEventListener('touchstart', onStart, { passive: true });
-    document.addEventListener('touchmove',  onMove,  { passive: false });
-    document.addEventListener('touchend',   onEnd,   { passive: true });
-
-    if (body) {
-      body.addEventListener('touchstart', onStart, { passive: true });
-    }
+    /* Prevent background page scroll — but allow body scroll inside sheet */
+    sheet.addEventListener('touchstart', onStart, { passive: true });
+    sheet.addEventListener('touchmove',  onMove,  { passive: false });
+    sheet.addEventListener('touchend',   onEnd,   { passive: true });
   }
 
   /* ────────────────────────────────

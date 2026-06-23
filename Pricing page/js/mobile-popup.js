@@ -214,66 +214,71 @@
      SWIPE TO DISMISS (drag handle)
   ──────────────────────────────── */
   function initSwipeDismiss(sheet) {
-    const handle   = sheet.querySelector('.mp-drag-handle');
-    const body     = sheet.querySelector('.mp-body');
-    if (!handle) return;
+    const body = sheet.querySelector('.mp-body');
 
-    let startY      = 0;
-    let currentY    = 0;
-    let dragging    = false;
-    let sheetHeight = 0;
-
-    /* Drag starts only on handle OR when body is scrolled to top */
-    function canDragFromBody(e) {
-      if (!body) return true;
-      return body.scrollTop <= 0;
-    }
+    let startY          = 0;
+    let currentY        = 0;
+    let dragging        = false;
+    let sheetHeight     = 0;
+    let startBodyScroll = 0;
+    let intentDecided   = false;
+    let isSwipeIntent   = false;
 
     function onStart(e) {
-      const target = e.target;
-      const isHandle = handle.contains(target) || target === handle;
-      const isBody   = body && body.contains(target);
+      const t = e.target;
+      /* Never hijack interactive elements */
+      if (t.closest && (
+        t.closest('.mp-close') ||
+        t.closest('button') ||
+        t.closest('input') ||
+        t.closest('textarea') ||
+        t.closest('select') ||
+        t.closest('a')
+      )) return;
 
-      if (!isHandle && !(isBody && canDragFromBody(e))) return;
-
-      dragging    = true;
-      startY      = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-      currentY    = startY;
-      sheetHeight = sheet.offsetHeight;
-
-      sheet.style.transition = 'none'; /* disable transition while dragging */
+      startY          = e.touches[0].clientY;
+      currentY        = startY;
+      sheetHeight     = sheet.offsetHeight;
+      startBodyScroll = body ? body.scrollTop : 0;
+      dragging        = true;
+      intentDecided   = false;
+      isSwipeIntent   = false;
+      sheet.style.transition = 'none';
     }
 
     function onMove(e) {
       if (!dragging) return;
+      currentY     = e.touches[0].clientY;
+      const deltaY = currentY - startY;
 
-      currentY       = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-      const deltaY   = currentY - startY;
+      /* Decide intent once 6px moved */
+      if (!intentDecided && Math.abs(deltaY) > 6) {
+        intentDecided = true;
+        isSwipeIntent = deltaY > 0 && startBodyScroll <= 0;
+      }
 
-      if (deltaY < 0) {
-        /* Swiping UP — resist a little (rubber-band), max 40px */
-        const resistance = Math.min(Math.abs(deltaY) * 0.2, 40);
-        sheet.style.transform = `translateY(${-resistance}px)`;
-      } else {
-        /* Swiping DOWN — follow finger 1:1 */
-        sheet.style.transform = `translateY(${deltaY}px)`;
-        /* Prevent body scroll while dragging down */
+      if (!intentDecided) return;
+
+      if (isSwipeIntent) {
         if (e.cancelable) e.preventDefault();
+        if (deltaY < 0) {
+          const r = Math.min(Math.abs(deltaY) * 0.15, 30);
+          sheet.style.transform = `translateY(${-r}px)`;
+        } else {
+          sheet.style.transform = `translateY(${deltaY}px)`;
+        }
       }
     }
 
     function onEnd() {
       if (!dragging) return;
-      dragging = false;
+      dragging      = false;
+      intentDecided = false;
+      sheet.style.transition = '';
 
-      const deltaY  = currentY - startY;
-      const DISMISS = sheetHeight * 0.35; /* dismiss threshold: 35% of sheet height */
-      const QUICK   = 6;                  /* px/ms — fast flick threshold */
+      const deltaY = currentY - startY;
 
-      sheet.style.transition = ''; /* restore transition */
-
-      if (deltaY > DISMISS) {
-        /* Enough drag — close */
+      if (isSwipeIntent && deltaY > sheetHeight * 0.20) {
         sheet.style.transform = `translateY(100%)`;
         const overlay = document.getElementById('mpOverlay');
         if (overlay) overlay.classList.remove('open');
@@ -283,20 +288,15 @@
           if (m) m.remove();
         }, 340);
       } else {
-        /* Snap back */
         sheet.style.transform = 'translateY(0)';
       }
+
+      isSwipeIntent = false;
     }
 
-    /* Touch events */
-    handle.addEventListener('touchstart', onStart, { passive: true });
-    document.addEventListener('touchmove',  onMove,  { passive: false });
-    document.addEventListener('touchend',   onEnd,   { passive: true });
-
-    /* Body drag (only when scrolled to top) */
-    if (body) {
-      body.addEventListener('touchstart', onStart, { passive: true });
-    }
+    sheet.addEventListener('touchstart', onStart, { passive: true });
+    sheet.addEventListener('touchmove',  onMove,  { passive: false });
+    sheet.addEventListener('touchend',   onEnd,   { passive: true });
   }
 
   /* ────────────────────────────────
