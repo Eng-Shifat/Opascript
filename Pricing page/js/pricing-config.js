@@ -53,10 +53,12 @@ window.SCRIPTORA_CONFIG = {
       id: 'assignment-writing', category: 'writing', badge: 'popular',
       icon: '📝', iconBg: 'rgba(45,110,247,0.18)',
       title: 'Assignment Writing', titleBn: 'অ্যাসাইনমেন্ট রাইটিং',
-      desc: 'Our experts craft your assignments with precision.',
+      desc: 'High-quality academic writing tailored to your requirements.',
       unitType: 'words', unitLabel: 'words', perUnit: 500, rate: 200,
       step: 500, min: 500, defaultQty: 500,
       deadlineDays: { normal: 4, urgent: 2, critical: 1 },
+      includes: ['100% original content', 'Proper structure & formatting', 'In-text citations included', 'University guideline followed', 'Plagiarism-free guaranteed'],
+      delivery: ['Complete assignment document', 'Plagiarism report (Turnitin)', 'Reference list / bibliography', 'Revision support (3 days)', 'Source files if applicable'],
     },
     {
       id: 'presentation-slides', category: 'writing', badge: null,
@@ -66,6 +68,8 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'slides', unitLabel: 'slides', perUnit: 1, rate: 60,
       step: 1, min: 5, defaultQty: 10,
       deadlineDays: { normal: 3, urgent: 2, critical: 1 },
+      includes: ['Custom slide design', 'Structured content flow', 'Visual charts & graphics', 'Speaker notes included', 'University theme compatible'],
+      delivery: ['Editable .pptx file', 'PDF export version', 'Speaker notes document', 'Revision support (2 days)', 'Image source credits'],
     },
     {
       id: 'proofreading', category: 'editing', badge: null,
@@ -75,6 +79,8 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'words', unitLabel: 'words', perUnit: 1000, rate: 100,
       step: 500, min: 1000, defaultQty: 1000,
       deadlineDays: { normal: 3, urgent: 1, critical: 0.5 },
+      includes: ['Grammar & spelling correction', 'Sentence structure fix', 'Academic tone adjustment', 'Punctuation & style check', 'Consistency review'],
+      delivery: ['Corrected document (.docx)', 'Track-changes version', 'Editor comments/notes', 'Clean final version', 'Revision support (2 days)'],
     },
     {
       id: 'apa-mla-formatting', category: 'editing', badge: null,
@@ -84,6 +90,8 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'pages', unitLabel: 'pages', perUnit: 1, rate: 20,
       step: 1, min: 1, defaultQty: 5,
       deadlineDays: { normal: 2, urgent: 1, critical: 0.5 },
+      includes: ['APA / MLA / Chicago / Harvard', 'Title page formatting', 'In-text citation fix', 'Reference page cleanup', 'Margin & font standardization'],
+      delivery: ['Fully formatted document', 'Citation style guide note', 'Reference list verified', 'Clean .docx & PDF copy', 'Revision support (2 days)'],
     },
     {
       id: 'plagiarism-reduction', category: 'editing', badge: null,
@@ -93,12 +101,16 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'words', unitLabel: 'words', perUnit: 1000, rate: 200,
       step: 500, min: 500, defaultQty: 1000,
       deadlineDays: { normal: 3, urgent: 2, critical: 1 },
+      includes: ['Turnitin similarity check', 'Manual paraphrasing', 'Meaning preserved fully', 'Citation correction', 'Below 15% guarantee'],
+      delivery: ['Rewritten document', 'Before & after Turnitin report', 'Similarity percentage proof', 'Clean .docx file', 'Revision support (3 days)'],
     },
     {
       id: 'spss-analysis', category: 'research', badge: 'expert',
       icon: '📊', iconBg: 'rgba(139,92,246,0.18)',
       title: 'SPSS Analysis', titleBn: 'এসপিএসএস বিশ্লেষণ',
       desc: 'Statistical analysis with full interpretation report.',
+      includes: ['Descriptive & inferential stats', 'Hypothesis testing', 'Data cleaning & coding', 'Chart & table generation', 'APA-style output tables'],
+      delivery: ['SPSS output file (.spv)', 'Interpreted results report', 'Charts & graphs (editable)', 'Methodology explanation', 'Revision support (3 days)'],
       unitType: 'tier',
       tiers: [
         { name: 'Basic',        price: 1500 },
@@ -116,6 +128,8 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'pages', unitLabel: 'pages', perUnit: 1, rate: 149,
       step: 1, min: 1, defaultQty: 5,
       deadlineDays: { normal: 5, urgent: 3, critical: 2 },
+      includes: ['Problem statement & objectives', 'Literature review outline', 'Research methodology plan', 'Timeline & scope defined', 'Proper academic referencing'],
+      delivery: ['Full proposal document', 'Research gap analysis', 'Reference list (APA/MLA)', 'Editable .docx file', 'Revision support (3 days)'],
     },
     {
       id: 'case-study-report', category: 'writing', badge: null,
@@ -125,6 +139,8 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'words', unitLabel: 'words', perUnit: 1000, rate: 399,
       step: 500, min: 500, defaultQty: 1000,
       deadlineDays: { normal: 4, urgent: 2, critical: 1 },
+      includes: ['Real-world scenario analysis', 'Problem identification', 'Theory application', 'Findings & recommendations', 'Proper academic format'],
+      delivery: ['Complete case study report', 'Executive summary', 'Reference list', 'Editable .docx file', 'Revision support (3 days)'],
     },
     {
       id: 'cv-writing', category: 'writing', badge: null,
@@ -133,6 +149,8 @@ window.SCRIPTORA_CONFIG = {
       desc: 'Professional CVs that highlight your strengths.',
       unitType: 'fixed', rate: 600,
       deadlineDays: { normal: 2, urgent: 1, critical: 0.5 },
+      includes: ['ATS-optimized format', 'Professional summary', 'Skills & achievement focus', 'Clean modern layout', 'Tailored to your field'],
+      delivery: ['CV in .docx & PDF', 'ATS-friendly version', 'Cover letter template', 'LinkedIn summary tip', 'Revision support (2 days)'],
     },
     {
       id: 'ai-plagiarism-remover', category: 'editing', badge: null,
@@ -142,6 +160,8 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'words', unitLabel: 'words', perUnit: 1000, rate: 600,
       step: 1000, min: 1000, defaultQty: 2000,
       deadlineDays: { normal: 3, urgent: 2, critical: 1 },
+      includes: ['AI detection bypass', 'Human-like rewriting', 'Meaning fully preserved', 'Turnitin & GPTZero safe', 'Academic tone maintained'],
+      delivery: ['Humanized document', 'AI detection score proof', 'Before & after comparison', 'Clean .docx file', 'Revision support (2 days)'],
     },
     {
       id: 'sop-writing', category: 'writing', badge: null,
@@ -150,6 +170,8 @@ window.SCRIPTORA_CONFIG = {
       desc: 'Compelling statements of purpose for your target university.',
       unitType: 'fixed', rate: 900,
       deadlineDays: { normal: 3, urgent: 2, critical: 1 },
+      includes: ['University-specific tailoring', 'Academic & career story', 'Motivation & goal clarity', 'Professional English tone', 'Word limit respected'],
+      delivery: ['Final SOP document', 'Editable .docx version', 'PDF export', 'Feedback-based revision', 'Revision support (3 days)'],
     },
     {
       id: 'lab-report-writing', category: 'research', badge: null,
@@ -159,6 +181,8 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'words', unitLabel: 'words', perUnit: 1000, rate: 450,
       step: 1000, min: 1000, defaultQty: 1000,
       deadlineDays: { normal: 3, urgent: 2, critical: 1 },
+      includes: ['Abstract to conclusion coverage', 'Data tables & graph creation', 'Results interpretation', 'Error analysis included', 'Lab format compliant'],
+      delivery: ['Complete lab report', 'Data tables & figures', 'Results & discussion', 'Reference list', 'Revision support (2 days)'],
     },
     {
       id: 'project-planning', category: 'research', badge: null,
@@ -167,6 +191,8 @@ window.SCRIPTORA_CONFIG = {
       desc: 'Clear outlines and roadmaps to kickstart your project.',
       unitType: 'fixed', rate: 350,
       deadlineDays: { normal: 2, urgent: 1, critical: 0.5 },
+      includes: ['Topic & scope analysis', 'Chapter/section outline', 'Research source suggestions', 'Gantt chart / timeline', 'Task breakdown plan'],
+      delivery: ['Project plan document', 'Outline with chapter notes', 'Timeline/Gantt chart', 'Resource recommendation list', 'Revision support (1 day)'],
     },
     {
       id: 'ai-detection-report', category: 'editing', badge: null,
@@ -175,6 +201,8 @@ window.SCRIPTORA_CONFIG = {
       desc: 'Instant AI-content detection scoring with a detailed report.',
       unitType: 'fixed', rate: 150,
       deadlineDays: { normal: 1, urgent: 0.5, critical: 0.25 },
+      includes: ['GPTZero & Turnitin AI check', 'Sentence-level detection', 'Score breakdown', 'Risk level analysis', 'Multiple tool cross-check'],
+      delivery: ['Detection report PDF', 'AI score screenshot', 'High-risk sentence highlights', 'Improvement suggestions', 'Same-day delivery'],
     },
     {
       id: 'research-article', category: 'writing', badge: null,
@@ -184,6 +212,8 @@ window.SCRIPTORA_CONFIG = {
       unitType: 'words', unitLabel: 'words', perUnit: 1000, rate: 1000,
       step: 1000, min: 1000, defaultQty: 3000,
       deadlineDays: { normal: 7, urgent: 4, critical: 2 },
+      includes: ['IMRAD structure followed', 'Literature review included', 'Methodology & data analysis', 'Journal-specific formatting', 'Plagiarism-free guaranteed'],
+      delivery: ['Full journal paper (.docx)', 'Abstract & keywords', 'Reference list (APA/MLA)', 'Turnitin report', 'Revision support (5 days)'],
     },
   ],
 

@@ -1043,22 +1043,6 @@ body {
   }
   .acc-price-lbl { font-size: 10px; color: rgba(255,255,255,0.4); }
   .acc-price-val { font-size: 16px; font-weight: 800; color: #fff; }
-  .acc-chevron {
-    width: 28px; height: 28px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    color: rgba(255,255,255,0.5);
-    font-size: 13px;
-    transition: transform 0.25s, background 0.2s;
-    flex-shrink: 0;
-    margin-left: 0.5rem;
-  }
-  .acc-item.open .acc-chevron {
-    transform: rotate(180deg);
-    background: rgba(45,110,247,0.25);
-    color: #7eb3ff;
-  }
 
   /* Body */
   .acc-body {

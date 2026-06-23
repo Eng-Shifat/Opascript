@@ -121,6 +121,20 @@
       <!-- Scrollable body -->
       <div class="mp-body">
 
+        <!-- Service Trust Card -->
+        ${(s.includes||[]).length ? `
+        <div class="mp-trust-card">
+          <div class="mp-trust-col">
+            <div class="mp-trust-col-head"><span class="mp-trust-icon">✅</span> What's Included</div>
+            <ul class="mp-trust-list">${(s.includes||[]).map(i=>`<li>${i}</li>`).join('')}</ul>
+          </div>
+          <div class="mp-trust-divider"></div>
+          <div class="mp-trust-col">
+            <div class="mp-trust-col-head"><span class="mp-trust-icon">📦</span> You'll Receive</div>
+            <ul class="mp-trust-list">${(s.delivery||[]).map(i=>`<li>${i}</li>`).join('')}</ul>
+          </div>
+        </div>` : ''}
+
         <!-- Price Calculator section -->
         <div class="mp-calc-head">
           <span>Price Calculator</span>

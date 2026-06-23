@@ -449,3 +449,68 @@
   30%       { transform: translateY(-4px) scale(1.08); filter: brightness(1.2); }
   60%       { transform: translateY(-2px) scale(1.04); filter: brightness(1.1); }
 }
+
+/* ── Service Trust Card ── */
+.mp-trust-card {
+  display: flex;
+  gap: 0;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1.1rem;
+}
+
+.mp-trust-col {
+  flex: 1;
+  padding: 0.85rem 0.9rem;
+}
+
+.mp-trust-divider {
+  width: 1px;
+  background: rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.mp-trust-col-head {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mp-trust-icon {
+  font-size: 13px;
+}
+
+.mp-trust-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mp-trust-list li {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.35;
+  padding-left: 13px;
+  position: relative;
+}
+
+.mp-trust-list li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: rgba(45,110,247,0.8);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.1;
+}

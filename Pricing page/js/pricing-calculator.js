@@ -331,7 +331,6 @@ function buildAccordion(services) {
           <div class="acc-price-lbl">শুরু থেকে</div>
           <div class="acc-price-val">৳<span id="acc-price-${s.id}">${fmtNum(price)}</span></div>
         </div>
-        <div class="acc-chevron">▾</div>
       </div>
       <div class="acc-body">
         <div class="acc-body-inner">
