@@ -143,7 +143,7 @@
 
         ${qtyBlock}
 
-        <div class="mp-section-label" style="margin-top:1.1rem">Deadline <span class="mp-section-sub">সময়সীমা</span></div>
+        <div class="mp-section-label" style="margin-top:0.6rem">Deadline <span class="mp-section-sub">সময়সীমা</span></div>
         <div class="mp-dl-row">${urgencyBtns}</div>
 
       </div>

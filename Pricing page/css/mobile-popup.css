@@ -176,11 +176,11 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
   color: #fff;
-  margin-bottom: 14px;
-  padding-top: 2px;
+  margin-bottom: 8px;
+  padding-top: 0;
 }
 .mp-calc-sub {
   font-size: 11px;
@@ -190,12 +190,12 @@
 
 /* Section labels */
 .mp-section-label {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 700;
   color: rgba(255,255,255,0.6);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -228,15 +228,15 @@
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 14px;
   overflow: hidden;
-  height: 62px;
-  margin-bottom: 10px;
+  height: 50px;
+  margin-bottom: 7px;
 }
 .mp-count-btn {
-  width: 62px; height: 62px;
+  width: 50px; height: 50px;
   background: rgba(255,255,255,0.06);
   border: none;
   color: #fff;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s;
@@ -250,7 +250,7 @@
   justify-content: center;
 }
 .mp-count-val {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 800;
   color: #fff;
   line-height: 1;
@@ -269,12 +269,12 @@
 }
 .mp-preset {
   flex: 1;
-  padding: 8px 0;
-  border-radius: 10px;
+  padding: 6px 0;
+  border-radius: 8px;
   background: rgba(255,255,255,0.06);
   border: 1.5px solid rgba(255,255,255,0.1);
   color: rgba(255,255,255,0.55);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
@@ -335,12 +335,12 @@
 }
 .mp-dl-btn {
   flex: 1;
-  padding: 12px 0;
-  border-radius: 12px;
+  padding: 8px 0;
+  border-radius: 10px;
   background: rgba(255,255,255,0.06);
   border: 1.5px solid rgba(255,255,255,0.1);
   color: rgba(255,255,255,0.5);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   text-align: center;
