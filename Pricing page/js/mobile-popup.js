@@ -32,7 +32,7 @@
   /* ────────────────────────────────
      BUILD POPUP HTML
   ──────────────────────────────── */
-  function buildPopup(s) {
+  function buildPopup(s, isAvail = true) {
     const st      = { qty: s.defaultQty || s.min || 0, tierIndex: s.defaultTier || 0, urgency: 'normal' };
     window._popupState = st;
 
@@ -99,9 +99,6 @@
         <button class="mp-close-btn" onclick="mpClose()">✕</button>
       </div>
 
-      <!-- Available now badge -->
-      <div class="mp-avail-badge"><span class="mp-avail-dot"></span> Available Now</div>
-
       <!-- Service info card -->
       <div class="mp-info-card">
         <div class="mp-info-left">
@@ -115,7 +112,10 @@
             </div>
           </div>
         </div>
-        <div class="mp-preselected">✓ Pre-selected</div>
+        <div class="mp-avail-badge-inline ${isAvail ? 'available' : 'unavailable'}">
+          <span class="mp-avail-dot-inline"></span>
+          ${isAvail ? 'Available Now' : 'Unavailable'}
+        </div>
       </div>
 
       <!-- Scrollable body -->
@@ -161,7 +161,9 @@
             <span class="mp-ready-txt">Ready to order</span>
           </div>
         </div>
-        <button class="mp-order-btn" onclick="mpOrder('${s.id}')">🛒 Order করুন</button>
+        ${isAvail
+          ? `<button class="mp-order-btn" onclick="mpOrder('${s.id}')">🛒 Order করুন</button>`
+          : `<button class="mp-order-btn mp-order-btn--unavail" disabled>🚫 Currently Unavailable</button>`}
       </div>
     </div>`;
   }
@@ -174,12 +176,15 @@
     const s = SERVICES.find(x => x.id === id);
     if (!s) return;
 
+    /* Check availability — block if unavailable */
+    const isAvail = (window.scriptoraAvailability || {})[id] !== false;
+
     /* remove old */
     document.querySelectorAll('.mp-overlay,.mp-sheet').forEach(el => el.remove());
 
     const div = document.createElement('div');
     div.id = 'mpMount';
-    div.innerHTML = buildPopup(s);
+    div.innerHTML = buildPopup(s, isAvail);
     document.body.appendChild(div);
 
     /* store current service */

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Management — Scriptora Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <link rel="stylesheet" href="css/sidebar.css">
+  <script src="js/sidebar.js" data-page="services"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #060b18;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* ── Page layout ── */
+    .page-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    .page-title { font-size: 1.4rem; font-weight: 800; }
+    .page-sub   { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+
+    /* ── Save status ── */
+    .save-status {
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: none;
+    }
+    .save-status.saving  { display: inline-block; background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+    .save-status.saved   { display: inline-block; background: rgba(34,197,94,0.12);  color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
+    .save-status.error   { display: inline-block; background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+    /* ── Category group ── */
+    .cat-group { margin-bottom: 2rem; }
+    .cat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 0.75rem;
+      padding-left: 4px;
+    }
+    .service-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ── Service row ── */
+    .service-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      transition: border-color 0.2s;
+    }
+    .service-row:hover { border-color: rgba(255,255,255,0.12); }
+
+    /* Icon */
+    .svc-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Info */
+    .svc-info { flex: 1; min-width: 0; }
+    .svc-name { font-size: 14px; font-weight: 700; }
+    .svc-desc { font-size: 11.5px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+    /* Status pill */
+    .svc-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .svc-status.available   { background: rgba(34,197,94,0.12);  color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+    .svc-status.unavailable { background: rgba(239,68,68,0.1);   color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+
+    /* Toggle switch */
+    .toggle-wrap { flex-shrink: 0; }
+    .toggle {
+      position: relative;
+      width: 46px; height: 26px;
+      cursor: pointer;
+    }
+    .toggle input { display: none; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 13px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .toggle input:checked + .toggle-track {
+      background: #2d6ef7;
+      border-color: #2d6ef7;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle input:checked ~ .toggle-thumb {
+      transform: translateX(20px);
+      background: #fff;
+    }
+
+    /* ── Loading state ── */
+    .loading-wrap {
+      text-align: center;
+      padding: 4rem 0;
+      color: rgba(255,255,255,0.35);
+      font-size: 14px;
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: #2d6ef7;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div id="topbarMount"></div>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <div class="page-title">🛠️ Service Management</div>
+      <div class="page-sub">Toggle services on/off. Changes apply instantly to the pricing page.</div>
+    </div>
+    <div id="saveStatus" class="save-status"></div>
+  </div>
+
+  <div id="loadingWrap" class="loading-wrap">
+    <div class="spinner"></div>
+    Loading services...
+  </div>
+
+  <div id="serviceBoard" style="display:none"></div>
+</div>
+
+<script src="js/authGuard.js"></script>
+<script>
+  /* ── Config — same service list as pricing page ── */
+  const SERVICES = [
+    { id: 'assignment-writing',   icon: '📝', iconBg: 'rgba(45,110,247,0.18)',   name: 'Assignment Writing',            cat: 'Writing & Content' },
+    { id: 'presentation-slides',  icon: '🖥️', iconBg: 'rgba(236,72,153,0.18)',   name: 'Presentation Slides',           cat: 'Writing & Content' },
+    { id: 'case-study-report',    icon: '📁', iconBg: 'rgba(251,113,133,0.18)',   name: 'Case Study Report',             cat: 'Writing & Content' },
+    { id: 'cv-writing',           icon: '📄', iconBg: 'rgba(99,102,241,0.18)',    name: 'CV Writing',                    cat: 'Writing & Content' },
+    { id: 'sop-writing',          icon: '📜', iconBg: 'rgba(244,114,182,0.18)',   name: 'SOP Writing',                   cat: 'Writing & Content' },
+    { id: 'research-article',     icon: '📰', iconBg: 'rgba(217,70,239,0.18)',    name: 'Research Article / Journal',    cat: 'Writing & Content' },
+    { id: 'proofreading',         icon: '🔍', iconBg: 'rgba(96,165,250,0.18)',    name: 'Proofreading',                  cat: 'Editing & Plagiarism' },
+    { id: 'apa-mla-formatting',   icon: '📑', iconBg: 'rgba(245,158,11,0.18)',    name: 'Formatting (APA/MLA)',           cat: 'Editing & Plagiarism' },
+    { id: 'plagiarism-reduction', icon: '🛡️', iconBg: 'rgba(34,197,94,0.18)',    name: 'Plagiarism Reduction',          cat: 'Editing & Plagiarism' },
+    { id: 'ai-plagiarism-remover',icon: '🧠', iconBg: 'rgba(168,85,247,0.18)',   name: 'AI Plagiarism Remover',         cat: 'Editing & Plagiarism' },
+    { id: 'ai-detection-report',  icon: '🕵️', iconBg: 'rgba(250,204,21,0.18)',  name: 'AI Detection Report',           cat: 'Editing & Plagiarism' },
+    { id: 'spss-analysis',        icon: '📊', iconBg: 'rgba(139,92,246,0.18)',   name: 'SPSS Analysis',                 cat: 'Research & Analysis' },
+    { id: 'research-proposal',    icon: '🔎', iconBg: 'rgba(20,184,166,0.18)',   name: 'Research Proposal',             cat: 'Research & Analysis' },
+    { id: 'lab-report-writing',   icon: '🧪', iconBg: 'rgba(34,211,238,0.18)',   name: 'Lab Report Writing',            cat: 'Research & Analysis' },
+    { id: 'project-planning',     icon: '🧭', iconBg: 'rgba(132,204,22,0.18)',   name: 'Project / Assignment Planning', cat: 'Research & Analysis' },
+  ];
+
+  /* availability state — loaded from Supabase */
+  const avail = {};
+  SERVICES.forEach(s => { avail[s.id] = true; });
+
+  /* ── Load from Supabase ── */
+  async function loadData() {
+    const sb = window.scriptoraSupabase;
+    if (!sb) { showError('Supabase not connected'); return; }
+
+    const { data, error } = await sb
+      .from('service_availability')
+      .select('service_id, is_available');
+
+    if (error) { showError('Failed to load: ' + error.message); return; }
+
+    if (data) {
+      data.forEach(row => { avail[row.service_id] = row.is_available; });
+    }
+
+    document.getElementById('loadingWrap').style.display = 'none';
+    renderBoard();
+    document.getElementById('serviceBoard').style.display = 'block';
+  }
+
+  /* ── Render service board ── */
+  function renderBoard() {
+    const board = document.getElementById('serviceBoard');
+    const cats  = [...new Set(SERVICES.map(s => s.cat))];
+
+    board.innerHTML = cats.map(cat => {
+      const services = SERVICES.filter(s => s.cat === cat);
+      return `
+        <div class="cat-group">
+          <div class="cat-label">${cat}</div>
+          <div class="service-list">
+            ${services.map(s => renderRow(s)).join('')}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderRow(s) {
+    const on = avail[s.id] !== false;
+    return `
+      <div class="service-row" id="row-${s.id}">
+        <div class="svc-icon" style="background:${s.iconBg}">${s.icon}</div>
+        <div class="svc-info">
+          <div class="svc-name">${s.name}</div>
+          <div class="svc-desc">${s.id}</div>
+        </div>
+        <div class="svc-status ${on ? 'available' : 'unavailable'}" id="status-${s.id}">
+          ${on ? '● Available' : '○ Unavailable'}
+        </div>
+        <label class="toggle toggle-wrap">
+          <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleService('${s.id}', this.checked)">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>`;
+  }
+
+  /* ── Toggle handler ── */
+  async function toggleService(id, isAvailable) {
+    showStatus('saving', 'Saving...');
+
+    const sb = window.scriptoraSupabase;
+    if (!sb) { showStatus('error', 'Not connected'); return; }
+
+    /* Upsert into Supabase */
+    const { error } = await sb
+      .from('service_availability')
+      .upsert({ service_id: id, is_available: isAvailable, updated_at: new Date().toISOString() },
+               { onConflict: 'service_id' });
+
+    if (error) {
+      showStatus('error', 'Failed to save');
+      console.error(error);
+      return;
+    }
+
+    /* Update local state */
+    avail[id] = isAvailable;
+
+    /* Update status pill */
+    const pill = document.getElementById('status-' + id);
+    if (pill) {
+      pill.className = 'svc-status ' + (isAvailable ? 'available' : 'unavailable');
+      pill.textContent = isAvailable ? '● Available' : '○ Unavailable';
+    }
+
+    showStatus('saved', '✓ Saved');
+    setTimeout(() => hideStatus(), 2000);
+  }
+
+  /* ── Status helpers ── */
+  function showStatus(type, msg) {
+    const el = document.getElementById('saveStatus');
+    el.className = 'save-status ' + type;
+    el.textContent = msg;
+  }
+  function hideStatus() {
+    document.getElementById('saveStatus').style.display = 'none';
+  }
+  function showError(msg) {
+    document.getElementById('loadingWrap').innerHTML =
+      `<div style="color:#f87171;font-size:14px">⚠️ ${msg}</div>`;
+  }
+
+  /* ── Init ── */
+  document.addEventListener('DOMContentLoaded', loadData);
+</script>
+
+</body>
+</html>

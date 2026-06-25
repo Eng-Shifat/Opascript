@@ -516,3 +516,42 @@
   font-size: 13px;
   line-height: 1.1;
 }
+
+/* ── Service Availability Badge (inside info card) ── */
+.mp-avail-badge-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mp-avail-badge-inline.available {
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: #22c55e;
+}
+.mp-avail-badge-inline.unavailable {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #f87171;
+}
+.mp-avail-dot-inline {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mp-avail-badge-inline.available .mp-avail-dot-inline { background: #22c55e; }
+.mp-avail-badge-inline.unavailable .mp-avail-dot-inline { background: #ef4444; }
+
+/* ── Unavailable order button ── */
+.mp-order-btn--unavail {
+  background: rgba(239,68,68,0.15) !important;
+  border: 1px solid rgba(239,68,68,0.3) !important;
+  color: #f87171 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7 !important;
+}

@@ -39,6 +39,7 @@
     if (path.includes('payment'))          return 'payments';
     if (path.includes('file'))             return 'files';
     if (path.includes('setting'))          return 'settings';
+    if (path.includes('services'))         return 'services';
     return 'dashboard';
   }
 
@@ -74,6 +75,10 @@
       </a>
       <a class="s-nav-item" href="#" data-page="files" data-tooltip="File Manager">
         <i class="ti ti-folder"></i><span class="s-nav-item-label">File Manager</span>
+      </a>
+
+      <a class="s-nav-item" href="admin-services.html" data-page="services" data-tooltip="Service Management">
+        <i class="ti ti-toggle-right"></i><span class="s-nav-item-label">Service Management</span>
       </a>
 
       <div class="s-nav-label">System</div>

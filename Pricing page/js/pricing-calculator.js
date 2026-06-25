@@ -10,6 +10,30 @@ const CATS     = CFG.categories;
 
 let activeCategory = 'all';
 
+/* Service availability — loaded from Supabase on init */
+const availability = {};
+SERVICES.forEach(s => { availability[s.id] = true; }); // default: all available
+
+/* Fetch availability from Supabase */
+async function loadAvailability() {
+  try {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    const { data } = await sb
+      .from('service_availability')
+      .select('service_id, is_available');
+    if (data) {
+      data.forEach(row => {
+        availability[row.service_id] = row.is_available;
+      });
+    }
+    /* Expose to mobile-popup.js */
+    window.scriptoraAvailability = { ...availability };
+  } catch (e) {
+    console.warn('Availability fetch failed:', e);
+  }
+}
+
 /* ── State ── */
 const state = {};
 SERVICES.forEach(s => {
@@ -85,10 +109,19 @@ function buildCard(s) {
     `<button class="osc-dl-btn${urgency === key ? ' active' : ''}" onclick="setUrgency('${s.id}','${key}')">${esc(val.label)}</button>`
   ).join('');
 
+  /* Availability check */
+  const isAvail = availability[s.id] !== false;
+  const unavailOverlay = !isAvail ? `
+    <div class="osc-unavail-overlay">
+      <div class="osc-unavail-badge">🚫 Currently Unavailable</div>
+      <div class="osc-unavail-note">This service is temporarily paused.</div>
+    </div>` : '';
+
   return `
-  <div class="osc-card-wrap">
+  <div class="osc-card-wrap${!isAvail ? ' osc-unavail' : ''}">
   ${badgeHtml}
-  <div class="osc-card" id="card-${s.id}">
+  ${!isAvail ? '<div class="osc-badge unavail">UNAVAILABLE</div>' : ''}
+  <div class="osc-card" id="card-${s.id}"${!isAvail ? ' style="pointer-events:none;opacity:0.45;filter:grayscale(0.5)"' : ''}>
     <div class="osc-card-head">
       <div class="osc-icon" style="background:${s.iconBg}">${s.icon}</div>
       <div>
@@ -106,8 +139,9 @@ function buildCard(s) {
         <div class="osc-price">৳<span id="price-${s.id}">${fmtNum(price)}</span></div>
         <div class="osc-delivery" id="del-${s.id}" style="color:#2d6ef7">${fmtDays(days)}</div>
       </div>
-      <button class="osc-order-btn" onclick="orderFromCard('${s.id}')">Order Now →</button>
+      <button class="osc-order-btn"${!isAvail ? ' disabled' : ''} onclick="orderFromCard('${s.id}')">Order Now →</button>
     </div>
+    ${unavailOverlay}
   </div>
   </div>`;
 }
@@ -197,35 +231,12 @@ function renderGrid() {
     ? SERVICES
     : SERVICES.filter(s => s.category === activeCategory);
 
-  /* Fade + scale out existing cards */
-  const existing = Array.from(grid.querySelectorAll('.osc-card-wrap'));
-  existing.forEach((el, i) => {
-    el.style.transition = `opacity 0.18s ease ${i * 25}ms, transform 0.18s ease ${i * 25}ms`;
-    el.style.opacity    = '0';
-    el.style.transform  = 'translateY(12px) scale(0.97)';
-  });
-
+  grid.style.opacity = '0';
   setTimeout(() => {
     grid.innerHTML = list.map(buildCard).join('');
-
-    /* Staggered slide-up entrance */
-    const cards = Array.from(grid.querySelectorAll('.osc-card-wrap'));
-    cards.forEach(el => {
-      el.style.opacity   = '0';
-      el.style.transform = 'translateY(28px)';
-      el.style.transition = 'none';
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        cards.forEach((el, i) => {
-          el.style.transition = `opacity 0.35s cubic-bezier(0.25,0.85,0.25,1) ${i * 60}ms, transform 0.35s cubic-bezier(0.25,0.85,0.25,1) ${i * 60}ms`;
-          el.style.opacity    = '1';
-          el.style.transform  = 'translateY(0)';
-        });
-      });
-    });
-  }, existing.length > 0 ? 180 : 0);
+    grid.style.transition = 'opacity .25s ease';
+    grid.style.opacity = '1';
+  }, 150);
 }
 
 /* ── Order Now — auth check + pricing data সহ Order page এ যাও ── */
@@ -296,7 +307,9 @@ window.orderThesis = async function() {
 };
 
 /* ── Init ── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  /* Load availability from Supabase first, then render */
+  await loadAvailability();
   buildTabs();
   renderGrid();
 });
@@ -443,35 +456,7 @@ window.setCategory = function(id) {
   buildTabs();
   renderGrid();
   const list = id === 'all' ? SERVICES : SERVICES.filter(s => s.category === id);
-
-  /* Animate accordion items out first */
-  const accContainer = document.getElementById('prAccordion');
-  if (accContainer) {
-    const items = Array.from(accContainer.querySelectorAll('.acc-item'));
-    items.forEach((el, i) => {
-      el.style.transition = `opacity 0.15s ease ${i * 20}ms, transform 0.15s ease ${i * 20}ms`;
-      el.style.opacity    = '0';
-      el.style.transform  = 'translateY(10px)';
-    });
-    setTimeout(() => {
-      renderAccordion(list);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const newItems = Array.from(accContainer.querySelectorAll('.acc-item'));
-          newItems.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(20px)'; el.style.transition = 'none'; });
-          requestAnimationFrame(() => {
-            newItems.forEach((el, i) => {
-              el.style.transition = `opacity 0.3s ease ${i * 50}ms, transform 0.3s cubic-bezier(0.25,0.85,0.25,1) ${i * 50}ms`;
-              el.style.opacity    = '1';
-              el.style.transform  = 'translateY(0)';
-            });
-          });
-        });
-      });
-    }, items.length > 0 ? 160 : 0);
-  } else {
-    renderAccordion(list);
-  }
+  renderAccordion(list);
 };
 
 document.addEventListener('DOMContentLoaded', () => {
