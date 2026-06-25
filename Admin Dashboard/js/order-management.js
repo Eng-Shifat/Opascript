@@ -162,7 +162,7 @@ function renderTable() {
   const tbody = document.getElementById('ordersTableBody');
   tbody.innerHTML = ORDERS.map(o => `
     <tr class="${o.rowClass} ${activeOrderId === o.id ? 'active-row' : ''}" data-id="${o.id}" data-status="${o.statusClass === 's-overdue' ? 'overdue' : o.statusClass === 's-inprogress' ? 'writing' : o.statusClass === 's-review' ? 'draft_ready' : o.statusClass === 's-completed' ? 'completed' : 'pending'}" onclick="selectOrder('${o.id}')">
-      <td><span class="order-id">${o.id}</span></td>
+      <td><span class="order-id">${o.orderId || o.id}</span></td>
       <td>
         <div class="topic-cell">
           <div class="topic-title">${o.topic}</div>
@@ -366,7 +366,9 @@ function openNewOrder() {
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
-  renderTable();
+  // Show loading state — Supabase load হওয়ার আগে demo দেখাবে না
+  const tbody = document.getElementById('ordersTableBody');
+  if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:rgba(255,255,255,0.3);font-size:13px;"><div style="margin-bottom:8px">⏳</div>Loading orders...</td></tr>`;
   // old detail panel auto-open removed — new panel opens on row click
   startTimer();
   initTabs();
@@ -1008,5 +1010,5 @@ async function loadRealOrders() {
 /* DOMContentLoaded এ hook করি */
 document.addEventListener('DOMContentLoaded', () => {
   /* sidebar.js এর admin check শেষ হওয়ার পরে load করতে হবে */
-  setTimeout(loadRealOrders, 800);
+  loadRealOrders();
 });

@@ -1,16 +1,14 @@
 /* ═══════════════════════════════════════════════════════════
-   SCRIPTORA — Shared Admin Topbar (topbar.js)
+   SCRIPTORA — Admin Topbar with Realtime Notifications
+   topbar.js
 
    Usage:
-   <script src="js/topbar.js" data-title="Page Title" data-sub="Subtitle"></script>
-
-   sidebar.js এর আগে অথবা পরে রাখা যাবে।
-   সব function globally available থাকবে।
+   <script src="js/topbar.js" data-title="Page Title" data-sub=""></script>
 ═══════════════════════════════════════════════════════════ */
 
 (function () {
 
-  const scriptTag = document.currentScript;
+  const scriptTag  = document.currentScript;
   const PAGE_TITLE = scriptTag?.getAttribute('data-title') || 'Admin Panel';
   const PAGE_SUB   = scriptTag?.getAttribute('data-sub')   || '';
 
@@ -20,7 +18,7 @@
     <button class="icon-btn menu-btn" onclick="toggleGlobalSidebar()">☰</button>
     <div class="topbar-title">
       <h1 id="topbarPageTitle">${PAGE_TITLE}</h1>
-      <p id="topbarPageSub">${PAGE_SUB}</p>
+      <p  id="topbarPageSub">${PAGE_SUB}</p>
     </div>
 
     <div class="search-box" id="topbarSearchWrap">
@@ -29,42 +27,48 @@
     </div>
 
     <div class="topbar-actions">
-      <div class="icon-btn" id="topbarNotifBtn" onclick="topbarToggle('topbar-notif-panel', event)">
+
+      <!-- NOTIFICATION BELL -->
+      <div class="icon-btn tb-btn" id="topbarNotifBtn" onclick="topbarToggle('topbar-notif-panel', event)">
         <i class="ti ti-bell"></i>
-        <span class="dot" id="topbarNotifDot" style="display:none"></span>
+        <span class="tb-dot" id="topbarNotifDot" style="display:none"></span>
       </div>
-      <div class="icon-btn" id="topbarMsgBtn" onclick="topbarToggle('topbar-msg-panel', event)">
+
+      <!-- MESSAGE -->
+      <div class="icon-btn tb-btn" id="topbarMsgBtn" onclick="topbarToggle('topbar-msg-panel', event)">
         <i class="ti ti-mail"></i>
-        <span class="dot" id="topbarMsgDot" style="display:none"></span>
+        <span class="tb-dot" id="topbarMsgDot" style="display:none"></span>
       </div>
+
+      <!-- AVATAR -->
       <div class="topbar-avatar" id="topbarAvatar" onclick="topbarToggle('topbar-profile-panel', event)">SA</div>
     </div>
 
-    <!-- NOTIFICATION PANEL -->
+    <!-- ── NOTIFICATION PANEL ── -->
     <div class="dropdown-panel" id="topbar-notif-panel">
       <div class="dp-header">
         <span class="dp-title">Notifications</span>
         <span class="dp-badge" id="topbarNotifBadge" style="display:none">0</span>
+        <span class="dp-clear" onclick="topbarMarkNotifsRead()">Mark all read</span>
       </div>
       <div class="dp-list" id="topbarNotifList">
-        <div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#6b7280;font-size:.82rem;text-align:center;padding:8px 0">Loading…</div></div></div>
+        <div class="dp-empty">Loading…</div>
       </div>
-      <div class="dp-footer" onclick="topbarMarkNotifsRead()" style="cursor:pointer">Mark all as read</div>
     </div>
 
-    <!-- MESSAGE PANEL -->
+    <!-- ── MESSAGE PANEL ── -->
     <div class="dropdown-panel" id="topbar-msg-panel">
       <div class="dp-header">
         <span class="dp-title">Messages</span>
         <span class="dp-badge" id="topbarMsgBadge" style="display:none">0</span>
       </div>
       <div class="dp-list" id="topbarMsgList">
-        <div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#6b7280;font-size:.82rem;text-align:center;padding:8px 0">Loading…</div></div></div>
+        <div class="dp-empty">Loading…</div>
       </div>
-      <div class="dp-footer" onclick="window.location.href='admin-messages.html'" style="cursor:pointer">View all messages</div>
+      <div class="dp-footer" onclick="window.location.href='admin-messages.html'" style="cursor:pointer">View all messages →</div>
     </div>
 
-    <!-- PROFILE PANEL -->
+    <!-- ── PROFILE PANEL ── -->
     <div class="dropdown-panel" id="topbar-profile-panel">
       <div class="dp-profile-head">
         <div class="dp-profile-avatar" id="topbarProfileAvatar">SA</div>
@@ -80,39 +84,51 @@
       <div class="dp-divider"></div>
       <div class="dp-menu-item logout" onclick="handleAdminLogout()"><i class="ti ti-logout"></i> Logout</div>
     </div>
+
   </header>`;
 
-  /* ── Inject on DOMContentLoaded ── */
+  /* ══════════════════════════════════════
+     IN-MEMORY STORE — panels সবসময় থাকবে
+  ══════════════════════════════════════ */
+  const store = {
+    notifs: [],   /* { id, icon, color, text, sub, time, read, onclick } */
+    msgs:   [],   /* { orderId, name, preview, time, count, read } */
+  };
+
+  /* ── Inject HTML ── */
   document.addEventListener('DOMContentLoaded', function () {
     const main = document.querySelector('.main');
     if (!main) return;
     main.insertAdjacentHTML('afterbegin', TOPBAR_HTML);
 
-    /* Auto date/time subtitle */
+    /* Auto subtitle */
     if (!PAGE_SUB) {
       const sub = document.getElementById('topbarPageSub');
       if (sub) {
         const now = new Date();
-        const d = now.toLocaleDateString('bn-BD', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-        sub.textContent = d + ' · স্বাগতম, Super Admin!';
+        sub.textContent = now.toLocaleDateString('en-BD', {
+          weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        }) + ' · Welcome, Super Admin!';
       }
     }
 
-    /* Outside click → close all dropdowns */
+    /* Outside click → close panels (panels data থাকে, শুধু hide হয়) */
     document.addEventListener('click', function () {
       document.querySelectorAll('#adminTopbar .dropdown-panel').forEach(p => p.classList.remove('open'));
     });
 
-    /* Load data after sidebar auth check */
-    setTimeout(_topbarInit, 700);
+    /* Init after supabase ready */
+    setTimeout(_topbarInit, 800);
   });
 
-  /* ── Init (after Supabase session ready) ── */
+  /* ══════════════════════════════════════
+     INIT
+  ══════════════════════════════════════ */
   async function _topbarInit() {
     const sb = window.scriptoraSupabase;
     if (!sb) return;
 
-    /* Admin email */
+    /* Admin session */
     try {
       const { data: { session } } = await sb.auth.getSession();
       if (session?.user) {
@@ -122,43 +138,218 @@
         _setEl('topbarProfileAvatar', initials);
         _setEl('topbarAvatar', initials);
       }
-    } catch(e) {}
+    } catch (e) {}
 
-    /* Load badges */
-    await _loadMsgBadge();
-    await _loadNotifBadge();
+    /* Initial load */
+    await _fetchNotifs();
+    await _fetchMsgs();
+
+    /* ── Realtime Subscriptions ── */
+    _subscribeRealtime(sb);
   }
 
   /* ══════════════════════════════════════
-     MESSAGES
+     REALTIME — সব change subscribe করা
   ══════════════════════════════════════ */
-  async function _loadMsgBadge() {
-    const sb = window.scriptoraSupabase;
-    if (!sb) return;
-    try {
-      const { count } = await sb
-        .from('messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('from_admin', false)
-        .eq('read', false);
+  function _subscribeRealtime(sb) {
 
-      const dot   = document.getElementById('topbarMsgDot');
-      const badge = document.getElementById('topbarMsgBadge');
-      if (count > 0) {
-        if (dot)   { dot.style.display = ''; }
-        if (badge) { badge.textContent = count; badge.style.display = ''; }
-      }
-    } catch(e) {}
+    /* orders table — INSERT / UPDATE */
+    sb.channel('topbar-orders')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, async (payload) => {
+        const o = payload.new;
+        _addNotif({
+          id:     'order-new-' + o.id,
+          icon:   'ti-file-plus',
+          color:  'dp-green',
+          text:   `নতুন order এসেছে`,
+          sub:    o.title || 'New Order',
+          time:   new Date().toISOString(),
+          onclick: `window.location.href='order-management.html'`,
+        });
+        _toast('🆕 New order received!');
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, async (payload) => {
+        const o   = payload.new;
+        const old = payload.old;
+
+        /* Payment proof submitted */
+        if (o.payment_status === 'under_review' && old.payment_status !== 'under_review') {
+          _addNotif({
+            id:     'payment-' + o.id,
+            icon:   'ti-cash',
+            color:  'dp-purple',
+            text:   `Payment proof জমা দেওয়া হয়েছে`,
+            sub:    o.title || 'Order',
+            time:   new Date().toISOString(),
+            onclick: `window.location.href='order-management.html'`,
+          });
+          _toast('💰 Payment proof submitted!');
+        }
+
+        /* Status change */
+        if (o.status !== old.status) {
+          _addNotif({
+            id:     'status-' + o.id + '-' + Date.now(),
+            icon:   'ti-refresh',
+            color:  'dp-blue',
+            text:   `Order status পরিবর্তন হয়েছে`,
+            sub:    `${old.status || '?'} → ${o.status}`,
+            time:   new Date().toISOString(),
+            onclick: `window.location.href='order-management.html'`,
+          });
+          _toast('🔄 Order status updated!');
+        }
+
+        /* Revision requested */
+        if (o.revision_requested && !old.revision_requested) {
+          _addNotif({
+            id:     'revision-' + o.id,
+            icon:   'ti-edit',
+            color:  'dp-orange',
+            text:   `Revision request এসেছে`,
+            sub:    o.title || 'Order',
+            time:   new Date().toISOString(),
+            onclick: `window.location.href='order-management.html'`,
+          });
+          _toast('✏️ Revision requested!');
+        }
+      })
+      .subscribe();
+
+    /* messages table — INSERT */
+    sb.channel('topbar-messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+        const m = payload.new;
+        if (m.from_admin) return; /* admin নিজে পাঠালে notification দরকার নেই */
+
+        /* Store এ add */
+        const existing = store.msgs.find(x => x.orderId === m.order_id);
+        if (existing) {
+          existing.count++;
+          existing.preview = m.text;
+          existing.time    = m.sent_at || new Date().toISOString();
+          existing.read    = false;
+        } else {
+          store.msgs.unshift({
+            orderId: m.order_id,
+            name:    'Client',
+            preview: m.text || '—',
+            time:    m.sent_at || new Date().toISOString(),
+            count:   1,
+            read:    false,
+          });
+        }
+
+        _renderMsgPanel();
+        _updateMsgBadge();
+        _toast('💬 নতুন message এসেছে!');
+      })
+      .subscribe();
+
+    /* files table — INSERT (file upload) */
+    sb.channel('topbar-files')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'order_files' }, async (payload) => {
+        const f = payload.new;
+        if (f.uploaded_by === 'admin') return;
+        _addNotif({
+          id:     'file-' + f.id,
+          icon:   'ti-file-upload',
+          color:  'dp-blue',
+          text:   `Client নতুন file upload করেছেন`,
+          sub:    f.file_name || 'File',
+          time:   new Date().toISOString(),
+          onclick: `window.location.href='order-management.html'`,
+        });
+        _toast('📎 New file uploaded!');
+      })
+      .subscribe();
   }
 
-  async function _loadMsgPanel() {
-    const sb   = window.scriptoraSupabase;
-    const list  = document.getElementById('topbarMsgList');
-    const badge = document.getElementById('topbarMsgBadge');
-    const dot   = document.getElementById('topbarMsgDot');
-    if (!sb || !list) return;
+  /* ══════════════════════════════════════
+     FETCH — initial load
+  ══════════════════════════════════════ */
+  async function _fetchNotifs() {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    store.notifs = [];
 
-    list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#6b7280;font-size:.82rem;text-align:center;padding:8px 0">Loading…</div></div></div>';
+    try {
+      /* Payment proof pending */
+      const { data: proofOrders } = await sb
+        .from('orders')
+        .select('id, title, order_number, updated_at, client_id')
+        .eq('payment_status', 'under_review')
+        .order('updated_at', { ascending: false })
+        .limit(10);
+
+      (proofOrders || []).forEach(o => {
+        store.notifs.push({
+          id:     'payment-' + o.id,
+          icon:   'ti-cash',
+          color:  'dp-purple',
+          text:   `Payment proof review pending`,
+          sub:    o.title || (o.order_number || o.id.slice(0,8)),
+          time:   o.updated_at,
+          read:   false,
+          onclick: `window.location.href='order-management.html'`,
+        });
+      });
+
+      /* Overdue orders */
+      const { data: overdueOrders } = await sb
+        .from('orders')
+        .select('id, title, deadline')
+        .eq('status', 'overdue')
+        .limit(5);
+
+      (overdueOrders || []).forEach(o => {
+        store.notifs.push({
+          id:     'overdue-' + o.id,
+          icon:   'ti-alert-circle',
+          color:  'dp-red',
+          text:   `Order overdue`,
+          sub:    o.title || 'Order',
+          time:   o.deadline,
+          read:   false,
+          onclick: `window.location.href='order-management.html'`,
+        });
+      });
+
+      /* New confirmed orders (last 24h) */
+      const since = new Date(Date.now() - 86400000).toISOString();
+      const { data: newOrders } = await sb
+        .from('orders')
+        .select('id, title, updated_at')
+        .eq('status', 'confirmed')
+        .gte('updated_at', since)
+        .order('updated_at', { ascending: false })
+        .limit(5);
+
+      (newOrders || []).forEach(o => {
+        store.notifs.push({
+          id:     'confirmed-' + o.id,
+          icon:   'ti-check',
+          color:  'dp-green',
+          text:   `নতুন order confirm হয়েছে`,
+          sub:    o.title || 'Order',
+          time:   o.updated_at,
+          read:   false,
+          onclick: `window.location.href='order-management.html'`,
+        });
+      });
+
+      store.notifs.sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0));
+
+    } catch (e) { console.error('notif fetch error', e); }
+
+    _renderNotifPanel();
+    _updateNotifBadge();
+  }
+
+  async function _fetchMsgs() {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    store.msgs = [];
 
     try {
       const { data: unread } = await sb
@@ -168,208 +359,156 @@
         .eq('read', false)
         .order('sent_at', { ascending: false });
 
-      if (!unread || !unread.length) {
-        list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#6b7280;font-size:.82rem;text-align:center;padding:8px 0">কোনো নতুন message নেই</div></div></div>';
-        if (badge) badge.style.display = 'none';
-        if (dot)   dot.style.display   = 'none';
-        return;
-      }
+      if (!unread?.length) { _renderMsgPanel(); _updateMsgBadge(); return; }
 
       /* Group by order */
       const grouped = {};
       unread.forEach(m => {
         if (!grouped[m.order_id]) grouped[m.order_id] = { latest: m, count: 0 };
         grouped[m.order_id].count++;
-        if (new Date(m.sent_at) > new Date(grouped[m.order_id].latest.sent_at)) grouped[m.order_id].latest = m;
+        if (new Date(m.sent_at) > new Date(grouped[m.order_id].latest.sent_at))
+          grouped[m.order_id].latest = m;
       });
-      const orderIds = Object.keys(grouped);
 
-      /* Fetch order + client info */
+      const orderIds = Object.keys(grouped);
       const { data: ordersData } = await sb.from('orders').select('id, title, client_id').in('id', orderIds);
       const orderMap = {};
       (ordersData || []).forEach(o => { orderMap[o.id] = o; });
 
-      const clientIds = [...new Set((ordersData||[]).map(o=>o.client_id).filter(Boolean))];
+      const clientIds = [...new Set((ordersData||[]).map(o => o.client_id).filter(Boolean))];
       let clientMap = {};
       if (clientIds.length) {
         const { data: clients } = await sb.from('clients').select('id,name,email').in('id', clientIds);
         (clients||[]).forEach(c => { clientMap[c.id] = c; });
       }
 
-      const rows = orderIds.map(oid => {
+      orderIds.forEach(oid => {
         const o = orderMap[oid] || {};
         const c = clientMap[o.client_id] || {};
-        return {
+        store.msgs.push({
           orderId: oid,
           name:    c.name || c.email || 'Client',
-          title:   o.title || 'Order',
           preview: grouped[oid].latest.text || '—',
           time:    grouped[oid].latest.sent_at,
           count:   grouped[oid].count,
-        };
-      }).sort((a,b) => new Date(b.time) - new Date(a.time));
+          read:    false,
+        });
+      });
 
-      list.innerHTML = rows.slice(0,6).map(r => `
-        <div class="dp-item unread" onclick="window.location.href='admin-messages.html?order=${r.orderId}'" style="cursor:pointer">
-          <div class="dp-avatar dp-av-purple">${_esc(r.name).substring(0,2).toUpperCase()}</div>
-          <div class="dp-body">
-            <div class="dp-text"><b>${_esc(r.name)}</b>${r.count > 1 ? ` <span style="font-size:.7rem;background:#6366f1;color:#fff;padding:1px 6px;border-radius:20px;margin-left:4px">${r.count}</span>` : ''}</div>
-            <div class="dp-sub">${_esc(r.preview.substring(0,50))}${r.preview.length>50?'…':''}</div>
-            <div class="dp-time">${_relTime(r.time)}</div>
-          </div>
-        </div>`).join('');
+      store.msgs.sort((a, b) => new Date(b.time) - new Date(a.time));
 
-      const total = rows.reduce((s,r)=>s+r.count, 0);
-      if (badge) { badge.textContent = total + ' new'; badge.style.display = ''; }
-      if (dot)   dot.style.display = '';
+    } catch (e) { console.error('msg fetch error', e); }
 
-    } catch(e) {
-      list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#f87171;font-size:.82rem">Load করা যায়নি</div></div></div>';
-    }
+    _renderMsgPanel();
+    _updateMsgBadge();
   }
 
   /* ══════════════════════════════════════
-     NOTIFICATIONS (orders থেকে)
+     RENDER — store থেকে panel update
   ══════════════════════════════════════ */
-  async function _loadNotifBadge() {
-    const sb = window.scriptoraSupabase;
-    if (!sb) return;
-    try {
-      /* নতুন pending orders count */
-      const { count } = await sb
-        .from('orders')
-        .select('id', { count: 'exact', head: true })
-        .eq('payment_status', 'under_review');
+  function _renderNotifPanel() {
+    const list = document.getElementById('topbarNotifList');
+    if (!list) return;
 
-      const dot   = document.getElementById('topbarNotifDot');
-      const badge = document.getElementById('topbarNotifBadge');
-      if (count > 0) {
-        if (dot)   dot.style.display = '';
-        if (badge) { badge.textContent = count; badge.style.display = ''; }
-      }
-    } catch(e) {}
+    if (!store.notifs.length) {
+      list.innerHTML = '<div class="dp-empty">কোনো notification নেই</div>';
+      return;
+    }
+
+    list.innerHTML = store.notifs.slice(0, 8).map(item => `
+      <div class="dp-item ${item.read ? '' : 'unread'}" onclick="${item.onclick}" style="cursor:pointer">
+        <div class="dp-icon ${item.color}"><i class="ti ${item.icon}"></i></div>
+        <div class="dp-body">
+          <div class="dp-text">${item.text}</div>
+          ${item.sub ? `<div class="dp-sub">${_esc(item.sub)}</div>` : ''}
+          <div class="dp-time">${_relTime(item.time)}</div>
+        </div>
+      </div>`).join('');
   }
 
-  async function _loadNotifPanel() {
-    const sb   = window.scriptoraSupabase;
-    const list  = document.getElementById('topbarNotifList');
-    const badge = document.getElementById('topbarNotifBadge');
-    const dot   = document.getElementById('topbarNotifDot');
-    if (!sb || !list) return;
+  function _renderMsgPanel() {
+    const list = document.getElementById('topbarMsgList');
+    if (!list) return;
 
-    list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#6b7280;font-size:.82rem;text-align:center;padding:8px 0">Loading…</div></div></div>';
-
-    try {
-      const items = [];
-
-      /* 1. Payment proof submitted — under_review */
-      const { data: proofOrders } = await sb
-        .from('orders')
-        .select('id, title, order_number, order_date, client_id')
-        .eq('payment_status', 'under_review')
-        .order('order_date', { ascending: false })
-        .limit(5);
-
-      if (proofOrders?.length) {
-        /* client names */
-        const cIds = [...new Set(proofOrders.map(o=>o.client_id).filter(Boolean))];
-        let cMap = {};
-        if (cIds.length) {
-          const { data: cl } = await sb.from('clients').select('id,name,email').in('id', cIds);
-          (cl||[]).forEach(c => { cMap[c.id] = c; });
-        }
-        proofOrders.forEach(o => {
-          const c = cMap[o.client_id] || {};
-          items.push({
-            icon: 'ti-cash',
-            color: 'dp-purple',
-            text: `<b>${_esc(c.name||'Client')}</b> payment proof পাঠিয়েছেন`,
-            sub: _esc(o.title||'Order'),
-            time: o.order_date,
-            onclick: `window.location.href='order-management.html'`,
-          });
-        });
-      }
-
-      /* 2. Overdue orders */
-      const { data: overdueOrders } = await sb
-        .from('orders')
-        .select('id, title, deadline')
-        .eq('status', 'overdue')
-        .limit(3);
-
-      (overdueOrders||[]).forEach(o => {
-        items.push({
-          icon: 'ti-alert-circle',
-          color: 'dp-red',
-          text: `Order <b>${_esc(o.title||'')}</b> overdue`,
-          sub: o.deadline ? 'Deadline: ' + new Date(o.deadline).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '',
-          time: o.deadline,
-          onclick: `window.location.href='order-management.html'`,
-        });
-      });
-
-      /* 3. Newly confirmed orders */
-      const { data: newOrders } = await sb
-        .from('orders')
-        .select('id, title, order_date')
-        .eq('status', 'confirmed')
-        .order('order_date', { ascending: false })
-        .limit(3);
-
-      (newOrders||[]).forEach(o => {
-        items.push({
-          icon: 'ti-check',
-          color: 'dp-green',
-          text: `নতুন order confirm: <b>${_esc(o.title||'Order')}</b>`,
-          sub: '',
-          time: o.order_date,
-          onclick: `window.location.href='order-management.html'`,
-        });
-      });
-
-      if (!items.length) {
-        list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#6b7280;font-size:.82rem;text-align:center;padding:8px 0">কোনো notification নেই</div></div></div>';
-        if (badge) badge.style.display = 'none';
-        if (dot)   dot.style.display   = 'none';
-        return;
-      }
-
-      /* Sort by time desc */
-      items.sort((a,b) => new Date(b.time||0) - new Date(a.time||0));
-
-      list.innerHTML = items.slice(0,6).map(item => `
-        <div class="dp-item unread" onclick="${item.onclick}" style="cursor:pointer">
-          <div class="dp-icon ${item.color}"><i class="ti ${item.icon}"></i></div>
-          <div class="dp-body">
-            <div class="dp-text">${item.text}</div>
-            ${item.sub ? `<div class="dp-sub">${item.sub}</div>` : ''}
-            <div class="dp-time">${_relTime(item.time)}</div>
-          </div>
-        </div>`).join('');
-
-      if (badge) { badge.textContent = items.length; badge.style.display = ''; }
-      if (dot)   dot.style.display = '';
-
-    } catch(e) {
-      list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#f87171;font-size:.82rem">Load করা যায়নি</div></div></div>';
+    if (!store.msgs.length) {
+      list.innerHTML = '<div class="dp-empty">কোনো নতুন message নেই</div>';
+      return;
     }
+
+    list.innerHTML = store.msgs.slice(0, 6).map(r => `
+      <div class="dp-item ${r.read ? '' : 'unread'}" onclick="window.location.href='admin-messages.html?order=${r.orderId}'" style="cursor:pointer">
+        <div class="dp-avatar dp-av-purple">${_esc(r.name).substring(0, 2).toUpperCase()}</div>
+        <div class="dp-body">
+          <div class="dp-text">
+            <b>${_esc(r.name)}</b>
+            ${r.count > 1 ? `<span class="dp-count">${r.count}</span>` : ''}
+          </div>
+          <div class="dp-sub">${_esc((r.preview||'').substring(0, 55))}${(r.preview||'').length > 55 ? '…' : ''}</div>
+          <div class="dp-time">${_relTime(r.time)}</div>
+        </div>
+      </div>`).join('');
   }
 
   /* ══════════════════════════════════════
-     MARK ALL NOTIFS READ
+     BADGE UPDATE
+  ══════════════════════════════════════ */
+  function _updateNotifBadge() {
+    const unread = store.notifs.filter(n => !n.read).length;
+    const dot    = document.getElementById('topbarNotifDot');
+    const badge  = document.getElementById('topbarNotifBadge');
+    if (dot)   dot.style.display   = unread ? '' : 'none';
+    if (badge) { badge.textContent = unread; badge.style.display = unread ? '' : 'none'; }
+  }
+
+  function _updateMsgBadge() {
+    const unread = store.msgs.filter(m => !m.read).length;
+    const total  = store.msgs.reduce((s, m) => s + (m.read ? 0 : m.count), 0);
+    const dot    = document.getElementById('topbarMsgDot');
+    const badge  = document.getElementById('topbarMsgBadge');
+    if (dot)   dot.style.display   = unread ? '' : 'none';
+    if (badge) { badge.textContent = total || unread; badge.style.display = unread ? '' : 'none'; }
+  }
+
+  /* ══════════════════════════════════════
+     ADD NOTIF (realtime থেকে)
+  ══════════════════════════════════════ */
+  function _addNotif(notif) {
+    /* duplicate check */
+    if (store.notifs.find(n => n.id === notif.id)) return;
+    store.notifs.unshift(notif);
+    _renderNotifPanel();
+    _updateNotifBadge();
+  }
+
+  /* ══════════════════════════════════════
+     TOAST
+  ══════════════════════════════════════ */
+  function _toast(msg) {
+    let wrap = document.getElementById('topbar-toast-wrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'topbar-toast-wrap';
+      wrap.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:8px;';
+      document.body.appendChild(wrap);
+    }
+    const t = document.createElement('div');
+    t.style.cssText = 'background:#1e2540;border:1px solid rgba(255,255,255,0.1);color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;box-shadow:0 4px 24px rgba(0,0,0,0.4);animation:tbSlideIn 0.3s ease;white-space:nowrap;';
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  /* ══════════════════════════════════════
+     MARK ALL READ
   ══════════════════════════════════════ */
   window.topbarMarkNotifsRead = function () {
-    const dot   = document.getElementById('topbarNotifDot');
-    const badge = document.getElementById('topbarNotifBadge');
-    const list  = document.getElementById('topbarNotifList');
-    if (dot)   dot.style.display   = 'none';
-    if (badge) badge.style.display = 'none';
-    if (list)  list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text" style="color:#6b7280;font-size:.82rem;text-align:center;padding:8px 0">কোনো notification নেই</div></div></div>';
+    store.notifs.forEach(n => { n.read = true; });
+    _renderNotifPanel();
+    _updateNotifBadge();
   };
 
   /* ══════════════════════════════════════
-     DROPDOWN TOGGLE
+     DROPDOWN TOGGLE — panel data থাকে, শুধু hide/show
   ══════════════════════════════════════ */
   window.topbarToggle = function (id, e) {
     e?.stopPropagation();
@@ -377,27 +516,18 @@
     if (!panel) return;
     const isOpen = panel.classList.contains('open');
     document.querySelectorAll('#adminTopbar .dropdown-panel').forEach(p => p.classList.remove('open'));
-    if (!isOpen) {
-      panel.classList.add('open');
-      /* Load fresh data when opened */
-      if (id === 'topbar-msg-panel')   _loadMsgPanel();
-      if (id === 'topbar-notif-panel') _loadNotifPanel();
-    }
+    if (!isOpen) panel.classList.add('open');
   };
 
   /* ══════════════════════════════════════
-     SEARCH (page specific function call করে)
+     SEARCH
   ══════════════════════════════════════ */
   window.topbarHandleSearch = function (val) {
-    /* page এ handleSearch() থাকলে call করো */
     if (typeof window.handleSearch === 'function') window.handleSearch(val);
   };
 
-  /* ══════════════════════════════════════
-     NAVIGATE
-  ══════════════════════════════════════ */
   window.topbarGoTo = function (page) {
-    const map = { profile: '#', settings: '#', help: '#' };
+    const map = { profile: 'admin-profile.html', settings: 'admin-settings.html', help: '#' };
     if (map[page]) window.location.href = map[page];
   };
 
@@ -405,18 +535,18 @@
      HELPERS
   ══════════════════════════════════════ */
   function _esc(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function _relTime(iso) {
     if (!iso) return '';
     const m = Math.floor((Date.now() - new Date(iso)) / 60000);
-    if (m < 1)  return 'এখনই';
-    if (m < 60) return m + ' min ago';
+    if (m < 1)   return 'এখনই';
+    if (m < 60)  return m + ' min ago';
     const h = Math.floor(m / 60);
-    if (h < 24) return h + ' hours ago';
+    if (h < 24)  return h + 'h ago';
     const d = Math.floor(h / 24);
-    return d === 1 ? 'গতকাল' : d + ' days ago';
+    return d === 1 ? 'Yesterday' : d + ' days ago';
   }
 
   function _setEl(id, text) {

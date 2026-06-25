@@ -612,3 +612,59 @@ tbody td { padding: 11px 9px; font-size: .78rem; border-bottom: 1px solid rgba(2
 #topbar-notif-panel   { right: 84px; }
 #topbar-msg-panel     { right: 48px; }
 #topbar-profile-panel { right: 8px; }
+
+/* ══════════════════════════════════════
+   TOPBAR ADDITIONS — topbar.js v2
+══════════════════════════════════════ */
+
+/* Notification dot on icon */
+.tb-btn { position: relative; }
+.tb-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #f87171;
+  border: 1.5px solid var(--bg, #0f1629);
+}
+
+/* dp-clear (mark all read link) */
+.dp-clear {
+  font-size: .62rem;
+  color: var(--accent2, #a78bfa);
+  cursor: pointer;
+  margin-left: auto;
+  padding-left: 8px;
+  opacity: 0.8;
+}
+.dp-clear:hover { opacity: 1; text-decoration: underline; }
+
+/* dp-empty state */
+.dp-empty {
+  text-align: center;
+  padding: 1.8rem 0;
+  font-size: .78rem;
+  color: rgba(255,255,255,0.3);
+}
+
+/* dp-count badge inside message item */
+.dp-count {
+  display: inline-block;
+  font-size: .6rem;
+  background: #6366f1;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 20px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Extra icon colors */
+.dp-blue   { background: rgba(96,165,250,0.15);  color: #60a5fa; }
+.dp-orange { background: rgba(251,146,60,0.15);  color: #fb923c; }
+
+/* Toast slide-in animation */
+@keyframes tbSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
