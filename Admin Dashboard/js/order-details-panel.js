@@ -54,7 +54,127 @@
 
   function formatWordHint(order) {
     const words = getWordCount(order);
-    return words ? '(~' + words.toLocaleString() + ' words)' : '(~— words)';
+    return words ? '(~' + words.toLocaleString() + ' words)' : '';
+  }
+
+  function clipText(str, maxLen) {
+    if (str == null || str === '') return '—';
+    const clean = String(str).trim().replace(/\s+/g, ' ');
+    if (!clean) return '—';
+    return clean.length > maxLen ? clean.slice(0, maxLen - 1) + '…' : clean;
+  }
+
+  function buildOrderInformationHTML(order, d, pageCount) {
+    const amount   = clipText(order.amount, 14);
+    const deadline = clipText(order.deadline, 12);
+    const time     = clipText(order.deadlineTime, 10);
+    const service  = clipText(order.pkg, 22);
+    const citation = clipText(d.citationStyle || 'APA', 12);
+    const chapters = clipText(String(order.chapters || '—'), 16);
+    const pages    = pageCount ? pageCount + ' Pages' : '— Pages';
+    const orderId  = clipText(order.orderId || order.id, 24);
+
+    return `
+        <div class="odp-card odp-oi-card">
+          <div class="odp-card-title"><i class="ti ti-clipboard-data"></i> Order Information</div>
+
+          <div class="odp-oi-tiles">
+            <div class="odp-oi-tile odp-oi-tile-blue">
+              <div class="odp-oi-tile-icon"><i class="ti ti-currency-taka"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Total Amount</div>
+                <div class="odp-oi-tile-val" title="${esc(order.amount || '')}">${esc(amount)}</div>
+              </div>
+            </div>
+            <div class="odp-oi-tile odp-oi-tile-orange">
+              <div class="odp-oi-tile-icon"><i class="ti ti-calendar-due"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Deadline</div>
+                <div class="odp-oi-tile-val odp-oi-tile-deadline">
+                  <span>${esc(deadline)}</span>
+                  <span class="odp-oi-tile-time">${esc(time)}</span>
+                </div>
+                <div class="odp-oi-tile-sub" id="odpDaysLeft">—</div>
+              </div>
+            </div>
+            <div class="odp-oi-tile odp-oi-tile-teal">
+              <div class="odp-oi-tile-icon"><i class="ti ti-file-description"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Word Count</div>
+                <div class="odp-oi-tile-val">${esc(formatWordCountDisplay(order))}</div>
+                <div class="odp-oi-tile-sub">${esc(formatWordHint(order))}</div>
+              </div>
+            </div>
+            <div class="odp-oi-tile odp-oi-tile-purple">
+              <div class="odp-oi-tile-icon"><i class="ti ti-blockquote"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Citation Style</div>
+                <div class="odp-oi-tile-val odp-oi-badge-wrap"><span class="odp-oi-badge">${esc(citation)}</span></div>
+              </div>
+            </div>
+            <div class="odp-oi-tile odp-oi-tile-green">
+              <div class="odp-oi-tile-icon"><i class="ti ti-award"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Service Type</div>
+                <div class="odp-oi-tile-val" title="${esc(order.pkg || '')}">${esc(service)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="odp-oi-pay-block">
+            <!-- Row 1: Status label -->
+            <div class="odp-oi-pay-top-row">
+              <span class="odp-oi-pay-label">Payment Status</span>
+              <span class="odp-oi-pay-pill odp-oi-pay-unpaid" id="odpOiPayStatus">Unpaid</span>
+            </div>
+            <!-- Row 2: Amounts + Bar + Button -->
+            <div class="odp-oi-pay-bottom-row">
+              <div class="odp-oi-pay-amounts">
+                <div class="odp-oi-pay-amount-item">
+                  <div class="odp-oi-pay-sub-lbl">Paid Amount</div>
+                  <div class="odp-oi-pay-sub-val" id="odpOiPaid">৳0</div>
+                </div>
+                <div class="odp-oi-pay-amount-sep"></div>
+                <div class="odp-oi-pay-amount-item">
+                  <div class="odp-oi-pay-sub-lbl">Due Amount</div>
+                  <div class="odp-oi-pay-sub-val" id="odpOiDue">${esc(amount)}</div>
+                </div>
+              </div>
+              <div class="odp-oi-pay-bar-wrap">
+                <div class="odp-oi-pay-bar-label">
+                  <span id="odpOiPaidPct">0%</span>
+                  <span class="odp-oi-pay-paid-lbl">Paid</span>
+                </div>
+                <div class="odp-oi-pay-track"><div class="odp-oi-pay-fill" id="odpOiPayFill" style="width:0%"></div></div>
+              </div>
+              <button type="button" class="odp-oi-pay-btn" onclick="odpSwitchTab('payments')">View Payments</button>
+            </div>
+          </div>
+
+          <div class="odp-oi-meta-row">
+            <div class="odp-oi-meta-item">
+              <div class="odp-oi-meta-icon-box odp-oi-meta-icon-purple"><i class="ti ti-layout-list"></i></div>
+              <div class="odp-oi-meta-body">
+                <div class="odp-oi-meta-lbl">Chapters / Pages</div>
+                <div class="odp-oi-meta-val">${esc(chapters)}</div>
+              </div>
+            </div>
+            <div class="odp-oi-meta-item">
+              <div class="odp-oi-meta-icon-box odp-oi-meta-icon-teal"><i class="ti ti-file-description"></i></div>
+              <div class="odp-oi-meta-body">
+                <div class="odp-oi-meta-lbl">Pages (est.)</div>
+                <div class="odp-oi-meta-val" id="odpOiPages">${esc(pages)}</div>
+              </div>
+            </div>
+            <div class="odp-oi-meta-item">
+              <div class="odp-oi-meta-icon-box odp-oi-meta-icon-blue"><i class="ti ti-hash"></i></div>
+              <div class="odp-oi-meta-body">
+                <div class="odp-oi-meta-lbl">Order ID</div>
+                <div class="odp-oi-meta-val odp-oi-meta-mono" title="${esc(order.orderId || order.id || '')}">${esc(orderId)}</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
   }
 
   function buildAcademicSummaryHTML(order, ord, client) {
@@ -234,6 +354,7 @@
   <div class="odp-tabs-wrap">
     <div class="odp-tabs">
       <button class="odp-tab odp-active" data-odp-tab="overview"  onclick="odpSwitchTab('overview')"><i class="ti ti-layout-2"></i> Overview</button>
+      <button class="odp-tab"            data-odp-tab="summary"   onclick="odpSwitchTab('summary')"><i class="ti ti-clipboard-list"></i> Order Summary</button>
       <button class="odp-tab"            data-odp-tab="files"     onclick="odpSwitchTab('files')"><i class="ti ti-files"></i> Files</button>
       <button class="odp-tab"            data-odp-tab="payments"  onclick="odpSwitchTab('payments')"><i class="ti ti-credit-card"></i> Payments</button>
       <button class="odp-tab"            data-odp-tab="messages"  onclick="odpSwitchTab('messages')"><i class="ti ti-message-dots"></i> Messages</button>
@@ -247,6 +368,11 @@
     <!-- ══ OVERVIEW ══ -->
     <div class="odp-pane odp-pane-active" data-odp-pane="overview">
       ${buildOverviewHTML(order, statusClass)}
+    </div>
+
+    <!-- ══ ORDER SUMMARY ══ -->
+    <div class="odp-pane" data-odp-pane="summary">
+      ${buildOrderSummaryHTML(order)}
     </div>
 
     <!-- ══ FILES ══ -->
@@ -309,6 +435,7 @@
     const pct = d.overall || order.progressPct || 0;
     const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
     const pfClass  = pct >= 80 ? 'pf-green'    : pct >= 40 ? 'pf-yellow'     : 'pf-red';
+    const pageCount = getPageCount(order);
 
     /* Milestone steps */
     const milestones = d.milestones || [
@@ -337,167 +464,97 @@
     }).join('');
 
     return `
-    <!-- 3-col layout: left cards | center cards | right panel -->
-    <div class="odp-ov-grid">
+    <!-- 2-col layout: [main content] | [right sidebar: progress + quick actions] -->
+    <div class="odp-ov-grid odp-ov-grid-sidebar">
 
-      <!-- ── LEFT COL ── -->
-      <div class="odp-ov-col">
+      <!-- ── LEFT / MAIN COLUMN ── -->
+      <div class="odp-ov-main-col">
 
-        <!-- Client Info -->
-        <div class="odp-card odp-client-card">
-          <div class="odp-card-title"><i class="ti ti-user-circle"></i> Client Information</div>
-          <div class="odp-cc-header">
-            <div class="odp-cc-av" style="background:${esc(order.avatarColor)}">${esc(order.initials)}</div>
-            <div class="odp-cc-info">
-              <div class="odp-cc-name">${esc(order.client)} <span class="odp-cc-badge-verified"><i class="ti ti-shield-check"></i> Verified</span></div>
-              <div class="odp-cc-uni">${esc(order.uni)}</div>
-            </div>
-            <div class="odp-cc-icon-actions">
-              <button class="odp-cc-icon-btn" title="Message" onclick="/* open chat tab */"><i class="ti ti-message-circle"></i></button>
-              <button class="odp-cc-icon-btn" title="Call" onclick="/* call */"><i class="ti ti-phone"></i></button>
-              <button class="odp-cc-icon-btn" title="View Profile"><i class="ti ti-user"></i></button>
-            </div>
-          </div>
-          <div class="odp-cc-contact-rows">
-            <div class="odp-cc-contact-row">
-              <i class="ti ti-mail odp-cc-contact-icon"></i>
-              <a class="odp-cc-contact-val" href="mailto:${esc(d.email||'')}" id="odpClientEmail">${esc(d.email||'—')}</a>
-            </div>
-            <div class="odp-cc-contact-row">
-              <i class="ti ti-device-mobile odp-cc-contact-icon"></i>
-              <span class="odp-cc-contact-val" id="odpClientPhone">${esc(d.phone||'—')}</span>
-            </div>
-          </div>
-          <div class="odp-cc-divider"></div>
-          <div class="odp-cc-stats">
-            <div class="odp-cc-stat">
-              <div class="odp-cc-stat-val" id="odpClientOrders">—</div>
-              <div class="odp-cc-stat-lbl">Total Orders</div>
-            </div>
-            <div class="odp-cc-stat-sep"></div>
-            <div class="odp-cc-stat">
-              <div class="odp-cc-stat-val" id="odpClientSpend">—</div>
-              <div class="odp-cc-stat-lbl">Total Spent</div>
-            </div>
-            <div class="odp-cc-stat-sep"></div>
-            <div class="odp-cc-stat">
-              <div class="odp-cc-stat-val odp-cc-stat-active" id="odpClientRating">4.9 ★</div>
-              <div class="odp-cc-stat-lbl">Client Rating</div>
-            </div>
-          </div>
-        </div>
+        <!-- Top row: Client Info + Academic Summary side by side -->
+        <div class="odp-ov-top-row">
 
-        <!-- Order Information — screenshot style -->
-        <div class="odp-card odp-oi-card">
-          <div class="odp-card-title"><i class="ti ti-clipboard-data"></i> Order Information</div>
-
-          <!-- Top mini-stat tiles -->
-          <div class="odp-oi-tiles">
-            <div class="odp-oi-tile odp-oi-tile-blue">
-              <div class="odp-oi-tile-icon"><i class="ti ti-currency-taka"></i></div>
-              <div class="odp-oi-tile-body">
-                <div class="odp-oi-tile-lbl">Total Amount</div>
-                <div class="odp-oi-tile-val">${esc(order.amount||'—')}</div>
+          <!-- Client Info -->
+          <div class="odp-card odp-client-card">
+            <div class="odp-card-title"><i class="ti ti-user-circle"></i> Client Information</div>
+            <div class="odp-cc-header">
+              <div class="odp-cc-av" style="background:${esc(order.avatarColor)}">${esc(order.initials)}</div>
+              <div class="odp-cc-info">
+                <div class="odp-cc-name">${esc(order.client)} <span class="odp-cc-badge-verified"><i class="ti ti-shield-check"></i> Verified</span></div>
+                <div class="odp-cc-uni">${esc(order.uni)}</div>
+              </div>
+              <div class="odp-cc-icon-actions">
+                <button class="odp-cc-icon-btn" title="Message" onclick="odpSwitchTab('messages')"><i class="ti ti-message-circle"></i></button>
+                <button class="odp-cc-icon-btn" title="Call"><i class="ti ti-phone"></i></button>
+                <button class="odp-cc-icon-btn" title="View Profile"><i class="ti ti-user"></i></button>
               </div>
             </div>
-            <div class="odp-oi-tile odp-oi-tile-orange">
-              <div class="odp-oi-tile-icon"><i class="ti ti-calendar-due"></i></div>
-              <div class="odp-oi-tile-body">
-                <div class="odp-oi-tile-lbl">Deadline</div>
-                <div class="odp-oi-tile-val">${esc(order.deadline)} ${esc(order.deadlineTime)}</div>
-                <div class="odp-oi-tile-sub" id="odpDaysLeft">—</div>
+            <div class="odp-cc-contact-rows">
+              <div class="odp-cc-contact-row">
+                <i class="ti ti-mail odp-cc-contact-icon"></i>
+                <a class="odp-cc-contact-val" href="mailto:${esc(d.email||'')} " id="odpClientEmail">${esc(d.email||'—')}</a>
+              </div>
+              <div class="odp-cc-contact-row">
+                <i class="ti ti-device-mobile odp-cc-contact-icon"></i>
+                <span class="odp-cc-contact-val" id="odpClientPhone">${esc(d.phone||'—')}</span>
               </div>
             </div>
-            <div class="odp-oi-tile odp-oi-tile-teal">
-              <div class="odp-oi-tile-icon"><i class="ti ti-file-text"></i></div>
-              <div class="odp-oi-tile-body">
-                <div class="odp-oi-tile-lbl">Word Count</div>
-                <div class="odp-oi-tile-val">${esc(formatWordCountDisplay(order))}</div>
-                <div class="odp-oi-tile-sub">${esc(formatWordHint(order))}</div>
+            <div class="odp-cc-divider"></div>
+            <div class="odp-cc-stats">
+              <div class="odp-cc-stat">
+                <div class="odp-cc-stat-val" id="odpClientOrders">—</div>
+                <div class="odp-cc-stat-lbl">Total Orders</div>
               </div>
-            </div>
-            <div class="odp-oi-tile odp-oi-tile-purple">
-              <div class="odp-oi-tile-icon"><i class="ti ti-quote"></i></div>
-              <div class="odp-oi-tile-body">
-                <div class="odp-oi-tile-lbl">Citation Style</div>
-                <div class="odp-oi-tile-val odp-oi-badge-wrap"><span class="odp-oi-badge">${esc(d.citationStyle||'APA')}</span></div>
+              <div class="odp-cc-stat-sep"></div>
+              <div class="odp-cc-stat">
+                <div class="odp-cc-stat-val" id="odpClientSpend">—</div>
+                <div class="odp-cc-stat-lbl">Total Spent</div>
               </div>
-            </div>
-            <div class="odp-oi-tile odp-oi-tile-green">
-              <div class="odp-oi-tile-icon"><i class="ti ti-school"></i></div>
-              <div class="odp-oi-tile-body">
-                <div class="odp-oi-tile-lbl">Service Type</div>
-                <div class="odp-oi-tile-val">${esc(order.pkg||'—')}</div>
+              <div class="odp-cc-stat-sep"></div>
+              <div class="odp-cc-stat">
+                <div class="odp-cc-stat-val odp-cc-stat-active" id="odpClientRating">4.9 ★</div>
+                <div class="odp-cc-stat-lbl">Client Rating</div>
               </div>
             </div>
           </div>
 
-          <!-- Payment Status row -->
-          <div class="odp-oi-pay-row">
-            <span class="odp-oi-pay-label">Payment Status</span>
-            <span class="odp-oi-pay-pill odp-oi-pay-unpaid" id="odpOiPayStatus">Unpaid</span>
-          </div>
-          <div class="odp-oi-pay-amounts">
-            <div>
-              <div class="odp-oi-pay-sub-lbl">Paid Amount</div>
-              <div class="odp-oi-pay-sub-val" id="odpOiPaid">৳0</div>
-            </div>
-            <div>
-              <div class="odp-oi-pay-sub-lbl">Due Amount</div>
-              <div class="odp-oi-pay-sub-val" id="odpOiDue">${esc(order.amount||'—')}</div>
-            </div>
-            <div class="odp-oi-pay-bar-wrap">
-              <div class="odp-oi-pay-bar-label"><span id="odpOiPaidPct">0%</span> <span style="color:var(--green)">Paid</span></div>
-              <div class="odp-oi-pay-track"><div class="odp-oi-pay-fill" id="odpOiPayFill" style="width:0%"></div></div>
-            </div>
-            <button class="odp-oi-pay-btn" onclick="odpSwitchTab('payments')">View Payments</button>
+          <!-- Academic Summary -->
+          <div class="odp-card odp-academic-card">
+            <div class="odp-card-title"><i class="ti ti-book"></i> Academic Summary</div>
+            <div class="odp-info-grid odp-info-grid-2col" id="odpThesisDetailsCard">${buildAcademicSummaryHTML(order)}</div>
           </div>
 
-          <!-- Bottom meta row -->
-          <div class="odp-oi-meta-row">
-            <div class="odp-oi-meta-item">
-              <i class="ti ti-users odp-oi-meta-icon"></i>
-              <div>
-                <div class="odp-oi-meta-lbl">Chapters / Pages</div>
-                <div class="odp-oi-meta-val">${esc(String(order.chapters||'—'))}</div>
-              </div>
-            </div>
-            <div class="odp-oi-meta-item">
-              <i class="ti ti-file-plus odp-oi-meta-icon"></i>
-              <div>
-                <div class="odp-oi-meta-lbl">Pages (est.)</div>
-                <div class="odp-oi-meta-val" id="odpOiPages">${esc(getPageCount(order) ? getPageCount(order) + ' Pages' : '— Pages')}</div>
-              </div>
-            </div>
-            <div class="odp-oi-meta-item">
-              <i class="ti ti-id odp-oi-meta-icon"></i>
-              <div>
-                <div class="odp-oi-meta-lbl">Order ID</div>
-                <div class="odp-oi-meta-val odp-oi-meta-mono">${esc(order.orderId||order.id||'—')}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        </div><!-- /odp-ov-top-row -->
 
-      <!-- ── CENTER COL ── -->
-      <div class="odp-ov-col">
+        <!-- Order Information — full width of main column -->
+        ${buildOrderInformationHTML(order, d, pageCount)}
 
-        <!-- Academic Details — compact summary (screenshot style) -->
-        <div class="odp-card odp-academic-card">
-          <div class="odp-card-title"><i class="ti ti-book"></i> Academic Details</div>
-          <div class="odp-info-grid" id="odpThesisDetailsCard">${buildAcademicSummaryHTML(order)}</div>
-        </div>
-      </div>
+      </div><!-- /odp-ov-main-col -->
 
-      <!-- ── RIGHT COL ── -->
-      <div class="odp-ov-right">
+      <!-- ── RIGHT SIDEBAR ── -->
+      <div class="odp-ov-sidebar">
 
-        <!-- Order Progress -->
-        <div class="odp-card">
+        <!-- Order Progress — vertical timeline -->
+        <div class="odp-card odp-progress-card odp-vt-card">
           <div class="odp-card-title"><i class="ti ti-chart-bar"></i> Order Progress</div>
-          <div class="odp-ms-track">${msHTML}</div>
-          <div class="odp-prog-label-row">
+          <div class="odp-vt-steps">
+            ${milestones.map((ms, i) => {
+              const isDone   = ms.state === 'done';
+              const isActive = ms.state === 'active';
+              const dotCls   = isDone ? 'done' : isActive ? 'active' : '';
+              const icon     = isDone ? '<i class="ti ti-check"></i>' : isActive ? '<div class="odp-vt-pulse"></div>' : '';
+              return `<div class="odp-vt-step">
+                <div class="odp-vt-dot-wrap">
+                  <div class="odp-vt-dot ${dotCls}">${icon}</div>
+                  ${i < milestones.length - 1 ? `<div class="odp-vt-line ${isDone ? 'done' : isActive ? 'active' : ''}"></div>` : ''}
+                </div>
+                <div class="odp-vt-body">
+                  <div class="odp-vt-name ${dotCls}">${esc(ms.name)}</div>
+                  <div class="odp-vt-date">${esc(ms.date || 'Pending')}</div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div class="odp-prog-label-row" style="margin-top:16px">
             <span>Overall Progress</span>
             <span style="color:${pctColor};font-weight:800">${pct}%</span>
           </div>
@@ -506,7 +563,7 @@
           </div>
           <div class="odp-prog-phase-pill">
             <span class="odp-prog-dot ${pfClass}"></span>
-            ${statusClass === 's-inprogress' ? 'Writing Phase' : statusClass === 's-review' ? 'Review Phase' : statusClass === 's-completed' ? 'Completed' : 'Pending'}
+            ${statusClass === 's-inprogress' ? 'In Progress' : statusClass === 's-review' ? 'Review Phase' : statusClass === 's-completed' ? 'Completed' : 'Pending'}
           </div>
         </div>
 
@@ -527,7 +584,7 @@
                 <option value="writing"     ${order.statusClass==='s-inprogress'?'selected':''}>🔵 In Progress</option>
                 <option value="completed"   ${order.statusClass==='s-completed' ?'selected':''}>🟢 Completed</option>
                 <option value="pending"     ${order.statusClass==='s-pending'   ?'selected':''}>🟡 Pending</option>
-                <option value="draft_ready" ${order.statusClass==='s-review'    ?'selected':''}>🔷 In Review</option>
+                <option value="draft_ready" ${order.statusClass==='s-review'    ?'selected':''}>🔷 Draft Ready</option>
                 <option value="overdue"     ${order.statusClass==='s-overdue'   ?'selected':''}>🔴 Overdue</option>
                 <option value="hold">⚫ On Hold</option>
               </select>
@@ -538,6 +595,88 @@
           </div>
         </div>
 
+      </div><!-- /odp-ov-sidebar -->
+
+    </div><!-- /odp-ov-grid -->`;
+  }
+
+  /* ══ ORDER SUMMARY HTML ══ */
+  function buildOrderSummaryHTML(order) {
+    const d = order.detail || {};
+    const fin = d.financials || {};
+    const pageCount = getPageCount(order);
+    const wordCount = getWordCount(order);
+    const total   = fin.total   || order.amount || '—';
+    const paid    = fin.paid    || '৳0';
+    const due     = fin.due     || order.amount || '—';
+    const paidPct = fin.paidPct || 0;
+    const pctColor = paidPct >= 100 ? 'var(--green)' : paidPct > 0 ? 'var(--yellow)' : 'var(--red)';
+    const statusClass = order.statusClass || 's-pending';
+    const statusLabel = { 's-inprogress':'In Progress','s-completed':'Completed','s-overdue':'Overdue','s-pending':'Pending','s-review':'In Review' }[statusClass] || order.status || '—';
+
+    const rows = [
+      { icon:'ti-file-description', label:'Topic / Title',       val: order.topic || '—' },
+      { icon:'ti-award',            label:'Service Package',     val: order.pkg   || '—' },
+      { icon:'ti-building',         label:'University',          val: order.uni   || '—' },
+      { icon:'ti-book',             label:'Department',          val: d.subject   || '—' },
+      { icon:'ti-language',         label:'Language',            val: d.language  || '—' },
+      { icon:'ti-blockquote',       label:'Citation Style',      val: d.citationStyle || 'APA', badge: true },
+      { icon:'ti-layout-list',      label:'Chapters / Sections', val: order.chapters ? String(order.chapters) : '—' },
+      { icon:'ti-file-text',        label:'Pages (est.)',        val: pageCount ? pageCount + ' Pages' : '—' },
+      { icon:'ti-letter-case',      label:'Word Count (est.)',   val: wordCount ? wordCount.toLocaleString() + ' words' : '—' },
+      { icon:'ti-calendar-due',     label:'Deadline',            val: [order.deadline, order.deadlineTime].filter(Boolean).join(' ') || '—' },
+    ];
+
+    return `
+    <div class="odp-summ-grid">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-clipboard-list"></i> Order Details</div>
+          <div class="odp-summ-rows">
+            ${rows.map(r => `
+            <div class="odp-summ-row">
+              <div class="odp-summ-icon-wrap"><i class="ti ${esc(r.icon)}"></i></div>
+              <div class="odp-summ-lbl">${esc(r.label)}</div>
+              <div class="odp-summ-val">${r.badge ? `<span class="odp-oi-badge">${esc(r.val)}</span>` : esc(r.val)}</div>
+            </div>`).join('')}
+          </div>
+        </div>
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-notes"></i> Additional Notes</div>
+          <div class="odp-summ-notes-box">${esc(d.notes || order.note || 'No additional notes provided.')}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-info-circle"></i> Order Status</div>
+          <div class="odp-summ-status-wrap">
+            <span class="odp-status-pill ${esc(statusClass)}">${esc(statusLabel)}</span>
+            <div class="odp-summ-status-sub">Order ID: <span class="odp-oi-meta-mono">${esc(order.orderId || order.id || '—')}</span></div>
+          </div>
+        </div>
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-report-money"></i> Payment Summary</div>
+          <div class="odp-amount-row"><span class="odp-amount-label">Total Amount</span><span class="odp-amount-val total">${esc(total)}</span></div>
+          <div class="odp-amount-row"><span class="odp-amount-label">Paid Amount</span><span class="odp-amount-val paid">${esc(paid)}</span></div>
+          <div class="odp-amount-row"><span class="odp-amount-label">Due Amount</span><span class="odp-amount-val due">${esc(due)}</span></div>
+          <div class="odp-pay-progress-wrap">
+            <div class="odp-pay-progress-row"><span>Payment Progress</span><span style="color:${pctColor};font-weight:600">${paidPct}% paid</span></div>
+            <div class="odp-progress-track"><div class="odp-progress-fill pf-green" style="width:${paidPct}%"></div></div>
+          </div>
+          <button type="button" class="odp-oi-pay-btn" style="margin-top:10px;width:100%" onclick="odpSwitchTab('payments')">
+            <i class="ti ti-credit-card"></i> View Full Payment Details
+          </button>
+        </div>
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-user-circle"></i> Client</div>
+          <div class="odp-summ-client-row">
+            <div class="odp-cc-av" style="background:${esc(order.avatarColor)};width:36px;height:36px;font-size:14px;flex-shrink:0">${esc(order.initials)}</div>
+            <div>
+              <div style="font-weight:700;font-size:13px;color:var(--text)">${esc(order.client || '—')}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(d.email || '—')}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>`;
   }
@@ -973,40 +1112,70 @@
     </div>`;
   }
 
+  async function ensureBucket() {
+    if (!sb()) return false;
+    try {
+      const { data: buckets } = await sb().storage.listBuckets();
+      const exists = (buckets || []).some(b => b.name === 'order-files');
+      if (!exists) {
+        const { error } = await sb().storage.createBucket('order-files', { public: false });
+        if (error) return false;
+      }
+      return true;
+    } catch(e) { return false; }
+  }
+
   window.odpUploadFiles = async function(files) {
     if (!files || !files.length) return;
     const list = document.getElementById('odpFileList');
     const existing = list ? list.querySelector('.odp-loading, div[style*="text-align:center"]') : null;
     if (existing) existing.remove();
 
+    const safeOrderId = (_currentOrderId || 'unknown').replace(/[#?&=\s]/g, '_');
+
+    if (sb()) {
+      const ok = await ensureBucket();
+      if (!ok) {
+        toast('⚠ Storage bucket নেই — Supabase এ "order-files" bucket create করো', 'var(--red)');
+        if (list) list.innerHTML = `<div style="color:var(--red);font-size:12px;padding:12px 4px;line-height:1.8">
+          ⚠ <b>Bucket not found</b><br>
+          Supabase Dashboard → Storage → <b>New bucket</b><br>
+          Name: <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px">order-files</code> → Create
+        </div>`;
+        return;
+      }
+    }
+
     for (const f of Array.from(files)) {
+      const safeName = f.name.replace(/[#?&=]/g, '_');
       const placeholder = document.createElement('div');
       placeholder.className = 'odp-file-row';
       placeholder.innerHTML = `<div style="flex:1;font-size:12px;color:var(--muted2)"><i class="ti ti-loader" style="animation:spin .7s linear infinite"></i> Uploading ${esc(f.name)}…</div>`;
       if (list) list.appendChild(placeholder);
 
       if (!sb()) {
-        /* Simulate upload */
-        setTimeout(() => {
-          placeholder.outerHTML = renderFileRow({ name: f.name, size: f.size, updated_at: new Date().toISOString(), supabasePath: `orders/${_currentOrderId}/${f.name}` });
-          toast(`✓ ${f.name} uploaded!`, 'var(--green)');
-          logActivity('file_upload', `File uploaded: ${f.name}`);
-        }, 1200);
+        await new Promise(res => setTimeout(res, 1200));
+        placeholder.outerHTML = renderFileRow({ name: f.name, size: f.size, updated_at: new Date().toISOString(), supabasePath: `orders/${safeOrderId}/${safeName}` });
+        toast(`✓ ${f.name} uploaded!`, 'var(--green)');
+        logActivity('file_upload', `File uploaded: ${f.name}`);
         continue;
       }
 
       try {
-        const path = `orders/${_currentOrderId}/${f.name}`;
+        const path = `orders/${safeOrderId}/${safeName}`;
         const { error } = await sb().storage.from('order-files').upload(path, f, { upsert: true });
         if (error) throw error;
-        placeholder.outerHTML = renderFileRow({ name: f.name, size: f.size, updated_at: new Date().toISOString(), supabasePath: path });
+        placeholder.remove();
         toast(`✓ ${f.name} uploaded!`, 'var(--green)');
         logActivity('file_upload', `File uploaded: ${f.name}`);
       } catch(e) {
-        placeholder.innerHTML = `<div style="color:var(--red);font-size:12px">⚠ Upload failed: ${esc(f.name)}</div>`;
+        const msg = e.message || '';
+        const hint = msg.includes('Bucket not found') ? ' — Supabase এ "order-files" bucket create করো' : '';
+        placeholder.innerHTML = `<div style="color:var(--red);font-size:12px;padding:8px 0">⚠ Upload failed: ${esc(f.name)}${hint}</div>`;
         toast(`⚠ Upload failed: ${f.name}`, 'var(--red)');
       }
     }
+    await loadFiles();
   };
 
   window.odpDragOver = function(e) { e.preventDefault(); document.getElementById('odpDropZone').style.borderColor='var(--accent)'; };

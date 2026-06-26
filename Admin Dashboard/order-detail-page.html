@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scriptora · Order Detail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="order-detail-page.css">
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- TOPBAR -->
+  <div class="odp-topbar">
+    <button class="odp-back">
+      <i class="ti ti-arrow-left"></i> Back to Orders
+    </button>
+    <div class="odp-spacer"></div>
+    <div class="odp-topbar-actions">
+      <button class="odp-btn"><i class="ti ti-message-circle"></i> Message</button>
+      <button class="odp-btn odp-btn-accent"><i class="ti ti-upload"></i> Upload</button>
+      <button class="odp-icon-btn" title="More"><i class="ti ti-dots"></i></button>
+    </div>
+  </div>
+
+  <!-- HEADER CARD -->
+  <div class="odp-header-card">
+    <div class="odp-header-icon-wrap">
+      <div class="odp-header-icon"><i class="ti ti-file-description"></i></div>
+    </div>
+    <div class="odp-header-left">
+      <div class="odp-title-row">
+        <div class="odp-title">Jidan showes</div>
+        <span class="odp-status-pill s-completed">Completed</span>
+      </div>
+      <div class="odp-meta-row">
+        <span class="odp-meta-item"><i class="ti ti-file-invoice"></i> Order ID: <b>SCR-2026-046428</b></span>
+        <span class="odp-meta-sep">·</span>
+        <span class="odp-meta-item"><i class="ti ti-user"></i> Client: <b>BUET</b></span>
+        <span class="odp-meta-sep">·</span>
+        <span class="odp-meta-item"><i class="ti ti-building"></i> Department: <b>Engineering</b></span>
+        <span class="odp-meta-sep">·</span>
+        <span class="odp-meta-item odp-meta-deadline"><i class="ti ti-alarm"></i> Deadline: <b>30 Jun 06:00</b></span>
+        <span class="odp-meta-sep">·</span>
+        <span class="odp-meta-item odp-meta-amount"><i class="ti ti-cash"></i> <b>৳10,000</b></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="odp-tabs-wrap">
+    <div class="odp-tabs">
+      <button class="odp-tab odp-active" onclick="switchTab('overview', this)"><i class="ti ti-layout-2"></i> Overview</button>
+      <button class="odp-tab" onclick="switchTab('files', this)"><i class="ti ti-files"></i> Files</button>
+      <button class="odp-tab" onclick="switchTab('payments', this)"><i class="ti ti-credit-card"></i> Payments</button>
+      <button class="odp-tab" onclick="switchTab('messages', this)"><i class="ti ti-message-dots"></i> Messages</button>
+      <button class="odp-tab" onclick="switchTab('activity', this)"><i class="ti ti-timeline"></i> Activity</button>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="odp-body">
+
+    <!-- OVERVIEW -->
+    <div class="odp-pane odp-pane-active" id="pane-overview">
+      <div class="odp-ov-grid">
+        <div class="odp-ov-main-col">
+
+          <div class="odp-ov-top-row">
+            <!-- Client Information -->
+            <div class="odp-card odp-client-card">
+              <div class="odp-card-title"><i class="ti ti-user-circle"></i> Client Information</div>
+              <div class="odp-cc-header">
+                <div class="odp-cc-av" style="background:linear-gradient(135deg,#7c5cff,#5b3ee0)">C</div>
+                <div class="odp-cc-info">
+                  <div class="odp-cc-name">Client <span class="odp-cc-badge-verified"><i class="ti ti-shield-check"></i> Verified</span></div>
+                  <div class="odp-cc-uni">BUET</div>
+                </div>
+                <div class="odp-cc-icon-actions">
+                  <button class="odp-cc-icon-btn"><i class="ti ti-message-circle"></i></button>
+                  <button class="odp-cc-icon-btn"><i class="ti ti-phone"></i></button>
+                  <button class="odp-cc-icon-btn"><i class="ti ti-user"></i></button>
+                </div>
+              </div>
+              <div class="odp-cc-contact-rows">
+                <div class="odp-cc-contact-row">
+                  <i class="ti ti-mail odp-cc-contact-icon"></i>
+                  <a class="odp-cc-contact-val" href="mailto:hossenjedan@gmail.com">hossenjedan@gmail.com</a>
+                </div>
+                <div class="odp-cc-contact-row">
+                  <i class="ti ti-device-mobile odp-cc-contact-icon"></i>
+                  <span class="odp-cc-contact-val">01988150184</span>
+                </div>
+              </div>
+              <div class="odp-cc-divider"></div>
+              <div class="odp-cc-stats">
+                <div class="odp-cc-stat">
+                  <div class="odp-cc-stat-val">12</div>
+                  <div class="odp-cc-stat-lbl">Total Orders</div>
+                </div>
+                <div class="odp-cc-stat-sep"></div>
+                <div class="odp-cc-stat">
+                  <div class="odp-cc-stat-val">৳1,20,000</div>
+                  <div class="odp-cc-stat-lbl">Total Spent</div>
+                </div>
+                <div class="odp-cc-stat-sep"></div>
+                <div class="odp-cc-stat">
+                  <div class="odp-cc-stat-val odp-cc-stat-active">4.9 ★</div>
+                  <div class="odp-cc-stat-lbl">Client Rating</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Academic Summary -->
+            <div class="odp-card">
+              <div class="odp-card-title"><i class="ti ti-book"></i> Academic Summary</div>
+              <div class="odp-info-grid">
+                <div class="odp-info-item">
+                  <div class="odp-info-lbl">Thesis / Topic Title</div>
+                  <div class="odp-info-val">Jidan showes</div>
+                </div>
+                <div class="odp-info-item">
+                  <div class="odp-info-lbl">Package</div>
+                  <div class="odp-info-val">Engineering</div>
+                </div>
+                <div class="odp-info-item">
+                  <div class="odp-info-lbl">Department</div>
+                  <div class="odp-info-val">IPE – Industrial &amp; Production Eng.</div>
+                </div>
+                <div class="odp-info-item">
+                  <div class="odp-info-lbl">University</div>
+                  <div class="odp-info-val">BUET</div>
+                </div>
+                <div class="odp-info-item">
+                  <div class="odp-info-lbl">Language</div>
+                  <div class="odp-info-val">English</div>
+                </div>
+                <div class="odp-info-item">
+                  <div class="odp-info-lbl">Citation Style</div>
+                  <div class="odp-info-val"><span class="odp-oi-badge">IEEE</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Information -->
+          <div class="odp-card">
+            <div class="odp-card-title"><i class="ti ti-clipboard-data"></i> Order Information</div>
+            <div class="odp-oi-tiles">
+              <div class="odp-oi-tile odp-oi-tile-blue">
+                <div class="odp-oi-tile-icon"><i class="ti ti-currency-taka"></i></div>
+                <div class="odp-oi-tile-body">
+                  <div class="odp-oi-tile-lbl">Total Amount</div>
+                  <div class="odp-oi-tile-val">৳10,000</div>
+                </div>
+              </div>
+              <div class="odp-oi-tile odp-oi-tile-orange">
+                <div class="odp-oi-tile-icon"><i class="ti ti-calendar-due"></i></div>
+                <div class="odp-oi-tile-body">
+                  <div class="odp-oi-tile-lbl">Deadline</div>
+                  <div class="odp-oi-tile-val odp-oi-tile-deadline">
+                    <span>30 Jun</span>
+                    <span class="odp-oi-tile-time">06:00</span>
+                  </div>
+                  <div class="odp-oi-tile-sub"><span class="odp-oi-days-badge">3 Days Left</span></div>
+                </div>
+              </div>
+              <div class="odp-oi-tile odp-oi-tile-teal">
+                <div class="odp-oi-tile-icon"><i class="ti ti-file-text"></i></div>
+                <div class="odp-oi-tile-body">
+                  <div class="odp-oi-tile-lbl">Word Count</div>
+                  <div class="odp-oi-tile-val">13,000 w</div>
+                  <div class="odp-oi-tile-sub">(~13,000 words)</div>
+                </div>
+              </div>
+              <div class="odp-oi-tile odp-oi-tile-purple">
+                <div class="odp-oi-tile-icon"><i class="ti ti-quote"></i></div>
+                <div class="odp-oi-tile-body">
+                  <div class="odp-oi-tile-lbl">Citation Style</div>
+                  <div class="odp-oi-tile-val"><span class="odp-oi-badge">IEEE</span></div>
+                </div>
+              </div>
+              <div class="odp-oi-tile odp-oi-tile-green">
+                <div class="odp-oi-tile-icon"><i class="ti ti-school"></i></div>
+                <div class="odp-oi-tile-body">
+                  <div class="odp-oi-tile-lbl">Service Type</div>
+                  <div class="odp-oi-tile-val">Engineering</div>
+                </div>
+              </div>
+            </div>
+            <div class="odp-oi-pay-strip">
+              <div class="odp-oi-pay-cell odp-oi-pay-cell-status">
+                <span class="odp-oi-pay-label">Payment Status</span>
+                <span class="odp-oi-pay-pill odp-oi-pay-unpaid">Unpaid</span>
+              </div>
+              <div class="odp-oi-pay-cell">
+                <div class="odp-oi-pay-sub-lbl">Paid Amount</div>
+                <div class="odp-oi-pay-sub-val">৳0</div>
+              </div>
+              <div class="odp-oi-pay-cell">
+                <div class="odp-oi-pay-sub-lbl">Due Amount</div>
+                <div class="odp-oi-pay-sub-val">৳10,000</div>
+              </div>
+              <div class="odp-oi-pay-cell odp-oi-pay-cell-bar">
+                <div class="odp-oi-pay-bar-label"><span>0%</span><span class="odp-oi-pay-paid-lbl">Paid</span></div>
+                <div class="odp-oi-pay-track"><div class="odp-oi-pay-fill" style="width:0%"></div></div>
+              </div>
+              <button class="odp-oi-pay-btn" onclick="switchTab('payments', document.querySelectorAll('.odp-tab')[2])">View Payments</button>
+            </div>
+            <div class="odp-oi-meta-row">
+              <div class="odp-oi-meta-item">
+                <i class="ti ti-users odp-oi-meta-icon"></i>
+                <div>
+                  <div class="odp-oi-meta-lbl">Chapters / Pages</div>
+                  <div class="odp-oi-meta-val">—</div>
+                </div>
+              </div>
+              <div class="odp-oi-meta-item">
+                <i class="ti ti-file-plus odp-oi-meta-icon"></i>
+                <div>
+                  <div class="odp-oi-meta-lbl">Pages (est.)</div>
+                  <div class="odp-oi-meta-val">52 Pages</div>
+                </div>
+              </div>
+              <div class="odp-oi-meta-item">
+                <i class="ti ti-id odp-oi-meta-icon"></i>
+                <div>
+                  <div class="odp-oi-meta-lbl">Order ID</div>
+                  <div class="odp-oi-meta-val odp-oi-meta-mono">SCR-2026-046428</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Row -->
+          <div class="odp-ov-bottom-row">
+            <!-- Order Progress -->
+            <div class="odp-card">
+              <div class="odp-card-title"><i class="ti ti-clock"></i> Order Progress</div>
+              <div class="odp-ov-timeline-h">
+                <div class="odp-h-tl-item">
+                  <div class="odp-h-tl-dot done"><i class="ti ti-check"></i></div>
+                  <div class="odp-h-tl-line done"></div>
+                  <div class="odp-h-tl-body"><div class="odp-h-tl-name done">Order Placed</div><div class="odp-h-tl-date">23 Jun 10:15 AM</div></div>
+                </div>
+                <div class="odp-h-tl-item">
+                  <div class="odp-h-tl-dot done"><i class="ti ti-check"></i></div>
+                  <div class="odp-h-tl-line done"></div>
+                  <div class="odp-h-tl-body"><div class="odp-h-tl-name done">Payment Confirmed</div><div class="odp-h-tl-date">23 Jun 10:45 AM</div></div>
+                </div>
+                <div class="odp-h-tl-item">
+                  <div class="odp-h-tl-dot done"><i class="ti ti-check"></i></div>
+                  <div class="odp-h-tl-line done"></div>
+                  <div class="odp-h-tl-body"><div class="odp-h-tl-name done">Work Started</div><div class="odp-h-tl-date">24 Jun 09:30 AM</div></div>
+                </div>
+                <div class="odp-h-tl-item">
+                  <div class="odp-h-tl-dot active"><i class="ti ti-writing"></i></div>
+                  <div class="odp-h-tl-line"></div>
+                  <div class="odp-h-tl-body"><div class="odp-h-tl-name active">Draft Ready</div><div class="odp-h-tl-date">26 Jun 11:20 AM</div></div>
+                </div>
+                <div class="odp-h-tl-item">
+                  <div class="odp-h-tl-dot"><i class="ti ti-circle"></i></div>
+                  <div class="odp-h-tl-line"></div>
+                  <div class="odp-h-tl-body"><div class="odp-h-tl-name">Review</div><div class="odp-h-tl-date">Pending</div></div>
+                </div>
+                <div class="odp-h-tl-item">
+                  <div class="odp-h-tl-dot"><i class="ti ti-circle"></i></div>
+                  <div class="odp-h-tl-body"><div class="odp-h-tl-name">Delivered</div><div class="odp-h-tl-date">Pending</div></div>
+                </div>
+              </div>
+              <div class="odp-prog-label-row" style="margin-top:14px">
+                <span>Overall Progress</span>
+                <span style="color:#f59e0b;font-weight:800">60%</span>
+              </div>
+              <div class="odp-progress-track" style="margin:6px 0 4px">
+                <div class="odp-progress-fill pf-yellow" style="width:60%"></div>
+              </div>
+              <div class="odp-prog-phase-pill">
+                <span class="odp-prog-dot" style="background:#60a5fa"></span>
+                In Progress
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="odp-card">
+              <div class="odp-card-title"><i class="ti ti-bolt"></i> Quick Actions</div>
+              <div class="odp-qa-list">
+                <button class="odp-qa-btn odp-qa-primary"><i class="ti ti-upload"></i> Upload / Submit Draft</button>
+                <button class="odp-qa-btn"><i class="ti ti-message-circle"></i> Send Message to Client</button>
+                <div class="odp-qa-select-wrap">
+                  <i class="ti ti-edit"></i>
+                  <select class="odp-qa-select">
+                    <option value="" disabled selected>Update Order Status</option>
+                    <option value="writing">🔵 In Progress</option>
+                    <option value="completed">🟢 Completed</option>
+                    <option value="pending">🟡 Pending</option>
+                    <option value="draft_ready">🔷 In Review</option>
+                    <option value="overdue">🔴 Overdue</option>
+                    <option value="hold">⚫ On Hold</option>
+                  </select>
+                </div>
+                <button class="odp-qa-btn odp-qa-danger"><i class="ti ti-circle-check"></i> Mark as Completed</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- FILES -->
+    <div class="odp-pane" id="pane-files">
+      <div class="odp-card" style="margin-bottom:14px">
+        <div style="border:2px dashed rgba(124,92,255,0.25);border-radius:12px;padding:40px;text-align:center;cursor:pointer;background:rgba(124,92,255,0.03)">
+          <i class="ti ti-cloud-upload" style="font-size:32px;color:var(--accent2);margin-bottom:10px;display:block"></i>
+          <p style="color:var(--muted2);font-size:13px">Drag &amp; drop files here, or <span style="color:var(--accent2);font-weight:600">browse to upload</span></p>
+          <p style="margin-top:6px;font-size:11px;color:var(--muted)">PDF, DOCX, ZIP, Images — max 50MB</p>
+        </div>
+      </div>
+      <div class="odp-card">
+        <div class="odp-card-title"><i class="ti ti-folder-open"></i> Uploaded Files</div>
+        <p style="color:var(--muted);font-size:12.5px;padding:20px 0;text-align:center">No files uploaded yet.</p>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="odp-pane" id="pane-payments">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-report-money"></i> Payment Summary</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted2);font-size:12.5px">Total Amount</span><span style="font-weight:700;color:var(--text)">৳10,000</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted2);font-size:12.5px">Paid Amount</span><span style="font-weight:700;color:#34d399">৳0</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:var(--muted2);font-size:12.5px">Due Amount</span><span style="font-weight:700;color:#f87171">৳10,000</span></div>
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted2);margin-bottom:6px"><span>Payment Progress</span><span style="color:var(--green);font-weight:600">0% paid</span></div>
+            <div class="odp-progress-track"><div class="odp-progress-fill pf-green" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-photo"></i> Payment Proof</div>
+          <p style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">No proof uploaded yet.</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="odp-btn" style="flex:1;justify-content:center;background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.25);color:#34d399"><i class="ti ti-circle-check"></i> Approve</button>
+            <button class="odp-btn odp-btn-accent" style="flex:1;justify-content:center"><i class="ti ti-cash"></i> Mark Paid</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="odp-pane" id="pane-messages">
+      <div class="odp-card">
+        <div class="odp-card-title"><i class="ti ti-messages"></i> Conversation with Client</div>
+        <div style="min-height:200px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12.5px">No messages yet.</div>
+        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
+          <textarea style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'Sora',sans-serif;font-size:12.5px;min-height:80px;resize:vertical;outline:none" placeholder="Type your message to Client…"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted2);cursor:pointer"><input type="checkbox" checked> Send email notification to client</label>
+            <button class="odp-btn odp-btn-accent"><i class="ti ti-send"></i> Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="odp-pane" id="pane-activity">
+      <div class="odp-card">
+        <div class="odp-card-title"><i class="ti ti-activity"></i> Order Activity Timeline</div>
+        <p style="color:var(--muted);font-size:12.5px;text-align:center;padding:30px 0">No activity recorded yet.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="order-detail-page.js"></script>
+</body>
+</html>
