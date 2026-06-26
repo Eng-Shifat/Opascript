@@ -28,6 +28,77 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  function getPageCount(order) {
+    if (!order) return null;
+    if (Number.isFinite(Number(order.pages)) && Number(order.pages) > 0) return Number(order.pages);
+    const d = order.detail || {};
+    const fromDetail = parseInt(String(d.pages || ''), 10);
+    if (Number.isFinite(fromDetail) && fromDetail > 0) return fromDetail;
+    const m = String(d.pages || order.wordcount || '').match(/(\d[\d,]*)/);
+    if (!m) return null;
+    const n = parseInt(m[1].replace(/,/g, ''), 10);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  function getWordCount(order) {
+    const pages = getPageCount(order);
+    if (pages) return pages * 250;
+    const n = parseFloat(String(order.wordcount || '').replace(/[^0-9.]/g, ''));
+    return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+  }
+
+  function formatWordCountDisplay(order) {
+    const words = getWordCount(order);
+    return words ? words.toLocaleString() + ' w' : '—';
+  }
+
+  function formatWordHint(order) {
+    const words = getWordCount(order);
+    return words ? '(~' + words.toLocaleString() + ' words)' : '(~— words)';
+  }
+
+  function buildAcademicSummaryHTML(order, ord, client) {
+    const d = order.detail || {};
+    const src = ord || {};
+    const fields = [
+      { label: 'Thesis / Topic Title', val: src.title || order.topic },
+      { label: 'Package',              val: src.package || order.pkg },
+      { label: 'Department',           val: src.department || d.subject },
+      { label: 'University',           val: src.university || (client && client.university) || order.uni },
+      { label: 'Language',             val: src.language || d.language },
+      { label: 'Citation Style',       val: src.citation || d.citationStyle, badge: true },
+    ];
+
+    return fields.map(f => {
+      const value = f.val != null && String(f.val).trim() !== '' ? String(f.val) : '—';
+      if (f.badge) {
+        return `<div class="odp-info-item"><div class="odp-info-lbl">${esc(f.label)}</div><div class="odp-info-val"><span class="odp-oi-badge">${esc(value === '—' ? 'APA' : value)}</span></div></div>`;
+      }
+      return `<div class="odp-info-item"><div class="odp-info-lbl">${esc(f.label)}</div><div class="odp-info-val">${esc(value)}</div></div>`;
+    }).join('');
+  }
+
+  function syncOrderInfoPayments(order) {
+    const fin = (order && order.detail && order.detail.financials) || {};
+    const paidPct = fin.paidPct || 0;
+    const paid = fin.paid || '৳0';
+    const due = fin.due || order.amount || '—';
+    const statusEl = document.getElementById('odpOiPayStatus');
+    const paidEl = document.getElementById('odpOiPaid');
+    const dueEl = document.getElementById('odpOiDue');
+    const pctEl = document.getElementById('odpOiPaidPct');
+    const fillEl = document.getElementById('odpOiPayFill');
+
+    if (paidEl) paidEl.textContent = paid;
+    if (dueEl) dueEl.textContent = due;
+    if (pctEl) pctEl.textContent = paidPct + '%';
+    if (fillEl) fillEl.style.width = paidPct + '%';
+    if (statusEl) {
+      statusEl.textContent = paidPct >= 100 ? 'Paid' : paidPct > 0 ? 'Partial' : 'Unpaid';
+      statusEl.className = 'odp-oi-pay-pill ' + (paidPct >= 100 ? 'odp-oi-pay-paid' : paidPct > 0 ? 'odp-oi-pay-partial' : 'odp-oi-pay-unpaid');
+    }
+  }
+
   /* ── TOAST ── */
   function toast(msg, color) {
     color = color || 'var(--accent)';
@@ -316,16 +387,95 @@
           </div>
         </div>
 
-        <!-- Order Information -->
-        <div class="odp-card">
-          <div class="odp-card-title"><i class="ti ti-clipboard-text"></i> Order Information</div>
-          <div class="odp-info-grid">
-            <div class="odp-info-item"><div class="odp-info-lbl">Service Type</div><div class="odp-info-val">${esc(order.pkg||'—')}</div></div>
-            <div class="odp-info-item"><div class="odp-info-lbl">Chapters</div><div class="odp-info-val">${esc(String(order.chapters||'—'))}</div></div>
-            <div class="odp-info-item"><div class="odp-info-lbl">Word Count</div><div class="odp-info-val">${esc(order.wordcount||'—')}</div></div>
-            <div class="odp-info-item"><div class="odp-info-lbl">Citation Style</div><div class="odp-info-val">${esc(d.citationStyle||'APA')}</div></div>
-            <div class="odp-info-item"><div class="odp-info-lbl">Amount</div><div class="odp-info-val odp-info-accent">${esc(order.amount||'—')}</div></div>
-            <div class="odp-info-item"><div class="odp-info-lbl">Deadline</div><div class="odp-info-val">${esc(order.deadline)} ${esc(order.deadlineTime)}</div></div>
+        <!-- Order Information — screenshot style -->
+        <div class="odp-card odp-oi-card">
+          <div class="odp-card-title"><i class="ti ti-clipboard-data"></i> Order Information</div>
+
+          <!-- Top mini-stat tiles -->
+          <div class="odp-oi-tiles">
+            <div class="odp-oi-tile odp-oi-tile-blue">
+              <div class="odp-oi-tile-icon"><i class="ti ti-currency-taka"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Total Amount</div>
+                <div class="odp-oi-tile-val">${esc(order.amount||'—')}</div>
+              </div>
+            </div>
+            <div class="odp-oi-tile odp-oi-tile-orange">
+              <div class="odp-oi-tile-icon"><i class="ti ti-calendar-due"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Deadline</div>
+                <div class="odp-oi-tile-val">${esc(order.deadline)} ${esc(order.deadlineTime)}</div>
+                <div class="odp-oi-tile-sub" id="odpDaysLeft">—</div>
+              </div>
+            </div>
+            <div class="odp-oi-tile odp-oi-tile-teal">
+              <div class="odp-oi-tile-icon"><i class="ti ti-file-text"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Word Count</div>
+                <div class="odp-oi-tile-val">${esc(formatWordCountDisplay(order))}</div>
+                <div class="odp-oi-tile-sub">${esc(formatWordHint(order))}</div>
+              </div>
+            </div>
+            <div class="odp-oi-tile odp-oi-tile-purple">
+              <div class="odp-oi-tile-icon"><i class="ti ti-quote"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Citation Style</div>
+                <div class="odp-oi-tile-val odp-oi-badge-wrap"><span class="odp-oi-badge">${esc(d.citationStyle||'APA')}</span></div>
+              </div>
+            </div>
+            <div class="odp-oi-tile odp-oi-tile-green">
+              <div class="odp-oi-tile-icon"><i class="ti ti-school"></i></div>
+              <div class="odp-oi-tile-body">
+                <div class="odp-oi-tile-lbl">Service Type</div>
+                <div class="odp-oi-tile-val">${esc(order.pkg||'—')}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Status row -->
+          <div class="odp-oi-pay-row">
+            <span class="odp-oi-pay-label">Payment Status</span>
+            <span class="odp-oi-pay-pill odp-oi-pay-unpaid" id="odpOiPayStatus">Unpaid</span>
+          </div>
+          <div class="odp-oi-pay-amounts">
+            <div>
+              <div class="odp-oi-pay-sub-lbl">Paid Amount</div>
+              <div class="odp-oi-pay-sub-val" id="odpOiPaid">৳0</div>
+            </div>
+            <div>
+              <div class="odp-oi-pay-sub-lbl">Due Amount</div>
+              <div class="odp-oi-pay-sub-val" id="odpOiDue">${esc(order.amount||'—')}</div>
+            </div>
+            <div class="odp-oi-pay-bar-wrap">
+              <div class="odp-oi-pay-bar-label"><span id="odpOiPaidPct">0%</span> <span style="color:var(--green)">Paid</span></div>
+              <div class="odp-oi-pay-track"><div class="odp-oi-pay-fill" id="odpOiPayFill" style="width:0%"></div></div>
+            </div>
+            <button class="odp-oi-pay-btn" onclick="odpSwitchTab('payments')">View Payments</button>
+          </div>
+
+          <!-- Bottom meta row -->
+          <div class="odp-oi-meta-row">
+            <div class="odp-oi-meta-item">
+              <i class="ti ti-users odp-oi-meta-icon"></i>
+              <div>
+                <div class="odp-oi-meta-lbl">Chapters / Pages</div>
+                <div class="odp-oi-meta-val">${esc(String(order.chapters||'—'))}</div>
+              </div>
+            </div>
+            <div class="odp-oi-meta-item">
+              <i class="ti ti-file-plus odp-oi-meta-icon"></i>
+              <div>
+                <div class="odp-oi-meta-lbl">Pages (est.)</div>
+                <div class="odp-oi-meta-val" id="odpOiPages">${esc(getPageCount(order) ? getPageCount(order) + ' Pages' : '— Pages')}</div>
+              </div>
+            </div>
+            <div class="odp-oi-meta-item">
+              <i class="ti ti-id odp-oi-meta-icon"></i>
+              <div>
+                <div class="odp-oi-meta-lbl">Order ID</div>
+                <div class="odp-oi-meta-val odp-oi-meta-mono">${esc(order.orderId||order.id||'—')}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -333,33 +483,10 @@
       <!-- ── CENTER COL ── -->
       <div class="odp-ov-col">
 
-        <!-- Academic Details -->
-        <div class="odp-card">
+        <!-- Academic Details — compact summary (screenshot style) -->
+        <div class="odp-card odp-academic-card">
           <div class="odp-card-title"><i class="ti ti-book"></i> Academic Details</div>
-          <div class="odp-info-grid" id="odpThesisDetailsCard">
-            <div class="odp-loading"><div class="odp-spinner"></div> Loading...</div>
-          </div>
-        </div>
-
-        <!-- Files -->
-        <div class="odp-card">
-          <div class="odp-card-title">
-            <i class="ti ti-files"></i> Files
-            <button class="odp-btn odp-btn-sm odp-card-title-btn" onclick="odpSwitchTab('files')">
-              <i class="ti ti-upload"></i> Upload New File
-            </button>
-          </div>
-          <div class="odp-file-list" id="odpFileListOverview">
-            <div class="odp-loading"><div class="odp-spinner"></div> Loading files…</div>
-          </div>
-        </div>
-
-        <!-- Activity Timeline -->
-        <div class="odp-card">
-          <div class="odp-card-title"><i class="ti ti-clock"></i> Activity Timeline</div>
-          <div class="odp-ov-timeline" id="odpOvTimeline">
-            <div class="odp-loading"><div class="odp-spinner"></div> Loading…</div>
-          </div>
+          <div class="odp-info-grid" id="odpThesisDetailsCard">${buildAcademicSummaryHTML(order)}</div>
         </div>
       </div>
 
@@ -479,6 +606,7 @@
     _currentOrder = order;
     _currentOrderId = order.id;
 
+    document.body.classList.add('odp-panel-open');
     document.body.insertAdjacentHTML('beforeend', buildShell(order));
 
     /* Sync status select IMMEDIATELY after HTML is in DOM */
@@ -500,6 +628,18 @@
     const dl = parseDeadline(order.deadline, order.deadlineTime);
     if (dl) startTimer(dl);
 
+    /* Days Left badge inside Order Information card */
+    const daysEl = document.getElementById("odpDaysLeft");
+    if (daysEl && dl) {
+      const diffMs = dl - Date.now();
+      const diffD  = Math.ceil(diffMs / 86400000);
+      if (diffMs <= 0) {
+        daysEl.innerHTML = '<span class="odp-oi-days-badge" style="background:rgba(248,113,113,0.18);color:#f87171">Overdue</span>';
+      } else {
+        daysEl.innerHTML = '<span class="odp-oi-days-badge">' + diffD + ' Day' + (diffD === 1 ? '' : 's') + ' Left</span>';
+      }
+    }
+
     /* Load async data */
     loadFullOrderData();
     loadMessages();
@@ -507,7 +647,7 @@
     loadActivity();
     loadPaymentHistory();
     loadClientOrderCount();
-    if (_currentOrder) _renderOvTimeline(_currentOrder);
+    if (_currentOrder) syncOrderInfoPayments(_currentOrder);
   };
 
   /* ══ LOAD FULL ORDER DATA FROM SUPABASE ══ */
@@ -515,22 +655,15 @@
     if (!sb()) return;
     /* Mock orders (e.g. '#SCR-2891') are not real UUIDs — skip DB query */
     if (!isRealUUID(_currentOrderId)) {
-      /* Still render the thesis details card from mock detail data */
       if (_currentOrder && _currentOrder.detail) {
         renderThesisDetailsCard(_currentOrder, null);
-      } else {
-        const el = document.getElementById('odpThesisDetailsCard');
-        if (el) el.innerHTML = `<div class="odp-card-title"><i class="ti ti-forms"></i> Client Submission Details</div>
-          <div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">
-            <i class="ti ti-info-circle" style="font-size:18px;display:block;margin-bottom:6px"></i>
-            Mock order — real Supabase data নেই।
-          </div>`;
       }
       return;
     }
     try {
       const { data: ord } = await sb().from('orders').select('*').eq('id', _currentOrderId).single();
       if (!ord) return;
+      if (_currentOrder) _currentOrder.clientId = ord.client_id || _currentOrder.clientId || '';
       let client = null;
       if (ord.client_id) {
         const { data: cl } = await sb().from('clients').select('*').eq('id', ord.client_id).single();
@@ -539,6 +672,7 @@
       renderClientSubmission(ord, client);
       renderClientInfoFromDB(ord, client);
       renderThesisDetailsCard(ord, client);
+      syncOrderInfoPayments(_currentOrder);
 
       /* Sync status select from DB */
       const statusSel = document.getElementById('odpStatusSelect');
@@ -562,107 +696,25 @@
   ══════════════════════════════════════════════════ */
   function renderThesisDetailsCard(ord, client) {
     const el = document.getElementById('odpThesisDetailsCard');
-    if (!el) return;
-
-    function e2(s) { return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    function val(v) { return v != null && String(v).trim() !== '' && String(v) !== 'undefined' && String(v) !== 'null'; }
-
-    /* ── Field groups matching order.js form fields ── */
-    const groups = [
-      {
-        icon: 'ti-book-2',
-        title: 'Thesis / Academic Details',
-        fields: [
-          { label: 'Thesis / Topic Title',       v: ord.title },
-          { label: 'Package',                    v: ord.package },
-          { label: 'Department',                 v: ord.department },
-          { label: 'University',                 v: ord.university || (client && client.university) },
-          { label: 'Research Area',              v: ord.research || ord.research_area },
-          { label: 'Language',                   v: ord.language },
-          { label: 'Citation Style',             v: ord.citation },
-        ]
-      },
-      {
-        icon: 'ti-microscope',
-        title: 'Scope & Methodology',
-        fields: [
-          { label: 'Chapter Scope',              v: ord.pages },
-          { label: 'Methodology / Research Type',v: ord.methodology || ord.method },
-          { label: 'Independent Variable',       v: ord.indep_var },
-          { label: 'Dependent Variable',         v: ord.dep_var },
-          { label: 'Project Type (CSE)',         v: ord.project_type },
-          { label: 'Tech Stack / Tools',         v: ord.tech_stack },
-          { label: 'Special Instructions',       v: ord.special_instructions, long: true },
-        ]
-      },
-      {
-        icon: 'ti-calendar-event',
-        title: 'Timeline & Pricing',
-        fields: [
-          { label: 'Deadline',                   v: ord.deadline },
-          { label: 'Urgency',                    v: ord.urgency },
-          { label: 'Advance Paid',               v: ord.advance_paid != null ? '৳' + Number(ord.advance_paid).toLocaleString() : null },
-          { label: 'Due Amount',                 v: ord.due_amount != null ? '৳' + Number(ord.due_amount).toLocaleString() : null },
-          { label: 'Total Price',                v: ord.total_price != null ? '৳' + Number(ord.total_price).toLocaleString() : null },
-          { label: 'Add-ons',                    v: Array.isArray(ord.addons) ? ord.addons.join(', ') : ord.addons },
-          { label: 'Coupon Applied',             v: ord.coupon },
-        ]
-      },
-      {
-        icon: 'ti-address-book',
-        title: 'Contact Info',
-        fields: [
-          { label: 'Email',                      v: (client && client.email) || ord.email, link: 'mailto' },
-          { label: 'Phone / WhatsApp',           v: (client && (client.phone || client.whatsapp)) || ord.phone || ord.whatsapp },
-        ]
-      },
-    ];
-
-    let html = '';
-    let hasAny = false;
-
-    groups.forEach(group => {
-      const visible = group.fields.filter(f => val(f.v));
-      if (!visible.length) return;
-      hasAny = true;
-
-      html += `<div class="odp-sub-group">
-        <div class="odp-sub-group-title"><i class="ti ${e2(group.icon)}"></i> ${e2(group.title)}</div>
-        <div class="odp-sub-grid">`;
-
-      visible.forEach(f => {
-        const isLong = f.long || String(f.v).length > 80;
-        const displayVal = f.link === 'mailto'
-          ? `<a href="${f.link}:${e2(String(f.v))}" style="color:var(--accent2)">${e2(String(f.v))}</a>`
-          : e2(String(f.v));
-
-        html += `<div class="odp-field${isLong ? ' odp-field-full' : ''}">
-          <label>${e2(f.label)}</label>
-          <div class="odp-field-val${isLong ? ' muted' : ''}"${isLong ? ' style="font-size:11.5px;line-height:1.6"' : ''}>${displayVal}</div>
-        </div>`;
-      });
-
-      html += `</div></div>`;
-    });
-
-    if (!hasAny) {
-      html = `<div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">
-        <i class="ti ti-info-circle" style="font-size:18px;display:block;margin-bottom:6px"></i>
-        Submission data পাওয়া যায়নি।<br>
-        <span style="font-size:11px;opacity:0.6">Order manually তৈরি হতে পারে।</span>
-      </div>`;
-    }
-
-    el.innerHTML = `<div class="odp-card-title"><i class="ti ti-forms"></i> Client Submission Details</div>${html}`;
+    if (!el || !ord) return;
+    el.innerHTML = buildAcademicSummaryHTML(_currentOrder || {}, ord, client);
   }
 
   function renderClientInfoFromDB(ord, client) {
-    if (!client) return;
-    const emailEl = document.querySelector('.odp-field-val a[href^="mailto:"]');
-    if (emailEl && client.email) { emailEl.href = 'mailto:' + client.email; emailEl.textContent = client.email; }
-    if ((client.university || ord.university) && _currentOrder) {
-      document.querySelectorAll('.odp-client-sub').forEach(el => {
-        if (el.textContent === _currentOrder.uni) el.textContent = client.university || ord.university || _currentOrder.uni;
+    if (!client && !ord) return;
+    const emailEl = document.getElementById('odpClientEmail');
+    const phoneEl = document.getElementById('odpClientPhone');
+    if (emailEl && client && client.email) {
+      emailEl.href = 'mailto:' + client.email;
+      emailEl.textContent = client.email;
+    }
+    if (phoneEl) {
+      const phone = (client && (client.phone || client.whatsapp)) || ord.phone || ord.whatsapp || '';
+      if (phone) phoneEl.textContent = phone;
+    }
+    if ((client && client.university) || ord.university) {
+      document.querySelectorAll('.odp-cc-uni').forEach(el => {
+        el.textContent = (client && client.university) || ord.university || el.textContent;
       });
     }
   }
@@ -705,8 +757,6 @@
 
     function esc2(s) { return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    function esc2(s) { return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
     let html = '';
     let hasAny = false;
     fields.forEach(group => {
@@ -737,6 +787,7 @@
   window.closeOrderDetailsPanel = function() {
     const ov = document.getElementById('odpOverlay');
     if (ov) { ov.classList.remove('odp-open'); setTimeout(() => { ov.remove(); }, 240); }
+    document.body.classList.remove('odp-panel-open');
     if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
     const oldPanel = document.getElementById('detailPanel');
     if (oldPanel) oldPanel.style.visibility = '';
@@ -1355,9 +1406,9 @@
      LOAD CLIENT ORDER COUNT
   ══════════════════════════════════════════════════════════ */
   async function loadClientOrderCount() {
-    if (!sb() || !_currentOrder || !isRealUUID(_currentOrderId)) return;
+    if (!sb() || !_currentOrder) return;
     const clientId = _currentOrder.clientId || _currentOrder.rawClientId || '';
-    if (!clientId) return;
+    if (!clientId || !isRealUUID(_currentOrderId)) return;
 
     try {
       /* Total orders count */

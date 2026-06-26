@@ -855,6 +855,25 @@ function parseDeadline(str) {
    unchanged থাকে — শুধু ORDERS array টা পাল্টায়।
 ══════════════════════════════════════════════════════════ */
 
+function buildOrderMilestones(o) {
+  const fmt = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : 'Pending';
+  const placed = o.order_date || o.created_at;
+  const paid = o.payment_status === 'confirmed' || o.payment_status === 'paid' || Number(o.advance_paid) > 0;
+  const writing = ['writing', 'confirmed', 'draft_ready', 'completed'].includes(o.status);
+  const draftReady = ['draft_ready', 'completed'].includes(o.status);
+  const review = o.status === 'completed';
+  const delivered = o.status === 'completed';
+
+  return [
+    { name: 'Order Placed',      date: placed ? fmt(placed) : 'Pending', state: 'done' },
+    { name: 'Payment Confirmed', date: paid ? fmt(placed) : 'Pending', state: paid ? 'done' : 'pending' },
+    { name: 'Work Started',      date: writing ? fmt(o.updated_at || placed) : 'Pending', state: writing && !draftReady ? 'active' : writing ? 'done' : 'pending' },
+    { name: 'Draft Ready',       date: draftReady ? fmt(o.updated_at) : 'Pending', state: draftReady && !review ? 'active' : draftReady ? 'done' : 'pending' },
+    { name: 'Review',            date: review ? fmt(o.updated_at) : 'Pending', state: review && !delivered ? 'active' : review ? 'done' : 'pending' },
+    { name: 'Delivered',         date: delivered ? fmt(o.updated_at) : 'Pending', state: delivered ? 'done' : 'pending' },
+  ];
+}
+
 function mapSupabaseOrderToLocal(o) {
   /* status mapping */
   const statusMap = {
@@ -888,6 +907,8 @@ function mapSupabaseOrderToLocal(o) {
   const uni        = meta.university || o.university || '—';
   const initials   = clientName.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
 
+  const pageNum = Number(o.pages);
+
   return {
     id:            o.id,          /* real UUID */
     orderId:       o.order_number || o.id.slice(0,8).toUpperCase(),
@@ -896,8 +917,9 @@ function mapSupabaseOrderToLocal(o) {
     topic:         o.title || 'Untitled',
     pkg:           o.package || '—',
     pkgClass:      'pkg-msc',
-    chapters:      o.pages ? Math.ceil(o.pages / 30) : '—',
-    wordcount:     o.pages ? (o.pages * 250).toLocaleString() + ' w' : '—',
+    pages:         Number.isFinite(pageNum) && pageNum > 0 ? pageNum : null,
+    chapters:      Number.isFinite(pageNum) && pageNum > 0 ? Math.ceil(pageNum / 30) : '—',
+    wordcount:     Number.isFinite(pageNum) && pageNum > 0 ? (pageNum * 250).toLocaleString() + ' w' : '—',
     progressPct:   o.progress || 0,
     progressBars:  [o.progress || 0, 0, 0],
     deadline:      deadlineDisplay,
@@ -909,31 +931,28 @@ function mapSupabaseOrderToLocal(o) {
     rowClass:      s.row,
     avatarColor:   '#6366f1',
     initials:      initials,
+    clientId:      o.client_id || '',
     /* full raw data for detail panel */
     detail: {
-      pages:        o.pages ? o.pages + ' pp' : '—',
+      pages:        Number.isFinite(pageNum) && pageNum > 0 ? pageNum + ' pp' : '—',
       type:         o.package || '—',
-      chapters:     o.pages ? Math.ceil(o.pages / 30) : '—',
-      wordcount:    o.pages ? (o.pages * 250).toLocaleString() + ' w' : '—',
+      chapters:     Number.isFinite(pageNum) && pageNum > 0 ? Math.ceil(pageNum / 30) : '—',
+      wordcount:    Number.isFinite(pageNum) && pageNum > 0 ? (pageNum * 250).toLocaleString() + ' w' : '—',
       value:        o.total_price ? '৳' + Number(o.total_price).toLocaleString() : '—',
       deadline:     deadlineDisplay + ' ' + deadlineTime,
       overall:      o.progress || 0,
       drafted:      (o.progress || 0) + '% complete',
       chapterBreakdown: [],
-      milestones: [
-        { name: 'Order Placed',    date: o.order_date ? new Date(o.order_date).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '—', state: 'done' },
-        { name: 'Payment Review',  date: o.payment_status === 'confirmed' ? 'Confirmed' : 'Pending', state: o.payment_status === 'confirmed' ? 'done' : 'pending' },
-        { name: 'Work Started',    date: o.status === 'writing' || o.status === 'confirmed' ? 'In Progress' : 'Pending', state: ['writing','confirmed','draft_ready','completed'].includes(o.status) ? 'active' : 'pending' },
-        { name: 'Draft Ready',     date: o.status === 'draft_ready' ? 'Ready' : 'Pending', state: o.status === 'draft_ready' || o.status === 'completed' ? 'done' : 'pending' },
-        { name: 'Delivered',       date: o.status === 'completed' ? 'Delivered' : 'Pending', state: o.status === 'completed' ? 'done' : 'pending' },
-      ],
+      milestones: buildOrderMilestones(o),
       files: [],
       notes:        o.citation ? 'Citation: ' + o.citation : '',
       overallColor: o.progress > 70 ? '#22c987' : o.progress > 30 ? '#f5a623' : '#6366f1',
-      email:        meta.email || '',
+      email:        meta.email || o.email || '',
+      phone:        meta.phone || meta.whatsapp || o.phone || o.whatsapp || '',
+      language:     o.language || 'English',
       clientLabel:  uni,
       subject:      o.department || '—',
-      citationStyle: o.citation || '—',
+      citationStyle: o.citation || 'APA',
       financials: {
         total:   o.total_price  ? '৳' + Number(o.total_price).toLocaleString()  : '—',
         paid:    o.advance_paid ? '৳' + Number(o.advance_paid).toLocaleString() : '৳0',
