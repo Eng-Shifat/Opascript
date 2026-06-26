@@ -114,45 +114,48 @@
     const d = order.detail || {};
     const statusClass = order.statusClass || 's-pending';
     const statusLabel = { 's-inprogress':'In Progress','s-completed':'Completed','s-overdue':'Overdue','s-pending':'Pending','s-review':'In Review' }[statusClass] || order.status;
-    const pkgDisplay = order.pkg || 'Thesis';
 
     return `
 <div class="odp-overlay" id="odpOverlay">
 
   <!-- TOPBAR -->
   <div class="odp-topbar">
-    <button class="odp-back" onclick="closeOrderDetailsPanel()"><i class="ti ti-arrow-left"></i> Orders</button>
-    <span class="odp-breadcrumb"><span class="cur">${esc(order.id)}</span></span>
+    <button class="odp-back" onclick="closeOrderDetailsPanel()">
+      <i class="ti ti-arrow-left"></i> Back to Orders
+    </button>
     <div class="odp-spacer"></div>
-    <div class="odp-countdown" id="odpCountdownWrap">
-      <i class="ti ti-alarm"></i>
-      <span id="odpCountdown">—</span>
-      <span style="opacity:0.5;font-size:10px">to deadline</span>
-    </div>
     <div class="odp-topbar-actions">
-      <button class="odp-icon-btn" title="Print" onclick="window.print()"><i class="ti ti-printer"></i></button>
+      <button class="odp-btn odp-btn-sm" onclick="odpSwitchTab('messages')">
+        <i class="ti ti-message-circle"></i> Message
+      </button>
+      <button class="odp-btn odp-btn-accent odp-btn-sm" onclick="odpSwitchTab('files')">
+        <i class="ti ti-upload"></i> Upload
+      </button>
       <button class="odp-icon-btn" title="More"><i class="ti ti-dots"></i></button>
     </div>
   </div>
 
   <!-- HEADER CARD -->
   <div class="odp-header-card">
+    <div class="odp-header-icon-wrap">
+      <div class="odp-header-icon"><i class="ti ti-file-description"></i></div>
+    </div>
     <div class="odp-header-left">
       <div class="odp-title-row">
         <div class="odp-title">${esc(order.topic)}</div>
         <span class="odp-status-pill ${statusClass}">${esc(statusLabel)}</span>
       </div>
       <div class="odp-meta-row">
-        <span class="odp-meta-item"><i class="ti ti-user"></i> ${esc(order.client)}</span>
-        <span class="odp-meta-item"><i class="ti ti-building"></i> ${esc(order.uni)}</span>
-        <span class="odp-meta-item"><i class="ti ti-book"></i> ${esc(pkgDisplay)}</span>
-        <span class="odp-meta-item"><i class="ti ti-calendar"></i> Deadline: ${esc(order.deadline)} ${esc(order.deadlineTime)}</span>
-        <span class="odp-meta-item"><i class="ti ti-cash"></i> ${esc(order.amount)}</span>
+        <span class="odp-meta-item"><i class="ti ti-file-invoice"></i> Order ID: <b>${esc(order.orderId||order.id)}</b></span>
+        <span class="odp-meta-sep">·</span>
+        <span class="odp-meta-item"><i class="ti ti-user"></i> Client: <b>${esc(order.uni)}</b></span>
+        <span class="odp-meta-sep">·</span>
+        <span class="odp-meta-item"><i class="ti ti-building"></i> Department: <b>${esc(order.pkg)}</b></span>
+        <span class="odp-meta-sep">·</span>
+        <span class="odp-meta-item odp-meta-deadline"><i class="ti ti-alarm"></i> Deadline: <b>${esc(order.deadline)} ${esc(order.deadlineTime)}</b></span>
+        <span class="odp-meta-sep">·</span>
+        <span class="odp-meta-item odp-meta-amount"><i class="ti ti-cash"></i> <b>${esc(order.amount)}</b></span>
       </div>
-    </div>
-    <div class="odp-header-right">
-      <button class="odp-btn odp-btn-sm" onclick="odpSwitchTab('messages')"><i class="ti ti-message-circle"></i> Message</button>
-      <button class="odp-btn odp-btn-sm" onclick="odpSwitchTab('files')"><i class="ti ti-upload"></i> Upload</button>
     </div>
   </div>
 
@@ -213,7 +216,6 @@
       </div>
     </div>
 
-
     <!-- ══ ACTIVITY ══ -->
     <div class="odp-pane" data-odp-pane="activity">
       <div class="odp-card">
@@ -228,92 +230,189 @@
 </div>`;
   }
 
+
   /* ══ OVERVIEW HTML ══ */
   function buildOverviewHTML(order, statusClass) {
     const d = order.detail || {};
     statusClass = statusClass || order.statusClass || 's-pending';
     const pct = d.overall || order.progressPct || 0;
-    const pfClass = pct >= 80 ? 'pf-green' : pct >= 40 ? 'pf-yellow' : 'pf-red';
     const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
+    const pfClass  = pct >= 80 ? 'pf-green'    : pct >= 40 ? 'pf-yellow'     : 'pf-red';
 
-    const chapters = (d.chapterBreakdown || []).map(ch => {
-      const pf = ch.pct >= 80 ? 'pf-green' : ch.pct >= 40 ? 'pf-yellow' : 'pf-red';
-      return `<div class="odp-chapter-item">
-        <span class="odp-ch-name">${esc(ch.name)}</span>
-        <div class="odp-ch-bar-wrap"><div class="odp-ch-bar ${pf}" style="width:${ch.pct}%"></div></div>
-        <span class="odp-ch-lbl">${esc(ch.label)}</span>
+    /* Milestone steps */
+    const milestones = d.milestones || [
+      { name:'Order Placed',       state:'pending' },
+      { name:'Payment Confirmed',  state:'pending' },
+      { name:'Topic Approved',     state:'pending' },
+      { name:'Writing in Progress',state:'pending' },
+      { name:'Review Phase',       state:'pending' },
+      { name:'Final Delivery',     state:'pending' },
+    ];
+
+    const msHTML = milestones.map((ms, i) => {
+      const isDone   = ms.state === 'done';
+      const isActive = ms.state === 'active';
+      const dotCls   = isDone ? 'odp-ms-dot done' : isActive ? 'odp-ms-dot active' : 'odp-ms-dot';
+      const nameCls  = isActive ? 'odp-ms-name active' : isDone ? 'odp-ms-name done' : 'odp-ms-name';
+      const icon     = isDone ? '<i class="ti ti-check"></i>' : isActive ? '<i class="ti ti-writing"></i>' : '';
+      return `<div class="odp-ms-item">
+        <div class="${dotCls}">${icon}</div>
+        ${i < milestones.length - 1 ? '<div class="odp-ms-line"></div>' : ''}
+        <div class="odp-ms-label">
+          <div class="${nameCls}">${esc(ms.name)}</div>
+          <div class="odp-ms-date">${esc(ms.date||'Pending')}</div>
+        </div>
       </div>`;
     }).join('');
 
-
     return `
-    <div class="odp-grid-2">
-      <!-- Client Info -->
-      <div class="odp-card">
-        <div class="odp-card-title"><i class="ti ti-user-circle"></i> Client Information</div>
-        <div class="odp-client-row">
-          <div class="odp-client-av" style="background:${esc(order.avatarColor)}">${esc(order.initials)}</div>
-          <div style="flex:1">
-            <div class="odp-client-name">${esc(order.client)}</div>
-            <div class="odp-client-sub">${esc(order.uni)}</div>
+    <!-- 3-col layout: left cards | center cards | right panel -->
+    <div class="odp-ov-grid">
+
+      <!-- ── LEFT COL ── -->
+      <div class="odp-ov-col">
+
+        <!-- Client Info -->
+        <div class="odp-card odp-client-card">
+          <div class="odp-card-title"><i class="ti ti-user-circle"></i> Client Information</div>
+          <div class="odp-cc-header">
+            <div class="odp-cc-av" style="background:${esc(order.avatarColor)}">${esc(order.initials)}</div>
+            <div class="odp-cc-info">
+              <div class="odp-cc-name">${esc(order.client)} <span class="odp-cc-badge-verified"><i class="ti ti-shield-check"></i> Verified</span></div>
+              <div class="odp-cc-uni">${esc(order.uni)}</div>
+            </div>
+            <div class="odp-cc-icon-actions">
+              <button class="odp-cc-icon-btn" title="Message" onclick="/* open chat tab */"><i class="ti ti-message-circle"></i></button>
+              <button class="odp-cc-icon-btn" title="Call" onclick="/* call */"><i class="ti ti-phone"></i></button>
+              <button class="odp-cc-icon-btn" title="View Profile"><i class="ti ti-user"></i></button>
+            </div>
           </div>
-          <span class="odp-client-badge">Client</span>
+          <div class="odp-cc-contact-rows">
+            <div class="odp-cc-contact-row">
+              <i class="ti ti-mail odp-cc-contact-icon"></i>
+              <a class="odp-cc-contact-val" href="mailto:${esc(d.email||'')}" id="odpClientEmail">${esc(d.email||'—')}</a>
+            </div>
+            <div class="odp-cc-contact-row">
+              <i class="ti ti-device-mobile odp-cc-contact-icon"></i>
+              <span class="odp-cc-contact-val" id="odpClientPhone">${esc(d.phone||'—')}</span>
+            </div>
+          </div>
+          <div class="odp-cc-divider"></div>
+          <div class="odp-cc-stats">
+            <div class="odp-cc-stat">
+              <div class="odp-cc-stat-val" id="odpClientOrders">—</div>
+              <div class="odp-cc-stat-lbl">Total Orders</div>
+            </div>
+            <div class="odp-cc-stat-sep"></div>
+            <div class="odp-cc-stat">
+              <div class="odp-cc-stat-val" id="odpClientSpend">—</div>
+              <div class="odp-cc-stat-lbl">Total Spent</div>
+            </div>
+            <div class="odp-cc-stat-sep"></div>
+            <div class="odp-cc-stat">
+              <div class="odp-cc-stat-val odp-cc-stat-active" id="odpClientRating">4.9 ★</div>
+              <div class="odp-cc-stat-lbl">Client Rating</div>
+            </div>
+          </div>
         </div>
-        <div class="odp-grid-2" style="gap:10px">
-          <div class="odp-field"><label>Email</label>
-            <div class="odp-field-val"><a href="mailto:${esc(d.email||'')}">${esc(d.email||'Not provided')}</a></div></div>
-          <div class="odp-field"><label>Total Orders</label>
-            <div class="odp-field-val muted" id="odpClientOrders">—</div></div>
-          <div class="odp-field"><label>University</label>
-            <div class="odp-field-val muted">${esc(order.uni)}</div></div>
-          <div class="odp-field"><label>Verification</label>
-            <div class="odp-field-val" style="color:var(--green)"><i class="ti ti-shield-check" style="font-size:13px;vertical-align:-1px"></i> Verified</div></div>
-        </div>
-      </div>
 
-      <!-- Order Info -->
-      <div class="odp-card">
-        <div class="odp-card-title"><i class="ti ti-clipboard-text"></i> Order Information</div>
-        <div class="odp-grid-2" style="gap:10px">
-          <div class="odp-field"><label>Service Type</label><div class="odp-field-val">${esc(order.pkg)}</div></div>
-          <div class="odp-field"><label>Chapters</label><div class="odp-field-val">${esc(order.chapters)} chapters</div></div>
-          <div class="odp-field"><label>Word Count</label><div class="odp-field-val muted">${esc(order.wordcount)}</div></div>
-          <div class="odp-field"><label>Citation Style</label><div class="odp-field-val muted">${esc(d.citationStyle||order.citationStyle||'APA 7th Ed.')}</div></div>
-          <div class="odp-field"><label>Amount</label><div class="odp-field-val" style="color:var(--accent2)">${esc(order.amount)}</div></div>
-          <div class="odp-field"><label>Deadline</label><div class="odp-field-val muted">${esc(order.deadline)} ${esc(order.deadlineTime)}</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="odp-grid-2">
-      <!-- Thesis Details — dynamic, filled by renderThesisDetailsCard() -->
-      <div class="odp-card" id="odpThesisDetailsCard">
-        <div class="odp-card-title"><i class="ti ti-forms"></i> Client Submission Details</div>
-        <div class="odp-loading"><div class="odp-spinner"></div> Loading...</div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <!-- Status & Milestone -->
+        <!-- Order Information -->
         <div class="odp-card">
-          <div class="odp-card-title"><i class="ti ti-adjustments-horizontal"></i> Status & Milestone</div>
-          <div class="odp-field"><label>Order Status</label>
-            <select class="odp-select" id="odpStatusSelect">
-              <option value="writing"     ${statusClass==='s-inprogress'?'selected':''}>🔵 In Progress</option>
-              <option value="completed"   ${statusClass==='s-completed' ?'selected':''}>🟢 Completed</option>
-              <option value="pending"     ${statusClass==='s-pending'   ?'selected':''}>🟡 Pending</option>
-              <option value="draft_ready" ${statusClass==='s-review'    ?'selected':''}>🔷 In Review</option>
-              <option value="overdue"     ${statusClass==='s-overdue'   ?'selected':''}>🔴 Overdue</option>
-              <option value="hold">⚫ On Hold</option>
-            </select>
+          <div class="odp-card-title"><i class="ti ti-clipboard-text"></i> Order Information</div>
+          <div class="odp-info-grid">
+            <div class="odp-info-item"><div class="odp-info-lbl">Service Type</div><div class="odp-info-val">${esc(order.pkg||'—')}</div></div>
+            <div class="odp-info-item"><div class="odp-info-lbl">Chapters</div><div class="odp-info-val">${esc(String(order.chapters||'—'))}</div></div>
+            <div class="odp-info-item"><div class="odp-info-lbl">Word Count</div><div class="odp-info-val">${esc(order.wordcount||'—')}</div></div>
+            <div class="odp-info-item"><div class="odp-info-lbl">Citation Style</div><div class="odp-info-val">${esc(d.citationStyle||'APA')}</div></div>
+            <div class="odp-info-item"><div class="odp-info-lbl">Amount</div><div class="odp-info-val odp-info-accent">${esc(order.amount||'—')}</div></div>
+            <div class="odp-info-item"><div class="odp-info-lbl">Deadline</div><div class="odp-info-val">${esc(order.deadline)} ${esc(order.deadlineTime)}</div></div>
           </div>
-          <div class="odp-confirm-row" style="justify-content:flex-end">
-            <button class="odp-btn odp-btn-accent odp-btn-sm" onclick="odpUpdateStatus(document.getElementById('odpStatusSelect').value)"><i class="ti ti-check"></i> Update Status</button>
+        </div>
+      </div>
+
+      <!-- ── CENTER COL ── -->
+      <div class="odp-ov-col">
+
+        <!-- Academic Details -->
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-book"></i> Academic Details</div>
+          <div class="odp-info-grid" id="odpThesisDetailsCard">
+            <div class="odp-loading"><div class="odp-spinner"></div> Loading...</div>
+          </div>
+        </div>
+
+        <!-- Files -->
+        <div class="odp-card">
+          <div class="odp-card-title">
+            <i class="ti ti-files"></i> Files
+            <button class="odp-btn odp-btn-sm odp-card-title-btn" onclick="odpSwitchTab('files')">
+              <i class="ti ti-upload"></i> Upload New File
+            </button>
+          </div>
+          <div class="odp-file-list" id="odpFileListOverview">
+            <div class="odp-loading"><div class="odp-spinner"></div> Loading files…</div>
+          </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-clock"></i> Activity Timeline</div>
+          <div class="odp-ov-timeline" id="odpOvTimeline">
+            <div class="odp-loading"><div class="odp-spinner"></div> Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RIGHT COL ── -->
+      <div class="odp-ov-right">
+
+        <!-- Order Progress -->
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-chart-bar"></i> Order Progress</div>
+          <div class="odp-ms-track">${msHTML}</div>
+          <div class="odp-prog-label-row">
+            <span>Overall Progress</span>
+            <span style="color:${pctColor};font-weight:800">${pct}%</span>
+          </div>
+          <div class="odp-progress-track" style="margin:6px 0 4px">
+            <div class="odp-progress-fill ${pfClass}" style="width:${pct}%"></div>
+          </div>
+          <div class="odp-prog-phase-pill">
+            <span class="odp-prog-dot ${pfClass}"></span>
+            ${statusClass === 's-inprogress' ? 'Writing Phase' : statusClass === 's-review' ? 'Review Phase' : statusClass === 's-completed' ? 'Completed' : 'Pending'}
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="odp-card odp-qa-card">
+          <div class="odp-card-title"><i class="ti ti-bolt"></i> Quick Actions</div>
+          <div class="odp-qa-list">
+            <button class="odp-qa-btn odp-qa-primary" onclick="odpSwitchTab('files')">
+              <i class="ti ti-upload"></i> Upload / Submit Draft
+            </button>
+            <button class="odp-qa-btn" onclick="odpSwitchTab('messages')">
+              <i class="ti ti-message-circle"></i> Send Message to Client
+            </button>
+            <div class="odp-qa-select-wrap">
+              <i class="ti ti-edit"></i>
+              <select class="odp-qa-select" id="odpStatusSelect" onchange="odpUpdateStatus(this.value)">
+                <option value="" disabled selected>Update Order Status</option>
+                <option value="writing"     ${order.statusClass==='s-inprogress'?'selected':''}>🔵 In Progress</option>
+                <option value="completed"   ${order.statusClass==='s-completed' ?'selected':''}>🟢 Completed</option>
+                <option value="pending"     ${order.statusClass==='s-pending'   ?'selected':''}>🟡 Pending</option>
+                <option value="draft_ready" ${order.statusClass==='s-review'    ?'selected':''}>🔷 In Review</option>
+                <option value="overdue"     ${order.statusClass==='s-overdue'   ?'selected':''}>🔴 Overdue</option>
+                <option value="hold">⚫ On Hold</option>
+              </select>
+            </div>
+            <button class="odp-qa-btn odp-qa-danger" onclick="odpMarkCompleted()">
+              <i class="ti ti-circle-check"></i> Mark as Completed
+            </button>
           </div>
         </div>
 
       </div>
-    </div>
-`;
+    </div>`;
   }
 
   /* ══ PAYMENTS HTML ══ */
@@ -380,9 +479,7 @@
     _currentOrder = order;
     _currentOrderId = order.id;
 
-    const area = document.querySelector('.content-area');
-    if (!area) return;
-    area.insertAdjacentHTML('beforeend', buildShell(order));
+    document.body.insertAdjacentHTML('beforeend', buildShell(order));
 
     /* Sync status select IMMEDIATELY after HTML is in DOM */
     const _statusSel = document.getElementById('odpStatusSelect');
@@ -410,6 +507,7 @@
     loadActivity();
     loadPaymentHistory();
     loadClientOrderCount();
+    if (_currentOrder) _renderOvTimeline(_currentOrder);
   };
 
   /* ══ LOAD FULL ORDER DATA FROM SUPABASE ══ */
@@ -771,8 +869,9 @@
      FILES — Supabase Storage
   ══════════════════════════════════════════════════════════ */
   async function loadFiles() {
-    const list = document.getElementById('odpFileList');
-    if (!list) return;
+    const list    = document.getElementById('odpFileList');
+    const listOv  = document.getElementById('odpFileListOverview');
+    if (!list && !listOv) return;
 
     /* Check if order has static files in detail */
     const d = _currentOrder && _currentOrder.detail;
@@ -789,32 +888,36 @@
         if (!d || !d.files || !d.files.length) list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No files uploaded yet.</div>';
         return;
       }
-      list.innerHTML = data.map(f => renderFileRow({ name: f.name, size: f.metadata?.size, updated_at: f.updated_at, supabasePath: `${path}/${f.name}` })).join('');
+      const html = data.map(f => renderFileRow({ name: f.name, size: f.metadata?.size, updated_at: f.updated_at, supabasePath: `${path}/${f.name}` })).join('');
+      const tableHeader = `<div class="odp-file-row-head"><span>File Name</span><span>Type</span><span>Uploaded By</span><span>Uploaded At</span><span>Size</span><span>Actions</span></div>`;
+      if (list) list.innerHTML = tableHeader + html;
+      if (listOv) listOv.innerHTML = tableHeader + html;
     } catch(e) {
       if (!d || !d.files || !d.files.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not load files.</div>';
     }
   }
 
   function renderFileRow(f) {
-    const ext = (f.name || '').split('.').pop().toLowerCase();
-    const iconClass = ext==='pdf' ? 'pdf' : ext==='docx'||ext==='doc' ? 'doc' : ext==='zip' ? 'zip' : 'img';
-    const icon = ext==='pdf' ? 'ti-file-type-pdf' : ext==='docx'||ext==='doc' ? 'ti-file-type-doc' : ext==='zip' ? 'ti-file-zip' : 'ti-file';
-    const size = f.size ? (f.size/1024 < 1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/1024/1024).toFixed(1)+' MB') : '';
-    const date = f.updated_at ? new Date(f.updated_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
-    const path = f.supabasePath || '';
+    const ext      = (f.name || '').split('.').pop().toLowerCase();
+    const pillCls  = ext==='pdf' ? 'pdf' : (ext==='docx'||ext==='doc') ? 'docx' : ext==='zip' ? 'zip' : ext.match(/png|jpg|jpeg|gif|webp/) ? 'img' : 'other';
+    const icon     = ext==='pdf' ? 'ti-file-type-pdf' : (ext==='docx'||ext==='doc') ? 'ti-file-type-doc' : ext==='zip' ? 'ti-file-zip' : ext.match(/png|jpg|jpeg|gif|webp/) ? 'ti-photo' : 'ti-file';
+    const size     = f.size ? (f.size/1024 < 1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/1024/1024).toFixed(1)+' MB') : '—';
+    const uploadedAt = f.updated_at ? new Date(f.updated_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' ' + new Date(f.updated_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+    const uploader = f.uploaded_by || (f.supabasePath ? 'Writer' : 'Client');
+    const path     = f.supabasePath || '';
     return `
     <div class="odp-file-row" data-path="${esc(path)}">
-      <div class="odp-file-icon ${iconClass}"><i class="ti ${icon}"></i></div>
-      <div style="flex:1;min-width:0">
-        <div class="odp-file-name">${esc(f.name)}</div>
-        <div class="odp-file-meta">${[size,date].filter(Boolean).join(' · ')}</div>
+      <div class="odp-file-name-cell">
+        <i class="ti ${icon}"></i>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</span>
       </div>
-      <span class="odp-vis-badge vis-client">Client visible</span>
+      <span class="odp-file-type-pill ${pillCls}">${ext}</span>
+      <span style="color:var(--muted2);font-size:11.5px">${esc(uploader)}</span>
+      <span style="color:var(--muted2);font-size:11px">${uploadedAt}</span>
+      <span style="color:var(--muted2);font-size:11.5px">${size}</span>
       <div class="odp-file-actions">
-        <button class="odp-file-btn" title="Download" onclick="odpDownloadFile('${esc(path)}','${esc(f.name)}')"><i class="ti ti-download"></i></button>
-        <button class="odp-file-btn" title="Toggle Lock" onclick="odpToggleLock(this)"><i class="ti ti-lock-open"></i></button>
-        <button class="odp-file-btn" title="Toggle Visibility" onclick="odpToggleVisibility(this)"><i class="ti ti-eye"></i></button>
-        <button class="odp-file-btn danger" title="Delete" onclick="odpDeleteFile('${esc(path)}',this)"><i class="ti ti-trash"></i></button>
+        <button class="odp-file-action-btn" title="Download" onclick="odpDownloadFile('${esc(path)}','${esc(f.name)}')"><i class="ti ti-download"></i></button>
+        <button class="odp-file-action-btn" title="Preview" onclick="odpToggleVisibility(this)"><i class="ti ti-eye"></i></button>
       </div>
     </div>`;
   }
@@ -1047,6 +1150,12 @@
     'hold':        '⚫',
   };
 
+  window.odpMarkCompleted = function() {
+    if (confirm('Mark this order as Completed?')) {
+      window.odpUpdateStatus('completed');
+    }
+  };
+
   window.odpUpdateStatus = async function(val) {
     if (!sb()) {
       toast('⚠ Supabase not connected', 'var(--red)');
@@ -1208,6 +1317,30 @@
     </div>`;
   }
 
+  /* ── Render overview horizontal timeline ── */
+  function _renderOvTimeline(order) {
+    const el = document.getElementById('odpOvTimeline');
+    if (!el) return;
+    const d = order.detail || {};
+    const milestones = d.milestones || [
+      { name:'Order Created',      state:'pending', date:'' },
+      { name:'Payment Received',   state:'pending', date:'' },
+      { name:'Topic Approved',     state:'pending', date:'' },
+      { name:'Writing in Progress',state:'pending', date:'' },
+      { name:'Review Phase',       state:'pending', date:'' },
+      { name:'Final Delivery',     state:'pending', date:'' },
+    ];
+    el.innerHTML = milestones.map(ms => {
+      const cls = ms.state === 'done' ? 'done' : ms.state === 'active' ? 'active' : '';
+      const icon = ms.state === 'done' ? '<i class="ti ti-check"></i>' : ms.state === 'active' ? '<i class="ti ti-writing"></i>' : '<i class="ti ti-clock"></i>';
+      return `<div class="odp-ov-tl-item">
+        <div class="odp-ov-tl-dot ${cls}">${icon}</div>
+        <div class="odp-ov-tl-lbl ${cls}">${esc(ms.name)}</div>
+        <div class="odp-ov-tl-date">${esc(ms.date||'Pending')}</div>
+      </div>`;
+    }).join('');
+  }
+
   /* In-memory activity log for current session */
   let _activityLog = [];
   function logActivity(type, text) {
@@ -1222,12 +1355,48 @@
      LOAD CLIENT ORDER COUNT
   ══════════════════════════════════════════════════════════ */
   async function loadClientOrderCount() {
-    const el = document.getElementById('odpClientOrders');
-    if (!el || !sb() || !_currentOrder || !isRealUUID(_currentOrderId)) return;
+    if (!sb() || !_currentOrder || !isRealUUID(_currentOrderId)) return;
+    const clientId = _currentOrder.clientId || _currentOrder.rawClientId || '';
+    if (!clientId) return;
+
     try {
-      const { count } = await sb().from('orders').select('id',{count:'exact',head:true}).eq('client_id', _currentOrder.clientId || '');
-      if (count !== null) el.textContent = count + ' orders';
-    } catch(e) {}
+      /* Total orders count */
+      const { count } = await sb()
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .eq('client_id', clientId);
+
+      const elOrders = document.getElementById('odpClientOrders');
+      if (elOrders && count !== null) elOrders.textContent = count;
+
+      /* Active orders */
+      const { count: activeCount } = await sb()
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .eq('client_id', clientId)
+        .in('status', ['pending', 'confirmed', 'writing', 'draft_ready']);
+
+      const elActive = document.getElementById('odpClientActive');
+      if (elActive && activeCount !== null) elActive.textContent = activeCount;
+
+      /* Total spend */
+      const { data: spendData } = await sb()
+        .from('orders')
+        .select('total_price')
+        .eq('client_id', clientId)
+        .eq('payment_status', 'paid');
+
+      const elSpend = document.getElementById('odpClientSpend');
+      if (elSpend && spendData) {
+        const total = spendData.reduce((s, o) => s + (Number(o.total_price) || 0), 0);
+        elSpend.textContent = total > 0 ? '৳' + total.toLocaleString() : '৳0';
+      }
+
+      /* Client ID short display */
+      const elId = document.getElementById('odpClientId');
+      if (elId) elId.textContent = clientId.slice(0, 8).toUpperCase();
+
+    } catch(e) { console.error('client stats error', e); }
   }
 
 })();
