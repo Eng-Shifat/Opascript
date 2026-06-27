@@ -2628,3 +2628,163 @@ body.odp-panel-open {
   margin-bottom: 10px;
 }
 .odp-file-note i { color: var(--accent2); margin-right: 4px; }
+
+/* ══════════════════════════════════════════════════════════
+   PAYMENT MANAGEMENT UI — Screenshot-style
+══════════════════════════════════════════════════════════ */
+
+/* Pending warning banner */
+.odp-pay-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(251,191,36,0.07);
+  border: 1px solid rgba(251,191,36,0.2);
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.odp-pay-how {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.odp-pay-how:hover { background: rgba(255,255,255,0.08); }
+
+/* Payment stat cards row */
+.odp-pay-stat-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.odp-pay-stat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 10px;
+}
+.odp-pay-stat-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.odp-pay-stat-icon.blue   { background: rgba(45,110,247,0.15); color: #60a5fa; }
+.odp-pay-stat-icon.green  { background: rgba(34,197,94,0.12);  color: #4ade80; }
+.odp-pay-stat-icon.red    { background: rgba(239,68,68,0.12);  color: #f87171; }
+.odp-pay-stat-num  { font-size: 13px; font-weight: 700; }
+.odp-pay-stat-lbl  { font-size: 10.5px; color: var(--muted2); margin-top: 1px; }
+
+/* Status pill */
+.odp-pay-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.odp-pay-status-pill.orange { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+.odp-pay-status-pill.green  { background: rgba(34,197,94,0.12);  color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+.odp-pay-status-pill.red    { background: rgba(239,68,68,0.1);   color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+.odp-pay-status-pill.muted  { background: rgba(255,255,255,0.05); color: var(--muted2); border: 1px solid rgba(255,255,255,0.08); }
+
+/* Files locked info box */
+.odp-pay-locked-info {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 12px;
+  background: rgba(251,191,36,0.05);
+  border: 1px solid rgba(251,191,36,0.12);
+  border-radius: 10px;
+}
+.odp-pay-locked-left, .odp-pay-locked-right {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+}
+.odp-pay-locked-left { align-items: flex-start; }
+.odp-pay-locked-right { flex-direction: column; justify-content: center; }
+.odp-pay-due-note {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Payment History Table */
+.odp-pay-table-head {
+  display: grid;
+  grid-template-columns: 24px 1fr 1fr 70px 90px 80px 50px 1fr;
+  gap: 6px;
+  padding: 6px 4px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: rgba(255,255,255,0.3);
+}
+.odp-pay-table-row {
+  display: grid;
+  grid-template-columns: 24px 1fr 1fr 70px 90px 80px 50px 1fr;
+  gap: 6px;
+  align-items: center;
+  padding: 9px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 11.5px;
+}
+.odp-pay-table-row:last-child { border-bottom: none; }
+.odp-pay-table-row:hover { background: rgba(255,255,255,0.02); }
+
+/* Payment verify row — client sent info */
+.odp-pay-verify-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.odp-pay-verify-item {
+  flex: 1;
+  min-width: 80px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.odp-pay-verify-lbl {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 4px;
+}
+.odp-pay-verify-val {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-all;
+}

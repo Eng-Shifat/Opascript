@@ -8,6 +8,7 @@
   let _timerInterval = null;
   let _currentOrderId = null;
   let _currentOrder = null;
+  let _payRealtimeChannel = null;
 
   /* ── SUPABASE HELPER ── */
   function sb() { return window.scriptoraSupabase; }
@@ -202,7 +203,7 @@
     const fin = (order && order.detail && order.detail.financials) || {};
     const paidPct = fin.paidPct || 0;
     const paid = fin.paid || '৳0';
-    const due = fin.due || order.amount || '—';
+    const due = fin.due || order.total_price || '—';
     const statusEl = document.getElementById('odpOiPayStatus');
     const paidEl = document.getElementById('odpOiPaid');
     const dueEl = document.getElementById('odpOiDue');
@@ -606,9 +607,9 @@
     const fin = d.financials || {};
     const pageCount = getPageCount(order);
     const wordCount = getWordCount(order);
-    const total   = fin.total   || order.amount || '—';
+    const total   = fin.total   || order.total_price || '—';
     const paid    = fin.paid    || '৳0';
-    const due     = fin.due     || order.amount || '—';
+    const due     = fin.due     || order.total_price || '—';
     const paidPct = fin.paidPct || 0;
     const pctColor = paidPct >= 100 ? 'var(--green)' : paidPct > 0 ? 'var(--yellow)' : 'var(--red)';
     const statusClass = order.statusClass || 's-pending';
@@ -681,49 +682,169 @@
 
   /* ══ PAYMENTS HTML ══ */
   function buildPaymentsHTML(order) {
-    const d = order.detail || {};
+    const d   = order.detail || {};
     const fin = d.financials || {};
-    const total   = fin.total   || order.amount || '—';
-    const paid    = fin.paid    || '—';
-    const due     = fin.due     || order.amount || '—';
-    const paidPct = fin.paidPct || 0;
+    const paid      = fin.paid || 0;
+    const paidPct   = fin.paidPct || 0;
+    const payStatus = order.paymentStatus || 'pending';
+
+    const totalFmt = order.amount || '—';
+    const paidFmt  = paid ? '৳' + Number(paid).toLocaleString() : '৳0';
+    const dueFmt   = '—';
+    const pctColor = paidPct >= 100 ? 'var(--green)' : paidPct > 0 ? 'var(--gold)' : 'var(--red)';
+    const isLocked = payStatus !== 'paid';
+
+    const statusLabel = { pending:'Pending', under_review:'Pending', approved:'Approved', paid:'Paid', rejected:'Rejected' }[payStatus] || 'Pending';
+    const statusCls   = { pending:'orange', under_review:'orange', approved:'green', paid:'green', rejected:'red' }[payStatus] || 'orange';
 
     return `
+    <!-- Payment Pending Warning Banner -->
+    ${payStatus === 'under_review' || payStatus === 'pending' ? `
+    <div class="odp-pay-banner">
+      <i class="ti ti-alert-circle" style="color:var(--gold);font-size:15px;flex-shrink:0"></i>
+      <div>
+        <div style="font-weight:700;font-size:12.5px;color:var(--gold)">Payment Pending</div>
+        <div style="font-size:11.5px;color:var(--muted2);margin-top:2px">Please verify the payment to proceed. Files are locked until payment is confirmed.</div>
+      </div>
+      <button class="odp-pay-how" onclick="toast('Verify txn ID, check screenshot, then Approve or Reject.','var(--accent)')"><i class="ti ti-info-circle"></i> How it works?</button>
+    </div>` : ''}
+
     <div class="odp-row-2">
+
+      <!-- LEFT COLUMN -->
       <div style="display:flex;flex-direction:column;gap:14px">
+
+        <!-- Payment Summary -->
         <div class="odp-card">
           <div class="odp-card-title"><i class="ti ti-report-money"></i> Payment Summary</div>
-          <div class="odp-amount-row"><span class="odp-amount-label">Total Amount</span><span class="odp-amount-val total">${esc(total)}</span></div>
-          <div class="odp-amount-row"><span class="odp-amount-label">Paid Amount</span><span class="odp-amount-val paid">${esc(paid)}</span></div>
-          <div class="odp-amount-row"><span class="odp-amount-label">Due Amount</span><span class="odp-amount-val due">${esc(due)}</span></div>
-          <div class="odp-pay-progress-wrap">
-            <div class="odp-pay-progress-row"><span>Payment Progress</span><span style="color:var(--green);font-weight:600">${paidPct}% paid</span></div>
-            <div class="odp-progress-track"><div class="odp-progress-fill pf-green" style="width:${paidPct}%"></div></div>
+          <div class="odp-pay-stat-row">
+            <div class="odp-pay-stat">
+              <div class="odp-pay-stat-icon blue"><i class="ti ti-receipt"></i></div>
+              <div><div class="odp-pay-stat-num" id="odpPaySummaryTotal">${totalFmt}</div><div class="odp-pay-stat-lbl">Total Amount</div></div>
+            </div>
+            <div class="odp-pay-stat">
+              <div class="odp-pay-stat-icon green"><i class="ti ti-arrow-up"></i></div>
+              <div><div class="odp-pay-stat-num" id="odpPaySummaryPaid" style="color:var(--green)">${paidFmt}</div><div class="odp-pay-stat-lbl">Sent Amount</div></div>
+            </div>
+            <div class="odp-pay-stat">
+              <div class="odp-pay-stat-icon red"><i class="ti ti-pig-money"></i></div>
+              <div><div class="odp-pay-stat-num" id="odpPaySummaryDue" style="color:var(--red)">${dueFmt}</div><div class="odp-pay-stat-lbl">Due Amount</div></div>
+            </div>
           </div>
+          <div style="margin-top:12px">
+            <div class="odp-pay-progress-row">
+              <span style="font-size:11px;color:var(--muted2)">Payment Status</span>
+              <span class="odp-pay-status-pill ${statusCls}">${statusLabel}</span>
+            </div>
+            <div class="odp-pay-progress-row" style="margin-top:6px">
+              <span style="font-size:11px;color:var(--muted2)">Payment Progress</span>
+              <span style="color:${pctColor};font-weight:700;font-size:12px">${paidPct}%</span>
+            </div>
+            <div class="odp-progress-track" style="margin-top:6px">
+              <div class="odp-progress-fill pf-green" style="width:${paidPct}%"></div>
+            </div>
+          </div>
+          ${isLocked ? `
+          <div class="odp-pay-locked-info">
+            <div class="odp-pay-locked-left">
+              <i class="ti ti-lock" style="color:var(--gold);font-size:18px"></i>
+              <div>
+                <div style="font-size:12px;font-weight:700">Files are locked</div>
+                <div style="font-size:11px;color:var(--muted2);margin-top:2px">Files will be unlocked automatically once the payment is fully received.</div>
+              </div>
+            </div>
+            <div class="odp-pay-locked-right">
+              <div style="font-size:11.5px;font-weight:600;color:var(--red-light)">You can't complete this order</div>
+              <div style="font-size:11px;color:var(--muted2);margin-top:2px">Complete button will be enabled automatically after full payment.</div>
+            </div>
+          </div>
+          <div class="odp-pay-due-note"><i class="ti ti-info-circle"></i> Due amount must be ৳0 to mark as completed and unlock all files.</div>
+          ` : ''}
         </div>
+
+        <!-- Payment History Table -->
         <div class="odp-card">
           <div class="odp-card-title"><i class="ti ti-history"></i> Payment History</div>
+          <div class="odp-pay-table-head">
+            <span>#</span><span>Date</span><span>Type</span><span>Amount</span><span>Method</span><span>Status</span><span>Action</span><span>Note</span>
+          </div>
           <div id="odpPayHistory"><div class="odp-loading"><div class="odp-spinner"></div> Loading…</div></div>
         </div>
+
       </div>
-      <div class="odp-card">
-        <div class="odp-card-title"><i class="ti ti-photo"></i> Payment Proof</div>
-        <div id="odpProofSection">
-          <div class="odp-proof-box" onclick="document.getElementById('odpProofInput').click()">
-            <div class="odp-proof-icon"><i class="ti ti-file-invoice"></i></div>
-            <div><div class="odp-proof-name">No proof uploaded</div><div class="odp-proof-sub">Click to upload payment receipt</div></div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <!-- Payment Proof -->
+        <div class="odp-card">
+          <div class="odp-card-title"><i class="ti ti-file-invoice"></i> Payment Proof</div>
+          <div id="odpProofSection">
+            <div class="odp-proof-box" onclick="document.getElementById('odpProofInput').click()" style="cursor:pointer">
+              <div class="odp-proof-icon"><i class="ti ti-file-invoice"></i></div>
+              <div>
+                <div class="odp-proof-name">No proof uploaded</div>
+                <div class="odp-proof-sub">Uploaded by Client</div>
+              </div>
+            </div>
+            <input type="file" id="odpProofInput" style="display:none" accept="image/*,.pdf" onchange="odpUploadProof(this.files)">
           </div>
-          <input type="file" id="odpProofInput" style="display:none" accept="image/*,.pdf" onchange="odpUploadProof(this.files)">
+
+          <!-- Client Sent Amount (from DB) -->
+          <div class="odp-pay-verify-row" style="margin-top:12px">
+            <div class="odp-pay-verify-item">
+              <div class="odp-pay-verify-lbl">Client Sent Amount</div>
+              <div class="odp-pay-verify-val" id="odpClientSentAmount" style="color:var(--green)">—</div>
+            </div>
+            <div class="odp-pay-verify-item">
+              <div class="odp-pay-verify-lbl">Payment Method</div>
+              <div class="odp-pay-verify-val" id="odpClientMethod">—</div>
+            </div>
+            <div class="odp-pay-verify-item">
+              <div class="odp-pay-verify-lbl">Transaction ID</div>
+              <div class="odp-pay-verify-val" id="odpClientTxnId" style="font-family:monospace;font-size:11px;color:var(--accent2)">—</div>
+            </div>
+          </div>
+
+          <!-- Admin: I received amount -->
+          <div class="odp-field" style="margin-top:12px">
+            <label style="font-size:11px;color:var(--muted2);font-weight:600;text-transform:uppercase;letter-spacing:.05em">আমি যা পেয়েছি (Received Amount)</label>
+            <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
+              <span style="font-size:13px;color:var(--muted2);flex-shrink:0">৳</span>
+              <input type="number" id="odpReceivedAmount" placeholder="0"
+                style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none"
+                oninput="odpUpdateDuePreview(this.value)">
+            </div>
+            <div id="odpDuePreview" style="margin-top:6px;font-size:11.5px;color:var(--muted2);display:none">
+              Due after this: <span id="odpDuePreviewVal" style="font-weight:700;color:var(--red)">—</span>
+            </div>
+          </div>
+
+          <div class="odp-field" style="margin-top:10px">
+            <label style="font-size:11px;color:var(--muted2);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Client Note (Optional)</label>
+            <div id="odpClientNote" style="margin-top:6px;font-size:12px;color:var(--muted2);padding:8px 10px;background:var(--card2);border-radius:8px;border:1px solid var(--border);min-height:36px">—</div>
+          </div>
+
+          <div class="odp-field" style="margin-top:10px">
+            <label style="font-size:11px;color:var(--muted2);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Internal Note (Only for Admin)</label>
+            <textarea class="odp-msg-textarea" id="odpPayNote" style="min-height:55px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;background:var(--card2);margin-top:6px" placeholder="Add an internal note…"></textarea>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="odp-btn odp-btn-green" style="flex:1;justify-content:center" onclick="odpApprovePayment()">
+              <i class="ti ti-circle-check"></i> Approve Payment
+            </button>
+            <button class="odp-btn" style="flex:1;justify-content:center;background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2)" onclick="odpRejectPayment()">
+              <i class="ti ti-circle-x"></i> Reject Payment
+            </button>
+          </div>
+
+          <button class="odp-btn odp-btn-accent" style="margin-top:8px;width:100%;justify-content:center" onclick="odpMarkPaymentReceived()">
+            <i class="ti ti-cash"></i> Mark as Payment Received
+          </button>
+          <div style="text-align:center;font-size:10.5px;color:var(--muted);margin-top:6px">After verification, client will be notified automatically.</div>
         </div>
-        <div class="odp-proof-btns" style="margin-bottom:14px">
-          <button class="odp-btn odp-btn-green" style="flex:1;justify-content:center" onclick="odpApprovePayment()"><i class="ti ti-circle-check"></i> Approve Payment</button>
-          <button class="odp-btn odp-btn-accent" style="flex:1;justify-content:center" onclick="odpMarkPaid()"><i class="ti ti-cash"></i> Mark as Paid</button>
-        </div>
-        <div class="odp-field">
-          <label>Payment Note (internal)</label>
-          <textarea class="odp-msg-textarea" id="odpPayNote" style="min-height:55px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;background:var(--card2)" placeholder="Add an internal payment note…"></textarea>
-        </div>
-        <button class="odp-btn odp-btn-sm" style="margin-top:8px;width:100%;justify-content:center" onclick="odpSavePayNote()"><i class="ti ti-device-floppy"></i> Save Note</button>
+
       </div>
     </div>`;
   }
@@ -798,14 +919,39 @@
       return;
     }
     try {
-      const { data: ord } = await sb().from('orders').select('*').eq('id', _currentOrderId).single();
+      const [{ data: ord }, { data: payments }] = await Promise.all([
+        sb().from('orders').select('*').eq('id', _currentOrderId).single(),
+        sb().from('payments').select('amount,type,confirmed').eq('order_id', _currentOrderId)
+      ]);
+
       if (!ord) return;
       if (_currentOrder) _currentOrder.clientId = ord.client_id || _currentOrder.clientId || '';
+
+      /* ── Payment financials compute ── */
+      const total = Number(ord.total_price || 0);
+      let paid = 0;
+      if (payments && payments.length) {
+        paid = payments
+          .filter(p => p.confirmed && (p.type === 'received' || p.type === 'approval'))
+          .reduce((s, p) => s + Number(p.amount || 0), 0);
+        if (paid === 0 && ord.advance_paid) paid = Number(ord.advance_paid);
+      } else if (ord.advance_paid) {
+        paid = Number(ord.advance_paid);
+      }
+      const due = Math.max(0, total - paid);
+      const paidPct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+
+      if (!_currentOrder.detail) _currentOrder.detail = {};
+      _currentOrder.detail.financials = { total, paid, due, paidPct };
+      _currentOrder.paymentStatus = ord.payment_status || _currentOrder.paymentStatus;
+
+      /* ── Client data ── */
       let client = null;
       if (ord.client_id) {
         const { data: cl } = await sb().from('clients').select('*').eq('id', ord.client_id).single();
         client = cl;
       }
+
       renderClientSubmission(ord, client);
       renderClientInfoFromDB(ord, client);
       renderThesisDetailsCard(ord, client);
@@ -815,7 +961,6 @@
       const statusSel = document.getElementById('odpStatusSelect');
       if (statusSel && ord.status) {
         statusSel.value = ord.status;
-        /* Also update header pill */
         const pill = document.querySelector('.odp-status-pill');
         if (pill) {
           const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' };
@@ -824,7 +969,91 @@
           pill.textContent = lblMap[ord.status] || ord.status;
         }
       }
-    } catch(e) {}
+
+      /* ── Subscribe to payments realtime ── */
+      _subscribePaymentsRealtime();
+
+    } catch(e) { console.error('loadFullOrderData:', e); }
+  }
+
+  /* ══ PAYMENTS REALTIME SUBSCRIPTION ══════════════════════════════════════ */
+  function _subscribePaymentsRealtime() {
+    if (!sb() || !isRealUUID(_currentOrderId)) return;
+    if (_payRealtimeChannel) {
+      sb().removeChannel(_payRealtimeChannel);
+      _payRealtimeChannel = null;
+    }
+    _payRealtimeChannel = sb()
+      .channel(`odp_pay_${_currentOrderId}`)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'payments', filter: `order_id=eq.${_currentOrderId}` },
+        async () => {
+          await _reloadPaymentFinancials();
+          await loadPaymentHistory();
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${_currentOrderId}` },
+        async (payload) => {
+          if (!_currentOrder) return;
+          _currentOrder.paymentStatus = payload.new.payment_status || _currentOrder.paymentStatus;
+          syncOrderInfoPayments(_currentOrder);
+          const payPill = document.getElementById('odpOiPayStatus');
+          if (payPill) {
+            const ps  = payload.new.payment_status || 'pending';
+            const lbl = { pending:'Unpaid', under_review:'Pending', approved:'Approved', paid:'Paid', rejected:'Rejected' }[ps] || 'Pending';
+            const cls = { pending:'odp-oi-pay-unpaid', under_review:'odp-oi-pay-partial', approved:'odp-oi-pay-paid', paid:'odp-oi-pay-paid', rejected:'odp-oi-pay-unpaid' }[ps] || 'odp-oi-pay-unpaid';
+            payPill.textContent = lbl;
+            payPill.className   = 'odp-oi-pay-pill ' + cls;
+          }
+        }
+      )
+      .subscribe();
+  }
+
+  async function _reloadPaymentFinancials() {
+    if (!sb() || !isRealUUID(_currentOrderId)) return;
+    try {
+      const [{ data: ord }, { data: pays }] = await Promise.all([
+        sb().from('orders').select('amount,advance_paid,payment_status').eq('id', _currentOrderId).single(),
+        sb().from('payments').select('amount,type,confirmed').eq('order_id', _currentOrderId)
+      ]);
+      if (!ord || !_currentOrder) return;
+
+      const total = Number(ord.total_price || 0) || Number(String((_currentOrder && _currentOrder.amount) || "").replace(/[^\d]/g, "")) || 0;
+      let paid = 0;
+      if (pays && pays.length) {
+        paid = pays
+          .filter(p => p.confirmed && (p.type === 'received' || p.type === 'approval'))
+          .reduce((s, p) => s + Number(p.amount || 0), 0);
+        if (paid === 0 && ord.advance_paid) paid = Number(ord.advance_paid);
+      } else if (ord.advance_paid) {
+        paid = Number(ord.advance_paid);
+      }
+      const due     = Math.max(0, total - paid);
+      const paidPct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+
+      if (!_currentOrder.detail) _currentOrder.detail = {};
+      _currentOrder.detail.financials = { total, paid, due, paidPct };
+      _currentOrder.paymentStatus = ord.payment_status || _currentOrder.paymentStatus;
+
+      syncOrderInfoPayments(_currentOrder);
+
+      /* Live update stat cards inside Payments tab */
+      const sp = document.getElementById('odpPaySummaryPaid');
+      const sd = document.getElementById('odpPaySummaryDue');
+      const st = document.getElementById('odpPaySummaryTotal');
+      if (sp) sp.textContent = paid  ? '৳' + Number(paid).toLocaleString()  : '৳0';
+      if (sd) sd.textContent = due   ? '৳' + Number(due).toLocaleString()   : '৳0';
+      if (st) st.textContent = total ? '৳' + Number(total).toLocaleString() : '—';
+
+      /* Live update progress bar */
+      const fill = document.querySelector('.odp-progress-fill.pf-green');
+      const pct  = document.querySelector('.odp-pay-progress-row span[style*="font-weight:7"]');
+      if (fill) fill.style.width = paidPct + '%';
+      if (pct)  pct.textContent  = paidPct + '%';
+
+    } catch(e) { console.error('_reloadPaymentFinancials:', e); }
   }
 
   /* ══ THESIS DETAILS CARD — Overview tab ══
@@ -928,6 +1157,10 @@
     if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
     const oldPanel = document.getElementById('detailPanel');
     if (oldPanel) oldPanel.style.visibility = '';
+    if (_payRealtimeChannel) {
+      if (sb()) sb().removeChannel(_payRealtimeChannel);
+      _payRealtimeChannel = null;
+    }
     _currentOrderId = null; _currentOrder = null;
   };
 
@@ -1345,21 +1578,139 @@
     const el = document.getElementById('odpPayHistory');
     if (!el) return;
 
-    if (!sb() || !isRealUUID(_currentOrderId)) { el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">Payment history unavailable.</div>'; return; }
+    if (!sb() || !isRealUUID(_currentOrderId)) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">Payment history unavailable.</div>';
+      return;
+    }
 
     try {
-      const { data } = await sb().from('payments').select('*').eq('order_id', _currentOrderId).order('created_at', { ascending: false });
-      if (!data || !data.length) { el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">No payment records yet.</div>'; return; }
-      el.innerHTML = data.map(p => `
-        <div class="odp-pay-hist-item">
-          <div>
-            <div class="odp-pay-hist-label">${esc(p.label||p.type||'Payment')}</div>
-            <div class="odp-pay-hist-sub">${p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : ''} · ${esc(p.method||'')}</div>
-          </div>
-          <span class="odp-pay-hist-val ${p.amount>0?'green':'orange'}">${p.amount>0?'+':''}${esc(String(p.amount||'—'))}</span>
-        </div>`).join('');
-    } catch(e) { el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">Could not load payment history.</div>'; }
+      const { data } = await sb().from('payments').select('*').eq('order_id', _currentOrderId).order('paid_at', { ascending: true });
+      if (!data || !data.length) {
+        el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">No payment records yet.</div>';
+        return;
+      }
+
+      /* Also try to load client note from latest payment */
+      const latestWithNote = data.find(p => p.type === 'advance' || p.type === 'payment');
+      if (latestWithNote && latestWithNote.client_note) {
+        const noteEl = document.getElementById('odpClientNote');
+        if (noteEl) noteEl.textContent = latestWithNote.client_note;
+      }
+
+      /* Populate client sent info in proof section */
+      const clientPayment = data.find(p => p.type === 'advance' || p.type === 'payment' || p.type === 'balance');
+      if (clientPayment) {
+        const sentEl   = document.getElementById('odpClientSentAmount');
+        const methodEl = document.getElementById('odpClientMethod');
+        const txnEl    = document.getElementById('odpClientTxnId');
+        const noteEl   = document.getElementById('odpClientNote');
+        if (sentEl)   sentEl.textContent   = clientPayment.amount ? '৳' + Number(clientPayment.amount).toLocaleString() : '—';
+        if (methodEl) methodEl.textContent = clientPayment.method || '—';
+        if (txnEl)    txnEl.textContent    = clientPayment.txn_id || '—';
+        if (noteEl && clientPayment.client_note) noteEl.textContent = clientPayment.client_note;
+
+        /* ── Update Payment Summary stat cards from real DB data ── */
+        const rawTotal = _currentOrder ? Number(String(_currentOrder.amount || '').replace(/[^\d]/g, '')) || 0 : 0;
+        const clientSent = Number(clientPayment.amount || 0);
+        const due = Math.max(0, rawTotal - clientSent);
+        const paidPct = rawTotal > 0 ? Math.min(100, Math.round((clientSent / rawTotal) * 100)) : 0;
+
+        const stTotal = document.getElementById('odpPaySummaryTotal');
+        const stPaid  = document.getElementById('odpPaySummaryPaid');
+        const stDue   = document.getElementById('odpPaySummaryDue');
+        const stFill  = document.querySelector('.odp-progress-fill.pf-green');
+        const stPct   = document.querySelector('.odp-pay-progress-row span[style*="font-weight:7"]');
+
+        if (stTotal) stTotal.textContent = rawTotal ? '৳' + Number(rawTotal).toLocaleString() : '—';
+        if (stPaid)  stPaid.textContent  = clientSent ? '৳' + Number(clientSent).toLocaleString() : '৳0';
+        if (stDue)   stDue.textContent   = due ? '৳' + Number(due).toLocaleString() : '৳0';
+        if (stFill)  stFill.style.width  = paidPct + '%';
+        if (stPct)   stPct.textContent   = paidPct + '%';
+
+        /* Pre-fill received amount with client's sent amount */
+        const recvEl = document.getElementById('odpReceivedAmount');
+        if (recvEl && clientPayment.amount) {
+          recvEl.value = clientPayment.amount;
+          odpUpdateDuePreview(clientPayment.amount);
+        }
+      }
+
+      /* Also load proof screenshot if exists */
+      if (latestWithNote && latestWithNote.screenshot_url) {
+        const sec = document.getElementById('odpProofSection');
+        if (sec) {
+          const name = latestWithNote.screenshot_url.split('/').pop() || 'Payment_Receipt';
+          const uploadedAt = latestWithNote.paid_at || latestWithNote.created_at;
+          const dateStr = uploadedAt ? new Date(uploadedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' ' + new Date(uploadedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '';
+          const sizeStr = latestWithNote.screenshot_size ? (latestWithNote.screenshot_size/1024).toFixed(0)+' KB' : '';
+          sec.innerHTML = `
+            <div class="odp-proof-box" style="cursor:pointer" onclick="window.open('${esc(latestWithNote.screenshot_url)}','_blank')">
+              <div class="odp-proof-icon"><i class="ti ti-file-invoice" style="color:var(--accent)"></i></div>
+              <div>
+                <div class="odp-proof-name">${esc(name)}</div>
+                <div class="odp-proof-sub">Uploaded by Client · ${dateStr}${sizeStr ? ' · '+sizeStr : ''}</div>
+              </div>
+              <i class="ti ti-eye" style="color:var(--muted2);margin-left:auto"></i>
+            </div>
+            <input type="file" id="odpProofInput" style="display:none" accept="image/*,.pdf" onchange="odpUploadProof(this.files)">`;
+        }
+      }
+
+      el.innerHTML = data.map((p, i) => {
+        const date    = p.paid_at || p.created_at;
+        const dateStr = date ? new Date(date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + new Date(date).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+        const type    = p.type === 'advance' ? 'Payment Sent<br><small style="color:var(--muted2)">(By Client)</small>'
+                      : p.type === 'approval' || p.type === 'received' ? 'Payment Received<br><small style="color:var(--muted2)">(By Admin)</small>'
+                      : p.type === 'balance' ? 'Balance Payment<br><small style="color:var(--muted2)">(By Client)</small>'
+                      : p.type === 'note' ? 'Internal Note<br><small style="color:var(--muted2)">(Admin)</small>'
+                      : esc(p.label || p.type || 'Payment');
+        const amtStr  = p.amount && p.amount > 0 ? '৳' + Number(p.amount).toLocaleString() : '—';
+        const method  = p.method || '—';
+        const txnId   = p.txn_id ? `<span style="font-size:11px;color:var(--accent2);font-family:monospace">${esc(p.txn_id)}</span>` : '—';
+        const statusCls = p.confirmed ? 'green' : (p.type==='note'?'muted':'orange');
+        const statusLabel = p.confirmed ? 'Approved' : p.type==='note' ? '—' : p.type==='approval'||p.type==='received' ? 'Received' : 'Pending';
+        const actionBtn = (p.type === 'advance' || p.type === 'payment' || p.type === 'balance') && !p.confirmed
+          ? `<i class="ti ti-eye" style="cursor:pointer;color:var(--accent2)" title="View proof" onclick="odpViewProof('${esc(p.screenshot_url||'')}')"></i>
+             <i class="ti ti-download" style="cursor:pointer;color:var(--muted2);margin-left:4px" title="Download proof" onclick="odpViewProof('${esc(p.screenshot_url||'')}')"></i>`
+          : (p.type === 'advance' || p.type === 'payment') && p.confirmed
+          ? `<i class="ti ti-eye" style="cursor:pointer;color:var(--muted2)" title="View proof" onclick="odpViewProof('${esc(p.screenshot_url||'')}')"></i>`
+          : '—';
+        const noteStr = p.note ? `<span style="font-size:11px;color:var(--muted2)">${esc(p.note)}</span>` : 'Initial payment sent';
+
+        return `<div class="odp-pay-table-row">
+          <span style="color:var(--muted2);font-size:11px">${i+1}</span>
+          <span style="font-size:11px;color:var(--muted2)">${dateStr}</span>
+          <span style="font-size:11.5px">${type}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${amtStr}</span>
+          <span style="font-size:11.5px;color:var(--muted2)">${esc(method)}<br>${txnId}</span>
+          <span class="odp-pay-status-pill ${statusCls}" style="font-size:10px">${statusLabel}</span>
+          <span style="display:flex;align-items:center;gap:4px">${actionBtn}</span>
+          <span style="font-size:11px;color:var(--muted2)">${noteStr}</span>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">Could not load payment history.</div>';
+    }
   }
+
+  window.odpViewProof = function(url) {
+    if (!url) { toast('⚠ No proof uploaded', 'var(--muted)'); return; }
+    window.open(url, '_blank');
+  };
+
+  /* Live due preview as admin types received amount */
+  window.odpUpdateDuePreview = function(val) {
+    const total = _currentOrder ? (_currentOrder.total_price || (_currentOrder.detail && _currentOrder.detail.financials && _currentOrder.detail.financials.total) || 0) : 0;
+    const received = parseFloat(val) || 0;
+    const due = Math.max(0, total - received);
+    const preview = document.getElementById('odpDuePreview');
+    const previewVal = document.getElementById('odpDuePreviewVal');
+    if (preview) preview.style.display = received > 0 ? 'block' : 'none';
+    if (previewVal) {
+      previewVal.textContent = due > 0 ? '৳' + Number(due).toLocaleString() : '৳0 (Full payment ✓)';
+      previewVal.style.color = due === 0 ? 'var(--green)' : 'var(--red)';
+    }
+  };
 
   window.odpUploadProof = async function(files) {
     if (!files || !files.length) return;
@@ -1388,26 +1739,100 @@
   window.odpApprovePayment = async function() {
     if (sb() && isRealUUID(_currentOrderId)) {
       try {
-        await sb().from('orders').update({ payment_status: 'approved' }).eq('id', _currentOrderId);
-        await sb().from('payments').insert({ order_id: _currentOrderId, label: 'Payment Approved', type: 'approval', method: 'Admin', amount: 0, created_at: new Date().toISOString() });
-      } catch(e) {}
+        await sb().from('orders').update({ payment_status: 'approved', updated_at: new Date().toISOString() }).eq('id', _currentOrderId);
+        await sb().from('payments').update({ confirmed: true }).eq('order_id', _currentOrderId).eq('type', 'advance');
+        /* Notify client */
+        await sb().from('client_notifications').insert({ order_id: _currentOrderId, client_id: _currentOrder && _currentOrder.clientId, type: 'payment_approved', message: 'Your payment has been approved! Your order is now in progress.', is_read: false, created_at: new Date().toISOString() }).catch(()=>{});
+      } catch(e) { console.error(e); }
     }
-    _appendPayHistoryItem({ label: 'Payment Approved', type: 'approval', method: 'Admin', amount: 0, created_at: new Date().toISOString() });
-    toast('✓ Payment approved!', 'var(--green)');
+    _appendPayHistoryItem({ label: 'Payment Approved', type: 'approval', method: 'Admin', amount: 0, confirmed: true, created_at: new Date().toISOString() });
+    /* Update banner */
+    const banner = document.querySelector('.odp-pay-banner');
+    if (banner) banner.remove();
+    await _reloadPaymentFinancials();
+    await loadPaymentHistory();
+    toast('✓ Payment approved! Client notified.', 'var(--green)');
     logActivity('payment', 'Payment approved by admin');
   };
 
-  window.odpMarkPaid = async function() {
+  window.odpRejectPayment = async function() {
+    if (!confirm('Reject this payment? Client will need to re-submit.')) return;
     if (sb() && isRealUUID(_currentOrderId)) {
       try {
-        await sb().from('orders').update({ payment_status: 'paid' }).eq('id', _currentOrderId);
-        await sb().from('payments').insert({ order_id: _currentOrderId, label: 'Marked as Paid', type: 'paid', method: 'Admin', amount: 0, created_at: new Date().toISOString() });
-      } catch(e) {}
+        await sb().from('orders').update({ payment_status: 'rejected', updated_at: new Date().toISOString() }).eq('id', _currentOrderId);
+        await sb().from('client_notifications').insert({ order_id: _currentOrderId, client_id: _currentOrder && _currentOrder.clientId, type: 'payment_rejected', message: 'Your payment could not be verified. Please re-submit with correct transaction ID.', is_read: false, created_at: new Date().toISOString() }).catch(()=>{});
+      } catch(e) { console.error(e); }
     }
-    _appendPayHistoryItem({ label: 'Marked as Paid', type: 'paid', method: 'Admin', amount: 0, created_at: new Date().toISOString() });
-    toast('✓ Order marked as paid!', 'var(--accent)');
-    logActivity('payment', 'Order marked as fully paid');
+    await _reloadPaymentFinancials();
+    toast('Payment rejected. Client notified.', 'var(--red)');
+    logActivity('payment', 'Payment rejected by admin');
   };
+
+  window.odpMarkPaymentReceived = async function() {
+    const recvEl = document.getElementById('odpReceivedAmount');
+    const received = recvEl ? (parseFloat(recvEl.value) || 0) : 0;
+    const total = _currentOrder ? (_currentOrder.total_price || (_currentOrder.detail && _currentOrder.detail.financials && _currentOrder.detail.financials.total) || 0) : 0;
+    const due = Math.max(0, total - received);
+
+    if (received <= 0) {
+      toast('⚠ আগে received amount টাইপ করুন', 'var(--gold)');
+      document.getElementById('odpReceivedAmount')?.focus();
+      return;
+    }
+
+    if (sb() && isRealUUID(_currentOrderId)) {
+      try {
+        await sb().from('orders').update({
+          payment_status: due === 0 ? 'paid' : 'approved',
+          advance_paid:   received,
+          due_amount:     due,
+          updated_at:     new Date().toISOString()
+        }).eq('id', _currentOrderId);
+
+        await sb().from('payments').insert({
+          order_id:   _currentOrderId,
+          label:      'Payment Received',
+          type:       'received',
+          method:     'Admin',
+          amount:     received,
+          confirmed:  true,
+          paid_at:    new Date().toISOString()
+        });
+
+        await sb().from('client_notifications').insert({
+          order_id:   _currentOrderId,
+          client_id:  _currentOrder && _currentOrder.clientId,
+          type:       'payment_received',
+          message:    due === 0
+            ? 'আপনার সম্পূর্ণ payment পাওয়া গেছে! Files এখন unlock হয়েছে।'
+            : `৳${Number(received).toLocaleString()} payment পাওয়া গেছে। বাকি ৳${Number(due).toLocaleString()} পরিশোধ করুন।`,
+          is_read:    false,
+          created_at: new Date().toISOString()
+        }).catch(()=>{});
+      } catch(e) { console.error(e); toast('⚠ Error: ' + e.message, 'var(--red)'); return; }
+    }
+
+    /* Update summary stat cards live */
+    const sentEl = document.querySelector('#odpClientSentAmount');
+    _appendPayHistoryItem({ label: 'Payment Received', type: 'received', method: 'Admin', amount: received, confirmed: true, created_at: new Date().toISOString() });
+
+    /* Update due/paid display */
+    const banner = document.querySelector('.odp-pay-banner');
+    if (banner && due === 0) banner.remove();
+    const dueNote = document.querySelector('.odp-pay-due-note');
+    if (dueNote && due === 0) dueNote.remove();
+
+    await _reloadPaymentFinancials();
+    await loadPaymentHistory();
+
+    const msg = due === 0
+      ? '✓ Full payment received! Files unlocked. Client notified.'
+      : `✓ ৳${Number(received).toLocaleString()} received. Due: ৳${Number(due).toLocaleString()}. Client notified.`;
+    toast(msg, due === 0 ? 'var(--green)' : 'var(--gold)');
+    logActivity('payment', `Payment received: ৳${received}. Due: ৳${due}`);
+  };
+
+  window.odpMarkPaid = window.odpMarkPaymentReceived;
 
   window.odpSavePayNote = async function() {
     const note = document.getElementById('odpPayNote');
@@ -1431,7 +1856,7 @@
         method:     'Admin',
         amount:     0,
         note:       text,
-        created_at: new Date().toISOString(),
+        paid_at:    new Date().toISOString(),
       });
       if (error) throw error;
       _appendPayHistoryItem({ label: 'Internal Note', type: 'note', method: 'Admin', amount: 0, created_at: new Date().toISOString(), note: text });

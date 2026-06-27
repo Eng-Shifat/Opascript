@@ -56,32 +56,67 @@ function selectMethod(m, el) {
 }
 
 // ── Screenshot Upload ────────────────────────────────────────────────────────
+let _ssFile = null; // selected file global রেখে দেব
+
 function handleSSfile(input) {
   if (!input.files[0]) return;
-  showSS(input.files[0]);
+  _ssFile = input.files[0];
+  showSS(_ssFile);
 }
 
 function handleSSdrop(e) {
   e.preventDefault();
   document.getElementById('ssZone').classList.remove('drag');
   const f = e.dataTransfer.files[0];
-  if (f && f.type.startsWith('image/')) showSS(f);
+  if (f && f.type.startsWith('image/')) {
+    _ssFile = f;
+    showSS(_ssFile);
+  }
 }
 
 function showSS(file) {
   const reader = new FileReader();
   reader.onload = e => {
-    document.getElementById('ssImg').src          = e.target.result;
-    document.getElementById('ssZone').style.display    = 'none';
+    document.getElementById('ssImg').src              = e.target.result;
+    document.getElementById('ssZone').style.display   = 'none';
     document.getElementById('ssPreview').style.display = 'block';
   };
   reader.readAsDataURL(file);
 }
 
 function removeScreenshot() {
+  _ssFile = null;
   document.getElementById('ssZone').style.display    = 'block';
   document.getElementById('ssPreview').style.display = 'none';
   document.getElementById('ssInput').value           = '';
+}
+
+// ── Screenshot → Supabase upload ─────────────────────────────────────────────
+async function uploadScreenshot(order_id, file) {
+  if (!file) return null;
+
+  const sb = window.scriptoraSupabase;
+  if (!sb) return null;
+
+  // File extension বের করো
+  const ext  = file.name.split('.').pop() || 'jpg';
+  const path = `${order_id}/proof_${Date.now()}.${ext}`;
+
+  const { data, error } = await sb.storage
+    .from('payment-proofs')
+    .upload(path, file, { upsert: true, contentType: file.type });
+
+  if (error) {
+    console.error('Screenshot upload failed:', error);
+    return null;
+  }
+
+  // Public URL বানাও
+  const { data: urlData } = sb.storage
+    .from('payment-proofs')
+    .getPublicUrl(path);
+
+  return urlData?.publicUrl || null;
 }
 
 // ── Payment Submit ───────────────────────────────────────────────────────────
@@ -101,7 +136,7 @@ async function submitPayment() {
   // Session data
   const data      = JSON.parse(sessionStorage.getItem('scriptora_order') || '{}');
   const client_id = localStorage.getItem('scriptora_client_id');
-  const order_id  = data.orderId; // order.js এ Supabase insert এর সময় save হয়েছে (real UUID)
+  const order_id  = data.orderId;
 
   // Login check
   if (!client_id) {
@@ -125,26 +160,35 @@ async function submitPayment() {
 
   // Button loading state
   const btn = document.querySelector('.pay-btn');
-  btn.disabled     = true;
-  btn.textContent  = '⏳ Submit হচ্ছে...';
+  btn.disabled    = true;
+  btn.textContent = '⏳ Screenshot upload হচ্ছে...';
 
   try {
-    // payments table এ insert — Client Dashboard এর existing working pattern অনুযায়ী
+    // ── Step 1: Screenshot upload (থাকলে) ──────────────────────────────────
+    let screenshot_url = '';
+    if (_ssFile) {
+      screenshot_url = (await uploadScreenshot(order_id, _ssFile)) || '';
+    }
+
+    // ── Step 2: payments table এ insert ────────────────────────────────────
+    btn.textContent = '⏳ Submit হচ্ছে...';
+
     const { error: payErr } = await window.scriptoraSupabase.from('payments').insert({
       order_id,
       client_id,
       amount,
-      type:           'advance',
-      txn_id:         txn,
+      type:            'advance',
+      txn_id:          txn,
       method,
-      confirmed:      false,
-      paid_at:        new Date().toISOString(),
-      screenshot_url: '', // future: Supabase storage upload
+      confirmed:       false,
+      paid_at:         new Date().toISOString(),
+      screenshot_url,
+      screenshot_size: _ssFile ? _ssFile.size : null,
     });
 
     if (payErr) throw payErr;
 
-    // orders.payment_status → under_review, admin manually verify করবে
+    // ── Step 3: orders.payment_status → under_review ────────────────────────
     const { error: updErr } = await window.scriptoraSupabase
       .from('orders')
       .update({ payment_status: 'under_review', updated_at: new Date().toISOString() })
@@ -152,14 +196,15 @@ async function submitPayment() {
 
     if (updErr) throw updErr;
 
-    // sessionStorage update (order-confirm page এ দেখানোর জন্য)
-    data.txnId         = txn;
-    data.paymentMethod = method;
+    // ── Step 4: sessionStorage update ───────────────────────────────────────
+    data.txnId          = txn;
+    data.paymentMethod  = method;
     data.paidAt         = new Date().toISOString();
     data.paymentStatus  = 'under_review';
+    data.screenshotUrl  = screenshot_url;
     sessionStorage.setItem('scriptora_order', JSON.stringify(data));
 
-    // Redirect to confirmation page
+    // ── Step 5: Redirect ─────────────────────────────────────────────────────
     window.location.href = './order-confirm.html';
 
   } catch (err) {
