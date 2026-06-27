@@ -2789,3 +2789,30 @@ body.odp-panel-open {
   color: var(--text);
   word-break: break-all;
 }
+
+/* ── Order Summary Step Progress ── */
+.odp-summ-step-line {
+  position:absolute; top:14px; left:10%; right:10%;
+  height:2px; background:var(--border); z-index:0;
+}
+.odp-summ-step {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  position:relative; z-index:1; flex:1;
+}
+.odp-summ-step-dot {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; background:var(--card2); border:2px solid var(--border);
+  color:var(--muted);
+}
+.odp-summ-step-dot.done { background:var(--green); border-color:var(--green); color:#fff; }
+.odp-summ-step-dot.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.odp-summ-step-lbl { font-size:10px; color:var(--muted); text-align:center; white-space:nowrap; }
+.odp-summ-step.done .odp-summ-step-lbl { color:var(--green); font-weight:600; }
+.odp-summ-step.active .odp-summ-step-lbl { color:var(--accent); font-weight:700; }
+.odp-summ-countdown {
+  display:inline-flex; align-items:center; gap:4px;
+  margin-left:8px; font-size:11px; color:var(--yellow);
+  background:rgba(255,200,0,0.08); padding:2px 8px; border-radius:20px;
+}
+

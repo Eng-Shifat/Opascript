@@ -1,3 +1,12 @@
+// ── Method Switch — সবার আগে define করি যাতে Supabase error হলেও কাজ করে ──
+function selectMethod(m, el) {
+  document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.method-detail').forEach(d => d.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const detail = document.getElementById('detail-' + m);
+  if (detail) detail.classList.add('active');
+}
+
 // ── Page Load — order summary দেখাও ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   const data = JSON.parse(sessionStorage.getItem('scriptora_order') || '{}');
@@ -48,12 +57,7 @@ function setText(id, val) {
 }
 
 // ── Payment Method Select ────────────────────────────────────────────────────
-function selectMethod(m, el) {
-  document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.method-detail').forEach(d => d.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('detail-' + m).classList.add('active');
-}
+// (selectMethod defined at top of file)
 
 // ── Screenshot Upload ────────────────────────────────────────────────────────
 let _ssFile = null; // selected file global রেখে দেব

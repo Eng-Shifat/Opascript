@@ -10,6 +10,16 @@
   <link rel="stylesheet" href="css/payment.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../shared/supabaseClient.js"></script>
+  <!-- Fallback: inline selectMethod so tabs work even if payment.js has errors -->
+  <script>
+    function selectMethod(m, el) {
+      document.querySelectorAll('.method-tab').forEach(function(t){ t.classList.remove('active'); });
+      document.querySelectorAll('.method-detail').forEach(function(d){ d.classList.remove('active'); });
+      if (el) el.classList.add('active');
+      var detail = document.getElementById('detail-' + m);
+      if (detail) detail.classList.add('active');
+    }
+  </script>
 </head>
 
 <body>

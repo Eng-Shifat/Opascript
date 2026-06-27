@@ -135,7 +135,8 @@ window._buildShell = function(order) {
 window._buildOverviewHTML = function(order, statusClass) {
     const d = order.detail || {};
     statusClass = statusClass || order.statusClass || 's-pending';
-    const pct = d.overall || order.progressPct || 0;
+    const statusPctMap = { 'pending':5, 's-pending':5, 'writing':40, 's-inprogress':40, 'draft_ready':75, 's-review':75, 'completed':100, 's-completed':100, 'overdue':40, 's-overdue':40, 'hold':20 };
+    const pct = d.overall || order.progressPct || statusPctMap[order.statusClass] || statusPctMap[order.status] || 0;
     const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
     const pfClass  = pct >= 80 ? 'pf-green'    : pct >= 40 ? 'pf-yellow'     : 'pf-red';
     const pageCount = window._getPageCount(order);
@@ -274,12 +275,6 @@ window._buildOverviewHTML = function(order, statusClass) {
         <div class="odp-card odp-qa-card">
           <div class="odp-card-title"><i class="ti ti-bolt"></i> Quick Actions</div>
           <div class="odp-qa-list">
-            <button class="odp-qa-btn odp-qa-primary" onclick="odpSwitchTab('files')">
-              <i class="ti ti-upload"></i> Upload / Submit Draft
-            </button>
-            <button class="odp-qa-btn" onclick="odpSwitchTab('messages')">
-              <i class="ti ti-message-circle"></i> Send Message to Client
-            </button>
             <div class="odp-qa-select-wrap">
               <i class="ti ti-edit"></i>
               <select class="odp-qa-select" id="odpStatusSelect" onchange="odpUpdateStatus(this.value)">
@@ -309,36 +304,88 @@ window._buildOrderSummaryHTML = function(order) {
     const fin = d.financials || {};
     const pageCount = window._getPageCount(order);
     const wordCount = window._getWordCount(order);
-    const total   = fin.total   || order.total_price || '—';
-    const paid    = fin.paid    || '৳0';
-    const due     = fin.due     || order.total_price || '—';
-    const paidPct = fin.paidPct || 0;
+    const total    = fin.total   != null ? '৳' + Number(fin.total).toLocaleString()  : (order.amount || '—');
+    const paid     = fin.paid    != null ? '৳' + Number(fin.paid).toLocaleString()   : '৳0';
+    const due      = fin.due     != null ? '৳' + Number(fin.due).toLocaleString()    : (order.amount || '—');
+    const paidPct  = fin.paidPct || 0;
     const pctColor = paidPct >= 100 ? 'var(--green)' : paidPct > 0 ? 'var(--yellow)' : 'var(--red)';
     const statusClass = order.statusClass || 's-pending';
     const statusLabel = { 's-inprogress':'In Progress','s-completed':'Completed','s-overdue':'Overdue','s-pending':'Pending','s-review':'In Review' }[statusClass] || order.status || '—';
-    const rows = [
-      { icon:'ti-file-description', label:'Topic / Title',       val: order.topic || '—' },
-      { icon:'ti-award',            label:'Service Package',     val: order.pkg   || '—' },
-      { icon:'ti-building',         label:'University',          val: order.uni   || '—' },
-      { icon:'ti-book',             label:'Department',          val: d.subject   || '—' },
-      { icon:'ti-language',         label:'Language',            val: d.language  || '—' },
-      { icon:'ti-blockquote',       label:'Citation Style',      val: d.citationStyle || 'APA', badge: true },
-      { icon:'ti-layout-list',      label:'Chapters / Sections', val: order.chapters ? String(order.chapters) : '—' },
-      { icon:'ti-file-text',        label:'Pages (est.)',        val: pageCount ? pageCount + ' Pages' : '—' },
-      { icon:'ti-letter-case',      label:'Word Count (est.)',   val: wordCount ? wordCount.toLocaleString() + ' words' : '—' },
-      { icon:'ti-calendar-due',     label:'Deadline',            val: [order.deadline, order.deadlineTime].filter(Boolean).join(' ') || '—' },
+    const orderId = order.orderId || order.id || '—';
+
+    /* Deadline countdown */
+    const dlParts = [order.deadline, order.deadlineTime].filter(Boolean).join(' ');
+    let dlCountdown = '';
+    if (order.deadline) {
+      const dlTarget = window._parseDeadline(order.deadline, order.deadlineTime);
+      if (dlTarget && !isNaN(dlTarget)) {
+        const diff = dlTarget - Date.now();
+        if (diff > 0) {
+          const dd = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000);
+          dlCountdown = dd + 'd ' + h + 'h ' + m + 'm left';
+        } else {
+          dlCountdown = 'Overdue';
+        }
+      }
+    }
+
+    /* Status steps */
+    const steps = [
+      { key:'pending',     label:'Received' },
+      { key:'writing',     label:'In Progress' },
+      { key:'draft_ready', label:'Under Review' },
+      { key:'completed',   label:'Completed' },
     ];
+    const rawStatus = (order.status || '').toLowerCase();
+    const statusKeyMap = {
+      's-pending':'pending', 'pending':'pending',
+      's-inprogress':'writing', 'writing':'writing', 'in progress':'writing', 'inprogress':'writing',
+      's-review':'draft_ready', 'draft_ready':'draft_ready', 'in review':'draft_ready', 'review':'draft_ready',
+      's-completed':'completed', 'completed':'completed',
+      's-overdue':'writing', 'overdue':'writing',
+      'hold':'pending',
+    };
+    const currentKey = statusKeyMap[statusClass] || statusKeyMap[rawStatus] || 'pending';
+    const currentIdx = steps.findIndex(s => s.key === currentKey);
+
+    const ord2 = order._rawDB || {};  /* raw DB row if available */
+    const rows = [
+      { icon:'ti-file-description', label:'Topic / Title',          val: order.topic || ord2.title || '—' },
+      { icon:'ti-award',            label:'Service Package',        val: order.pkg   || ord2.package || '—' },
+      { icon:'ti-building',         label:'University',             val: order.uni   || ord2.university || '—' },
+      { icon:'ti-book',             label:'Department',             val: d.subject   || ord2.department || '—' },
+      { icon:'ti-microscope',       label:'Research Area',          val: ord2.research_area || d.researchArea || '—' },
+      { icon:'ti-git-branch',       label:'Methodology',            val: ord2.methodology || d.methodology || '—' },
+      { icon:'ti-arrows-right-left',label:'Independent Variable',   val: ord2.independent_variable || d.indepVar || null },
+      { icon:'ti-arrow-down',       label:'Dependent Variable',     val: ord2.dependent_variable || d.depVar || null },
+      { icon:'ti-language',         label:'Language',               val: ord2.language || d.language || '—' },
+      { icon:'ti-blockquote',       label:'Citation Style',         val: ord2.citation || d.citationStyle || 'APA', badge: true },
+      { icon:'ti-layout-list',      label:'Chapters / Sections',    val: ord2.chapters || (order.chapters ? String(order.chapters) : '—') },
+      { icon:'ti-file-text',        label:'Pages (est.)',           val: pageCount ? pageCount + ' Pages' : '—' },
+      { icon:'ti-letter-case',      label:'Word Count (est.)',      val: wordCount ? wordCount.toLocaleString() + ' words' : '—' },
+      { icon:'ti-bolt',             label:'Urgency',                val: ord2.urgency || order.urgency || '—' },
+      { icon:'ti-calendar-due',     label:'Deadline',               val: dlParts || '—', extra: dlCountdown },
+      { icon:'ti-puzzle',           label:'Add-ons',                val: ord2.addons ? (Array.isArray(ord2.addons) ? ord2.addons.join(', ') : ord2.addons) : (d.addons ? d.addons : null) },
+      { icon:'ti-tag',              label:'Service Type',           val: ord2.service_type || '—' },
+      { icon:'ti-notes',            label:'Special Instructions',   val: ord2.special_instructions || d.specialInstructions || null, full: true },
+    ].filter(r => r.val && r.val !== '—' && r.val !== 'null');
+
     return `
     <div class="odp-summ-grid">
+
+      <!-- LEFT COLUMN -->
       <div style="display:flex;flex-direction:column;gap:14px">
         <div class="odp-card">
-          <div class="odp-card-title"><i class="ti ti-clipboard-list"></i> Order Details</div>
+          <div class="odp-card-title"><i class="ti ti-clipboard-list"></i> Order Information</div>
           <div class="odp-summ-rows">
             ${rows.map(r => `
             <div class="odp-summ-row">
               <div class="odp-summ-icon-wrap"><i class="ti ${window._esc(r.icon)}"></i></div>
               <div class="odp-summ-lbl">${window._esc(r.label)}</div>
-              <div class="odp-summ-val">${r.badge ? `<span class="odp-oi-badge">${window._esc(r.val)}</span>` : window._esc(r.val)}</div>
+              <div class="odp-summ-val">
+                ${r.badge ? `<span class="odp-oi-badge">${window._esc(r.val)}</span>` : window._esc(r.val)}
+                ${r.extra ? `<span class="odp-summ-countdown"><i class="ti ti-clock"></i> ${window._esc(r.extra)}</span>` : ''}
+              </div>
             </div>`).join('')}
           </div>
         </div>
@@ -347,41 +394,70 @@ window._buildOrderSummaryHTML = function(order) {
           <div class="odp-summ-notes-box">${window._esc(d.notes || order.note || 'No additional notes provided.')}</div>
         </div>
       </div>
+
+      <!-- RIGHT COLUMN -->
       <div style="display:flex;flex-direction:column;gap:14px">
+
+        <!-- Order Status Card -->
         <div class="odp-card">
-          <div class="odp-card-title"><i class="ti ti-info-circle"></i> Order Status</div>
-          <div class="odp-summ-status-wrap">
-            <span class="odp-status-pill ${window._esc(statusClass)}">${window._esc(statusLabel)}</span>
-            <div class="odp-summ-status-sub">Order ID: <span class="odp-oi-meta-mono">${window._esc(order.orderId || order.id || '—')}</span></div>
+          <div class="odp-card-title"><i class="ti ti-activity"></i> Order Status</div>
+          <div style="text-align:center;margin:10px 0 16px">
+            <span class="odp-status-pill ${window._esc(statusClass)}" style="font-size:11px;padding:5px 14px">• ${window._esc(statusLabel)}</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:relative">
+            <div class="odp-summ-step-line"></div>
+            ${steps.map((s, i) => {
+              const done   = i < currentIdx;
+              const active = i === currentIdx;
+              const cls    = done ? 'done' : active ? 'active' : '';
+              const icon   = done ? 'ti-check' : active ? 'ti-loader' : 'ti-circle';
+              return `<div class="odp-summ-step ${cls}">
+                <div class="odp-summ-step-dot ${cls}"><i class="ti ${icon}"></i></div>
+                <div class="odp-summ-step-lbl">${window._esc(s.label)}</div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card2);border-radius:8px;font-size:11.5px;color:var(--muted2)">
+            <i class="ti ti-hash" style="color:var(--accent2)"></i>
+            Order ID: <span style="font-family:'JetBrains Mono',monospace;color:var(--accent2);font-weight:600">${window._esc(orderId)}</span>
+            <button onclick="navigator.clipboard.writeText('${window._esc(orderId)}').then(()=>window._toast('✓ Copied!','var(--green)'))" style="margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;padding:2px"><i class="ti ti-copy"></i></button>
           </div>
         </div>
+
+        <!-- Payment Summary -->
         <div class="odp-card">
           <div class="odp-card-title"><i class="ti ti-report-money"></i> Payment Summary</div>
           <div class="odp-amount-row"><span class="odp-amount-label">Total Amount</span><span class="odp-amount-val total">${window._esc(total)}</span></div>
           <div class="odp-amount-row"><span class="odp-amount-label">Paid Amount</span><span class="odp-amount-val paid">${window._esc(paid)}</span></div>
           <div class="odp-amount-row"><span class="odp-amount-label">Due Amount</span><span class="odp-amount-val due">${window._esc(due)}</span></div>
-          <div class="odp-pay-progress-wrap">
+          <div class="odp-pay-progress-wrap" style="margin-top:10px">
             <div class="odp-pay-progress-row"><span>Payment Progress</span><span style="color:${pctColor};font-weight:600">${paidPct}% paid</span></div>
             <div class="odp-progress-track"><div class="odp-progress-fill pf-green" style="width:${paidPct}%"></div></div>
           </div>
-          <button type="button" class="odp-oi-pay-btn" style="margin-top:10px;width:100%" onclick="odpSwitchTab('payments')">
+          <button type="button" class="odp-oi-pay-btn" style="margin-top:12px;width:100%" onclick="odpSwitchTab('payments')">
             <i class="ti ti-credit-card"></i> View Full Payment Details
           </button>
         </div>
+
+        <!-- Client Card -->
         <div class="odp-card">
           <div class="odp-card-title"><i class="ti ti-user-circle"></i> Client</div>
           <div class="odp-summ-client-row">
-            <div class="odp-cc-av" style="background:${window._esc(order.avatarColor)};width:36px;height:36px;font-size:14px;flex-shrink:0">${window._esc(order.initials)}</div>
-            <div style="flex:1">
+            <div class="odp-cc-av" style="background:${window._esc(order.avatarColor)};width:40px;height:40px;font-size:15px;flex-shrink:0">${window._esc(order.initials)}</div>
+            <div style="flex:1;min-width:0">
               <div style="font-weight:700;font-size:13px;color:var(--text)">${window._esc(order.client || '—')}</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">${window._esc(d.email || '—')}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${window._esc(d.email || '—')}</div>
             </div>
             <div style="display:flex;gap:6px;flex-shrink:0">
               <button class="odp-cc-icon-btn" title="Message client" onclick="odpSwitchTab('messages')"><i class="ti ti-message-circle"></i></button>
-              <button class="odp-cc-icon-btn" title="View client profile" onclick="window.open('/admin/client-profile.html?id=' + (window._currentOrder && window._currentOrder.clientId || ''), '_blank')"><i class="ti ti-user"></i></button>
+              <button class="odp-cc-icon-btn" title="View client profile" onclick="window.open('/admin/clients.html?id=' + (window._currentOrder && window._currentOrder.clientId || ''), '_blank')"><i class="ti ti-user"></i></button>
             </div>
           </div>
+          <button type="button" class="odp-oi-pay-btn" style="margin-top:12px;width:100%;background:var(--card2)" onclick="window.open('/admin/clients.html?id=' + (window._currentOrder && window._currentOrder.clientId || ''), '_blank')">
+            <i class="ti ti-external-link"></i> View Client Details
+          </button>
         </div>
+
       </div>
     </div>`;
   }

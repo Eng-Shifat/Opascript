@@ -92,9 +92,24 @@ window._parseDeadline = function(label, time) {
     if (time) { const [h,m] = time.split(':'); d.setHours(+h||23,+m||59,0,0); }
     return d;
   }
-  const d = new Date(s + (time ? ' ' + time : ''));
-  if (!isNaN(d)) return d;
   const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+
+  /* Try "30 Jun" or "30 Jun 2026" — day first */
+  const m3 = s.match(/^(\d{1,2})\s+([a-z]{3})(?:\s+(\d{4}))?$/i);
+  if (m3) {
+    const mo = months[m3[2].toLowerCase()];
+    if (mo !== undefined) {
+      const nd = new Date();
+      const yr = m3[3] ? +m3[3] : nd.getFullYear();
+      nd.setFullYear(yr); nd.setMonth(mo); nd.setDate(+m3[1]);
+      if (!m3[3] && nd < new Date()) nd.setFullYear(nd.getFullYear() + 1);
+      if (time) { const [h,mn] = time.split(':'); nd.setHours(+h||23,+mn||59,0,0); }
+      else nd.setHours(23,59,0,0);
+      return nd;
+    }
+  }
+
+  /* Try "Jun 30" — month first */
   const m2 = s.match(/^([a-z]{3})\s+(\d{1,2})$/i);
   if (m2) {
     const mo = months[m2[1].toLowerCase()];
@@ -106,6 +121,10 @@ window._parseDeadline = function(label, time) {
       return nd;
     }
   }
+
+  /* Fallback: native Date parse */
+  const d = new Date(s + (time ? ' ' + time : ''));
+  if (!isNaN(d)) return d;
   return null;
 };
 
@@ -193,7 +212,10 @@ window._loadFullOrderData = async function() {
       window._sb().from('payments').select('amount,type,confirmed').eq('order_id', window._currentOrderId)
     ]);
     if (!ord) return;
-    if (window._currentOrder) window._currentOrder.clientId = ord.client_id || window._currentOrder.clientId || '';
+    if (window._currentOrder) {
+      window._currentOrder.clientId = ord.client_id || window._currentOrder.clientId || '';
+      window._currentOrder._rawDB = ord;  /* full DB row for Order Summary */
+    }
 
     /* Payment financials */
     const total = Number(ord.total_price || 0);
@@ -235,6 +257,7 @@ window._loadFullOrderData = async function() {
     if (statusSel && ord.status) statusSel.value = ord.status;
 
     window._subscribePaymentsRealtime();
+    window._loadClientOrderCount();
 
   } catch(e) { console.error('loadFullOrderData:', e); }
 };

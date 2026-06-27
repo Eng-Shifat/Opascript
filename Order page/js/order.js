@@ -749,24 +749,50 @@ async function nextStep() {
     const btn = document.getElementById('btnNext');
     if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Order করা হচ্ছে...'; }
 
+    // ── Collect extra fields for DB ──
+    const methodVal     = document.querySelector('#methodCards .rc.active')?.dataset.m
+                       || document.querySelector('#engMethodCards .rc.active')?.dataset.et
+                       || null;
+    const indepVarVal   = document.getElementById('indepVar')?.value.trim() || null;
+    const depVarVal     = document.getElementById('depVar')?.value.trim() || null;
+    const chSel2        = document.getElementById('chapterSelect');
+    const chaptersVal   = chSel2 ? (chSel2.value === 'custom' ? (document.getElementById('chapterCustom')?.value.trim() || 'Custom') : (chSel2.options[chSel2.selectedIndex]?.text || null)) : null;
+    const specialInstVal= document.getElementById('specialInstructions')?.value.trim()
+                       || document.getElementById('specialInstructionsPremium')?.value.trim()
+                       || null;
+    const languageVal   = document.getElementById('language')?.value || null;
+    const addonKeys     = Object.entries(activeAddons).filter(([,v])=>v).map(([k])=>k);
+
     // ── Real Supabase insert — orders table এর actual column অনুযায়ী ──
     const { data: orderRow, error } = await window.scriptoraSupabase
       .from('orders')
       .insert({
-        client_id:    client_id,
-        order_number: orderNumber,
-        title:        titleVal,
-        package:      packageVal,
-        pages:        pagesVal,
-        citation:     citationVal,
-        department:   dept,
-        university:   universityVal,
-        total_price:  totalVal,
-        advance_paid: 0,
-        status:       'pending',
-        payment_status: 'unpaid',
-        deadline:     deadlineVal,
-        order_date:   new Date().toISOString()
+        client_id:             client_id,
+        order_number:          orderNumber,
+        title:                 titleVal,
+        package:               packageVal,
+        pages:                 pagesVal,
+        citation:              citationVal,
+        department:            dept,
+        university:            universityVal,
+        total_price:           totalVal,
+        advance_paid:          0,
+        status:                'pending',
+        payment_status:        'unpaid',
+        deadline:              deadlineVal,
+        order_date:            new Date().toISOString(),
+        research_area:         researchArea || null,
+        methodology:           methodVal,
+        independent_variable:  indepVarVal,
+        dependent_variable:    depVarVal,
+        chapters:              chaptersVal,
+        urgency:               urgencyLabel,
+        special_instructions:  specialInstVal,
+        language:              languageVal,
+        addons:                addonKeys.length ? addonKeys : null,
+        coupon:                appliedCoupon || null,
+        discount:              discountAmount || 0,
+        service_type:          new URLSearchParams(window.location.search).get('service') || null
       })
       .select()
       .single();

@@ -160,6 +160,10 @@ let timerSeconds = 4 * 3600 + 37 * 60 + 31;
 // ── RENDER TABLE ──
 function renderTable() {
   const tbody = document.getElementById('ordersTableBody');
+  if (!ORDERS.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem;color:rgba(255,255,255,0.25);font-size:13px;"><i class="ti ti-inbox" style="font-size:2rem;display:block;margin-bottom:8px"></i>No orders found</td></tr>`;
+    return;
+  }
   tbody.innerHTML = ORDERS.map(o => `
     <tr class="${o.rowClass} ${activeOrderId === o.id ? 'active-row' : ''}" data-id="${o.id}" data-status="${o.statusClass === 's-overdue' ? 'overdue' : o.statusClass === 's-inprogress' ? 'writing' : o.statusClass === 's-review' ? 'draft_ready' : o.statusClass === 's-completed' ? 'completed' : 'pending'}" onclick="selectOrder('${o.id}')">
       <td><span class="order-id">${o.orderId || o.id}</span></td>
@@ -572,13 +576,115 @@ function initFilterBtns() {
   document.querySelectorAll('.filter-btn, .btn-export').forEach(btn => {
     btn.addEventListener('click', () => {
       const label = btn.textContent.trim();
-      if (label.includes('Export CSV')) {
-        exportCSV();
+      if (label.includes('Export CSV')) { exportCSV(); return; }
+
+      /* Sort button */
+      if (label.includes('Sort')) {
+        const rows = Array.from(document.querySelectorAll('#ordersTableBody tr'));
+        const asc  = btn.textContent.includes('↑');
+        rows.sort((a, b) => {
+          const da = a.querySelector('.deadline-date')?.textContent || '';
+          const db = b.querySelector('.deadline-date')?.textContent || '';
+          return asc ? da.localeCompare(db) : db.localeCompare(da);
+        });
+        const tbody = document.getElementById('ordersTableBody');
+        rows.forEach(r => tbody.appendChild(r));
+        btn.innerHTML = btn.innerHTML.replace(asc ? '↑' : '↓', asc ? '↓' : '↑');
         return;
       }
-      showOMToast(`🔧 "${label.split('\n')[0].trim()}" — filter coming soon`, '#f5a623');
+
+      /* Package filter */
+      if (label.includes('Package') || label.includes('Packages')) {
+        const pkgs = [...new Set(ORDERS.map(o => o.pkg).filter(Boolean))];
+        const menu = document.createElement('div');
+        menu.style.cssText = 'position:absolute;background:#1a1d2e;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:6px;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:180px;';
+        ['All Packages', ...pkgs].forEach(pkg => {
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:8px 12px;cursor:pointer;font-size:12px;color:#e2e8f0;border-radius:6px;';
+          item.textContent = pkg;
+          item.onmouseenter = () => item.style.background = 'rgba(255,255,255,0.06)';
+          item.onmouseleave = () => item.style.background = '';
+          item.onclick = () => {
+            document.querySelectorAll('#ordersTableBody tr').forEach(row => {
+              if (pkg === 'All Packages') { row.style.display = ''; return; }
+              const pkgEl = row.querySelector('.pkg-badge');
+              row.style.display = pkgEl && pkgEl.textContent.trim() === pkg ? '' : 'none';
+            });
+            btn.querySelector('span') && (btn.querySelector('span').textContent = pkg);
+            menu.remove();
+          };
+          menu.appendChild(item);
+        });
+        const rect = btn.getBoundingClientRect();
+        menu.style.top = rect.bottom + 4 + 'px';
+        menu.style.left = rect.left + 'px';
+        document.body.appendChild(menu);
+        setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 10);
+        return;
+      }
+
+      /* Date filter */
+      if (label.includes('Jun') || label.includes('Jul') || label.includes('Jan') || label.includes('–') || label.includes('Date')) {
+        showDateRangePicker(btn);
+        return;
+      }
     });
   });
+}
+
+/* Date range picker */
+function showDateRangePicker(btn) {
+  const existing = document.getElementById('omDatePicker');
+  if (existing) { existing.remove(); return; }
+
+  const now = new Date();
+  const picker = document.createElement('div');
+  picker.id = 'omDatePicker';
+  picker.style.cssText = 'position:absolute;background:#1a1d2e;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:240px;';
+
+  picker.innerHTML = `
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Date Range</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <label style="font-size:12px;color:#e2e8f0">From <input type="date" id="omDateFrom" style="background:#0d1117;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 8px;color:#e2e8f0;font-size:12px;margin-left:6px"></label>
+      <label style="font-size:12px;color:#e2e8f0">To &nbsp;&nbsp;&nbsp;<input type="date" id="omDateTo" style="background:#0d1117;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 8px;color:#e2e8f0;font-size:12px;margin-left:6px"></label>
+      <div style="display:flex;gap:6px;margin-top:4px">
+        <button onclick="applyDateFilter()" style="flex:1;padding:6px;background:#6366f1;border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer">Apply</button>
+        <button onclick="clearDateFilter()" style="flex:1;padding:6px;background:rgba(255,255,255,0.06);border:none;border-radius:6px;color:#e2e8f0;font-size:12px;cursor:pointer">All Time</button>
+      </div>
+    </div>`;
+
+  const rect = btn.getBoundingClientRect();
+  picker.style.top = rect.bottom + 4 + 'px';
+  picker.style.left = rect.left + 'px';
+  document.body.appendChild(picker);
+  setTimeout(() => document.addEventListener('click', (e) => { if (!picker.contains(e.target) && e.target !== btn) picker.remove(); }, { once: true }), 10);
+}
+
+function applyDateFilter() {
+  const from = document.getElementById('omDateFrom')?.value;
+  const to   = document.getElementById('omDateTo')?.value;
+  document.getElementById('omDatePicker')?.remove();
+
+  document.querySelectorAll('#ordersTableBody tr').forEach(row => {
+    const dl = row.querySelector('.deadline-date')?.textContent?.trim() || '';
+    if (!from && !to) { row.style.display = ''; return; }
+    const d = new Date(dl);
+    let show = true;
+    if (from && d < new Date(from)) show = false;
+    if (to   && d > new Date(to))   show = false;
+    row.style.display = show ? '' : 'none';
+  });
+
+  /* Update filter button label */
+  const from2 = document.getElementById('omDateFrom')?.value;
+  const to2   = document.getElementById('omDateTo')?.value;
+  const btn   = document.querySelector('.filter-btn i.ti-calendar')?.closest('.filter-btn');
+  if (btn && from2 && to2) btn.childNodes[2].textContent = ` ${from2} – ${to2} `;
+}
+
+function clearDateFilter() {
+  document.getElementById('omDatePicker')?.remove();
+  document.querySelectorAll('#ordersTableBody tr').forEach(row => row.style.display = '');
 }
 
 // ══════════════════════════════════════════
@@ -964,18 +1070,33 @@ function mapSupabaseOrderToLocal(o) {
 }
 
 async function loadRealOrders() {
-  const sb = window.scriptoraSupabase;
+  /* sidebar.js admin auth শেষ হওয়ার জন্য wait করি */
+  let sb = window.scriptoraSupabase;
+  if (!sb) {
+    await new Promise(res => setTimeout(res, 800));
+    sb = window.scriptoraSupabase;
+  }
   if (!sb) return;
 
+  /* Loading state */
+  const tbody = document.getElementById('ordersTableBody');
+  if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:rgba(255,255,255,0.3);font-size:13px;"><div style="margin-bottom:8px">⏳</div>Loading orders...</td></tr>`;
+
   try {
-    /* Step 1: orders load */
+    /* Step 1: orders load — NO date filter, load all */
     const { data, error } = await sb
       .from('orders')
       .select('*')
       .order('order_date', { ascending: false });
 
     if (error) throw error;
-    if (!data || !data.length) return; /* no real orders — keep mock data */
+    if (!data || !data.length) {
+      ORDERS.length = 0;
+      renderTable();
+      updateStatCounts();
+      if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem;color:rgba(255,255,255,0.25);font-size:13px;"><i class="ti ti-inbox" style="font-size:2rem;display:block;margin-bottom:8px"></i>No orders found</td></tr>`;
+      return;
+    }
 
     /* Step 2: client names load */
     const clientIds = [...new Set(data.map(o => o.client_id).filter(Boolean))];
@@ -1028,6 +1149,6 @@ async function loadRealOrders() {
 
 /* DOMContentLoaded এ hook করি */
 document.addEventListener('DOMContentLoaded', () => {
-  /* sidebar.js এর admin check শেষ হওয়ার পরে load করতে হবে */
-  loadRealOrders();
+  /* sidebar.js এর admin auth check শেষ হওয়ার জন্য 1s delay */
+  setTimeout(loadRealOrders, 1000);
 });
