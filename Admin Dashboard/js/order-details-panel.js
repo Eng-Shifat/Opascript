@@ -340,7 +340,7 @@
       <div class="odp-meta-row">
         <span class="odp-meta-item"><i class="ti ti-file-invoice"></i> Order ID: <b>${esc(order.orderId||order.id)}</b></span>
         <span class="odp-meta-sep">·</span>
-        <span class="odp-meta-item"><i class="ti ti-user"></i> Client: <b>${esc(order.uni)}</b></span>
+        <span class="odp-meta-item" id="odpHeaderClient"><i class="ti ti-user"></i> Client: <b>${esc(order.client || order.uni || '—')}</b></span>
         <span class="odp-meta-sep">·</span>
         <span class="odp-meta-item"><i class="ti ti-building"></i> Department: <b>${esc(order.pkg)}</b></span>
         <span class="odp-meta-sep">·</span>
@@ -958,17 +958,14 @@
       syncOrderInfoPayments(_currentOrder);
 
       /* Sync status select from DB */
+      const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' };
+      const lblMap = { writing:'In Progress', completed:'Completed', pending:'Pending', draft_ready:'In Review', overdue:'Overdue', hold:'On Hold' };
+      document.querySelectorAll('.odp-status-pill').forEach(pill => {
+        pill.className = 'odp-status-pill ' + (clsMap[ord.status] || 's-pending');
+        pill.textContent = lblMap[ord.status] || ord.status;
+      });
       const statusSel = document.getElementById('odpStatusSelect');
-      if (statusSel && ord.status) {
-        statusSel.value = ord.status;
-        const pill = document.querySelector('.odp-status-pill');
-        if (pill) {
-          const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' };
-          const lblMap = { writing:'In Progress', completed:'Completed', pending:'Pending', draft_ready:'In Review', overdue:'Overdue', hold:'On Hold' };
-          pill.className = 'odp-status-pill ' + (clsMap[ord.status] || 's-pending');
-          pill.textContent = lblMap[ord.status] || ord.status;
-        }
-      }
+      if (statusSel && ord.status) statusSel.value = ord.status;
 
       /* ── Subscribe to payments realtime ── */
       _subscribePaymentsRealtime();
@@ -1068,6 +1065,20 @@
 
   function renderClientInfoFromDB(ord, client) {
     if (!client && !ord) return;
+
+    /* ── Client name ── */
+    if (client && client.name) {
+      document.querySelectorAll('.odp-cc-name').forEach(el => {
+        el.innerHTML = `${client.name} <span class="odp-cc-badge-verified"><i class="ti ti-shield-check"></i> Verified</span>`;
+      });
+      const headerClient = document.getElementById('odpHeaderClient');
+      if (headerClient) headerClient.innerHTML = `<i class="ti ti-user"></i> Client: <b>${client.name}</b>`;
+      /* Messages tab placeholder */
+      document.querySelectorAll('.odp-msg-textarea').forEach(el => {
+        el.placeholder = el.placeholder.replace(order && order.client || 'Client', client.name);
+      });
+    }
+
     const emailEl = document.getElementById('odpClientEmail');
     const phoneEl = document.getElementById('odpClientPhone');
     if (emailEl && client && client.email) {
@@ -1078,9 +1089,9 @@
       const phone = (client && (client.phone || client.whatsapp)) || ord.phone || ord.whatsapp || '';
       if (phone) phoneEl.textContent = phone;
     }
-    if ((client && client.university) || ord.university) {
+    if ((client && client.University) || ord.university) {
       document.querySelectorAll('.odp-cc-uni').forEach(el => {
-        el.textContent = (client && client.university) || ord.university || el.textContent;
+        el.textContent = (client && client.University) || ord.university || el.textContent;
       });
     }
   }

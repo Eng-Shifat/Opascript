@@ -904,7 +904,7 @@ function mapSupabaseOrderToLocal(o) {
   /* client name from metadata */
   const meta      = o.clients || {};
   const clientName = meta.name || meta.email || 'Client';
-  const uni        = meta.university || o.university || '—';
+  const uni        = meta.University || meta.university || o.university || '—';
   const initials   = clientName.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
 
   const pageNum = Number(o.pages);
@@ -983,7 +983,7 @@ async function loadRealOrders() {
     if (clientIds.length) {
       const { data: clients } = await sb
         .from('clients')
-        .select('id, name, email, university')
+        .select('id, name, email, "University"')
         .in('id', clientIds);
       if (clients) clients.forEach(c => { clientMap[c.id] = c; });
     }
