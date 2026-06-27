@@ -151,8 +151,29 @@ window._renderFileRow = function(f) {
     const uploadedAt = f.updated_at ? new Date(f.updated_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' ' + new Date(f.updated_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
     const uploader   = f.uploaded_by || (f.supabasePath ? 'Writer' : 'Client');
     const path       = f.supabasePath || '';
+    const isClient   = uploader === 'Client';
 
-    /* Access control defaults from DB meta, fallback: visible=true, download=true */
+    /* ── Client-submitted files: শুধু View + Download ── */
+    if (isClient) {
+      return `
+      <div class="odp-file-row" data-path="${window._esc(path)}">
+        <div class="odp-file-name-cell">
+          <i class="ti ${icon}"></i>
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${window._esc(f.name)}</span>
+        </div>
+        <span class="odp-file-type-pill ${pillCls}">${ext}</span>
+        <span style="color:var(--muted2);font-size:11.5px">${window._esc(uploader)}</span>
+        <span style="color:var(--muted2);font-size:11px">${uploadedAt}</span>
+        <span style="color:var(--muted2);font-size:11.5px">${size}</span>
+        <span></span>
+        <div class="odp-file-actions">
+          <button class="odp-file-action-btn" title="View file" onclick="odpViewFile('${window._esc(path)}','${window._esc(f.name)}')"><i class="ti ti-eye"></i></button>
+          <button class="odp-file-action-btn" title="Download file" onclick="odpDownloadFile('${window._esc(path)}','${window._esc(f.name)}')"><i class="ti ti-download"></i></button>
+        </div>
+      </div>`;
+    }
+
+    /* ── Writer/Admin files: full access controls ── */
     const meta       = window._fileMetaCache[path] || {};
     const isVisible  = meta.is_visible  !== undefined ? meta.is_visible  : true;
     const dlAllowed  = meta.download_allowed !== undefined ? meta.download_allowed : true;
@@ -259,6 +280,16 @@ window._renderFileRow = function(f) {
       a.href = url; a.download = name; a.click();
       URL.revokeObjectURL(url);
     } catch(e) { window._toast('⚠ Download failed', 'var(--red)'); }
+  };
+
+  /* View file in new tab */
+  window.odpViewFile = async function(path, name) {
+    if (!path || !window._sb()) { window._toast('⚠ View not available', 'var(--red)'); return; }
+    try {
+      const { data, error } = await window._sb().storage.from('order-files').createSignedUrl(path, 300);
+      if (error) throw error;
+      window.open(data.signedUrl, '_blank');
+    } catch(e) { window._toast('⚠ Could not open file', 'var(--red)'); }
   };
 
   /* Toggle client visibility (Viewable/Hidden) */

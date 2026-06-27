@@ -68,6 +68,40 @@
     </div>
   </aside>
 
+  <!-- TOP BAR -->
+  <header class="cd-topbar" id="cdTopbar">
+    <div class="cd-topbar-left">
+      <button class="cd-menu-btn" id="cdMenuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')" title="Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="cd-topbar-title" id="cdTopbarTitle">Dashboard</span>
+    </div>
+    <div class="cd-topbar-right">
+      <!-- Notification Bell -->
+      <div class="cd-notif-wrap" id="cdNotifWrap">
+        <button class="cd-notif-btn" id="cdNotifBtn" title="Notifications" onclick="cdToggleNotif()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="cd-notif-dot" id="cdNotifDot" style="display:none"></span>
+        </button>
+        <!-- Dropdown -->
+        <div class="cd-notif-dropdown" id="cdNotifDropdown">
+          <div class="cd-notif-head">
+            <span>Notifications</span>
+            <button onclick="cdMarkAllRead()" class="cd-notif-mark-all">সব পড়া হয়েছে</button>
+          </div>
+          <div class="cd-notif-list" id="cdNotifList">
+            <div class="cd-notif-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <p>কোনো notification নেই</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Avatar -->
+      <div class="cd-topbar-avatar" id="cdTopbarAvatar">?</div>
+    </div>
+  </header>
+
   <!-- MAIN CONTENT -->
   <main class="db-main">
 
@@ -459,5 +493,6 @@
   </a>
 </nav>
 
+  <script src="js/cd-topbar.js"></script>
 </body>
 </html>
