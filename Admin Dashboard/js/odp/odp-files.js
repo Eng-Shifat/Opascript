@@ -55,13 +55,19 @@
         return;
       }
       const tableHeader = window._buildFileTableHeader();
-      const html = data.map(f => window._renderFileRow({
-        name: f.name,
-        size: f.metadata?.size,
-        updated_at: f.updated_at,
-        supabasePath: `${path}/${f.name}`,
-        uploaded_by: 'Writer'
-      })).join('');
+      const html = data.map(f => {
+        /* Check cache for uploaded_by — admin upload shows 'Admin', else 'Writer' */
+        const storagePath = `${path}/${f.name}`;
+        const cachedMeta = window._fileMetaCache[storagePath] || {};
+        const uploader = cachedMeta.uploaded_by || 'Writer';
+        return window._renderFileRow({
+          name: f.name,
+          size: f.metadata?.size,
+          updated_at: f.updated_at,
+          supabasePath: storagePath,
+          uploaded_by: uploader
+        });
+      }).join('');
       if (list) list.innerHTML = tableHeader + html;
       if (listOv) listOv.innerHTML = tableHeader + html;
     } catch(e) {
@@ -153,7 +159,7 @@ window._renderFileRow = function(f) {
     const path       = f.supabasePath || '';
     const isClient   = uploader === 'Client';
 
-    /* ── Client-submitted files: শুধু View + Download ── */
+    /* ── Client-submitted files: View + Download only, no access controls ── */
     if (isClient) {
       return `
       <div class="odp-file-row" data-path="${window._esc(path)}">
@@ -165,7 +171,7 @@ window._renderFileRow = function(f) {
         <span style="color:var(--muted2);font-size:11.5px">${window._esc(uploader)}</span>
         <span style="color:var(--muted2);font-size:11px">${uploadedAt}</span>
         <span style="color:var(--muted2);font-size:11.5px">${size}</span>
-        <span></span>
+        <span style="color:var(--muted);font-size:11px;font-style:italic">Client owned</span>
         <div class="odp-file-actions">
           <button class="odp-file-action-btn" title="View file" onclick="odpViewFile('${window._esc(path)}','${window._esc(f.name)}')"><i class="ti ti-eye"></i></button>
           <button class="odp-file-action-btn" title="Download file" onclick="odpDownloadFile('${window._esc(path)}','${window._esc(f.name)}')"><i class="ti ti-download"></i></button>
@@ -254,7 +260,7 @@ window._renderFileRow = function(f) {
         const { error } = await window._sb().storage.from('order-files').upload(path, f, { upsert: true });
         if (error) throw error;
         /* Create default access record — hidden from client until admin enables */
-        await window._saveFileMeta(path, { is_visible: false, download_allowed: true, client_notified: false });
+        await window._saveFileMeta(path, { is_visible: false, download_allowed: true, client_notified: false, uploaded_by: 'Admin' });
         placeholder.remove();
         window._toast(`✓ ${f.name} uploaded! Set Client Access to show it.`, 'var(--green)');
         window._logActivity('file_upload', `File uploaded: ${f.name}`);

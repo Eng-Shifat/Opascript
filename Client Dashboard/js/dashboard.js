@@ -269,31 +269,93 @@ function renderStepper(status) {
   });
 }
 
-async function loadOrderFiles(orderId,hasDue) {
-  const {data:files}=await sb.from('files').select('*').eq('order_id',orderId).order('id',{ascending:true});
-  const list=document.getElementById('filesList');
-  if(!files||files.length===0){list.innerHTML='<div class="empty-note">কোনো file নেই</div>';return;}
-  list.innerHTML='';
-  files.forEach(file=>{
-    const isLocked=file.locked&&hasDue;
-    const ext=(file.name||'').split('.').pop().toUpperCase();
-    const iconCls=isLocked?'fi-lock':ext==='PDF'?'fi-pdf':'fi-doc';
-    const iconTxt=isLocked?`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`:ext;
-    const div=document.createElement('div');
-    div.className='file-item';
-    div.innerHTML=`
-      <div class="file-icon ${iconCls}">${iconTxt}</div>
-      <div class="file-info">
-        <div class="file-name" style="${isLocked?'color:var(--text-muted)':''}">${escHtml(file.name)}</div>
-        <div class="file-meta">${fmtDate(file.created_at)}</div>
-        ${isLocked?'<div class="file-locked-label">Due payment করলে unlock হবে</div>':''}
-      </div>
-      ${isLocked
-        ?`<button class="file-unlock-btn" onclick="showPage('payments')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>Unlock</button>`
-        :`<a class="file-dl-btn" href="${escHtml(file.url)}" target="_blank" download><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</a>`
-      }`;
-    list.appendChild(div);
-  });
+async function loadOrderFiles(orderId, hasDue) {
+  const list = document.getElementById('filesList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-note" style="font-size:12px;color:var(--text-muted)">Loading files…</div>';
+
+  try {
+    /* Load only admin-sent files that are visible to client */
+    const { data: accessRows, error } = await sb
+      .from('order_file_access')
+      .select('storage_path, is_visible, download_allowed, uploaded_by, updated_at')
+      .eq('order_id', orderId)
+      .eq('is_visible', true)
+      .neq('uploaded_by', 'Client'); /* Client নিজের submit করা file এখানে দেখাবে না */
+
+    if (error) throw error;
+
+    if (!accessRows || !accessRows.length) {
+      list.innerHTML = '<div class="empty-note">কোনো file পাঠানো হয়নি</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    for (const row of accessRows) {
+      const parts = row.storage_path.split('/');
+      const fileName = parts[parts.length - 1];
+      const ext = fileName.split('.').pop().toUpperCase();
+      const iconCls = ext === 'PDF' ? 'fi-pdf' : 'fi-doc';
+      const dlAllowed = row.download_allowed;
+      const isLocked = hasDue;
+
+      const div = document.createElement('div');
+      div.className = 'file-item';
+
+      /* Build actions separately to avoid quote hell */
+      let actionsHtml;
+      if (isLocked) {
+        actionsHtml = `<button class="file-unlock-btn" onclick="showPage('payments')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+          </svg>Unlock</button>`;
+      } else {
+        /* Store path/name in data attrs to avoid inline quote escaping */
+        actionsHtml = `<button class="file-view-btn cdv-btn"
+          data-path="${escHtml(row.storage_path)}"
+          data-name="${escHtml(fileName)}"
+          data-dl="${dlAllowed ? '1' : '0'}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg> View</button>` +
+          (dlAllowed
+            ? `<span class="cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="font-size:14px;cursor:pointer">🔓</span>`
+            : `<span title="Download not allowed" style="font-size:14px">🔒</span>`);
+      }
+
+      div.innerHTML = `
+        <div class="file-icon ${isLocked ? 'fi-lock' : iconCls}">
+          ${isLocked
+            ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+            : ext}
+        </div>
+        <div class="file-info">
+          <div class="file-name" style="${isLocked ? 'color:var(--text-muted)' : ''}">${escHtml(fileName)}</div>
+          <div class="file-meta">${fmtDate(row.updated_at)}</div>
+          ${isLocked ? '<div class="file-locked-label">Due payment করলে unlock হবে</div>' : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">${actionsHtml}</div>`;
+
+      list.appendChild(div);
+    }
+
+    /* Event delegation for view/download buttons — avoids inline onclick quote issues */
+    list.querySelectorAll('.cdv-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openFileViewer(btn.dataset.path, btn.dataset.name, btn.dataset.dl === '1');
+      });
+    });
+    list.querySelectorAll('.cdv-dl-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        downloadFile(btn.dataset.path, btn.dataset.name);
+      });
+    });
+  } catch (e) {
+    console.error('loadOrderFiles error:', e);
+    list.innerHTML = '<div class="empty-note">Files load হয়নি</div>';
+  }
 }
 
 async function loadLatestAdminMsg(orderId) {
@@ -307,37 +369,98 @@ async function loadLatestAdminMsg(orderId) {
 }
 
 async function loadFilesPage() {
-  if(allOrders.length===0) return;
-  const {data:files}=await sb.from('files').select('*, orders(title,due_amount)').in('order_id',allOrders.map(o=>o.id)).order('created_at',{ascending:false});
-  const container=document.getElementById('allFilesList');
-  const empty=document.getElementById('filesEmpty');
-  if(!files||files.length===0){empty.style.display='flex';return;}
-  empty.style.display='none';
-  const grouped={};
-  files.forEach(f=>{
-    if(!grouped[f.order_id]) grouped[f.order_id]={title:f.orders?.title||'Order',files:[]};
-    grouped[f.order_id].files.push(f);
-  });
-  container.innerHTML='';
-  Object.entries(grouped).forEach(([orderId,group])=>{
-    const groupDiv=document.createElement('div'); groupDiv.className='files-group';
-    groupDiv.innerHTML=`<div class="files-group-label">${escHtml(group.title)}</div>`;
-    const card=document.createElement('div'); card.className='files-card';
-    group.files.forEach(file=>{
-      const order=allOrders.find(o=>o.id===Number(orderId));
-      const isLocked=file.locked&&(order?.due_amount||0)>0;
-      const ext=(file.name||'').split('.').pop().toUpperCase();
-      const iconCls=isLocked?'fi-lock':ext==='PDF'?'fi-pdf':'fi-doc';
-      const iconTxt=isLocked?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`:ext;
-      const item=document.createElement('div'); item.className='file-item';
-      item.innerHTML=`
-        <div class="file-icon ${iconCls}">${iconTxt}</div>
-        <div class="file-info"><div class="file-name">${escHtml(file.name)}</div><div class="file-meta">${fmtDate(file.created_at)}</div></div>
-        ${isLocked?`<span class="file-locked-label">🔒 Locked</span>`:`<a class="file-dl-btn" href="${escHtml(file.url)}" target="_blank" download><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</a>`}`;
-      card.appendChild(item);
+  if (allOrders.length === 0) return;
+  const container = document.getElementById('allFilesList');
+  const empty = document.getElementById('filesEmpty');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  try {
+    /* Fetch all visible admin-sent files for this client's orders */
+    const orderIds = allOrders.map(o => o.id);
+    const { data: accessRows, error } = await sb
+      .from('order_file_access')
+      .select('storage_path, is_visible, download_allowed, uploaded_by, updated_at, order_id')
+      .in('order_id', orderIds)
+      .eq('is_visible', true)
+      .neq('uploaded_by', 'Client'); /* Client নিজের submit করা file এখানে দেখাবে না */
+
+    if (error) throw error;
+    if (!accessRows || !accessRows.length) { empty.style.display = 'flex'; return; }
+    empty.style.display = 'none';
+
+    /* Group by order_id */
+    const grouped = {};
+    accessRows.forEach(row => {
+      if (!grouped[row.order_id]) grouped[row.order_id] = { files: [] };
+      grouped[row.order_id].files.push(row);
     });
-    groupDiv.appendChild(card); container.appendChild(groupDiv);
-  });
+
+    for (const [orderId, group] of Object.entries(grouped)) {
+      const order = allOrders.find(o => String(o.id) === String(orderId));
+      const hasDue = (order?.due_amount || 0) > 0;
+      const title = order?.title || 'Order';
+
+      const groupDiv = document.createElement('div'); groupDiv.className = 'files-group';
+      groupDiv.innerHTML = `<div class="files-group-label">${escHtml(title)}</div>`;
+      const card = document.createElement('div'); card.className = 'files-card';
+
+      for (const row of group.files) {
+        const parts = row.storage_path.split('/');
+        const fileName = parts[parts.length - 1];
+        const ext = fileName.split('.').pop().toUpperCase();
+        const isLocked = hasDue && !row.download_allowed;
+        const iconCls = isLocked ? 'fi-lock' : ext === 'PDF' ? 'fi-pdf' : 'fi-doc';
+        const iconTxt = isLocked
+          ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+          : ext;
+
+        let signedUrl = null;
+        if (!isLocked) {
+          try {
+            const { data: urlData } = await sb.storage
+              .from('order-files')
+              .createSignedUrl(row.storage_path, 3600);
+            signedUrl = urlData?.signedUrl;
+          } catch (_) {}
+        }
+
+        const item = document.createElement('div'); item.className = 'file-item';
+        item.innerHTML =
+          `<div class="file-icon ${iconCls}">${iconTxt}</div>` +
+          `<div class="file-info"><div class="file-name">${escHtml(fileName)}</div><div class="file-meta">${fmtDate(row.updated_at)}</div></div>` +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+          (isLocked
+            ? '<span class="file-locked-label">\u{1F512} Locked</span>'
+            : `<button class="file-view-btn cdv-btn" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" data-dl="${row.download_allowed ? '1' : '0'}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg> View</button>` +
+              (row.download_allowed
+                ? `<span class="cdv-dl-btn" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" title="Download" style="font-size:14px;cursor:pointer">\u{1F513}</span>`
+                : '<span title="Download not allowed" style="font-size:14px">\u{1F512}</span>')
+          ) + '</div>';
+        card.appendChild(item);
+      }
+
+      card.querySelectorAll('.cdv-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openFileViewer(btn.dataset.path, btn.dataset.name, btn.dataset.dl === '1');
+        });
+      });
+      card.querySelectorAll('.cdv-dl-btn').forEach(btn => {
+        btn.addEventListener('click', () => downloadFile(btn.dataset.path, btn.dataset.name));
+      });
+
+      groupDiv.appendChild(card);
+      container.appendChild(groupDiv);
+    }
+  } catch (e) {
+    console.error('loadFilesPage error:', e);
+    empty.style.display = 'flex';
+  }
 }
 
 async function loadPaymentsPage() {
@@ -523,7 +646,7 @@ function setupRealtime() {
         openOrderDetail(currentOrderId);
       }
 
-      /* Status badge in sidebar notification dot */
+      /* Only show toast if status actually changed */
       if (oldStatus !== newStatus) {
         showToast(`📋 Status update: ${label}`, 'success');
         /* Order confirmed → show popup */
@@ -545,9 +668,8 @@ function setupRealtime() {
             });
           }, 300);
         }
-      } else {
-        showToast('Order update হয়েছে!', 'success');
       }
+      /* No toast for non-status updates (progress, etc.) */
     })
     .on('postgres_changes', {
       event: 'INSERT',
@@ -580,6 +702,33 @@ function setupRealtime() {
     })
     .subscribe();
   realtimeSubs.push(msgSub);
+
+  /* Realtime file notification — admin যখন file visible করবে */
+  const fileSub = sb.channel('client-files-realtime')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'order_file_access'
+    }, async payload => {
+      /* শুধু তখনই notify করবো যখন is_visible true হবে (admin send করবে) */
+      if (!payload.new?.is_visible || payload.old?.is_visible === true) return;
+      /* Check if this belongs to current user's orders */
+      const myOrderIds = allOrders.map(o => String(o.id));
+      if (!myOrderIds.includes(String(payload.new?.order_id))) return;
+      /* File path থেকে file name বের করো */
+      const path = payload.new?.storage_path || '';
+      const fileName = path.split('/').pop() || 'একটি file';
+      showToast(`📎 নতুন file পাঠানো হয়েছে: ${fileName}`, 'success');
+      /* Files page reload করো যদি open থাকে */
+      await loadFilesPage();
+      /* Order detail open থাকলে সেখানেও reload */
+      if (currentOrderId && String(payload.new?.order_id) === String(currentOrderId)) {
+        const order = allOrders.find(o => String(o.id) === String(currentOrderId));
+        await loadOrderFiles(currentOrderId, (order?.due_amount || 0) > 0);
+      }
+    })
+    .subscribe();
+  realtimeSubs.push(fileSub);
 }
 
 function updateMsgBadge(n) {
@@ -649,6 +798,113 @@ function showPage(pageId,clickedItem) {
     clearInterval(countdownTimer);
   }
 }
+
+
+/* ── PROTECTED FILE VIEWER ──────────────────────────────────── */
+window.openFileViewer = async function(storagePath, fileName, dlAllowed) {
+  const overlay = document.getElementById('fileViewerOverlay');
+  const frame   = document.getElementById('viewerFrame');
+  const img     = document.getElementById('viewerImg');
+  const wm      = document.getElementById('viewerWatermark');
+  const nameEl  = document.getElementById('viewerFileName');
+  if (!overlay) return;
+
+  /* Watermark = client name/email */
+  const wmText = (currentClient?.name || currentUser?.email || 'Scriptora Client').toUpperCase();
+  wm.textContent = wmText + '  •  ' + wmText + '  •  ' + wmText;
+
+  nameEl.textContent = fileName;
+  frame.src = ''; img.src = ''; img.style.display = 'none'; frame.style.display = 'block';
+
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  /* Block keyboard shortcuts */
+  window._viewerKeyHandler = function(e) {
+    const k = e.key?.toLowerCase();
+    /* Block: Ctrl+S, Ctrl+P, Ctrl+Shift+I, PrtScn, F12 */
+    if ((e.ctrlKey || e.metaKey) && ['s','p','u'].includes(k)) { e.preventDefault(); e.stopPropagation(); }
+    if (k === 'printscreen') { e.preventDefault(); }
+    if (k === 'f12') { e.preventDefault(); }
+  };
+  document.addEventListener('keydown', window._viewerKeyHandler, true);
+
+  /* Get 5-min signed URL — short expiry so URL can't be reused */
+  try {
+    const { data: urlData, error } = await sb.storage
+      .from('order-files')
+      .createSignedUrl(storagePath, 300); /* 5 minutes */
+    if (error || !urlData?.signedUrl) throw error || new Error('No URL');
+
+    const url = urlData.signedUrl;
+    const ext = fileName.split('.').pop().toLowerCase();
+    const isImage = ['jpg','jpeg','png','gif','webp','svg'].includes(ext);
+    const isPdf   = ext === 'pdf';
+
+    if (isImage) {
+      /* Image: show in <img> so iframe controls are gone */
+      img.src = url;
+      img.style.display = 'block';
+      frame.style.display = 'none';
+    } else if (isPdf) {
+      /* PDF: load in iframe with #toolbar=0 to hide browser toolbar */
+      frame.src = url + '#toolbar=0&navpanes=0&scrollbar=1';
+    } else {
+      /* HTML/doc: load in iframe */
+      frame.src = url;
+    }
+
+    /* Store for download button */
+    window._viewerCurrentUrl  = url;
+    window._viewerCurrentPath = storagePath;
+    window._viewerCurrentName = fileName;
+    window._viewerDlAllowed   = dlAllowed;
+
+  } catch(e) {
+    console.error('[Viewer]', e);
+    frame.src = '';
+    frame.srcdoc = '<div style="color:#ef4444;padding:40px;font-family:sans-serif;text-align:center;">⚠ File load হয়নি। Please try again.</div>';
+  }
+};
+
+window.closeFileViewer = function() {
+  const overlay = document.getElementById('fileViewerOverlay');
+  const frame   = document.getElementById('viewerFrame');
+  const img     = document.getElementById('viewerImg');
+  if (overlay) { overlay.style.display = 'none'; }
+  if (frame)   { frame.src = ''; }
+  if (img)     { img.src = ''; img.style.display = 'none'; }
+  document.body.style.overflow = '';
+  if (window._viewerKeyHandler) {
+    document.removeEventListener('keydown', window._viewerKeyHandler, true);
+    window._viewerKeyHandler = null;
+  }
+  window._viewerCurrentUrl = null;
+};
+
+window.downloadFile = async function(storagePath, fileName) {
+  /* Fresh signed URL for actual download */
+  try {
+    const { data, error } = await sb.storage.from('order-files').download(storagePath);
+    if (error) throw error;
+    const url = URL.createObjectURL(data);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName; a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    showToast('⚠ Download হয়নি', 'error');
+  }
+};
+
+/* Close viewer on overlay background click */
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('fileViewerOverlay');
+  if (overlay) {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeFileViewer();
+    });
+  }
+});
 
 function showToast(msg,type='') {
   const t=document.getElementById('toast');

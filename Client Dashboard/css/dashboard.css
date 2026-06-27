@@ -1529,3 +1529,23 @@ input, select, textarea { font-family: inherit; }
     height: 100vh;
   }
 }
+
+/* ── File View Button ─────────────────────────────────────── */
+.file-view-btn {
+  background: rgba(99,102,241,.12);
+  color: #a5b4fc;
+  border: 1px solid rgba(99,102,241,.25);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+  font-family: 'Sora', sans-serif;
+}
+.file-view-btn:hover {
+  background: rgba(99,102,241,.22);
+  border-color: rgba(99,102,241,.5);
+}
