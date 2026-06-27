@@ -296,23 +296,14 @@ async function loadOrderFiles(orderId, hasDue) {
       const fileName = parts[parts.length - 1];
       const ext = fileName.split('.').pop().toUpperCase();
       const iconCls = ext === 'PDF' ? 'fi-pdf' : 'fi-doc';
+      /* Download: admin manually unlock করলে সবসময় পারবে
+         due=0 হলে auto-unlock হয়, কিন্তু admin manually unlock করলে due থাকলেও পারবে */
       const dlAllowed = row.download_allowed;
-      const isLocked = hasDue;
 
       const div = document.createElement('div');
       div.className = 'file-item';
 
-      /* Build actions separately to avoid quote hell */
-      let actionsHtml;
-      if (isLocked) {
-        actionsHtml = `<button class="file-unlock-btn" onclick="showPage('payments')">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2"/>
-            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
-          </svg>Unlock</button>`;
-      } else {
-        /* Store path/name in data attrs to avoid inline quote escaping */
-        actionsHtml = `<button class="file-view-btn cdv-btn"
+      const actionsHtml = `<button class="file-view-btn cdv-btn"
           data-path="${escHtml(row.storage_path)}"
           data-name="${escHtml(fileName)}"
           data-dl="${dlAllowed ? '1' : '0'}">
@@ -320,21 +311,17 @@ async function loadOrderFiles(orderId, hasDue) {
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg> View</button>` +
-          (dlAllowed
-            ? `<span class="cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="font-size:14px;cursor:pointer">🔓</span>`
-            : `<span title="Download not allowed" style="font-size:14px">🔒</span>`);
-      }
+        (dlAllowed
+          ? `<button class="file-view-btn cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#6ee7b7;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>`
+          : `<span title="Download locked" style="font-size:16px;opacity:0.5;cursor:default;">🔒</span>`);
 
       div.innerHTML = `
-        <div class="file-icon ${isLocked ? 'fi-lock' : iconCls}">
-          ${isLocked
-            ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
-            : ext}
-        </div>
+        <div class="file-icon ${iconCls}">${ext}</div>
         <div class="file-info">
-          <div class="file-name" style="${isLocked ? 'color:var(--text-muted)' : ''}">${escHtml(fileName)}</div>
+          <div class="file-name">${escHtml(fileName)}</div>
           <div class="file-meta">${fmtDate(row.updated_at)}</div>
-          ${isLocked ? '<div class="file-locked-label">Due payment করলে unlock হবে</div>' : ''}
         </div>
         <div style="display:flex;align-items:center;gap:8px;">${actionsHtml}</div>`;
 
@@ -410,38 +397,27 @@ async function loadFilesPage() {
         const parts = row.storage_path.split('/');
         const fileName = parts[parts.length - 1];
         const ext = fileName.split('.').pop().toUpperCase();
-        const isLocked = hasDue && !row.download_allowed;
-        const iconCls = isLocked ? 'fi-lock' : ext === 'PDF' ? 'fi-pdf' : 'fi-doc';
-        const iconTxt = isLocked
-          ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
-          : ext;
-
-        let signedUrl = null;
-        if (!isLocked) {
-          try {
-            const { data: urlData } = await sb.storage
-              .from('order-files')
-              .createSignedUrl(row.storage_path, 3600);
-            signedUrl = urlData?.signedUrl;
-          } catch (_) {}
-        }
+        const iconCls = ext === 'PDF' ? 'fi-pdf' : 'fi-doc';
+        /* Download: admin manually unlock করলে সবসময় পারবে
+           due=0 হলে auto-unlock হয়, কিন্তু admin manually unlock করলে due থাকলেও পারবে */
+        const dlAllowed = row.download_allowed;
 
         const item = document.createElement('div'); item.className = 'file-item';
         item.innerHTML =
-          `<div class="file-icon ${iconCls}">${iconTxt}</div>` +
+          `<div class="file-icon ${iconCls}">${ext}</div>` +
           `<div class="file-info"><div class="file-name">${escHtml(fileName)}</div><div class="file-meta">${fmtDate(row.updated_at)}</div></div>` +
-          '<div style="display:flex;align-items:center;gap:8px;">' +
-          (isLocked
-            ? '<span class="file-locked-label">\u{1F512} Locked</span>'
-            : `<button class="file-view-btn cdv-btn" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" data-dl="${row.download_allowed ? '1' : '0'}">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg> View</button>` +
-              (row.download_allowed
-                ? `<span class="cdv-dl-btn" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" title="Download" style="font-size:14px;cursor:pointer">\u{1F513}</span>`
-                : '<span title="Download not allowed" style="font-size:14px">\u{1F512}</span>')
-          ) + '</div>';
+          `<div style="display:flex;align-items:center;gap:8px;">
+            <button class="file-view-btn cdv-btn" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" data-dl="${dlAllowed ? '1' : '0'}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg> View</button>` +
+          (dlAllowed
+            ? `<button class="file-view-btn cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#6ee7b7;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </button>`
+            : `<span title="Download locked" style="font-size:16px;opacity:0.5;cursor:default;">🔒</span>`) +
+          `</div>`;
         card.appendChild(item);
       }
 
@@ -802,12 +778,23 @@ function showPage(pageId,clickedItem) {
 
 /* ── PROTECTED FILE VIEWER ──────────────────────────────────── */
 window.openFileViewer = async function(storagePath, fileName, dlAllowed) {
-  const overlay = document.getElementById('fileViewerOverlay');
-  const frame   = document.getElementById('viewerFrame');
-  const img     = document.getElementById('viewerImg');
-  const wm      = document.getElementById('viewerWatermark');
-  const nameEl  = document.getElementById('viewerFileName');
+  const overlay   = document.getElementById('fileViewerOverlay');
+  const frame     = document.getElementById('viewerFrame');
+  const img       = document.getElementById('viewerImg');
+  const wm        = document.getElementById('viewerWatermark');
+  const nameEl    = document.getElementById('viewerFileName');
+  const protBadge = document.getElementById('viewerProtectedBadge');
+  const dlBtn     = document.getElementById('viewerDownloadBtn');
   if (!overlay) return;
+
+  /* Toggle: show Download button OR Protected badge based on dlAllowed */
+  if (dlAllowed) {
+    if (protBadge) protBadge.style.display = 'none';
+    if (dlBtn)     dlBtn.style.display = 'flex';
+  } else {
+    if (protBadge) protBadge.style.display = 'flex';
+    if (dlBtn)     dlBtn.style.display = 'none';
+  }
 
   /* Watermark = client name/email */
   const wmText = (currentClient?.name || currentUser?.email || 'Scriptora Client').toUpperCase();
@@ -880,6 +867,15 @@ window.closeFileViewer = function() {
     window._viewerKeyHandler = null;
   }
   window._viewerCurrentUrl = null;
+};
+
+/* Called by the Download button inside the viewer */
+window.viewerDownload = async function() {
+  const path = window._viewerCurrentPath;
+  const name = window._viewerCurrentName;
+  if (!path || !name) return;
+  if (!window._viewerDlAllowed) { showToast('⚠ Download allowed নয়', 'error'); return; }
+  await downloadFile(path, name);
 };
 
 window.downloadFile = async function(storagePath, fileName) {

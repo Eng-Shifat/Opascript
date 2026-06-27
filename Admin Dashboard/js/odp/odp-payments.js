@@ -242,6 +242,18 @@
           is_read:    false,
           created_at: new Date().toISOString()
         }).catch(()=>{});
+
+        /* due = 0 হলে সব file এর download_allowed automatically true */
+        if (due === 0) {
+          await window._sb().from('order_file_access')
+            .update({ download_allowed: true, updated_at: new Date().toISOString() })
+            .eq('order_id', window.window._currentOrderId);
+          /* local cache update */
+          Object.keys(window._fileMetaCache || {}).forEach(path => {
+            if (window._fileMetaCache[path]) window._fileMetaCache[path].download_allowed = true;
+          });
+          window._toast('✅ Due cleared! সব files download unlock হয়েছে।', 'var(--green)');
+        }
       } catch(e) { console.error(e); window._toast('⚠ Error: ' + e.message, 'var(--red)'); return; }
     }
 
