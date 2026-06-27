@@ -127,3 +127,45 @@ window._loadClientOrderCount = async function() {
     } catch(e) { console.error('client stats error', e); }
   }
 
+
+/* ── Client-uploaded files count for Order Summary ─────────────── */
+window._loadClientFilesCount = async function() {
+  if (!window._sb() || !window._isRealUUID(window._currentOrderId)) return;
+  try {
+    const safeId = window._currentOrderId.replace(/[#?&=\s]/g, '_');
+    const path   = `orders/${safeId}`;
+
+    /* Storage থেকে file list নাও */
+    const { data: storageFiles } = await window._sb()
+      .storage.from('order-files').list(path, { limit: 100 });
+
+    const totalFiles = storageFiles ? storageFiles.length : 0;
+
+    /* order_file_access থেকে uploaded_by চেক করার চেষ্টা (column না থাকলেও চলবে) */
+    let clientCount = 0;
+    try {
+      const { data: accessRows } = await window._sb()
+        .from('order_file_access')
+        .select('uploaded_by')
+        .eq('order_id', window._currentOrderId);
+      if (accessRows) {
+        clientCount = accessRows.filter(r => r.uploaded_by === 'Client').length;
+      }
+    } catch(_) { /* uploaded_by column নেই — ignore */ }
+
+    const elAttach = document.getElementById('odpClientAttachCount');
+    if (elAttach) {
+      if (totalFiles === 0) {
+        elAttach.textContent = 'No files yet';
+      } else if (clientCount > 0) {
+        elAttach.textContent = `${clientCount} client file${clientCount > 1 ? 's' : ''} (${totalFiles} total)`;
+      } else {
+        elAttach.textContent = `${totalFiles} file${totalFiles > 1 ? 's' : ''}`;
+      }
+    }
+  } catch(e) { 
+    console.warn('[FilesCount]', e);
+    const elAttach = document.getElementById('odpClientAttachCount');
+    if (elAttach) elAttach.textContent = '—';
+  }
+};

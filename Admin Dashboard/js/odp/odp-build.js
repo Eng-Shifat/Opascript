@@ -75,23 +75,36 @@ window._buildShell = function(order) {
 
     <!-- ══ ORDER SUMMARY ══ -->
     <div class="odp-pane" data-odp-pane="summary">
-      ${window._buildOrderSummaryHTML(order)}
+      <div id="odpSummaryContent">${window._buildOrderSummaryHTML(order)}</div>
     </div>
 
     <!-- ══ FILES ══ -->
     <div class="odp-pane" data-odp-pane="files">
+
+      <!-- Admin Upload Zone -->
       <div class="odp-upload-zone" id="odpDropZone" onclick="document.getElementById('odpFileInput').click()" ondragover="odpDragOver(event)" ondrop="odpDrop(event)">
         <i class="ti ti-cloud-upload"></i>
         <p>Drag & drop files here, or <span>browse to upload</span></p>
         <p style="margin-top:4px;font-size:11px;color:var(--muted)">PDF, DOCX, ZIP, Images — max 50MB</p>
       </div>
       <input type="file" id="odpFileInput" style="display:none" multiple onchange="odpUploadFiles(this.files)">
-      <div class="odp-card">
-        <div class="odp-card-title"><i class="ti ti-folder-open"></i> Uploaded Files</div>
+
+      <!-- Admin/Writer Files -->
+      <div class="odp-card" style="margin-bottom:14px">
+        <div class="odp-card-title"><i class="ti ti-folder-open"></i> Admin / Writer Files</div>
         <div class="odp-file-list" id="odpFileList">
           <div class="odp-loading"><div class="odp-spinner"></div> Loading files…</div>
         </div>
       </div>
+
+      <!-- Client Submitted Files -->
+      <div class="odp-card">
+        <div class="odp-card-title"><i class="ti ti-paperclip"></i> Client Submitted Files</div>
+        <div class="odp-file-list" id="odpClientFileList">
+          <div class="odp-loading"><div class="odp-spinner"></div> Loading…</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ══ PAYMENTS ══ -->
@@ -304,10 +317,13 @@ window._buildOrderSummaryHTML = function(order) {
     const fin = d.financials || {};
     const pageCount = window._getPageCount(order);
     const wordCount = window._getWordCount(order);
-    const total    = fin.total   != null ? '৳' + Number(fin.total).toLocaleString()  : (order.amount || '—');
-    const paid     = fin.paid    != null ? '৳' + Number(fin.paid).toLocaleString()   : '৳0';
-    const due      = fin.due     != null ? '৳' + Number(fin.due).toLocaleString()    : (order.amount || '—');
-    const paidPct  = fin.paidPct || 0;
+    const rawDB2    = order._rawDB || {};
+    const rawTotal  = rawDB2.total_price != null ? Number(rawDB2.total_price) : null;
+    const rawPaid   = rawDB2.advance_paid != null ? Number(rawDB2.advance_paid) : 0;
+    const total    = fin.total   != null ? '৳' + Number(fin.total).toLocaleString()  : rawTotal != null ? '৳' + rawTotal.toLocaleString() : '—';
+    const paid     = fin.paid    != null ? '৳' + Number(fin.paid).toLocaleString()   : '৳' + rawPaid.toLocaleString();
+    const due      = fin.due     != null ? '৳' + Number(fin.due).toLocaleString()    : rawTotal != null ? '৳' + Math.max(0, rawTotal - rawPaid).toLocaleString() : '—';
+    const paidPct  = fin.paidPct || (rawTotal ? Math.min(100, Math.round((rawPaid / rawTotal) * 100)) : 0);
     const pctColor = paidPct >= 100 ? 'var(--green)' : paidPct > 0 ? 'var(--yellow)' : 'var(--red)';
     const statusClass = order.statusClass || 's-pending';
     const statusLabel = { 's-inprogress':'In Progress','s-completed':'Completed','s-overdue':'Overdue','s-pending':'Pending','s-review':'In Review' }[statusClass] || order.status || '—';
@@ -349,9 +365,21 @@ window._buildOrderSummaryHTML = function(order) {
     const currentIdx = steps.findIndex(s => s.key === currentKey);
 
     const ord2 = order._rawDB || {};  /* raw DB row if available */
+
+    /* Coupon & discount formatting */
+    const couponVal   = ord2.coupon || null;
+    const discountVal = ord2.discount ? '৳' + Number(ord2.discount).toLocaleString() : null;
+    const advanceVal  = ord2.advance_paid != null ? '৳' + Number(ord2.advance_paid).toLocaleString() : null;
+    const dueVal      = ord2.due_amount   != null ? '৳' + Number(ord2.due_amount).toLocaleString()
+                      : (ord2.total_price != null && ord2.advance_paid != null)
+                        ? '৳' + (Number(ord2.total_price) - Number(ord2.advance_paid)).toLocaleString()
+                        : null;
+
     const rows = [
+      { icon:'ti-hash',             label:'Order Number',           val: ord2.order_number || order.orderId || '—' },
       { icon:'ti-file-description', label:'Topic / Title',          val: order.topic || ord2.title || '—' },
       { icon:'ti-award',            label:'Service Package',        val: order.pkg   || ord2.package || '—' },
+      { icon:'ti-tag',              label:'Service Type',           val: ord2.service_type || '—' },
       { icon:'ti-building',         label:'University',             val: order.uni   || ord2.university || '—' },
       { icon:'ti-book',             label:'Department',             val: d.subject   || ord2.department || '—' },
       { icon:'ti-microscope',       label:'Research Area',          val: ord2.research_area || d.researchArea || '—' },
@@ -366,9 +394,13 @@ window._buildOrderSummaryHTML = function(order) {
       { icon:'ti-bolt',             label:'Urgency',                val: ord2.urgency || order.urgency || '—' },
       { icon:'ti-calendar-due',     label:'Deadline',               val: dlParts || '—', extra: dlCountdown },
       { icon:'ti-puzzle',           label:'Add-ons',                val: ord2.addons ? (Array.isArray(ord2.addons) ? ord2.addons.join(', ') : ord2.addons) : (d.addons ? d.addons : null) },
-      { icon:'ti-tag',              label:'Service Type',           val: ord2.service_type || '—' },
+      { icon:'ti-ticket',           label:'Coupon Applied',         val: couponVal },
+      { icon:'ti-rosette-discount', label:'Discount',               val: discountVal },
+      { icon:'ti-cash',             label:'Advance Paid',           val: advanceVal },
+      { icon:'ti-clock-dollar',     label:'Due Amount',             val: dueVal },
+      { icon:'ti-paperclip',        label:'Client Attachments',     val: 'Loading…', id: 'odpClientAttachCount', keep: true },
       { icon:'ti-notes',            label:'Special Instructions',   val: ord2.special_instructions || d.specialInstructions || null, full: true },
-    ].filter(r => r.val && r.val !== '—' && r.val !== 'null');
+    ].filter(r => r.keep || (r.val && r.val !== '—' && r.val !== 'null'));
 
     return `
     <div class="odp-summ-grid">
@@ -383,7 +415,7 @@ window._buildOrderSummaryHTML = function(order) {
               <div class="odp-summ-icon-wrap"><i class="ti ${window._esc(r.icon)}"></i></div>
               <div class="odp-summ-lbl">${window._esc(r.label)}</div>
               <div class="odp-summ-val">
-                ${r.badge ? `<span class="odp-oi-badge">${window._esc(r.val)}</span>` : window._esc(r.val)}
+                ${r.badge ? `<span class="odp-oi-badge">${window._esc(r.val)}</span>` : `<span${r.id ? ` id="${r.id}"` : ''}>${window._esc(r.val)}</span>`}
                 ${r.extra ? `<span class="odp-summ-countdown"><i class="ti ti-clock"></i> ${window._esc(r.extra)}</span>` : ''}
               </div>
             </div>`).join('')}

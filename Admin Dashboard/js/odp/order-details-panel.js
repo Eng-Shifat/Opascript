@@ -246,6 +246,14 @@ window._loadFullOrderData = async function() {
     window._renderThesisDetailsCard(ord, client);
     window._syncOrderInfoPayments(window._currentOrder);
 
+    /* Re-render Order Summary tab now that _rawDB is available */
+    const summaryEl = document.getElementById('odpSummaryContent');
+    if (summaryEl && window._currentOrder) {
+      summaryEl.innerHTML = window._buildOrderSummaryHTML(window._currentOrder);
+      /* Call immediately after render so odpClientAttachCount is in DOM */
+      window._loadClientFilesCount();
+    }
+
     /* Status sync */
     const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' };
     const lblMap = { writing:'In Progress', completed:'Completed', pending:'Pending', draft_ready:'In Review', overdue:'Overdue', hold:'On Hold' };

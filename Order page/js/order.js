@@ -452,20 +452,74 @@ function dragOver(e)  { e.preventDefault(); document.getElementById('uploadZone'
 function dragLeave(e) { document.getElementById('uploadZone').classList.remove('drag'); }
 function dropFile(e)  { e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag'); addFiles(Array.from(e.dataTransfer.files)); }
 function fileSelect(e){ addFiles(Array.from(e.target.files)); }
+
 function addFiles(files) {
-  files.forEach(f => { if (!uploadedFiles.find(x=>x.name===f.name)) uploadedFiles.push(f); });
+  files.forEach(f => {
+    if (!uploadedFiles.find(x => x.name === f.name)) {
+      uploadedFiles.push(f);
+      uploadFileToStorage(f);
+    }
+  });
+}
+
+/* Track upload state per file */
+const _uploadState = {}; // { filename: 'uploading' | 'done' | 'error' }
+
+async function uploadFileToStorage(file) {
+  const sb = window.scriptoraSupabase;
+  const clientId = localStorage.getItem('scriptora_client_id');
+  if (!sb || !clientId) return;
+
+  _uploadState[file.name] = 'uploading';
+  renderFiles();
+
+  try {
+    const safeName = file.name.replace(/[#?&=]/g, '_');
+    const path = `temp/${clientId}/${safeName}`;
+
+    const { error } = await sb.storage
+      .from('order-files')
+      .upload(path, file, { upsert: true });
+
+    if (error) {
+      _uploadState[file.name] = 'error';
+      console.warn('[Upload]', file.name, error.message);
+    } else {
+      _uploadState[file.name] = 'done';
+    }
+  } catch(e) {
+    _uploadState[file.name] = 'error';
+    console.warn('[Upload] exception', e);
+  }
   renderFiles();
 }
-function removeFile(name) { uploadedFiles = uploadedFiles.filter(f=>f.name!==name); renderFiles(); }
+
+function removeFile(name) {
+  uploadedFiles = uploadedFiles.filter(f => f.name !== name);
+  delete _uploadState[name];
+  renderFiles();
+}
+
 function renderFiles() {
   const list = document.getElementById('fileList');
   list.innerHTML = uploadedFiles.map(f => {
     const ext  = f.name.split('.').pop().toUpperCase();
     const icon = ext==='PDF'?'📄':ext==='DOCX'||ext==='DOC'?'📝':'🖼️';
     const size = f.size<1048576?(f.size/1024).toFixed(0)+' KB':(f.size/1048576).toFixed(1)+' MB';
+    const state = _uploadState[f.name];
+
+    let statusHTML = '';
+    if (state === 'uploading') {
+      statusHTML = `<span class="fi-status fi-uploading"><span class="fi-spinner"></span> Uploading…</span>`;
+    } else if (state === 'done') {
+      statusHTML = `<span class="fi-status fi-done">✔ Uploaded</span>`;
+    } else if (state === 'error') {
+      statusHTML = `<span class="fi-status fi-error">⚠ Failed</span>`;
+    }
+
     return `<div class="fi">
-      <div class="fi-left"><span class="fi-icon">${icon}</span><div><div class="fi-name">${f.name}</div><div class="fi-size">${size}</div></div></div>
-      <button class="fi-rm" onclick="removeFile('${f.name}')">✕</button>
+      <div class="fi-left"><span class="fi-icon">${icon}</span><div><div class="fi-name">${f.name}</div><div class="fi-size">${size} ${statusHTML}</div></div></div>
+      ${state !== 'uploading' ? `<button class="fi-rm" onclick="removeFile('${f.name.replace(/'/g,"\\'")}')">✕</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -548,6 +602,14 @@ function validate(s) {
     const wcVal = document.getElementById('wordCount')?.value;
     if (!wcVal) { se('wordCount','Word count সেট করুন'); ok=false; }
     ce('citationStyle'); if(!gv('citationStyle')){se('citationStyle','Citation style বেছে নিন');ok=false;}
+  }
+  if (s===4) {
+    /* Block next if any file is still uploading */
+    const stillUploading = Object.values(_uploadState).some(v => v === 'uploading');
+    if (stillUploading) {
+      alert('ফাইল upload হচ্ছে, একটু অপেক্ষা করুন…');
+      ok = false;
+    }
   }
   if (s===5) {
     const te=document.getElementById('err-terms');
@@ -824,6 +886,50 @@ async function nextStep() {
       coupon:   appliedCoupon || null,
       discount: discountAmount || 0
     }));
+
+    // ── Client-uploaded files → temp থেকে orders/ path-এ move করো ──────
+    if (uploadedFiles.length > 0) {
+      const sb = window.scriptoraSupabase;
+      const clientId = localStorage.getItem('scriptora_client_id');
+      const safeOrderId = orderRow.id.replace(/[#?&=\s]/g, '_');
+
+      for (const file of uploadedFiles) {
+        try {
+          const safeName = file.name.replace(/[#?&=]/g, '_');
+          const tempPath  = `temp/${clientId}/${safeName}`;
+          const finalPath = `orders/${safeOrderId}/${safeName}`;
+
+          // temp → orders/ এ copy (download then re-upload)
+          const { data: blob, error: dlErr } = await sb.storage
+            .from('order-files').download(tempPath);
+
+          if (dlErr) {
+            // temp-এ নেই, সরাসরি upload করো
+            await sb.storage.from('order-files').upload(finalPath, file, { upsert: true });
+          } else {
+            await sb.storage.from('order-files').upload(finalPath, blob, { upsert: true });
+            // temp file delete করো
+            await sb.storage.from('order-files').remove([tempPath]);
+          }
+
+          // order_file_access table-এ record
+          await sb.from('order_file_access').upsert({
+            order_id: orderRow.id,
+            storage_path: finalPath,
+            is_visible: false,
+            download_allowed: true,
+            client_notified: false,
+            uploaded_by: 'Client',
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'order_id,storage_path' });
+
+        } catch (e) {
+          console.warn('[Order] File move error:', file.name, e);
+        }
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────
+
     window.location.href = '../Payment page/payment.html';
     return;
   }

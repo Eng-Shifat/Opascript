@@ -69,7 +69,67 @@
         if (list) list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not load files.</div>';
       }
     }
+
+    /* Load client submitted files */
+    await window._loadClientFiles();
   }
+
+/* ── Client submitted files (uploaded via order form) ─────────── */
+window._loadClientFiles = async function() {
+  const el = document.getElementById('odpClientFileList');
+  if (!el) return;
+
+  if (!window._sb() || !window._isRealUUID(window._currentOrderId)) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">No client files.</div>';
+    return;
+  }
+
+  try {
+    /* order_file_access থেকে Client uploaded files নাও */
+    const { data: accessRows } = await window._sb()
+      .from('order_file_access')
+      .select('storage_path, is_visible, download_allowed, client_notified, uploaded_by')
+      .eq('order_id', window._currentOrderId)
+      .eq('uploaded_by', 'Client');
+
+    if (!accessRows || !accessRows.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px"><i class="ti ti-paperclip" style="font-size:20px;display:block;margin-bottom:6px;opacity:0.4"></i>Client has not submitted any files.</div>';
+      return;
+    }
+
+    const tableHeader = window._buildFileTableHeader();
+    const rows = await Promise.all(accessRows.map(async (row) => {
+      const parts = row.storage_path.split('/');
+      const name  = parts[parts.length - 1];
+
+      /* file metadata — size & date from Storage */
+      let size, updated_at;
+      try {
+        const folder = parts.slice(0, -1).join('/');
+        const { data: ls } = await window._sb().storage.from('order-files').list(folder, { limit: 100 });
+        const meta = ls && ls.find(f => f.name === name);
+        size       = meta?.metadata?.size;
+        updated_at = meta?.updated_at;
+      } catch(_) {}
+
+      /* update cache so access control works */
+      window._fileMetaCache[row.storage_path] = row;
+
+      return window._renderFileRow({
+        name,
+        size,
+        updated_at,
+        supabasePath: row.storage_path,
+        uploaded_by: 'Client'
+      });
+    }));
+
+    el.innerHTML = tableHeader + rows.join('');
+  } catch(e) {
+    console.warn('[ClientFiles]', e);
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not load client files.</div>';
+  }
+};
 
 window._buildFileTableHeader = function() {
     return `<div class="odp-file-row-head">
