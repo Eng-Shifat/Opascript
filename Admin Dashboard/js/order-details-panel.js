@@ -613,7 +613,6 @@
     const pctColor = paidPct >= 100 ? 'var(--green)' : paidPct > 0 ? 'var(--yellow)' : 'var(--red)';
     const statusClass = order.statusClass || 's-pending';
     const statusLabel = { 's-inprogress':'In Progress','s-completed':'Completed','s-overdue':'Overdue','s-pending':'Pending','s-review':'In Review' }[statusClass] || order.status || '—';
-
     const rows = [
       { icon:'ti-file-description', label:'Topic / Title',       val: order.topic || '—' },
       { icon:'ti-award',            label:'Service Package',     val: order.pkg   || '—' },
@@ -626,7 +625,6 @@
       { icon:'ti-letter-case',      label:'Word Count (est.)',   val: wordCount ? wordCount.toLocaleString() + ' words' : '—' },
       { icon:'ti-calendar-due',     label:'Deadline',            val: [order.deadline, order.deadlineTime].filter(Boolean).join(' ') || '—' },
     ];
-
     return `
     <div class="odp-summ-grid">
       <div style="display:flex;flex-direction:column;gap:14px">
@@ -1056,73 +1054,142 @@
   };
 
   /* ══════════════════════════════════════════════════════════
-     FILES — Supabase Storage
+     FILES — Supabase Storage + Access Control
   ══════════════════════════════════════════════════════════ */
+
+  /* In-memory file metadata cache for current order */
+  let _fileMetaCache = {}; /* key: storagePath → { is_visible, download_allowed, notified } */
+
+  async function loadFilesMeta(orderId) {
+    _fileMetaCache = {};
+    if (!sb() || !isRealUUID(orderId)) return;
+    try {
+      const { data } = await sb()
+        .from('order_file_access')
+        .select('storage_path, is_visible, download_allowed, client_notified')
+        .eq('order_id', orderId);
+      if (data) data.forEach(r => { _fileMetaCache[r.storage_path] = r; });
+    } catch(e) { console.warn('[Files] meta load error', e); }
+  }
+
   async function loadFiles() {
-    const list    = document.getElementById('odpFileList');
-    const listOv  = document.getElementById('odpFileListOverview');
+    const list   = document.getElementById('odpFileList');
+    const listOv = document.getElementById('odpFileListOverview');
     if (!list && !listOv) return;
 
-    /* Check if order has static files in detail */
+    await loadFilesMeta(_currentOrderId);
+
+    /* Static files from order.detail */
     const d = _currentOrder && _currentOrder.detail;
     if (d && d.files && d.files.length) {
-      list.innerHTML = d.files.map(f => renderFileRow(f)).join('');
+      const tableHeader = buildFileTableHeader();
+      const html = d.files.map(f => renderFileRow(f)).join('');
+      if (list) list.innerHTML = tableHeader + html;
+      if (listOv) listOv.innerHTML = tableHeader + html;
     }
 
-    if (!sb() || !isRealUUID(_currentOrderId)) return;
+    if (!sb() || !isRealUUID(_currentOrderId)) {
+      if (list && !(d && d.files && d.files.length)) {
+        list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No files uploaded yet.</div>';
+      }
+      return;
+    }
 
     try {
-      const path = `orders/${_currentOrderId}`;
+      const safeOrderId = (_currentOrderId || '').replace(/[#?&=\s]/g, '_');
+      const path = `orders/${safeOrderId}`;
       const { data, error } = await sb().storage.from('order-files').list(path, { limit: 100 });
       if (error || !data || !data.length) {
         if (!d || !d.files || !d.files.length) list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No files uploaded yet.</div>';
         return;
       }
-      const html = data.map(f => renderFileRow({ name: f.name, size: f.metadata?.size, updated_at: f.updated_at, supabasePath: `${path}/${f.name}` })).join('');
-      const tableHeader = `<div class="odp-file-row-head"><span>File Name</span><span>Type</span><span>Uploaded By</span><span>Uploaded At</span><span>Size</span><span>Actions</span></div>`;
+      const tableHeader = buildFileTableHeader();
+      const html = data.map(f => renderFileRow({
+        name: f.name,
+        size: f.metadata?.size,
+        updated_at: f.updated_at,
+        supabasePath: `${path}/${f.name}`,
+        uploaded_by: 'Writer'
+      })).join('');
       if (list) list.innerHTML = tableHeader + html;
       if (listOv) listOv.innerHTML = tableHeader + html;
     } catch(e) {
-      if (!d || !d.files || !d.files.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not load files.</div>';
+      if (!d || !d.files || !d.files.length) {
+        if (list) list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not load files.</div>';
+      }
     }
   }
 
+  function buildFileTableHeader() {
+    return `<div class="odp-file-row-head">
+      <span>File Name</span>
+      <span>Type</span>
+      <span>Uploaded By</span>
+      <span>Uploaded At</span>
+      <span>Size</span>
+      <span>Client Access</span>
+      <span>Actions</span>
+    </div>`;
+  }
+
   function renderFileRow(f) {
-    const ext      = (f.name || '').split('.').pop().toLowerCase();
-    const pillCls  = ext==='pdf' ? 'pdf' : (ext==='docx'||ext==='doc') ? 'docx' : ext==='zip' ? 'zip' : ext.match(/png|jpg|jpeg|gif|webp/) ? 'img' : 'other';
-    const icon     = ext==='pdf' ? 'ti-file-type-pdf' : (ext==='docx'||ext==='doc') ? 'ti-file-type-doc' : ext==='zip' ? 'ti-file-zip' : ext.match(/png|jpg|jpeg|gif|webp/) ? 'ti-photo' : 'ti-file';
-    const size     = f.size ? (f.size/1024 < 1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/1024/1024).toFixed(1)+' MB') : '—';
+    const ext        = (f.name || '').split('.').pop().toLowerCase();
+    const pillCls    = ext==='pdf' ? 'pdf' : (ext==='docx'||ext==='doc') ? 'docx' : ext==='zip' ? 'zip' : ext.match(/png|jpg|jpeg|gif|webp/) ? 'img' : 'other';
+    const icon       = ext==='pdf' ? 'ti-file-type-pdf' : (ext==='docx'||ext==='doc') ? 'ti-file-type-doc' : ext==='zip' ? 'ti-file-zip' : ext.match(/png|jpg|jpeg|gif|webp/) ? 'ti-photo' : 'ti-file';
+    const size       = f.size ? (f.size/1024 < 1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/1024/1024).toFixed(1)+' MB') : '—';
     const uploadedAt = f.updated_at ? new Date(f.updated_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' ' + new Date(f.updated_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
-    const uploader = f.uploaded_by || (f.supabasePath ? 'Writer' : 'Client');
-    const path     = f.supabasePath || '';
+    const uploader   = f.uploaded_by || (f.supabasePath ? 'Writer' : 'Client');
+    const path       = f.supabasePath || '';
+
+    /* Access control defaults from DB meta, fallback: visible=true, download=true */
+    const meta       = _fileMetaCache[path] || {};
+    const isVisible  = meta.is_visible  !== undefined ? meta.is_visible  : true;
+    const dlAllowed  = meta.download_allowed !== undefined ? meta.download_allowed : true;
+    const notified   = meta.client_notified || false;
+    const chkId      = 'vis_' + path.replace(/[^a-z0-9]/gi, '_');
+    const notifBadge = notified ? `<span class="odp-notif-sent">✓ Notified</span>` : '';
+
     return `
-    <div class="odp-file-row" data-path="${esc(path)}">
+    <div class="odp-file-row${isVisible ? '' : ' client-hidden'}" data-path="${esc(path)}" data-dl="${dlAllowed}" data-vis="${isVisible}">
       <div class="odp-file-name-cell">
         <i class="ti ${icon}"></i>
         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</span>
+        ${notifBadge}
       </div>
       <span class="odp-file-type-pill ${pillCls}">${ext}</span>
       <span style="color:var(--muted2);font-size:11.5px">${esc(uploader)}</span>
       <span style="color:var(--muted2);font-size:11px">${uploadedAt}</span>
       <span style="color:var(--muted2);font-size:11.5px">${size}</span>
+      <div class="odp-access-cell">
+        <span class="odp-access-badge ${isVisible ? 'viewable' : 'hidden'}" id="badge_${chkId}">${isVisible ? '● Viewable' : '○ Hidden'}</span>
+        <label class="odp-mini-toggle" title="Toggle client visibility">
+          <input type="checkbox" ${isVisible ? 'checked' : ''} onchange="odpToggleVisibility('${esc(path)}','${esc(f.name)}',this)">
+          <div class="odp-mini-track"></div>
+          <div class="odp-mini-thumb"></div>
+        </label>
+      </div>
       <div class="odp-file-actions">
-        <button class="odp-file-action-btn" title="Download" onclick="odpDownloadFile('${esc(path)}','${esc(f.name)}')"><i class="ti ti-download"></i></button>
-        <button class="odp-file-action-btn" title="Preview" onclick="odpToggleVisibility(this)"><i class="ti ti-eye"></i></button>
+        <button class="odp-file-action-btn" title="Download file (admin)" onclick="odpDownloadFile('${esc(path)}','${esc(f.name)}')"><i class="ti ti-download"></i></button>
+        <button class="odp-file-action-btn${dlAllowed ? '' : ' locked-dl'}" title="${dlAllowed ? 'Client download allowed — click to lock' : 'Client download locked — click to unlock'}" onclick="odpToggleDownload('${esc(path)}',this)"><i class="ti ${dlAllowed ? 'ti-lock-open' : 'ti-lock'}"></i></button>
+        <button class="odp-file-action-btn" title="Send notification to client" onclick="odpNotifyClient('${esc(path)}','${esc(f.name)}',this)"><i class="ti ti-bell"></i></button>
+        <button class="odp-file-action-btn danger" title="Delete file" onclick="odpDeleteFile('${esc(path)}',this)"><i class="ti ti-trash"></i></button>
       </div>
     </div>`;
   }
 
-  async function ensureBucket() {
-    if (!sb()) return false;
+  /* Save access meta to Supabase */
+  async function saveFileMeta(storagePath, updates) {
+    if (!sb() || !isRealUUID(_currentOrderId)) return;
     try {
-      const { data: buckets } = await sb().storage.listBuckets();
-      const exists = (buckets || []).some(b => b.name === 'order-files');
-      if (!exists) {
-        const { error } = await sb().storage.createBucket('order-files', { public: false });
-        if (error) return false;
-      }
-      return true;
-    } catch(e) { return false; }
+      await sb().from('order_file_access').upsert({
+        order_id: _currentOrderId,
+        storage_path: storagePath,
+        ...updates,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'order_id,storage_path' });
+      /* update local cache */
+      _fileMetaCache[storagePath] = { ..._fileMetaCache[storagePath], ...updates };
+    } catch(e) { console.error('[Files] meta save error', e); }
   }
 
   window.odpUploadFiles = async function(files) {
@@ -1133,19 +1200,6 @@
 
     const safeOrderId = (_currentOrderId || 'unknown').replace(/[#?&=\s]/g, '_');
 
-    if (sb()) {
-      const ok = await ensureBucket();
-      if (!ok) {
-        toast('⚠ Storage bucket নেই — Supabase এ "order-files" bucket create করো', 'var(--red)');
-        if (list) list.innerHTML = `<div style="color:var(--red);font-size:12px;padding:12px 4px;line-height:1.8">
-          ⚠ <b>Bucket not found</b><br>
-          Supabase Dashboard → Storage → <b>New bucket</b><br>
-          Name: <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px">order-files</code> → Create
-        </div>`;
-        return;
-      }
-    }
-
     for (const f of Array.from(files)) {
       const safeName = f.name.replace(/[#?&=]/g, '_');
       const placeholder = document.createElement('div');
@@ -1155,7 +1209,9 @@
 
       if (!sb()) {
         await new Promise(res => setTimeout(res, 1200));
-        placeholder.outerHTML = renderFileRow({ name: f.name, size: f.size, updated_at: new Date().toISOString(), supabasePath: `orders/${safeOrderId}/${safeName}` });
+        const fakeRow = document.createElement('div');
+        fakeRow.innerHTML = renderFileRow({ name: f.name, size: f.size, updated_at: new Date().toISOString(), supabasePath: `orders/${safeOrderId}/${safeName}`, uploaded_by: 'Writer' });
+        placeholder.replaceWith(fakeRow.firstElementChild);
         toast(`✓ ${f.name} uploaded!`, 'var(--green)');
         logActivity('file_upload', `File uploaded: ${f.name}`);
         continue;
@@ -1165,14 +1221,15 @@
         const path = `orders/${safeOrderId}/${safeName}`;
         const { error } = await sb().storage.from('order-files').upload(path, f, { upsert: true });
         if (error) throw error;
+        /* Create default access record — hidden from client until admin enables */
+        await saveFileMeta(path, { is_visible: false, download_allowed: true, client_notified: false });
         placeholder.remove();
-        toast(`✓ ${f.name} uploaded!`, 'var(--green)');
+        toast(`✓ ${f.name} uploaded! Set Client Access to show it.`, 'var(--green)');
         logActivity('file_upload', `File uploaded: ${f.name}`);
       } catch(e) {
-        const msg = e.message || '';
-        const hint = msg.includes('Bucket not found') ? ' — Supabase এ "order-files" bucket create করো' : '';
-        placeholder.innerHTML = `<div style="color:var(--red);font-size:12px;padding:8px 0">⚠ Upload failed: ${esc(f.name)}${hint}</div>`;
-        toast(`⚠ Upload failed: ${f.name}`, 'var(--red)');
+        console.error('Upload error:', e);
+        placeholder.innerHTML = `<div style="color:var(--red);font-size:12px;padding:8px 0">⚠ Upload failed: ${esc(f.name)} — ${esc(e.message||'Unknown error')}</div>`;
+        toast(`⚠ Upload failed: ${f.name} — ${e.message||''}`, 'var(--red)');
       }
     }
     await loadFiles();
@@ -1193,34 +1250,91 @@
     } catch(e) { toast('⚠ Download failed', 'var(--red)'); }
   };
 
-  window.odpToggleLock = function(btn) {
-    const icon = btn.querySelector('i');
-    const locked = icon.classList.contains('ti-lock');
-    icon.className = locked ? 'ti ti-lock-open' : 'ti ti-lock';
-    btn.style.color = locked ? '' : 'var(--yellow)';
-    toast(locked ? 'File unlocked' : 'File locked', locked ? 'var(--muted)' : 'var(--yellow)');
+  /* Toggle client visibility (Viewable/Hidden) */
+  window.odpToggleVisibility = async function(path, name, checkbox) {
+    const isVisible = checkbox.checked;
+    const row = checkbox.closest('.odp-file-row');
+    const badge = row ? row.querySelector('.odp-access-badge') : null;
+
+    /* Optimistic UI */
+    if (badge) {
+      badge.className = 'odp-access-badge ' + (isVisible ? 'viewable' : 'hidden');
+      badge.textContent = isVisible ? '● Viewable' : '○ Hidden';
+    }
+    if (row) {
+      row.classList.toggle('client-hidden', !isVisible);
+      row.dataset.vis = isVisible;
+    }
+
+    await saveFileMeta(path, { is_visible: isVisible });
+    toast(isVisible ? `✓ "${name}" is now visible to client` : `"${name}" hidden from client`, isVisible ? 'var(--green)' : 'var(--muted)');
   };
 
-  window.odpToggleVisibility = function(btn) {
-    const icon = btn.querySelector('i');
+  /* Toggle download lock */
+  window.odpToggleDownload = async function(path, btn) {
     const row = btn.closest('.odp-file-row');
-    const badge = row ? row.querySelector('.odp-vis-badge') : null;
-    const hidden = icon.classList.contains('ti-eye-off');
-    icon.className = hidden ? 'ti ti-eye' : 'ti ti-eye-off';
-    if (badge) {
-      badge.className = hidden ? 'odp-vis-badge vis-client' : 'odp-vis-badge vis-admin';
-      badge.textContent = hidden ? 'Client visible' : 'Admin only';
+    const currentlyAllowed = row ? row.dataset.dl === 'true' : true;
+    const nowAllowed = !currentlyAllowed;
+
+    /* Optimistic UI */
+    btn.classList.toggle('locked-dl', !nowAllowed);
+    btn.title = nowAllowed ? 'Download allowed — click to lock' : 'Download locked — click to unlock';
+    btn.querySelector('i').className = 'ti ' + (nowAllowed ? 'ti-lock-open' : 'ti-lock');
+    if (row) row.dataset.dl = nowAllowed;
+
+    await saveFileMeta(path, { download_allowed: nowAllowed });
+    toast(nowAllowed ? '🔓 Download unlocked for client' : '🔒 Download locked for client', nowAllowed ? 'var(--green)' : 'var(--yellow)');
+  };
+
+  /* Send notification to client about new file */
+  window.odpNotifyClient = async function(path, name, btn) {
+    if (!sb() || !isRealUUID(_currentOrderId)) {
+      toast('⚠ Cannot send notification (no Supabase)', 'var(--red)');
+      return;
     }
-    toast(hidden ? 'Visible to client' : 'Hidden from client', hidden ? 'var(--green)' : 'var(--muted)');
+    try {
+      /* Insert notification into client_notifications table */
+      await sb().from('client_notifications').insert({
+        order_id: _currentOrderId,
+        type: 'file_uploaded',
+        message: `A new file "${name}" is available for your order.`,
+        storage_path: path,
+        is_read: false,
+        created_at: new Date().toISOString()
+      });
+      /* Mark as notified in file meta */
+      await saveFileMeta(path, { client_notified: true });
+
+      /* Update UI badge */
+      const row = btn.closest('.odp-file-row');
+      const nameCell = row ? row.querySelector('.odp-file-name-cell') : null;
+      if (nameCell && !nameCell.querySelector('.odp-notif-sent')) {
+        nameCell.insertAdjacentHTML('beforeend', '<span class="odp-notif-sent">✓ Notified</span>');
+      }
+      btn.style.color = 'var(--green)';
+      toast(`✓ Client notified about "${name}"`, 'var(--green)');
+    } catch(e) {
+      console.error('[Notify] error:', e);
+      toast('⚠ Notification failed: ' + (e.message || 'Unknown'), 'var(--red)');
+    }
   };
 
   window.odpDeleteFile = async function(path, btn) {
     if (!confirm('Delete this file? This cannot be undone.')) return;
     const row = btn.closest('.odp-file-row');
     if (sb() && path) {
-      try { await sb().storage.from('order-files').remove([path]); } catch(e) {}
+      try {
+        await sb().storage.from('order-files').remove([path]);
+        /* Also remove access meta */
+        if (isRealUUID(_currentOrderId)) {
+          await sb().from('order_file_access').delete()
+            .eq('order_id', _currentOrderId)
+            .eq('storage_path', path);
+        }
+      } catch(e) { console.warn('[Files] delete error', e); }
     }
     if (row) row.remove();
+    delete _fileMetaCache[path];
     toast('File deleted', 'var(--red)');
   };
 

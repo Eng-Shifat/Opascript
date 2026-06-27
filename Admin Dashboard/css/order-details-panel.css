@@ -43,7 +43,6 @@
   background: var(--card);
   flex-shrink: 0;
   min-height: 52px;
-  width: 100%;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -2459,7 +2458,7 @@ body.odp-panel-open {
 
 /* ══ ORDER SUMMARY PANE ══ */
 .odp-summ-grid { display:grid; grid-template-columns:1fr 360px; gap:16px; align-items:start; }
-.odp-summ-rows { display:flex; flex-direction:column; gap:0; }
+.odp-summ-rows { display:flex; flex-direction:column; }
 .odp-summ-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
 .odp-summ-row:last-child { border-bottom:none; }
 .odp-summ-icon-wrap { width:28px; height:28px; background:rgba(108,99,255,0.1); border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--accent); font-size:13px; }
@@ -2470,3 +2469,162 @@ body.odp-panel-open {
 .odp-summ-status-sub { font-size:11px; color:var(--muted); }
 .odp-summ-client-row { display:flex; align-items:center; gap:10px; padding:4px 0; }
 @media (max-width:900px) { .odp-summ-grid { grid-template-columns:1fr; } }
+
+/* ══════════════════════════════════════════════════════════
+   FILE MANAGEMENT — Secure Access Control (Admin)
+   Added: visibility toggle, download lock, blur security,
+   Client Access column, notification badge
+══════════════════════════════════════════════════════════ */
+
+/* Updated file row grid — 7 columns with Client Access */
+.odp-file-row {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) 46px 70px 95px 58px 105px 108px !important;
+  align-items: center;
+  gap: 16px;
+  padding: 11px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 12px;
+  transition: background 0.15s;
+  min-width: 0;
+  overflow: hidden;
+}
+.odp-file-row:hover { background: rgba(255,255,255,0.02); }
+.odp-file-row-head {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) 46px 70px 95px 58px 105px 108px !important;
+  gap: 16px;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.3);
+  padding: 0 4px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  min-width: 0;
+}
+
+/* Client Access toggle pill */
+.odp-access-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.odp-access-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+  cursor: default;
+}
+.odp-access-badge.viewable {
+  background: rgba(34,197,94,0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.2);
+}
+.odp-access-badge.hidden {
+  background: rgba(239,68,68,0.1);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+/* Mini toggle for visibility */
+.odp-mini-toggle {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.odp-mini-toggle input { display: none; }
+.odp-mini-track {
+  position: absolute; inset: 0;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.2s, border-color 0.2s;
+}
+.odp-mini-toggle input:checked + .odp-mini-track {
+  background: rgba(34,197,94,0.5);
+  border-color: rgba(34,197,94,0.6);
+}
+.odp-mini-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  transition: transform 0.2s, background 0.2s;
+}
+.odp-mini-toggle input:checked ~ .odp-mini-thumb {
+  transform: translateX(16px);
+  background: #fff;
+}
+
+/* Download lock icon button */
+.odp-file-action-btn.locked-dl {
+  color: var(--yellow) !important;
+  border-color: rgba(251,191,36,0.3) !important;
+  background: rgba(251,191,36,0.08) !important;
+}
+.odp-file-action-btn.locked-dl:hover {
+  background: rgba(251,191,36,0.15) !important;
+}
+
+/* Blur security overlay for hidden files on client side */
+.odp-file-row.client-hidden .odp-file-name-cell span {
+  filter: blur(4px);
+  user-select: none;
+  pointer-events: none;
+}
+.odp-file-row.client-hidden {
+  opacity: 0.5;
+}
+
+/* Notification sent badge */
+.odp-notif-sent {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(108,99,255,0.15);
+  color: var(--accent2);
+  border: 1px solid rgba(108,99,255,0.2);
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Upload zone tabs: All Files / Client Uploads / Writer Uploads */
+.odp-file-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.odp-file-tab {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.odp-file-tab.active,
+.odp-file-tab:hover {
+  background: rgba(108,99,255,0.12);
+  color: var(--accent2);
+  border-color: rgba(108,99,255,0.25);
+}
+
+/* File section header info note */
+.odp-file-note {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 10px;
+}
+.odp-file-note i { color: var(--accent2); margin-right: 4px; }
