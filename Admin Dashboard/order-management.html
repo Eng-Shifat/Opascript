@@ -249,6 +249,14 @@
 <script src="js/topbar.js" data-title="Orders Management" data-sub=""></script>
 <script src="js/sidebar.js" data-page="orders"></script>
 <script src="js/order-management.js"></script>
-<script src="js/order-details-panel.js"></script>
+<!-- ODP: order-details-panel.js MUST load first (shared state & helpers) -->
+<script src="js/odp/order-details-panel.js"></script>
+<script src="js/odp/odp-build.js"></script>
+<script src="js/odp/odp-overview.js"></script>
+<script src="js/odp/odp-payments.js"></script>
+<script src="js/odp/odp-files.js"></script>
+<script src="js/odp/odp-messages.js"></script>
+<script src="js/odp/odp-status.js"></script>
+<script src="js/odp/odp-activity.js"></script>
 </body>
 </html>

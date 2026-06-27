@@ -221,16 +221,23 @@
 
 /* ── TABS ── */
 .odp-tabs-wrap {
-  padding: 12px 20px 0;
-  border-bottom: 1px solid var(--border);
+  margin: 0 20px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
   flex-shrink: 0;
-  background: var(--bg);
+  background: var(--card);
+  overflow: hidden;
 }
 
 .odp-tabs {
   display: flex;
   gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.odp-tabs::-webkit-scrollbar { display: none; }
 
 .odp-tab {
   display: flex;
@@ -1617,12 +1624,6 @@ a.odp-cc-detail-val:hover { text-decoration: underline; }
 .odp-meta-amount { color: var(--accent2) !important; font-weight: 700; }
 
 /* Tabs — pill style */
-.odp-tabs-wrap {
-  padding: 0 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--card);
-  flex-shrink: 0;
-}
 .odp-tabs {
   display: flex; gap: 2px;
   overflow-x: auto;
