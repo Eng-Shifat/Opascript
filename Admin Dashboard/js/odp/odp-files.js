@@ -315,6 +315,21 @@ window._renderFileRow = function(f) {
     }
 
     await window._saveFileMeta(path, { is_visible: isVisible });
+
+    /* Auto-notify client when file becomes visible */
+    if (isVisible && window._sb() && window._isRealUUID(window._currentOrderId)) {
+      try {
+        await window._sb().from('client_notifications').insert({
+          order_id:   window._currentOrderId,
+          client_id:  window._currentOrder?.clientId || null,
+          type:       'file_uploaded',
+          message:    `📎 নতুন file দেখা যাচ্ছে: "${name}"`,
+          is_read:    false,
+          created_at: new Date().toISOString(),
+        });
+      } catch(_ne) {}
+    }
+
     window._toast(isVisible ? `✓ "${name}" is now visible to client` : `"${name}" hidden from client`, isVisible ? 'var(--green)' : 'var(--muted)');
   };
 
@@ -331,6 +346,22 @@ window._renderFileRow = function(f) {
     if (row) row.dataset.dl = nowAllowed;
 
     await window._saveFileMeta(path, { download_allowed: nowAllowed });
+
+    /* Notify client when download is unlocked */
+    if (nowAllowed && window._sb() && window._isRealUUID(window._currentOrderId)) {
+      const fileName = path.split('/').pop() || 'file';
+      try {
+        await window._sb().from('client_notifications').insert({
+          order_id:   window._currentOrderId,
+          client_id:  window._currentOrder?.clientId || null,
+          type:       'file_uploaded',
+          message:    `🔓 "${fileName}" এখন download করা যাবে।`,
+          is_read:    false,
+          created_at: new Date().toISOString(),
+        });
+      } catch(_ne) {}
+    }
+
     window._toast(nowAllowed ? '🔓 Download unlocked for client' : '🔒 Download locked for client', nowAllowed ? 'var(--green)' : 'var(--yellow)');
   };
 
@@ -342,6 +373,9 @@ window._renderFileRow = function(f) {
     }
     try {
       /* Insert notification into client_notifications table */
+
+
+  try {
       await window._sb().from('client_notifications').insert({
         order_id: window._currentOrderId,
         type: 'file_uploaded',
@@ -350,6 +384,9 @@ window._renderFileRow = function(f) {
         is_read: false,
         created_at: new Date().toISOString()
       });
+
+
+  } catch(_ne) {}
       /* Mark as notified in file meta */
       await window._saveFileMeta(path, { client_notified: true });
 

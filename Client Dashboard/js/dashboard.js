@@ -53,6 +53,7 @@ async function checkSession() {
   const { data:{ session } } = await sb.auth.getSession();
   if (!session) { window.location.href = LOGIN_PATH; return; }
   currentUser = session.user;
+  window.currentUser = currentUser; /* expose for cd-topbar.js */
 
   const { data:client } = await sb.from('clients').select('*').eq('id',currentUser.id).single();
   if (!client) {
@@ -777,6 +778,53 @@ function showPage(pageId,clickedItem) {
 
 
 /* ── PROTECTED FILE VIEWER ──────────────────────────────────── */
+/* ── PDF.js Canvas Renderer ───────────────────────────────────── */
+async function renderPdfToCanvas(url) {
+  const container = document.getElementById('viewerPdfCanvas');
+  if (!container) return;
+  container.innerHTML = '<div style="color:#94a3b8;padding:40px;text-align:center;font-family:Sora,sans-serif;">Loading PDF...</div>';
+  container.style.display = 'block';
+
+  /* Load PDF.js from CDN if not already loaded */
+  if (!window.pdfjsLib) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  try {
+    const pdf = await window.pdfjsLib.getDocument({ url, withCredentials: false }).promise;
+    container.innerHTML = '';
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1.6 });
+
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'margin-bottom:8px;border-radius:6px;overflow:hidden;line-height:0;';
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = viewport.width;
+      canvas.height = viewport.height;
+      canvas.style.cssText = 'width:100%;display:block;pointer-events:none;';
+      canvas.setAttribute('draggable', 'false');
+
+      wrapper.appendChild(canvas);
+      container.appendChild(wrapper);
+
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    }
+  } catch(err) {
+    container.innerHTML = '<div style="color:#ef4444;padding:40px;text-align:center;font-family:Sora,sans-serif;">⚠ PDF load হয়নি। Please try again.</div>';
+    console.error('[PDF.js]', err);
+  }
+}
+
 window.openFileViewer = async function(storagePath, fileName, dlAllowed) {
   const overlay   = document.getElementById('fileViewerOverlay');
   const frame     = document.getElementById('viewerFrame');
@@ -809,12 +857,20 @@ window.openFileViewer = async function(storagePath, fileName, dlAllowed) {
   /* Block keyboard shortcuts */
   window._viewerKeyHandler = function(e) {
     const k = e.key?.toLowerCase();
-    /* Block: Ctrl+S, Ctrl+P, Ctrl+Shift+I, PrtScn, F12 */
-    if ((e.ctrlKey || e.metaKey) && ['s','p','u'].includes(k)) { e.preventDefault(); e.stopPropagation(); }
+    /* Block: Ctrl+S, Ctrl+P, Ctrl+U, Ctrl+C, Ctrl+A, PrtScn, F12 */
+    if ((e.ctrlKey || e.metaKey) && ['s','p','u','c','a'].includes(k)) { e.preventDefault(); e.stopPropagation(); }
     if (k === 'printscreen') { e.preventDefault(); }
     if (k === 'f12') { e.preventDefault(); }
   };
   document.addEventListener('keydown', window._viewerKeyHandler, true);
+
+  /* Block right-click context menu */
+  window._viewerContextHandler = function(e) { e.preventDefault(); };
+  overlay.addEventListener('contextmenu', window._viewerContextHandler);
+
+  /* Block copy event */
+  window._viewerCopyHandler = function(e) { e.preventDefault(); };
+  overlay.addEventListener('copy', window._viewerCopyHandler);
 
   /* Get 5-min signed URL — short expiry so URL can't be reused */
   try {
@@ -828,17 +884,35 @@ window.openFileViewer = async function(storagePath, fileName, dlAllowed) {
     const isImage = ['jpg','jpeg','png','gif','webp','svg'].includes(ext);
     const isPdf   = ext === 'pdf';
 
+
+
     if (isImage) {
-      /* Image: show in <img> so iframe controls are gone */
+      /* Image: show in <img> — no text to copy */
       img.src = url;
       img.style.display = 'block';
       frame.style.display = 'none';
+      const pdfCanvas = document.getElementById('viewerPdfCanvas');
+      if (pdfCanvas) pdfCanvas.style.display = 'none';
     } else if (isPdf) {
-      /* PDF: load in iframe with #toolbar=0 to hide browser toolbar */
-      frame.src = url + '#toolbar=0&navpanes=0&scrollbar=1';
+      /* PDF: render via PDF.js into canvas — no text layer, no copy */
+      frame.style.display = 'none';
+      img.style.display = 'none';
+      await renderPdfToCanvas(url);
     } else {
-      /* HTML/doc: load in iframe */
+      /* HTML/doc: load in iframe, inject no-select CSS after load */
+      const pdfCanvas = document.getElementById('viewerPdfCanvas');
+      if (pdfCanvas) pdfCanvas.style.display = 'none';
       frame.src = url;
+      frame.style.display = 'block';
+      frame.onload = function() {
+        try {
+          const style = frame.contentDocument.createElement('style');
+          style.textContent = '* { user-select: none !important; -webkit-user-select: none !important; }';
+          frame.contentDocument.head.appendChild(style);
+          frame.contentDocument.addEventListener('contextmenu', e => e.preventDefault());
+          frame.contentDocument.addEventListener('copy', e => e.preventDefault());
+        } catch(err) { /* cross-origin — silently fail */ }
+      };
     }
 
     /* Store for download button */
@@ -859,12 +933,22 @@ window.closeFileViewer = function() {
   const frame   = document.getElementById('viewerFrame');
   const img     = document.getElementById('viewerImg');
   if (overlay) { overlay.style.display = 'none'; }
-  if (frame)   { frame.src = ''; }
+  if (frame)   { frame.src = ''; frame.style.display = 'none'; }
   if (img)     { img.src = ''; img.style.display = 'none'; }
+  const pdfCanvas = document.getElementById('viewerPdfCanvas');
+  if (pdfCanvas) { pdfCanvas.innerHTML = ''; pdfCanvas.style.display = 'none'; }
   document.body.style.overflow = '';
   if (window._viewerKeyHandler) {
     document.removeEventListener('keydown', window._viewerKeyHandler, true);
     window._viewerKeyHandler = null;
+  }
+  if (overlay && window._viewerContextHandler) {
+    overlay.removeEventListener('contextmenu', window._viewerContextHandler);
+    window._viewerContextHandler = null;
+  }
+  if (overlay && window._viewerCopyHandler) {
+    overlay.removeEventListener('copy', window._viewerCopyHandler);
+    window._viewerCopyHandler = null;
   }
   window._viewerCurrentUrl = null;
 };

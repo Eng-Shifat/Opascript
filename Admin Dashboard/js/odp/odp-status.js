@@ -96,6 +96,18 @@
         sent_at:    new Date().toISOString(),
       });
 
+      /* 3b. Insert into client_notifications for bell icon */
+      try {
+        await window._sb().from('client_notifications').insert({
+          order_id:   window._currentOrderId,
+          client_id:  window._currentOrder?.clientId || null,
+          type:       'status_change',
+          message:    `${emoji} আপনার অর্ডারের status update হয়েছে: "${label}"`,
+          is_read:    false,
+          created_at: new Date().toISOString(),
+        });
+      } catch(_ne) {}
+
       /* 4. Log in activity */
       window._logActivity('status', `Status changed to: ${label}`);
 
@@ -132,6 +144,14 @@
           from_admin: true,
           read:       false,
           sent_at:    new Date().toISOString(),
+        });
+        await window._sb().from('client_notifications').insert({
+          order_id:   window._currentOrderId,
+          client_id:  window._currentOrder?.clientId || null,
+          type:       'status_change',
+          message:    `📌 Milestone update: আপনার thesis এখন "${val}" পর্যায়ে আছে।`,
+          is_read:    false,
+          created_at: new Date().toISOString(),
         });
       } catch(e) {}
     }

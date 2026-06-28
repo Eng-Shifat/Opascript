@@ -35,7 +35,6 @@ function cdSyncTopbarAvatar() {
   const sidebarAv = document.getElementById('sbAvatar');
   if (!sidebarAv) return;
 
-  // Copy avatar content (img or initials)
   if (sidebarAv.querySelector('img')) {
     const img = sidebarAv.querySelector('img');
     topbarAv.innerHTML = `<img src="${img.src}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
@@ -44,9 +43,6 @@ function cdSyncTopbarAvatar() {
   }
 }
 
-/* Call after user loads */
-const _origUpdateSidebarUser = window.updateSidebarUser;
-// Patch: will be called once sb-avatar is set
 const _cdAvObserver = new MutationObserver(() => cdSyncTopbarAvatar());
 document.addEventListener('DOMContentLoaded', () => {
   const av = document.getElementById('sbAvatar');
@@ -76,41 +72,32 @@ document.addEventListener('click', (e) => {
 async function cdLoadNotifications() {
   const list = document.getElementById('cdNotifList');
   if (!list) return;
-
-  // sb and currentUser come from dashboard.js global scope
   if (typeof sb === 'undefined' || !window.currentUser) return;
 
-  try {
-    const { data, error } = await sb
-      .from('client_notifications')
-      .select('*')
-      .eq('order_id', window.currentUser?.id) // fallback — adjust if schema differs
-      .order('created_at', { ascending: false })
-      .limit(20);
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:#64748b;font-size:13px;font-family:Sora,sans-serif;">Loading...</div>';
 
-    // Try alternate query — by matching orders of this client
-    const { data: orderIds } = await sb
+  try {
+    /* Step 1: get all order ids for this client */
+    const { data: orders, error: oErr } = await sb
       .from('orders')
       .select('id')
       .eq('client_id', window.currentUser.id);
 
-    if (!orderIds || !orderIds.length) {
-      cdRenderNotifEmpty(list);
-      return;
-    }
+    if (oErr) throw oErr;
+    if (!orders || !orders.length) { cdRenderNotifEmpty(list); return; }
 
-    const ids = orderIds.map(o => o.id);
-    const { data: notifs } = await sb
+    const ids = orders.map(o => o.id);
+
+    /* Step 2: fetch notifications matching those order ids */
+    const { data: notifs, error: nErr } = await sb
       .from('client_notifications')
       .select('*')
       .in('order_id', ids)
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(15);
 
-    if (!notifs || !notifs.length) {
-      cdRenderNotifEmpty(list);
-      return;
-    }
+    if (nErr) throw nErr;
+    if (!notifs || !notifs.length) { cdRenderNotifEmpty(list); return; }
 
     cdRenderNotifications(list, notifs);
     cdUpdateNotifBadge(notifs);
@@ -130,20 +117,28 @@ function cdRenderNotifEmpty(list) {
 
 function cdRenderNotifications(list, notifs) {
   const iconMap = {
-    file_uploaded: { cls: 'file', icon: '📎' },
-    status_change: { cls: 'status', icon: '✅' },
-    message: { cls: 'message', icon: '💬' },
+    file_uploaded:    { cls: 'file',    icon: '📎' },
+    status_change:    { cls: 'status',  icon: '✅' },
+    message:          { cls: 'message', icon: '💬' },
+    payment_approved: { cls: 'status',  icon: '💰' },
+    payment_rejected: { cls: 'file',    icon: '❌' },
   };
 
   list.innerHTML = notifs.map(n => {
     const info = iconMap[n.type] || { cls: 'status', icon: '🔔' };
-    const time = n.created_at ? cdTimeAgo(n.created_at) : '';
+    const timeAgo = n.created_at ? cdTimeAgo(n.created_at) : '';
+    const timeExact = n.created_at
+      ? new Date(n.created_at).toLocaleString('en-GB', {
+          day: '2-digit', month: 'short', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', hour12: true
+        })
+      : '';
     return `
       <div class="cd-notif-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" onclick="cdMarkRead('${n.id}',this)">
         <div class="cd-notif-icon ${info.cls}">${info.icon}</div>
         <div class="cd-notif-content">
           <div class="cd-notif-msg">${_esc(n.message || '')}</div>
-          <div class="cd-notif-time">${time}</div>
+          <div class="cd-notif-time" title="${timeExact}">${timeAgo}${timeExact ? ' · ' + timeExact : ''}</div>
         </div>
       </div>`;
   }).join('');
@@ -167,9 +162,9 @@ window.cdMarkRead = async function(id, el) {
 window.cdMarkAllRead = async function() {
   if (typeof sb === 'undefined' || !window.currentUser) return;
   try {
-    const { data: orderIds } = await sb.from('orders').select('id').eq('client_id', window.currentUser.id);
-    if (!orderIds?.length) return;
-    const ids = orderIds.map(o => o.id);
+    const { data: orders } = await sb.from('orders').select('id').eq('client_id', window.currentUser.id);
+    if (!orders?.length) return;
+    const ids = orders.map(o => o.id);
     await sb.from('client_notifications').update({ is_read: true }).in('order_id', ids).eq('is_read', false);
     document.querySelectorAll('.cd-notif-item.unread').forEach(el => el.classList.remove('unread'));
     const dot = document.getElementById('cdNotifDot');
@@ -180,10 +175,14 @@ window.cdMarkAllRead = async function() {
 async function cdCheckUnreadCount() {
   if (typeof sb === 'undefined' || !window.currentUser) return;
   try {
-    const { data: orderIds } = await sb.from('orders').select('id').eq('client_id', window.currentUser.id);
-    if (!orderIds?.length) return;
-    const ids = orderIds.map(o => o.id);
-    const { count } = await sb.from('client_notifications').select('id', { count: 'exact', head: true }).in('order_id', ids).eq('is_read', false);
+    const { data: orders } = await sb.from('orders').select('id').eq('client_id', window.currentUser.id);
+    if (!orders?.length) return;
+    const ids = orders.map(o => o.id);
+    const { count } = await sb
+      .from('client_notifications')
+      .select('id', { count: 'exact', head: true })
+      .in('order_id', ids)
+      .eq('is_read', false);
     const dot = document.getElementById('cdNotifDot');
     if (dot) dot.style.display = (count > 0) ? 'block' : 'none';
   } catch(e) {}
@@ -192,17 +191,24 @@ async function cdCheckUnreadCount() {
 /* ── Realtime: new notifications ──────────────────────── */
 function cdSetupNotifRealtime() {
   if (typeof sb === 'undefined' || !window.currentUser) return;
-  sb.channel('cd-notifs')
+  sb.channel('cd-notifs-' + window.currentUser.id)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'client_notifications' },
       async (payload) => {
-        // Check if this notification belongs to current client's order
-        const { data: order } = await sb.from('orders').select('client_id').eq('id', payload.new.order_id).single();
-        if (order?.client_id === window.currentUser.id) {
-          const dot = document.getElementById('cdNotifDot');
-          if (dot) dot.style.display = 'block';
-          // If dropdown is open, refresh it
-          if (_cdNotifOpen) cdLoadNotifications();
-        }
+        /* Verify this notification belongs to current client's order */
+        const { data: order } = await sb
+          .from('orders')
+          .select('client_id')
+          .eq('id', payload.new.order_id)
+          .single();
+
+        if (order?.client_id !== window.currentUser.id) return;
+
+        /* Show dot */
+        const dot = document.getElementById('cdNotifDot');
+        if (dot) dot.style.display = 'block';
+
+        /* If dropdown is open, refresh it */
+        if (_cdNotifOpen) cdLoadNotifications();
       })
     .subscribe();
 }
@@ -224,7 +230,6 @@ function cdTimeAgo(isoStr) {
 
 /* ── Init after auth ──────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Wait for currentUser to be set, then init
   const waitForUser = setInterval(() => {
     if (window.currentUser) {
       clearInterval(waitForUser);

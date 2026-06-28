@@ -102,6 +102,19 @@ window._renderFallbackMessages = function() {
         sent_at: new Date().toISOString(),
       });
       if (error) throw error;
+
+      /* Insert into client_notifications for bell icon */
+      try {
+        await window._sb().from('client_notifications').insert({
+          order_id:   window._currentOrderId,
+          client_id:  window._currentOrder?.clientId || null,
+          type:       'message',
+          message:    `💬 Admin থেকে নতুন message: "${text.substring(0, 80)}${text.length > 80 ? '…' : ''}"`,
+          is_read:    false,
+          created_at: new Date().toISOString(),
+        });
+      } catch(_ne) {}
+
       const notifyMsg = notify && notify.checked ? 'Message sent + email notification!' : 'Message sent!';
       window._toast('✓ ' + notifyMsg, 'var(--accent)');
     } catch(e) {
