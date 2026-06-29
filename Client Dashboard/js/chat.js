@@ -42,7 +42,7 @@ async function loadOrdersIntoSelect(userId) {
 
   const { data: orders, error } = await sb
     .from('orders')
-    .select('id, title, service_type, status')
+    .select('id, title, service_type, status, order_number')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -52,7 +52,8 @@ async function loadOrdersIntoSelect(userId) {
   orders.forEach(o => {
     const opt = document.createElement('option');
     opt.value = o.id;
-    opt.textContent = `${o.title || o.service_type || 'Order'} — ${o.status || ''}`;
+    opt.dataset.orderNumber = o.order_number || '';
+    opt.textContent = `${o.order_number ? '#' + o.order_number + ' — ' : ''}${o.title || o.service_type || 'Order'}`;
     sel.appendChild(opt);
   });
 
@@ -104,7 +105,12 @@ function showChatPrompt() {
 function showChatBox(orderId) {
   document.getElementById('chatSelectPrompt').style.display = 'none';
   document.getElementById('chatBox').style.display = 'flex';
-  document.getElementById('chatOrderId').textContent = `#${orderId.substring(0, 8)}`;
+
+  /* order_number খোঁজো selected option থেকে */
+  const sel = document.getElementById('chatOrderSelect');
+  const selectedOpt = sel?.querySelector(`option[value="${orderId}"]`);
+  const orderNum = selectedOpt?.dataset.orderNumber;
+  document.getElementById('chatOrderId').textContent = orderNum ? `#SCR-${orderNum}` : `#${orderId.substring(0, 8)}`;
 }
 
 /* ── Load chat for an order ────────────────────────────────────────────── */

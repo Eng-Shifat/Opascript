@@ -70,12 +70,15 @@ input, select, textarea { font-family: inherit; }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px 16px;
+  height: 56px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--border);
   font-size: 16px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.3px;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .sb-logo {
@@ -208,9 +211,12 @@ input, select, textarea { font-family: inherit; }
   margin-left: var(--sidebar-w);
   width: calc(100% - var(--sidebar-w));
   min-height: 100vh;
+  height: 100vh;
   background: var(--bg-base);
   overflow-x: hidden;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .page {
@@ -222,6 +228,13 @@ input, select, textarea { font-family: inherit; }
   min-width: 0;
 }
 .page.active { display: flex; }
+
+#page-messages.active {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  padding-bottom: 0;
+}
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -676,7 +689,8 @@ input, select, textarea { font-family: inherit; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  min-height: 480px;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   max-width: 100%;
@@ -977,17 +991,19 @@ input, select, textarea { font-family: inherit; }
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 9px;
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
+  padding: 10px;
+  background: rgba(37,99,235,0.08);
+  color: var(--accent-light);
+  border: 1px solid rgba(37,99,235,0.3);
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   width: 100%;
   transition: all .2s;
+  cursor: pointer;
 }
-.profile-pass-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+.profile-pass-btn:hover { background: rgba(37,99,235,0.18); border-color: var(--accent-light); color: #fff; }
+.profile-pass-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .profile-msg {
   font-size: 12px;
@@ -1083,7 +1099,7 @@ input, select, textarea { font-family: inherit; }
 @media (max-width: 680px) {
   :root { --sidebar-w: 0px; }
   .sidebar { display: none; }
-  .db-main { margin-left: 0; padding-bottom: 70px; }
+  .db-main { margin-left: 0; padding-bottom: 70px; width: 100%; }
   .page { padding: 16px; }
   .stat-row { grid-template-columns: repeat(2, 1fr); }
   .cd-blocks { gap: 5px; }
@@ -1092,7 +1108,7 @@ input, select, textarea { font-family: inherit; }
 
   .order-select { min-width: unset; width: 100%; }
   .page-header { flex-wrap: wrap; gap: 8px; }
-  .chat-container { min-height: 360px; }
+  .chat-container { min-height: 0; flex: 1; }
   .chat-box { height: 360px; }
 }
 

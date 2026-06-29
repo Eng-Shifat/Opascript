@@ -478,7 +478,7 @@ function populateChatOrderSelect() {
   select.innerHTML='<option value="">Order বেছে নিন</option>';
   allOrders.forEach(order=>{
     const opt=document.createElement('option');
-    opt.value=order.id; opt.textContent=`#SCR-${String(order.id).slice(-6).toUpperCase()} — ${truncate(order.title,30)}`;
+    opt.value=order.id; opt.textContent=`${order.order_number ? '#SCR-'+order.order_number : '#SCR-'+String(order.id).slice(-6).toUpperCase()} — ${truncate(order.title,30)}`;
     select.appendChild(opt);
   });
 }
@@ -486,7 +486,7 @@ function populateChatOrderSelect() {
 async function loadChat(orderId) {
   document.getElementById('chatSelectPrompt').style.display='none';
   document.getElementById('chatBox').style.display='flex';
-  document.getElementById('chatOrderId').textContent=`#SCR-${String(orderId).slice(-6).toUpperCase()}`;
+  document.getElementById('chatOrderId').textContent=`#SCR-${allOrders.find(o=>o.id===orderId)?.order_number || String(orderId).slice(-6).toUpperCase()}`;
   const body=document.getElementById('chatBody');
   const loading=document.getElementById('chatLoading');
   body.innerHTML=''; body.appendChild(loading); loading.style.display='flex';
@@ -563,12 +563,23 @@ async function changePassword() {
   if(newPass.length<8){showProfileMsg('passMsg','কমপক্ষে ৮ অক্ষর হতে হবে','error');return;}
   if(newPass!==confirm){showProfileMsg('passMsg','নতুন password মিলছে না','error');return;}
   btn.textContent='Updating...'; btn.disabled=true;
+
+  /* বর্তমান password দিয়ে re-verify */
   const {error:signInErr}=await sb.auth.signInWithPassword({email:currentUser.email,password:current});
-  if(signInErr){showProfileMsg('passMsg','বর্তমান password ভুল','error');btn.textContent='Password Update করুন';btn.disabled=false;return;}
+  if(signInErr){
+    showProfileMsg('passMsg','বর্তমান password ভুল','error');
+    btn.textContent='Password Update করুন'; btn.disabled=false;
+    return;
+  }
+
   const {error}=await sb.auth.updateUser({password:newPass});
   btn.textContent='Password Update করুন'; btn.disabled=false;
-  if(error){showProfileMsg('passMsg','Password পরিবর্তন হয়নি','error');}
-  else{setVal('pCurrentPass','');setVal('pNewPass','');setVal('pConfirmPass','');showProfileMsg('passMsg','✓ Password পরিবর্তন হয়েছে!','success');showToast('Password update হয়েছে','success');}
+  if(error){showProfileMsg('passMsg','Password পরিবর্তন হয়নি: '+error.message,'error');}
+  else{
+    setVal('pCurrentPass','');setVal('pNewPass','');setVal('pConfirmPass','');
+    showProfileMsg('passMsg','✓ Password পরিবর্তন হয়েছে!','success');
+    showToast('Password update হয়েছে','success');
+  }
 }
 
 async function uploadAvatar(e) {

@@ -165,6 +165,7 @@
 
     /* Check unread messages badge */
     loadUnreadBadge();
+    if (window.scriptoraSupabase) setupAdminPresence(window.scriptoraSupabase);
   });
 
   /* Unread message count for sidebar badge */
@@ -197,10 +198,39 @@
   window.handleAdminLogout = async function () {
     try {
       if (window.scriptoraSupabase) {
+        /* broadcast offline before sign out */
+        if (window._adminPresenceChannel) {
+          await window._adminPresenceChannel.untrack();
+        }
         await window.scriptoraSupabase.auth.signOut();
       }
     } catch(e) {}
     window.location.href = '../Login Page/login.html';
   };
+
+  /* ── Admin Presence Broadcast ──────────────────────────── */
+  function setupAdminPresence(sb) {
+    const ch = sb.channel('scriptora-admin-presence', {
+      config: { presence: { key: 'admin' } }
+    });
+
+    ch.on('presence', { event: 'sync' }, () => {})
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await ch.track({ online: true, ts: Date.now() });
+        }
+      });
+
+    window._adminPresenceChannel = ch;
+
+    /* broadcast offline on tab close/hide */
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'hidden') {
+        await ch.track({ online: false, ts: Date.now() });
+      } else {
+        await ch.track({ online: true, ts: Date.now() });
+      }
+    });
+  }
 
 })();
