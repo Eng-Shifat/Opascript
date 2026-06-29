@@ -10,17 +10,21 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 const LOGIN_PATH = '../Login page/login.html';
 
 const STEPS = [
-  { label: 'Order\nconfirmed' },
-  { label: 'Payment\nreceived' },
+  { label: 'Order\nPlaced' },
+  { label: 'Payment\nReceived' },
   { label: 'Writing\nচলছে' },
-  { label: 'Draft\nDelivery' },
-  { label: 'Final\nPayment' },
-  { label: 'File\nUnlock' },
+  { label: 'File in\nReview' },
+  { label: 'Delivery' },
+  { label: 'Completed' },
 ];
 
 const STATUS_STEP_MAP = {
-  'pending':0,'confirmed':1,'payment_done':2,
-  'writing':3,'draft_sent':4,'final_payment':5,'completed':6,
+  'pending':1, 'confirmed':1,
+  'payment_received':2, 'payment_done':2,
+  'writing':3,
+  'in_review':4, 'draft_ready':4, 'draft_sent':4,
+  'delivered':5,
+  'completed':6,
 };
 
 let currentUser=null, currentClient=null, allOrders=[], currentOrderId=null;
@@ -204,9 +208,15 @@ async function openOrderDetail(orderId) {
   currentOrderId=orderId;
   const order=allOrders.find(o=>o.id===orderId);
   if(!order) return;
+  window._openingOrderDetail = true;
   showPage('orders');
+  window._openingOrderDetail = false;
   document.getElementById('ordersListView').style.display='none';
   document.getElementById('orderDetailView').style.display='block';
+  // Hide page header and remove top padding in detail view
+  const pageHeader = document.querySelector('#page-orders .page-header');
+  if(pageHeader) pageHeader.style.display='none';
+  document.getElementById('page-orders').style.paddingTop='0';
   setText('detailTitle',order.title||'Untitled');
   setText('detailMeta',`${order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase())} · ${order.department||''} · Order: ${fmtDate(order.order_date)}`);
   const badge=getStatusBadge(order.status);
@@ -221,7 +231,19 @@ async function openOrderDetail(orderId) {
   payBadges.innerHTML='';
   if((order.advance_paid||0)>0) payBadges.innerHTML+=`<span class="pay-badge confirmed">✓ Advance paid</span>`;
   if((order.due_amount||0)>0) payBadges.innerHTML+=`<span class="pay-badge pending">✗ Due pending</span>`;
-  await loadOrderFiles(orderId,(order.due_amount||0)>0);
+  const hasDue = (order.due_amount||0) > 0;
+
+  // Due hero + warning + Pay Now
+  document.getElementById('payDueHero').style.display    = hasDue ? 'flex'  : 'none';
+  document.getElementById('payDueWarning').style.display = hasDue ? 'flex'  : 'none';
+  document.getElementById('payNowSection').style.display = hasDue ? 'block' : 'none';
+
+  // Pay Now → payment page
+  document.getElementById('payNowBtn').onclick = () => {
+    window.location.href = `../Payment page/payment.html?order_id=${orderId}`;
+  };
+
+  await loadOrderFiles(orderId, hasDue);
   await loadLatestAdminMsg(orderId);
   await checkAndShowProofSection(order);
 }
@@ -230,6 +252,15 @@ document.getElementById('backToOrders').onclick=()=>{
   document.getElementById('ordersListView').style.display='block';
   document.getElementById('orderDetailView').style.display='none';
   clearInterval(countdownTimer);
+  const pageHeader = document.querySelector('#page-orders .page-header');
+  if(pageHeader) pageHeader.style.display='';
+  document.getElementById('page-orders').style.paddingTop='';
+};
+
+/* Countdown "View Order Details" button — scrolls to detail (already on detail view) */
+const cdViewBtn = document.getElementById('cdViewOrderBtn');
+if (cdViewBtn) cdViewBtn.onclick = () => {
+  document.getElementById('orderDetailView').scrollIntoView({behavior:'smooth'});
 };
 
 function startCountdown(deadlineStr) {
@@ -247,6 +278,7 @@ function startCountdown(deadlineStr) {
     setText('cdMins',pad(m)); setText('cdSecs',pad(s));
     setText('cdDeadline',fmtDateLong(deadlineStr));
     setText('cdDaysLeft',`আর মাত্র ${d} দিন বাকি`);
+    const el2=document.getElementById('cdDaysLeft2'); if(el2) el2.textContent=d;
   }
   tick(); countdownTimer=setInterval(tick,1000);
 }
@@ -292,11 +324,14 @@ async function loadOrderFiles(orderId, hasDue) {
     }
 
     list.innerHTML = '';
-    for (const row of accessRows) {
+    const PREVIEW_LIMIT = 4;
+    const totalCount = accessRows.length;
+    const previewRows = accessRows.slice(0, PREVIEW_LIMIT);
+    for (const row of previewRows) {
       const parts = row.storage_path.split('/');
       const fileName = parts[parts.length - 1];
       const ext = fileName.split('.').pop().toUpperCase();
-      const iconCls = ext === 'PDF' ? 'fi-pdf' : 'fi-doc';
+      const iconCls = {'PDF':'fi-pdf','PNG':'fi-png','JPG':'fi-jpg','JPEG':'fi-jpeg','DOC':'fi-doc','DOCX':'fi-docx'}[ext]||'fi-doc';
       /* Download: admin manually unlock করলে সবসময় পারবে
          due=0 হলে auto-unlock হয়, কিন্তু admin manually unlock করলে due থাকলেও পারবে */
       const dlAllowed = row.download_allowed;
@@ -340,6 +375,17 @@ async function loadOrderFiles(orderId, hasDue) {
         downloadFile(btn.dataset.path, btn.dataset.name);
       });
     });
+
+    /* View All Files button */
+    const viewAllWrap = document.getElementById('filesViewAllWrap');
+    const viewAllCount = document.getElementById('filesViewAllCount');
+    if (totalCount > PREVIEW_LIMIT) {
+      viewAllWrap.style.display = 'block';
+      viewAllCount.textContent = totalCount;
+      document.getElementById('filesViewAllBtn').onclick = () => showPage('files');
+    } else {
+      viewAllWrap.style.display = 'none';
+    }
   } catch (e) {
     console.error('loadOrderFiles error:', e);
     list.innerHTML = '<div class="empty-note">Files load হয়নি</div>';
@@ -781,9 +827,13 @@ function showPage(pageId,clickedItem) {
     const m=document.querySelector(`.mbn-item[data-page="${pageId}"]`);if(m)m.classList.add('active');
   }
   if(pageId==='orders'){
-    document.getElementById('ordersListView').style.display='block';
-    document.getElementById('orderDetailView').style.display='none';
-    clearInterval(countdownTimer);
+    // Only reset to list view if not being called from openOrderDetail
+    // openOrderDetail handles its own show/hide
+    if(!window._openingOrderDetail) {
+      document.getElementById('ordersListView').style.display='block';
+      document.getElementById('orderDetailView').style.display='none';
+      clearInterval(countdownTimer);
+    }
   }
 }
 
