@@ -214,6 +214,7 @@ input, select, textarea { font-family: inherit; }
   height: 100vh;
   background: var(--bg-base);
   overflow-x: hidden;
+  overflow-y: auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -234,6 +235,11 @@ input, select, textarea { font-family: inherit; }
   height: 100%;
   overflow: hidden;
   padding-bottom: 0;
+}
+
+/* সব page scroll করবে, শুধু messages ছাড়া */
+.page.active:not(#page-messages) {
+  overflow-y: auto;
 }
 
 @keyframes fadeUp {
@@ -1110,6 +1116,22 @@ input, select, textarea { font-family: inherit; }
   .page-header { flex-wrap: wrap; gap: 8px; }
   .chat-container { min-height: 0; flex: 1; }
   .chat-box { height: 360px; }
+
+  /* Payment section mobile */
+  .pay-row { font-size: 12px; gap: 8px; }
+  .pay-row span:last-child { text-align: right; flex-shrink: 0; }
+  .detail-panel { padding: 14px; }
+  .panel-head { font-size: 10px; margin-bottom: 10px; }
+
+  /* Files mobile — button wraps, name truncates */
+  .file-item { flex-wrap: wrap; gap: 6px; }
+  .file-info { min-width: 0; }
+  .file-dl-btn, .file-unlock-btn { font-size: 10px; padding: 4px 8px; }
+  .file-name { font-size: 11px; }
+
+  /* Order detail full width, no overflow */
+  .order-detail-wrap, .detail-two-col { width: 100%; box-sizing: border-box; }
+  .order-card, .detail-panel { overflow: hidden; }
 }
 
 /* ── MOBILE BOTTOM NAV ── */
@@ -1527,7 +1549,96 @@ input, select, textarea { font-family: inherit; }
   color: #fff;
   cursor: pointer;
   flex-shrink: 0;
+  border: 2px solid transparent;
+  transition: border-color .2s;
 }
+.cd-user-menu.open .cd-topbar-avatar { border-color: #6366f1; }
+
+/* User dropdown wrapper */
+.cd-user-menu {
+  position: relative;
+}
+
+.cd-user-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 220px;
+  background: #0f1829;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  z-index: 9999;
+  overflow: hidden;
+  animation: fadeUp .15s ease both;
+}
+.cd-user-menu.open .cd-user-dropdown { display: block; }
+
+.cd-user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(99,102,241,0.06);
+  overflow: hidden;
+}
+.cd-user-dd-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.cd-user-dd-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cd-user-dd-email {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  word-break: break-all;
+  white-space: normal;
+  line-height: 1.3;
+}
+.cd-user-dd-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 4px 0;
+}
+.cd-user-dd-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  text-align: left;
+  letter-spacing: 0.01em;
+}
+.cd-user-dd-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.cd-user-dd-item.logout { color: #f87171; }
+.cd-user-dd-item.logout:hover { background: rgba(248,113,113,0.08); color: #fca5a5; }
 
 /* Adjust main content for topbar */
 .db-main { padding-top: calc(56px + 24px) !important; }

@@ -316,7 +316,7 @@ async function loadOrderFiles(orderId, hasDue) {
           ? `<button class="file-view-btn cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#6ee7b7;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>`
-          : `<span title="Download locked" style="font-size:16px;opacity:0.5;cursor:default;">🔒</span>`);
+          : `<span title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;" onclick="showPaymentDuePopup()">🔒</span>`);
 
       div.innerHTML = `
         <div class="file-icon ${iconCls}">${ext}</div>
@@ -417,7 +417,7 @@ async function loadFilesPage() {
             ? `<button class="file-view-btn cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#6ee7b7;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               </button>`
-            : `<span title="Download locked" style="font-size:16px;opacity:0.5;cursor:default;">🔒</span>`) +
+            : `<span title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;" onclick="showPaymentDuePopup()">🔒</span>`) +
           `</div>`;
         card.appendChild(item);
       }
@@ -1178,3 +1178,34 @@ async function checkAndShowProofSection(order) {
     if (btn) { btn.textContent = '💸 Proof পাঠান'; btn.disabled = false; }
   }
 }
+
+/* ── Payment Due Popup ──────────────────────────────────────────────────── */
+window.showPaymentDuePopup = function() {
+  const order = allOrders.find(o => o.id === currentOrderId);
+  if (!order) return;
+
+  const total    = order.total_price    || 0;
+  const paid     = order.advance_paid   || 0;
+  const due      = order.due_amount     || 0;
+
+  const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  setTxt('popupDueAmount', `৳${fmt(due)}`);
+  setTxt('popupTotal',     `৳${fmt(total)}`);
+  setTxt('popupPaid',      `৳${fmt(paid)}`);
+  setTxt('popupDue2',      `৳${fmt(due)}`);
+
+  const overlay = document.getElementById('paymentDueOverlay');
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+
+window.closePaymentDuePopup = function() {
+  const overlay = document.getElementById('paymentDueOverlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+};
+
+/* Close on overlay click */
+document.getElementById('paymentDueOverlay')?.addEventListener('click', function(e) {
+  if (e.target === this) closePaymentDuePopup();
+});

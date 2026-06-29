@@ -124,14 +124,6 @@ function cdRenderNotifications(list, notifs) {
     payment_rejected: { cls: 'file',    icon: '❌' },
   };
 
-  const redirectMap = {
-    file_uploaded:    'files',
-    status_change:    'orders',
-    message:          'messages',
-    payment_approved: 'payments',
-    payment_rejected: 'payments',
-  };
-
   list.innerHTML = notifs.map(n => {
     const info = iconMap[n.type] || { cls: 'status', icon: '🔔' };
     const timeAgo = n.created_at ? cdTimeAgo(n.created_at) : '';
@@ -141,10 +133,8 @@ function cdRenderNotifications(list, notifs) {
           hour: '2-digit', minute: '2-digit', hour12: true
         })
       : '';
-    const targetPage = redirectMap[n.type] || 'orders';
-    const orderId = n.order_id || '';
     return `
-      <div class="cd-notif-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" style="cursor:pointer;" onclick="cdNotifClick('${n.id}','${targetPage}','${orderId}',this)">
+      <div class="cd-notif-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" onclick="cdMarkRead('${n.id}',this)">
         <div class="cd-notif-icon ${info.cls}">${info.icon}</div>
         <div class="cd-notif-content">
           <div class="cd-notif-msg">${_esc(n.message || '')}</div>
@@ -168,24 +158,6 @@ window.cdMarkRead = async function(id, el) {
     await cdCheckUnreadCount();
   } catch(e) {}
 };
-
-/* Click notification → mark read + navigate to relevant page */
-window.cdNotifClick = async function(id, targetPage, orderId, el) {
-  await window.cdMarkRead(id, el);
-  _cdNotifOpen = false;
-  const dd = document.getElementById("cdNotifDropdown");
-  if (dd) dd.classList.remove("open");
-  if (typeof showPage === "function") {
-    showPage(targetPage);
-    if (targetPage === "messages" && orderId) {
-      setTimeout(() => {
-        const sel = document.getElementById("chatOrderSelect");
-        if (sel) { sel.value = orderId; sel.dispatchEvent(new Event("change")); }
-      }, 300);
-    }
-  }
-};
-
 
 window.cdMarkAllRead = async function() {
   if (typeof sb === 'undefined' || !window.currentUser) return;
@@ -266,4 +238,61 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(cdSyncTopbarAvatar, 500);
     }
   }, 300);
+});
+
+/* ── User Menu Dropdown ───────────────────────────────────────────────────── */
+let _cdUserMenuOpen = false;
+
+window.cdToggleUserMenu = function() {
+  _cdUserMenuOpen = !_cdUserMenuOpen;
+  const menu = document.getElementById('cdUserMenu');
+  if (_cdUserMenuOpen) {
+    menu.classList.add('open');
+    cdPopulateUserDropdown();
+  } else {
+    menu.classList.remove('open');
+  }
+};
+
+function cdPopulateUserDropdown() {
+  const user = window.currentUser;
+  const client = window.currentClient;
+  if (!user) return;
+
+  const name = client?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+  const initials = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+
+  const ddAvatar = document.getElementById('cdUserDdAvatar');
+  const ddName   = document.getElementById('cdUserDdName');
+  const ddEmail  = document.getElementById('cdUserDdEmail');
+
+  if (ddAvatar) ddAvatar.textContent = initials;
+  if (ddName)   ddName.textContent   = name;
+  if (ddEmail)  ddEmail.textContent  = user.email || '';
+}
+
+window.cdUserMenuNav = function(page) {
+  _cdUserMenuOpen = false;
+  document.getElementById('cdUserMenu')?.classList.remove('open');
+  if (page === 'home') {
+    window.location.href = '../../index.html';
+    return;
+  }
+  if (typeof showPage === 'function') showPage(page);
+};
+
+window.cdUserLogout = async function() {
+  try {
+    if (window.sb) await window.sb.auth.signOut();
+  } catch(e) {}
+  window.location.href = '../Login Page/login.html';
+};
+
+/* Close dropdown when clicking outside */
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('cdUserMenu');
+  if (menu && !menu.contains(e.target) && _cdUserMenuOpen) {
+    _cdUserMenuOpen = false;
+    menu.classList.remove('open');
+  }
 });
