@@ -492,7 +492,7 @@ input, select, textarea { font-family: inherit; }
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 18px 24px 20px;
+  padding: 12px 20px 14px;
   margin-top: 14px;
   margin-bottom: 14px;
 }
@@ -501,7 +501,7 @@ input, select, textarea { font-family: inherit; }
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: .1em;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 /* Detail panels */
@@ -1994,7 +1994,7 @@ input, select, textarea { font-family: inherit; }
   color: var(--text-muted) !important;
   text-align: center !important;
   margin-top: 8px !important;
-  max-width: 64px !important;
+  white-space: nowrap !important;
   line-height: 1.35 !important;
 }
 .step-label.done {

@@ -19,11 +19,17 @@ const STEPS = [
 ];
 
 const STATUS_STEP_MAP = {
-  'pending':1, 'confirmed':1,
+  /* Step 1 — Order Placed */
+  'pending':1, 'confirmed':1, 'hold':1,
+  /* Step 2 — Payment Received */
   'payment_received':2, 'payment_done':2,
-  'writing':3,
-  'in_review':4, 'draft_ready':4, 'draft_sent':4,
+  /* Step 3 — Writing চলছে */
+  'writing':3, 'in_progress':3, 'overdue':3,
+  /* Step 4 — File in Review */
+  'in_review':4, 'draft_ready':4, 'draft_sent':4, 's-review':4,
+  /* Step 5 — Delivery */
   'delivered':5,
+  /* Step 6 — Completed */
   'completed':6,
 };
 
@@ -297,7 +303,7 @@ function renderStepper(status) {
         :`${i+1}`;
     const div=document.createElement('div');
     div.className=`step ${cls}`;
-    div.innerHTML=`<div class="step-circle ${cls}">${icon}</div><div class="step-label ${cls}">${step.label.replace('\n','<br>')}</div>`;
+    div.innerHTML=`<div class="step-circle ${cls}">${icon}</div><div class="step-label ${cls}">${step.label.replace('\n',' ')}</div>`;
     stepper.appendChild(div);
   });
 }
