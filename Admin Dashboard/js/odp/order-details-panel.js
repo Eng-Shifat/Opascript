@@ -217,15 +217,13 @@ window._loadFullOrderData = async function() {
       window._currentOrder._rawDB = ord;  /* full DB row for Order Summary */
     }
 
-    /* Payment financials */
+    /* Payment financials — ONLY sum admin-confirmed rows, never fall back to advance_paid column */
     const total = Number(ord.total_price || 0);
     let paid = 0;
     if (payments && payments.length) {
-      paid = payments.filter(p => p.confirmed && (p.type === 'received' || p.type === 'approval'))
-                     .reduce((s, p) => s + Number(p.amount || 0), 0);
-      if (paid === 0 && ord.advance_paid) paid = Number(ord.advance_paid);
-    } else if (ord.advance_paid) {
-      paid = Number(ord.advance_paid);
+      paid = payments
+        .filter(p => p.confirmed === true && (p.type === 'received' || p.type === 'approval'))
+        .reduce((s, p) => s + Number(p.amount || 0), 0);
     }
     const due     = Math.max(0, total - paid);
     const paidPct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
@@ -233,6 +231,12 @@ window._loadFullOrderData = async function() {
     if (!window._currentOrder.detail) window._currentOrder.detail = {};
     window._currentOrder.detail.financials = { total, paid, due, paidPct };
     window._currentOrder.paymentStatus = ord.payment_status || window._currentOrder.paymentStatus;
+
+    /* If Payments tab DOM already exists (e.g. user is on it), sync the stat cards now */
+    const sp = document.getElementById('odpPaySummaryPaid');
+    const sd = document.getElementById('odpPaySummaryDue');
+    if (sp) sp.textContent = '\u09F3' + Number(paid).toLocaleString();
+    if (sd) sd.textContent = '\u09F3' + Number(due).toLocaleString();
 
     /* Client data */
     let client = null;
@@ -294,6 +298,6 @@ window.odpSwitchTab = function(name) {
 
   if (name === 'messages') window._loadMessages();
   if (name === 'files')    window._loadFiles();
-  if (name === 'payments') window._loadPaymentHistory();
+  if (name === 'payments') { window._reloadPaymentFinancials(); window._loadPaymentHistory(); }
   if (name === 'activity') window._loadActivity();
 };

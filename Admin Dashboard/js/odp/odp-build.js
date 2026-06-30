@@ -504,7 +504,7 @@ window._buildPaymentsHTML = function(order) {
 
     const totalFmt = order.amount || '—';
     const paidFmt  = paid ? '৳' + Number(paid).toLocaleString() : '৳0';
-    const dueFmt   = '—';
+    const dueFmt   = fin.due !== undefined ? (fin.due ? '৳' + Number(fin.due).toLocaleString() : '৳0') : '—';
     const pctColor = paidPct >= 100 ? 'var(--green)' : paidPct > 0 ? 'var(--gold)' : 'var(--red)';
     const isLocked = payStatus !== 'paid';
 
@@ -580,7 +580,7 @@ window._buildPaymentsHTML = function(order) {
         <div class="odp-card">
           <div class="odp-card-title"><i class="ti ti-history"></i> Payment History</div>
           <div class="odp-pay-table-head">
-            <span>#</span><span>Date</span><span>Type</span><span>Amount</span><span>Method</span><span>Status</span><span>Action</span><span>Note</span>
+            <span>#</span><span>Date</span><span>Amount</span><span>Method</span><span>TXN ID</span><span>Status</span><span>Note</span>
           </div>
           <div id="odpPayHistory"><div class="odp-loading"><div class="odp-spinner"></div> Loading…</div></div>
         </div>

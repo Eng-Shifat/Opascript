@@ -2736,11 +2736,11 @@ body.odp-panel-open {
   border: 1px solid rgba(255,255,255,0.05);
 }
 
-/* Payment History Table */
+/* Payment History Table — 7 columns: # | Date | Amount | Method | TXN ID | Status | Note */
 .odp-pay-table-head {
   display: grid;
-  grid-template-columns: 24px 1fr 1fr 70px 90px 80px 50px 1fr;
-  gap: 6px;
+  grid-template-columns: 24px 100px 90px 80px 110px 90px 1.4fr;
+  gap: 10px;
   padding: 6px 4px 8px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   font-size: 9.5px;
@@ -2751,8 +2751,8 @@ body.odp-panel-open {
 }
 .odp-pay-table-row {
   display: grid;
-  grid-template-columns: 24px 1fr 1fr 70px 90px 80px 50px 1fr;
-  gap: 6px;
+  grid-template-columns: 24px 100px 90px 80px 110px 90px 1.4fr;
+  gap: 10px;
   align-items: center;
   padding: 9px 4px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
@@ -2760,6 +2760,13 @@ body.odp-panel-open {
 }
 .odp-pay-table-row:last-child { border-bottom: none; }
 .odp-pay-table-row:hover { background: rgba(255,255,255,0.02); }
+.odp-pay-table-row > span:last-child,
+.odp-pay-table-head > span:last-child {
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
 
 /* Payment verify row — client sent info */
 .odp-pay-verify-row {

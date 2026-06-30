@@ -231,13 +231,33 @@ async function openOrderDetail(orderId) {
   startCountdown(order.deadline);
   renderStepper(order.status);
   setText('detailTotal',`৳${fmt(order.total_price)}`);
-  setText('detailAdvance',`৳${fmt(order.advance_paid)}`);
-  setText('detailDue',`৳${fmt(order.due_amount)}`);
+
+  /* ── Fetch live approved-payment sum (don't trust stale advance_paid column) ── */
+  let livePaid = 0, liveDue = 0;
+  try {
+    const { data: approvedPays } = await sb
+      .from('payments')
+      .select('amount')
+      .eq('order_id', orderId)
+      .eq('confirmed', true)
+      .in('type', ['received', 'approval']);
+    livePaid = (approvedPays || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+    liveDue  = Math.max(0, Number(order.total_price || 0) - livePaid);
+  } catch(_) {
+    /* fallback to order row if query fails */
+    livePaid = order.advance_paid || 0;
+    liveDue  = order.due_amount   || 0;
+  }
+
+  setText('detailAdvance',`৳${fmt(livePaid)}`);
+  setText('detailDue',`৳${fmt(liveDue)}`);
   const payBadges=document.getElementById('payBadges');
   payBadges.innerHTML='';
-  if((order.advance_paid||0)>0) payBadges.innerHTML+=`<span class="pay-badge confirmed">✓ Advance paid</span>`;
-  if((order.due_amount||0)>0) payBadges.innerHTML+=`<span class="pay-badge pending">✗ Due pending</span>`;
-  const hasDue = (order.due_amount||0) > 0;
+  if(livePaid>0) payBadges.innerHTML+=`<span class="pay-badge confirmed">✓ Advance paid</span>`;
+  if(liveDue>0)  payBadges.innerHTML+=`<span class="pay-badge pending">✗ Due pending</span>`;
+
+  /* Use live values for lock/unlock logic */
+  const hasDue = liveDue > 0;
 
   // Due hero + warning + Pay Now
   document.getElementById('payDueHero').style.display    = hasDue ? 'flex'  : 'none';
@@ -723,6 +743,43 @@ function setupRealtime() {
     .subscribe();
   realtimeSubs.push(orderSub);
 
+  /* Realtime payments — when admin approves, refresh order detail */
+  const paymentSub = sb.channel('client-payments-realtime')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'payments',
+    }, async payload => {
+      /* Only care if this payment belongs to one of our orders */
+      const myOrderIds = allOrders.map(o => String(o.id));
+      if (!myOrderIds.includes(String(payload.new?.order_id))) return;
+
+      if (payload.new?.confirmed === true && payload.old?.confirmed === false) {
+        /* Payment just got approved — reload orders and refresh detail */
+        await loadOrders();
+        if (currentOrderId && String(payload.new.order_id) === String(currentOrderId)) {
+          openOrderDetail(currentOrderId);
+          showToast('✅ Payment confirmed! Paid amount updated.', 'success');
+        }
+      } else if (currentOrderId && String(payload.new?.order_id) === String(currentOrderId)) {
+        /* Any other payment row change (e.g. rejection) for the open order — refresh history */
+        await renderClientPaymentHistory(currentOrderId);
+      }
+    })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'payments',
+    }, async payload => {
+      const myOrderIds = allOrders.map(o => String(o.id));
+      if (!myOrderIds.includes(String(payload.new?.order_id))) return;
+      if (currentOrderId && String(payload.new?.order_id) === String(currentOrderId)) {
+        await renderClientPaymentHistory(currentOrderId);
+      }
+    })
+    .subscribe();
+  realtimeSubs.push(paymentSub);
+
   /* Realtime unread message badge from admin */
   const msgSub = sb.channel('client-messages-realtime')
     .on('postgres_changes', {
@@ -966,20 +1023,29 @@ window.openFileViewer = async function(storagePath, fileName, dlAllowed) {
       img.style.display = 'none';
       await renderPdfToCanvas(url);
     } else {
-      /* HTML/doc: load in iframe, inject no-select CSS after load */
+      /* Unsupported for inline preview (docx, xlsx, etc.) */
       const pdfCanvas = document.getElementById('viewerPdfCanvas');
       if (pdfCanvas) pdfCanvas.style.display = 'none';
-      frame.src = url;
       frame.style.display = 'block';
-      frame.onload = function() {
-        try {
-          const style = frame.contentDocument.createElement('style');
-          style.textContent = '* { user-select: none !important; -webkit-user-select: none !important; }';
-          frame.contentDocument.head.appendChild(style);
-          frame.contentDocument.addEventListener('contextmenu', e => e.preventDefault());
-          frame.contentDocument.addEventListener('copy', e => e.preventDefault());
-        } catch(err) { /* cross-origin — silently fail */ }
-      };
+      img.style.display = 'none';
+      const isOfficeDoc = ['doc','docx','xls','xlsx','ppt','pptx'].includes(ext);
+      frame.srcdoc = `
+        <div style="
+          display:flex;flex-direction:column;align-items:center;justify-content:center;
+          height:100%;min-height:300px;background:#0f1729;color:#94a3b8;
+          font-family:sans-serif;text-align:center;padding:40px;gap:14px;
+        ">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <div style="font-size:15px;font-weight:700;color:#e2e8f0">⚠️ File Preview Unavailable</div>
+          <div style="font-size:12px;color:#64748b;max-width:320px;line-height:1.7">
+            Unfortunately, this file cannot be previewed here. Please download the file and open it using a compatible application to view its contents.<br><br>
+            Thank you for your understanding.
+          </div>
+        </div>`;
+      frame.src = '';
     }
 
     /* Store for download button */
@@ -1087,12 +1153,23 @@ async function submitPaymentProof() {
   const order = allOrders.find(o => o.id === currentOrderId);
   if (!order) return;
 
-  const txnId     = document.getElementById('proofTxnId')?.value.trim();
-  const fileInput = document.getElementById('proofScreenshot');
-  const file      = fileInput?.files[0];
-  const statusEl  = document.getElementById('proofStatus');
-  const btn       = document.getElementById('proofSendBtn');
+  const claimedAmount = parseFloat(document.getElementById('proofClaimedAmount')?.value) || 0;
+  const method     = document.getElementById('proofMethod')?.value.trim();
+  const txnId      = document.getElementById('proofTxnId')?.value.trim();
+  const clientNote = document.getElementById('proofClientNote')?.value.trim();
+  const fileInput  = document.getElementById('proofScreenshot');
+  const file       = fileInput?.files[0];
+  const statusEl   = document.getElementById('proofStatus');
+  const btn        = document.getElementById('proofSendBtn');
 
+  if (!claimedAmount || claimedAmount <= 0) {
+    if (statusEl) { statusEl.textContent = 'আপনি কত টাকা পাঠিয়েছেন সেটা লিখুন।'; statusEl.style.color = '#f87171'; }
+    return;
+  }
+  if (!method) {
+    if (statusEl) { statusEl.textContent = 'Payment method select করুন।'; statusEl.style.color = '#f87171'; }
+    return;
+  }
   if (!txnId && !file) {
     if (statusEl) { statusEl.textContent = 'Transaction ID বা screenshot দিন।'; statusEl.style.color = '#f87171'; }
     return;
@@ -1104,7 +1181,6 @@ async function submitPaymentProof() {
 
   let screenshotUrl = null;
 
-  /* Upload screenshot to Supabase Storage */
   if (file) {
     const ext  = file.name.split('.').pop();
     const path = `payment-proofs/${currentOrderId}/${Date.now()}.${ext}`;
@@ -1118,21 +1194,25 @@ async function submitPaymentProof() {
     screenshotUrl = urlData.publicUrl;
   }
 
-  /* Insert into payments table */
+  /* Insert as pending — does NOT affect advance_paid / due_amount */
   const { error } = await sb.from('payments').insert({
     order_id:       currentOrderId,
     client_id:      currentUser.id,
-    amount:         order.advance_paid || 0,
-    type:           'advance',
+    amount:         claimedAmount,
+    type:           'pending',
+    method:         method,
     txn_id:         txnId || null,
-    method:         'Client submitted',
+    client_note:    clientNote || null,
     screenshot_url: screenshotUrl,
     confirmed:      false,
     paid_at:        new Date().toISOString(),
   });
 
-  /* Update order payment_status → under_review */
-  await sb.from('orders').update({ payment_status: 'under_review', updated_at: new Date().toISOString() }).eq('id', currentOrderId);
+  /* order payment_status → under_review, financials untouched */
+  await sb.from('orders').update({
+    payment_status: 'under_review',
+    updated_at: new Date().toISOString()
+  }).eq('id', currentOrderId);
 
   btn.disabled = false;
   if (error) {
@@ -1141,7 +1221,6 @@ async function submitPaymentProof() {
     return;
   }
 
-  /* UI: hide form, show submitted state */
   document.getElementById('proofSubmitSection').style.display = 'none';
   document.getElementById('proofSubmitted').style.display     = 'flex';
   showToast('✅ Payment proof পাঠানো হয়েছে! Admin review করবেন।', 'success');
@@ -1193,56 +1272,184 @@ function closeConfirmPopup() {
 /* ═══════════════════════════════════════════
    PROOF SUBMIT SECTION — show/hide in order detail
 ═══════════════════════════════════════════ */
+
+function resetProofForm() {
+  const fields = ['proofClaimedAmount','proofTxnId','proofClientNote'];
+  fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const method = document.getElementById('proofMethod'); if (method) method.value = '';
+  const fi = document.getElementById('proofScreenshot'); if (fi) fi.value = '';
+  const fn = document.getElementById('proofFileName'); if (fn) fn.textContent = 'Screenshot বেছে নিন';
+  const fi2 = document.getElementById('proofScreenshot'); if (fi2) fi2.onchange = () => handleProofFileSelect(fi2);
+  const btn = document.getElementById('proofSendBtn');
+  if (btn) { btn.textContent = '💸 Proof পাঠান'; btn.disabled = false; }
+}
 async function checkAndShowProofSection(order) {
   const section   = document.getElementById('proofSubmitSection');
   const submitted = document.getElementById('proofSubmitted');
-  if (!section || !submitted) return;
 
-  /* Reset */
-  section.style.display   = 'none';
-  submitted.style.display = 'none';
+  /* The inline proof form is replaced by the dedicated Payment page flow.
+     Hide the old form entirely — client now pays via the "Pay Now" button,
+     which routes to payment.html?order_id=... */
+  if (section)   section.style.display = 'none';
+  if (submitted) submitted.style.display = 'none';
 
-  /* Only show if due_amount > 0 or advance_paid > 0 and status is pending */
-  if (!['pending','under_review'].includes(order.payment_status || order.status)) return;
+  await renderClientPaymentHistory(order.id);
+}
 
-  /* Check if proof already submitted */
-  const { data: existingProof } = await sb
-    .from('payments')
-    .select('id, confirmed')
-    .eq('order_id', order.id)
-    .eq('client_id', currentUser.id)
-    .limit(1);
+/* ═══════════════════════════════════════════
+   CLIENT PAYMENT HISTORY — card-style list with
+   status icons, filter dropdown, and "view all" expand
+═══════════════════════════════════════════ */
+let _payHistAllData   = [];   // full unfiltered payment list for current order
+let _payHistFilter    = 'all';
+let _payHistExpanded  = false;
+const PAY_HIST_COLLAPSED_COUNT = 3;
 
-  if (existingProof && existingProof.length > 0) {
-    submitted.style.display = 'flex';
-  } else {
-    /* Show proof submit form */
-    section.style.display = 'block';
-    /* Reset inputs */
-    const txn = document.getElementById('proofTxnId');
-    const fi  = document.getElementById('proofScreenshot');
-    const fn  = document.getElementById('proofFileName');
-    const st  = document.getElementById('proofStatus');
-    if (txn) txn.value = '';
-    if (fi)  fi.value  = '';
-    if (fn)  fn.textContent = 'Screenshot বেছে নিন';
-    if (st)  st.textContent = '';
-    /* File input change handler */
-    if (fi) fi.onchange = () => handleProofFileSelect(fi);
-    /* Send button handler */
-    const btn = document.getElementById('proofSendBtn');
-    if (btn) { btn.textContent = '💸 Proof পাঠান'; btn.disabled = false; }
+async function renderClientPaymentHistory(orderId) {
+  const wrap = document.getElementById('clientPayHistoryList');
+  const card = document.getElementById('clientPayHistoryCard');
+  if (!wrap || !card) return;
+
+  card.style.display = 'block';
+  wrap.innerHTML = '<div class="pay-hist-loading">লোড হচ্ছে...</div>';
+  _payHistExpanded = false;
+
+  try {
+    const { data: pays, error } = await sb
+      .from('payments')
+      .select('id, amount, method, txn_id, type, confirmed, note, screenshot_url, paid_at')
+      .eq('order_id', orderId)
+      .order('paid_at', { ascending: false });
+
+    if (error || !pays) {
+      wrap.innerHTML = '<div class="pay-hist-empty">Payment history লোড করতে সমস্যা হয়েছে।</div>';
+      return;
+    }
+
+    _payHistAllData = pays;
+    _drawPayHistList();
+
+  } catch (e) {
+    console.error('renderClientPaymentHistory error:', e);
+    wrap.innerHTML = '<div class="pay-hist-empty">Payment history লোড করতে সমস্যা হয়েছে।</div>';
   }
 }
 
+function _payHistStatusMeta(p) {
+  const isApproved = p.confirmed === true;
+  const isRejected = p.type === 'rejected';
+  if (isRejected) return { key: 'rejected', label: 'Rejected',         color: '#f87171', icon: 'x' };
+  if (isApproved) return { key: 'approved', label: 'Approved',         color: '#4ade80', icon: 'check' };
+  return                { key: 'pending',  label: 'Pending Review',    color: '#fbbf24', icon: 'hourglass' };
+}
+
+function _payHistIconSvg(icon, color) {
+  if (icon === 'check') {
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5"><circle cx="12" cy="12" r="10" fill="${color}22"/><polyline points="8 12 11 15 16 9"/></svg>`;
+  }
+  if (icon === 'x') {
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5"><circle cx="12" cy="12" r="10" fill="${color}22"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+  }
+  /* hourglass */
+  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><circle cx="12" cy="12" r="10" fill="${color}22"/><path d="M8 7h8M8 17h8M9 7c0 3 3 3.5 3 5s-3 2-3 5M15 7c0-3-3-3.5-3-5"/></svg>`;
+}
+
+function _drawPayHistList() {
+  const wrap = document.getElementById('clientPayHistoryList');
+  if (!wrap) return;
+
+  let list = _payHistAllData;
+  if (_payHistFilter !== 'all') {
+    list = list.filter(p => _payHistStatusMeta(p).key === _payHistFilter);
+  }
+
+  if (!list.length) {
+    wrap.innerHTML = `<div class="pay-hist-empty">${_payHistFilter === 'all' ? 'এখনো কোনো payment submit করা হয়নি।' : 'এই status এ কোনো payment নেই।'}</div>`;
+    _updateViewAllLink(0, 0);
+    return;
+  }
+
+  const visibleList = _payHistExpanded ? list : list.slice(0, PAY_HIST_COLLAPSED_COUNT);
+
+  wrap.innerHTML = visibleList.map((p, idx) => {
+    const meta = _payHistStatusMeta(p);
+    const dateStr = new Date(p.paid_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+    const timeStr = new Date(p.paid_at).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    const num = String(_payHistAllData.length - _payHistAllData.indexOf(p)).padStart(3, '0');
+
+    return `
+      <div class="pay-hist-card">
+        <div class="pay-hist-icon-circle" style="background:${meta.color}1c">
+          ${_payHistIconSvg(meta.icon, meta.color)}
+        </div>
+        <div class="pay-hist-card-body">
+          <div class="pay-hist-card-top">
+            <span class="pay-hist-card-title">Payment #${num}</span>
+          </div>
+          <div class="pay-hist-card-meta">
+            <span>📅 ${dateStr}</span>
+            <span>🕐 ${timeStr}</span>
+          </div>
+          <div class="pay-hist-card-method">${(p.method || '—')}</div>
+        </div>
+        <div class="pay-hist-card-right">
+          <span class="pay-hist-card-amount" style="color:${meta.key === 'pending' ? '#fbbf24' : meta.key === 'rejected' ? '#f87171' : '#4ade80'}">৳${Number(p.amount || 0).toLocaleString()}</span>
+          <span class="pay-hist-card-badge" style="color:${meta.color};border-color:${meta.color}55;background:${meta.color}15">${meta.label}</span>
+          ${p.screenshot_url
+            ? `<button class="pay-hist-view-btn" onclick="window.open('${p.screenshot_url}','_blank')">👁 ${meta.key === 'pending' ? 'View Proof' : 'View Receipt'}</button>`
+            : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  _updateViewAllLink(list.length, visibleList.length);
+}
+
+function _updateViewAllLink(totalCount, shownCount) {
+  const linkWrap = document.getElementById('clientPayHistoryViewAll');
+  if (!linkWrap) return;
+
+  if (totalCount <= PAY_HIST_COLLAPSED_COUNT) {
+    linkWrap.style.display = 'none';
+    return;
+  }
+
+  linkWrap.style.display = 'block';
+  linkWrap.innerHTML = _payHistExpanded
+    ? `<button class="pay-hist-viewall-btn" onclick="_togglePayHistExpand()">কম দেখান ↑</button>`
+    : `<button class="pay-hist-viewall-btn" onclick="_togglePayHistExpand()">সব Transaction দেখুন (${totalCount}) →</button>`;
+}
+
+window._togglePayHistExpand = function() {
+  _payHistExpanded = !_payHistExpanded;
+  _drawPayHistList();
+};
+
+window._setPayHistFilter = function(val) {
+  _payHistFilter   = val;
+  _payHistExpanded = false;
+  _drawPayHistList();
+};
+
 /* ── Payment Due Popup ──────────────────────────────────────────────────── */
-window.showPaymentDuePopup = function() {
+window.showPaymentDuePopup = async function() {
   const order = allOrders.find(o => o.id === currentOrderId);
   if (!order) return;
 
-  const total    = order.total_price    || 0;
-  const paid     = order.advance_paid   || 0;
-  const due      = order.due_amount     || 0;
+  const total = Number(order.total_price || 0);
+
+  /* Fetch live approved-payment sum */
+  let paid = 0, due = 0;
+  try {
+    const { data: approvedPays } = await sb
+      .from('payments').select('amount')
+      .eq('order_id', currentOrderId).eq('confirmed', true).in('type', ['received','approval']);
+    paid = (approvedPays || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+    due  = Math.max(0, total - paid);
+  } catch(_) {
+    paid = order.advance_paid || 0;
+    due  = order.due_amount   || 0;
+  }
 
   const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
   setTxt('popupDueAmount', `৳${fmt(due)}`);
