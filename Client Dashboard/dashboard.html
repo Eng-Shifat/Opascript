@@ -499,10 +499,33 @@
 
         <!-- Right col — Files -->
         <div class="detail-panel files-panel">
-          <div class="panel-head">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            FILES
+          <div class="pps-header">
+            <div class="pps-header-left">
+              <div class="pps-header-icon">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <span class="pps-header-title">MY FILES</span>
+            </div>
+            <span class="pps-sparkle">✦</span>
           </div>
+
+          <div class="pps-hero" style="margin-bottom:10px;">
+            <div class="fps-icon-col">
+              <div class="fps-icon-glow"></div>
+              <div class="fps-icon-wrap">
+                <img src="assets/files-icon.png" alt="files" class="fps-icon-img" draggable="false" tabindex="-1">
+              </div>
+              <div class="pps-shield-spark pps-spark-tl">✦</div>
+              <div class="pps-shield-spark pps-spark-br">✦</div>
+            </div>
+            <div class="pps-hero-text">
+              <h3 class="pps-hero-title">Secure file access after payment confirmation</h3>
+              <p class="pps-hero-sub">Your project files are securely stored and will become available automatically once your payment has been verified and confirmed. Download and manage your files anytime with safe, encrypted access.</p>
+            </div>
+          </div>
+
+          <div class="pps-divider"></div>
+
           <div id="filesList">
             <div class="empty-note">কোনো file নেই</div>
           </div>
@@ -514,6 +537,7 @@
         </div>
 
       </div><!-- end detail-two-col -->
+
 
         <!-- Admin Message Preview -->
         <div class="admin-msg-card" id="adminMsgCard" style="display:none">
@@ -527,9 +551,8 @@
             <div class="admin-msg-text" id="adminMsgText"></div>
             <button class="go-chat-btn" id="goChatBtn">সম্পূর্ণ চ্যাট দেখুন →</button>
           </div>
-          <div class="admin-msg-right">
-            <img src="assets/message-icon.png" alt="message" class="admin-msg-img" draggable="false">
-          </div>
+          <img src="assets/message-icon.png" alt="message" class="admin-msg-img" draggable="false">
+
         </div>
       </div>
 
@@ -598,11 +621,14 @@
           <p class="page-sub">সব order এর files এক জায়গায়</p>
         </div>
       </div>
-      <div id="allFilesList">
-        <div class="empty-state" id="filesEmpty">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          <p>কোনো file নেই</p>
-        </div>
+      <div id="filesFilterChip" class="files-filter-chip" style="display:none">
+        <span id="filesFilterChipText"></span>
+        <button id="filesFilterChipClear" type="button">সব Order দেখুন ✕</button>
+      </div>
+      <div id="allFilesList"></div>
+      <div class="empty-state" id="filesEmpty" style="display:none">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <p>কোনো file নেই</p>
       </div>
     </section>
 
@@ -614,11 +640,10 @@
           <p class="page-sub">Payment history ও status</p>
         </div>
       </div>
-      <div id="paymentsList">
-        <div class="empty-state" id="paymentsEmpty">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          <p>কোনো payment নেই</p>
-        </div>
+      <div id="paymentsList"></div>
+      <div class="empty-state" id="paymentsEmpty" style="display:none">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <p>কোনো payment নেই</p>
       </div>
     </section>
 

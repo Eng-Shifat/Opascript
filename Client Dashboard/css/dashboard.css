@@ -462,7 +462,7 @@ input, select, textarea { font-family: inherit; }
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 .od-title { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.4; }
 .od-meta  { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
@@ -493,8 +493,8 @@ input, select, textarea { font-family: inherit; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 12px 20px 14px;
-  margin-top: 14px;
-  margin-bottom: 14px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 .progress-label {
   font-size: 10px;
@@ -507,14 +507,14 @@ input, select, textarea { font-family: inherit; }
 /* Detail panels */
 .detail-two-col {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   align-items: stretch;
 }
 .detail-left-col {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   min-width: 0;
 }
 .files-panel {
@@ -524,7 +524,30 @@ input, select, textarea { font-family: inherit; }
   min-width: 0;
   height: 100%;
   box-sizing: border-box;
+  position: relative;
+  background: linear-gradient(145deg, #0c0e1a 0%, #10082a 45%, #190a3e 100%) !important;
+  border: 1px solid rgba(124,58,237,0.22) !important;
+  overflow: hidden;
 }
+.files-panel::before {
+  content: '';
+  position: absolute;
+  top: -80px; left: -80px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, rgba(124,58,237,0.13) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+.files-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+.files-panel > * { position: relative; z-index: 1; }
 .detail-panel {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -635,13 +658,16 @@ input, select, textarea { font-family: inherit; }
   position: relative;
   background: linear-gradient(135deg, #0c0e1a 0%, #12082e 50%, #1a0a3e 100%);
   border: 1px solid rgba(124,58,237,0.25);
-  border-radius: var(--radius-lg);
-  padding: 20px 0 20px 20px;
+  border-radius: 16px;
+  height: 120px;
+  margin-top: 10px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  overflow: hidden;
-  min-height: 110px;
+  justify-content: space-between;
+  gap: 16px;
+  overflow: visible;
 }
 .admin-msg-card::before {
   content: '';
@@ -657,23 +683,15 @@ input, select, textarea { font-family: inherit; }
   z-index: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-}
-.admin-msg-right {
-  flex-shrink: 0;
-  align-self: stretch;
-  width: 160px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  overflow: hidden;
-  z-index: 1;
+  justify-content: center;
+  padding-right: 130px;
 }
 .admin-msg-header {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
+  z-index: 1;
 }
 .admin-msg-header-icon {
   width: 22px; height: 22px;
@@ -690,23 +708,29 @@ input, select, textarea { font-family: inherit; }
   color: #a78bfa;
 }
 .admin-msg-text {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-primary);
-  line-height: 1.6;
-  margin-bottom: 14px;
+  line-height: 1.4;
+  margin-bottom: 8px;
   font-family: 'Noto Sans Bengali', 'Sora', sans-serif;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .go-chat-btn {
   background: none;
   border: 1px solid rgba(124,58,237,0.35);
   color: #a78bfa;
-  padding: 7px 16px;
+  padding: 5px 14px;
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 11px;
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
   transition: all .2s;
+  z-index: 1;
+  align-self: flex-start;
 }
 .go-chat-btn:hover {
   border-color: #7c3aed;
@@ -714,15 +738,20 @@ input, select, textarea { font-family: inherit; }
   color: #c4b5fd;
 }
 .admin-msg-img {
-  width: 180px;
-  height: 180px;
+  position: absolute;
+  right: 18px;
+  bottom: -14px;
+  width: 140px;
+  height: 140px;
   object-fit: contain;
-  mix-blend-mode: lighten;
-  filter: drop-shadow(0 0 24px rgba(167,139,250,0.6)) drop-shadow(0 0 8px rgba(124,58,237,0.4));
-  animation: shieldFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(167,139,250,0.55)) drop-shadow(0 0 6px rgba(124,58,237,0.4));
+  animation: adminMsgFloat 3s ease-in-out infinite;
   transform-origin: bottom right;
-  margin-bottom: -10px;
-  margin-right: -10px;
+  z-index: 1;
+}
+@keyframes adminMsgFloat {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-4px) scale(1.02); }
 }
 
 /* ── CHAT ─────────────────────────────────────────────────────────────────── */
@@ -737,8 +766,13 @@ input, select, textarea { font-family: inherit; }
   cursor: pointer;
   min-width: 220px;
   max-width: 100%;
+  color-scheme: dark;
 }
 .order-select:focus { border-color: var(--border-hover); }
+.order-select option {
+  background: #17102e;
+  color: var(--text-primary);
+}
 
 .chat-container {
   background: var(--bg-card);
@@ -896,6 +930,37 @@ input, select, textarea { font-family: inherit; }
 
 /* ── FILES PAGE ───────────────────────────────────────────────────────────── */
 .files-group { margin-bottom: 18px; }
+.files-filter-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(124,58,237,0.1);
+  border: 1px solid rgba(124,58,237,0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #c4b5fd;
+}
+.files-filter-chip button {
+  background: none;
+  border: 1px solid rgba(124,58,237,0.35);
+  color: #a78bfa;
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .2s;
+}
+.files-filter-chip button:hover {
+  border-color: #7c3aed;
+  background: rgba(124,58,237,0.15);
+  color: #fff;
+}
 .files-group-label {
   font-size: 11px;
   font-weight: 600;
@@ -1458,6 +1523,33 @@ input, select, textarea { font-family: inherit; }
 .pps-spark-tl { top: 4px; left: 6px; animation-delay: 0s; }
 .pps-spark-br { bottom: 6px; right: 4px; animation-delay: 1s; }
 
+/* Files panel hero icon */
+.fps-icon-col {
+  flex-shrink: 0;
+  position: relative;
+  width: 100px; height: 100px;
+  display: flex; align-items: center; justify-content: center;
+}
+.fps-icon-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 65%);
+  border-radius: 50%;
+  animation: shieldGlowPulse 2.8s ease-in-out infinite;
+  overflow: hidden;
+}
+.fps-icon-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.fps-icon-img {
+  width: 108px; height: 108px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(167,139,250,0.55)) drop-shadow(0 0 6px rgba(124,58,237,0.4));
+  animation: shieldFloat 3.2s ease-in-out infinite;
+}
+
 .pps-hero-text { flex: 1; padding-top: 0; }
 .pps-hero-badge { display: none; }
 .pps-hero-title {
@@ -1696,6 +1788,26 @@ input, select, textarea { font-family: inherit; }
   transition: border-color 0.2s;
 }
 .proof-field input[type="text"]:focus { border-color: #6366f1; }
+#proofMethod {
+  width: 100%;
+  background: #1e2130;
+  border: 1px solid #2e3347;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  color-scheme: dark;
+}
+#proofMethod:focus { border-color: #6366f1; }
+#proofMethod option {
+  background: #1e2130;
+  color: #e2e8f0;
+}
 .proof-upload-btn {
   display: flex;
   align-items: center;
@@ -1756,7 +1868,7 @@ input, select, textarea { font-family: inherit; }
   border: 1px solid rgba(124,58,237,0.22);
   border-radius: var(--radius-lg);
   padding: 16px;
-  margin-top: 14px;
+  margin-top: 0;
   margin-bottom: 0;
   position: relative;
   overflow: hidden;
@@ -1815,8 +1927,13 @@ input, select, textarea { font-family: inherit; }
   outline: none;
   cursor: pointer;
   transition: border-color 0.2s;
+  color-scheme: dark;
 }
 .pay-hist-filter:focus { border-color: #7c3aed; }
+.pay-hist-filter option {
+  background: #17102e;
+  color: #e2e8f0;
+}
 .pay-hist-filter-icon-btn {
   width: 30px; height: 30px;
   background: rgba(255,255,255,0.05);

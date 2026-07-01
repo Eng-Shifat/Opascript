@@ -408,7 +408,11 @@ async function loadOrderFiles(orderId, hasDue) {
     if (totalCount > PREVIEW_LIMIT) {
       viewAllWrap.style.display = 'block';
       viewAllCount.textContent = totalCount;
-      document.getElementById('filesViewAllBtn').onclick = () => showPage('files');
+      document.getElementById('filesViewAllBtn').onclick = () => {
+        filesPageOrderFilter = orderId;
+        loadFilesPage();
+        showPage('files');
+      };
     } else {
       viewAllWrap.style.display = 'none';
     }
@@ -428,6 +432,8 @@ async function loadLatestAdminMsg(orderId) {
   } else { card.style.display='none'; }
 }
 
+let filesPageOrderFilter = null;
+
 async function loadFilesPage() {
   if (allOrders.length === 0) return;
   const container = document.getElementById('allFilesList');
@@ -436,9 +442,24 @@ async function loadFilesPage() {
 
   container.innerHTML = '';
 
+  /* Filter chip UI (shown when arriving from a specific order's "View All Files") */
+  const chip = document.getElementById('filesFilterChip');
+  const chipText = document.getElementById('filesFilterChipText');
+  const chipClear = document.getElementById('filesFilterChipClear');
+  if (filesPageOrderFilter) {
+    const fo = allOrders.find(o => String(o.id) === String(filesPageOrderFilter));
+    chip.style.display = 'flex';
+    chipText.textContent = `শুধু "${fo?.title || 'এই Order'}" এর files দেখানো হচ্ছে`;
+    chipClear.onclick = () => { filesPageOrderFilter = null; loadFilesPage(); };
+  } else if (chip) {
+    chip.style.display = 'none';
+  }
+
   try {
     /* Fetch all visible admin-sent files for this client's orders */
-    const orderIds = allOrders.map(o => o.id);
+    const orderIds = filesPageOrderFilter
+      ? [filesPageOrderFilter]
+      : allOrders.map(o => o.id);
     const { data: accessRows, error } = await sb
       .from('order_file_access')
       .select('storage_path, is_visible, download_allowed, uploaded_by, updated_at, order_id')
@@ -844,6 +865,7 @@ function initNav() {
       setTimeout(() => ripple.remove(), 850);
 
       const page=item.dataset.page;
+      if(page==='files' && filesPageOrderFilter){ filesPageOrderFilter=null; loadFilesPage(); }
       showPage(page,item);
       if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}
     });
@@ -865,6 +887,7 @@ function initNav() {
       setTimeout(() => ripple.remove(), 850);
 
       const page=item.dataset.page;
+      if(page==='files' && filesPageOrderFilter){ filesPageOrderFilter=null; loadFilesPage(); }
       showPage(page);
       if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}
     });
