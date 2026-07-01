@@ -188,7 +188,7 @@ window._renderFileRow = function(f) {
     const notifBadge = notified ? `<span class="odp-notif-sent">✓ Notified</span>` : '';
 
     return `
-    <div class="odp-file-row${isVisible ? '' : ' client-hidden'}" data-path="${window._esc(path)}" data-dl="${dlAllowed}" data-vis="${isVisible}">
+    <div class="odp-file-row${isVisible ? '' : ' client-hidden'}" data-path="${window._esc(path)}" data-dl="${dlAllowed}" data-vis="${isVisible}" data-uploaded-by="${window._esc(uploader)}">
       <div class="odp-file-name-cell">
         <i class="ti ${icon}"></i>
         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${window._esc(f.name)}</span>
@@ -316,8 +316,10 @@ window._renderFileRow = function(f) {
 
     await window._saveFileMeta(path, { is_visible: isVisible });
 
-    /* Auto-notify client when file becomes visible */
-    if (isVisible && window._sb() && window._isRealUUID(window._currentOrderId)) {
+    /* Auto-notify client when file becomes visible — but skip Client's own uploads */
+    const fileRow = document.querySelector(`.odp-file-row[data-path="${CSS.escape(path)}"]`);
+    const uploadedBy = fileRow?.dataset?.uploadedBy || '';
+    if (isVisible && uploadedBy !== 'Client' && window._sb() && window._isRealUUID(window._currentOrderId)) {
       try {
         await window._sb().from('client_notifications').insert({
           order_id:   window._currentOrderId,

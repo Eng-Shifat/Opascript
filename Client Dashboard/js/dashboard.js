@@ -706,9 +706,8 @@ function setupRealtime() {
         openOrderDetail(currentOrderId);
       }
 
-      /* Only show toast if status actually changed */
+      /* Status change → no toast (bell notification handles this), শুধু visual feedback */
       if (oldStatus !== newStatus) {
-        showToast(`📋 Status update: ${label}`, 'success');
         /* Order confirmed → show popup */
         if (newStatus === 'confirmed' && oldStatus !== 'confirmed') {
           const confirmedOrder = allOrders.find(o => o.id === payload.new?.id) || payload.new;
@@ -738,7 +737,6 @@ function setupRealtime() {
       filter: `client_id=eq.${currentUser.id}`
     }, async () => {
       await loadOrders();
-      showToast('নতুন Order তৈরি হয়েছে!', 'success');
     })
     .subscribe();
   realtimeSubs.push(orderSub);
@@ -759,7 +757,6 @@ function setupRealtime() {
         await loadOrders();
         if (currentOrderId && String(payload.new.order_id) === String(currentOrderId)) {
           openOrderDetail(currentOrderId);
-          showToast('✅ Payment confirmed! Paid amount updated.', 'success');
         }
       } else if (currentOrderId && String(payload.new?.order_id) === String(currentOrderId)) {
         /* Any other payment row change (e.g. rejection) for the open order — refresh history */
@@ -793,9 +790,6 @@ function setupRealtime() {
       if (!myOrderIds.includes(payload.new?.order_id)) return;
 
       updateMsgBadge(1);
-
-      const preview = (payload.new?.text || '').substring(0, 60);
-      showToast(`💬 Admin: ${preview}${preview.length >= 60 ? '…' : ''}`, 'info');
     })
     .subscribe();
   realtimeSubs.push(msgSub);
@@ -809,13 +803,12 @@ function setupRealtime() {
     }, async payload => {
       /* শুধু তখনই notify করবো যখন is_visible true হবে (admin send করবে) */
       if (!payload.new?.is_visible || payload.old?.is_visible === true) return;
+      /* Client নিজের upload করা file এর জন্য notification দরকার নেই */
+      if (payload.new?.uploaded_by === 'Client') return;
       /* Check if this belongs to current user's orders */
       const myOrderIds = allOrders.map(o => String(o.id));
       if (!myOrderIds.includes(String(payload.new?.order_id))) return;
-      /* File path থেকে file name বের করো */
       const path = payload.new?.storage_path || '';
-      const fileName = path.split('/').pop() || 'একটি file';
-      showToast(`📎 নতুন file পাঠানো হয়েছে: ${fileName}`, 'success');
       /* Files page reload করো যদি open থাকে */
       await loadFilesPage();
       /* Order detail open থাকলে সেখানেও reload */
@@ -1379,7 +1372,7 @@ function _drawPayHistList() {
 
     return `
       <div class="pay-hist-card">
-        <div class="pay-hist-icon-circle" style="background:${meta.color}1c">
+        <div class="pay-hist-icon-circle" style="background:${meta.color}18;border-color:${meta.color}30">
           ${_payHistIconSvg(meta.icon, meta.color)}
         </div>
         <div class="pay-hist-card-body">
@@ -1387,16 +1380,23 @@ function _drawPayHistList() {
             <span class="pay-hist-card-title">Payment #${num}</span>
           </div>
           <div class="pay-hist-card-meta">
-            <span>📅 ${dateStr}</span>
-            <span>🕐 ${timeStr}</span>
+            <span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:3px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${dateStr}</span>
+            <span class="pay-hist-meta-dot"></span>
+            <span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timeStr}</span>
           </div>
-          <div class="pay-hist-card-method">${(p.method || '—')}</div>
+          <div class="pay-hist-card-method">
+            <span class="pay-hist-method-dot" style="background:${meta.color}"></span>
+            ${(p.method || '—')}
+          </div>
         </div>
         <div class="pay-hist-card-right">
           <span class="pay-hist-card-amount" style="color:${meta.key === 'pending' ? '#fbbf24' : meta.key === 'rejected' ? '#f87171' : '#4ade80'}">৳${Number(p.amount || 0).toLocaleString()}</span>
-          <span class="pay-hist-card-badge" style="color:${meta.color};border-color:${meta.color}55;background:${meta.color}15">${meta.label}</span>
+          <span class="pay-hist-card-badge" style="color:${meta.color};border-color:${meta.color}44;background:${meta.color}12">
+            ${meta.key === 'approved' ? `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : meta.key === 'pending' ? `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>` : `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`}
+            ${meta.label}
+          </span>
           ${p.screenshot_url
-            ? `<button class="pay-hist-view-btn" onclick="window.open('${p.screenshot_url}','_blank')">👁 ${meta.key === 'pending' ? 'View Proof' : 'View Receipt'}</button>`
+            ? `<button class="pay-hist-view-btn" onclick="window.open('${p.screenshot_url}','_blank')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${meta.key === 'pending' ? 'View Proof' : 'View Receipt'}</button>`
             : ''}
         </div>
       </div>`;

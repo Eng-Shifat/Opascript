@@ -95,6 +95,37 @@
     msgs:   [],   /* { orderId, name, preview, time, count, read } */
   };
 
+  /* ── DB-persisted notifications ─────────────────────────
+     admin_notifications table এ save/fetch করা হয়
+     যেকোনো device থেকে login করলেও সব notification পাবে
+  ══════════════════════════════════════ */
+  const NOTIF_MAX = 50;
+
+  async function _saveNotifToDB(notif) {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    try {
+      await sb.from('admin_notifications').upsert({
+        id:      notif.id,
+        icon:    notif.icon,
+        color:   notif.color,
+        text:    notif.text,
+        sub:     notif.sub || null,
+        time:    notif.time || new Date().toISOString(),
+        read:    notif.read || false,
+        onclick: notif.onclick || null,
+      }, { onConflict: 'id' });
+    } catch (e) { console.error('notif save error', e); }
+  }
+
+  async function _markAllReadInDB() {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    try {
+      await sb.from('admin_notifications').update({ read: true }).eq('read', false);
+    } catch (e) { console.error('notif mark read error', e); }
+  }
+
   /* ── Inject HTML ── */
   document.addEventListener('DOMContentLoaded', function () {
     const main = document.querySelector('.main');
@@ -137,6 +168,12 @@
         _setEl('topbarProfileEmail', email);
         _setEl('topbarProfileAvatar', initials);
         _setEl('topbarAvatar', initials);
+
+        /* Realtime websocket-এ JWT explicitly attach করা — RLS policy
+           (auth.email() = ...) কাজ করার জন্য এটা দরকার */
+        if (session.access_token && sb.realtime?.setAuth) {
+          sb.realtime.setAuth(session.access_token);
+        }
       }
     } catch (e) {}
 
@@ -166,7 +203,6 @@
           time:   new Date().toISOString(),
           onclick: `window.location.href='order-management.html'`,
         });
-        _toast('🆕 New order received!');
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, async (payload) => {
         const o   = payload.new;
@@ -183,7 +219,6 @@
             time:   new Date().toISOString(),
             onclick: `window.location.href='order-management.html'`,
           });
-          _toast('💰 Payment proof submitted!');
         }
 
         /* Status change */
@@ -197,7 +232,6 @@
             time:   new Date().toISOString(),
             onclick: `window.location.href='order-management.html'`,
           });
-          _toast('🔄 Order status updated!');
         }
 
         /* Revision requested */
@@ -211,10 +245,11 @@
             time:   new Date().toISOString(),
             onclick: `window.location.href='order-management.html'`,
           });
-          _toast('✏️ Revision requested!');
         }
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('[Realtime] topbar-orders status:', status, err || '');
+      });
 
     /* messages table — INSERT */
     sb.channel('topbar-messages')
@@ -242,13 +277,14 @@
 
         _renderMsgPanel();
         _updateMsgBadge();
-        _toast('💬 নতুন message এসেছে!');
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('[Realtime] topbar-messages status:', status, err || '');
+      });
 
     /* files table — INSERT (file upload) */
     sb.channel('topbar-files')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'order_files' }, async (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'order_file_access' }, async (payload) => {
         const f = payload.new;
         if (f.uploaded_by === 'admin') return;
         _addNotif({
@@ -260,9 +296,10 @@
           time:   new Date().toISOString(),
           onclick: `window.location.href='order-management.html'`,
         });
-        _toast('📎 New file uploaded!');
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('[Realtime] topbar-files status:', status, err || '');
+      });
   }
 
   /* ══════════════════════════════════════
@@ -271,10 +308,30 @@
   async function _fetchNotifs() {
     const sb = window.scriptoraSupabase;
     if (!sb) return;
-    store.notifs = [];
+    const fresh = [];
 
     try {
-      /* Payment proof pending */
+      /* ── DB থেকে saved notifications (সব device এ পাবে) ── */
+      const { data: saved } = await sb
+        .from('admin_notifications')
+        .select('*')
+        .order('time', { ascending: false })
+        .limit(NOTIF_MAX);
+
+      (saved || []).forEach(n => {
+        fresh.push({
+          id:      n.id,
+          icon:    n.icon,
+          color:   n.color,
+          text:    n.text,
+          sub:     n.sub,
+          time:    n.time,
+          read:    n.read,
+          onclick: n.onclick,
+        });
+      });
+
+      /* ── DB query: payment proof pending (fresh state) ── */
       const { data: proofOrders } = await sb
         .from('orders')
         .select('id, title, order_number, updated_at, client_id')
@@ -283,19 +340,19 @@
         .limit(10);
 
       (proofOrders || []).forEach(o => {
-        store.notifs.push({
-          id:     'payment-' + o.id,
-          icon:   'ti-cash',
-          color:  'dp-purple',
-          text:   `Payment proof review pending`,
-          sub:    o.title || (o.order_number || o.id.slice(0,8)),
-          time:   o.updated_at,
-          read:   false,
-          onclick: `window.location.href='order-management.html'`,
-        });
+        const id = 'payment-' + o.id;
+        if (!fresh.find(n => n.id === id)) {
+          fresh.push({
+            id, icon: 'ti-cash', color: 'dp-purple',
+            text:   'Payment proof review pending',
+            sub:    o.title || o.order_number || o.id.slice(0, 8),
+            time:   o.updated_at, read: false,
+            onclick: `window.location.href='order-management.html'`,
+          });
+        }
       });
 
-      /* Overdue orders */
+      /* ── DB query: overdue orders ── */
       const { data: overdueOrders } = await sb
         .from('orders')
         .select('id, title, deadline')
@@ -303,42 +360,20 @@
         .limit(5);
 
       (overdueOrders || []).forEach(o => {
-        store.notifs.push({
-          id:     'overdue-' + o.id,
-          icon:   'ti-alert-circle',
-          color:  'dp-red',
-          text:   `Order overdue`,
-          sub:    o.title || 'Order',
-          time:   o.deadline,
-          read:   false,
-          onclick: `window.location.href='order-management.html'`,
-        });
+        const id = 'overdue-' + o.id;
+        if (!fresh.find(n => n.id === id)) {
+          fresh.push({
+            id, icon: 'ti-alert-circle', color: 'dp-red',
+            text: 'Order overdue',
+            sub:  o.title || 'Order',
+            time: o.deadline, read: false,
+            onclick: `window.location.href='order-management.html'`,
+          });
+        }
       });
 
-      /* New confirmed orders (last 24h) */
-      const since = new Date(Date.now() - 86400000).toISOString();
-      const { data: newOrders } = await sb
-        .from('orders')
-        .select('id, title, updated_at')
-        .eq('status', 'confirmed')
-        .gte('updated_at', since)
-        .order('updated_at', { ascending: false })
-        .limit(5);
-
-      (newOrders || []).forEach(o => {
-        store.notifs.push({
-          id:     'confirmed-' + o.id,
-          icon:   'ti-check',
-          color:  'dp-green',
-          text:   `নতুন order confirm হয়েছে`,
-          sub:    o.title || 'Order',
-          time:   o.updated_at,
-          read:   false,
-          onclick: `window.location.href='order-management.html'`,
-        });
-      });
-
-      store.notifs.sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0));
+      fresh.sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0));
+      store.notifs = fresh.slice(0, NOTIF_MAX);
 
     } catch (e) { console.error('notif fetch error', e); }
 
@@ -415,7 +450,7 @@
       return;
     }
 
-    list.innerHTML = store.notifs.slice(0, 8).map(item => `
+    list.innerHTML = store.notifs.slice(0, 20).map(item => `
       <div class="dp-item ${item.read ? '' : 'unread'}" onclick="${item.onclick}" style="cursor:pointer">
         <div class="dp-icon ${item.color}"><i class="ti ${item.icon}"></i></div>
         <div class="dp-body">
@@ -473,9 +508,10 @@
      ADD NOTIF (realtime থেকে)
   ══════════════════════════════════════ */
   function _addNotif(notif) {
-    /* duplicate check */
     if (store.notifs.find(n => n.id === notif.id)) return;
     store.notifs.unshift(notif);
+    if (store.notifs.length > NOTIF_MAX) store.notifs.length = NOTIF_MAX;
+    _saveNotifToDB(notif); /* DB তে persist করো */
     _renderNotifPanel();
     _updateNotifBadge();
   }
@@ -503,6 +539,7 @@
   ══════════════════════════════════════ */
   window.topbarMarkNotifsRead = function () {
     store.notifs.forEach(n => { n.read = true; });
+    _markAllReadInDB(); /* DB তে read = true করো */
     _renderNotifPanel();
     _updateNotifBadge();
   };

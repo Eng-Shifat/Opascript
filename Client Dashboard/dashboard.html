@@ -344,44 +344,85 @@
 
         <!-- Payment + Files -->
         <div class="detail-two-col">
+          <div class="detail-left-col">
           <div class="detail-panel payment-panel">
-            <div class="panel-head">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              PAYMENT SUMMARY
-            </div>
 
-            <!-- Due state: shield + message -->
-            <div class="pay-due-hero" id="payDueHero" style="display:none">
-              <div class="pay-shield-wrap">
-                <div class="pay-shield-icon">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <!-- ── HEADER ── -->
+            <div class="pps-header">
+              <div class="pps-header-left">
+                <div class="pps-header-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </div>
-                <div class="pay-shield-sparks">✦</div>
+                <span class="pps-header-title">PAYMENT SUMMARY</span>
               </div>
-              <div class="pay-due-text">
-                <div class="pay-due-title">Complete your payment to unlock your files</div>
-                <div class="pay-due-sub">Total payment clear করলে আপনি আপনার সমস্ত ফাইল download করতে পারবেন।</div>
+              <span class="pps-sparkle">✦</span>
+            </div>
+
+            <!-- ── HERO (shown when due) ── -->
+            <div class="pps-hero" id="payDueHero" style="display:none">
+              <div class="pps-shield-col">
+                <div class="pps-shield-glow"></div>
+                <div class="pps-shield-wrap">
+                  <img src="assets/security-icon.png" alt="payment shield" class="pps-shield-img" draggable="false" tabindex="-1">
+                </div>
+                <div class="pps-shield-spark pps-spark-tl">✦</div>
+                <div class="pps-shield-spark pps-spark-br">✦</div>
+              </div>
+              <div class="pps-hero-text">
+                <div class="pps-hero-badge">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Action Required
+                </div>
+                <h3 class="pps-hero-title">Complete your payment to unlock your files</h3>
+                <p class="pps-hero-sub">Unlock your files after payment confirmation. Your files will become available automatically once your payment has been fully verified by the admin. This process ensures secure transactions and guarantees that file access is granted only after successful payment confirmation</p>
               </div>
             </div>
 
-            <div class="pay-row"><span>মোট মূল্য</span><span id="detailTotal">—</span></div>
-            <div class="pay-row"><span>Advance paid</span><span class="green-text" id="detailAdvance">—</span></div>
-            <div class="pay-row total-row"><span>Due amount</span><span class="red-text" id="detailDue">—</span></div>
+            <!-- ── DIVIDER ── -->
+            <div class="pps-divider"></div>
+
+            <!-- ── PAYMENT ROWS ── -->
+            <div class="pps-rows">
+              <div class="pps-row">
+                <div class="pps-row-left">
+                  <div class="pps-row-label">মোট মূল্য</div>
+                </div>
+                <span class="pps-row-amount pps-amt-white" id="detailTotal">—</span>
+              </div>
+
+              <div class="pps-row">
+                <div class="pps-row-left">
+                  <div class="pps-row-label">Advance paid</div>
+                </div>
+                <span class="pps-row-amount pps-amt-green" id="detailAdvance">—</span>
+              </div>
+
+              <div class="pps-row pps-row-due">
+                <div class="pps-row-left">
+                  <div class="pps-row-label">Due amount</div>
+                </div>
+                <span class="pps-row-amount pps-amt-red" id="detailDue">—</span>
+              </div>
+            </div>
+
             <div class="pay-badges" id="payBadges"></div>
 
-            <!-- Due warning -->
-            <div class="pay-due-warning" id="payDueWarning" style="display:none">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              আপনার বাকি payment টি clear করলে সাথে সাথে ফাইল unlock হবে।
+            <!-- ── WARNING BOX ── -->
+            <div class="pps-warning" id="payDueWarning" style="display:none">
+              <div class="pps-warning-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <span>আপনার বাকি payment টি clear করলে সাথে সাথে ফাইল unlock করা যাবে।</span>
             </div>
 
-            <!-- Pay Now button -->
+            <!-- ── PAY NOW ── -->
             <div id="payNowSection" style="display:none">
-              <button class="pay-now-btn" id="payNowBtn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                Pay Now →
+              <button class="pps-pay-btn" id="payNowBtn">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                Pay Now
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
-              <div class="pay-secure-note">
+              <div class="pps-secure">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Secure payment powered by SSL encryption
               </div>
@@ -424,53 +465,71 @@
               <div class="proof-status" id="proofStatus"></div>
               <button class="proof-send-btn" id="proofSendBtn">💸 Proof পাঠান</button>
             </div>
-            <div class="proof-submitted" id="proofSubmitted" style="display:none">
+          <div class="proof-submitted" id="proofSubmitted" style="display:none">
               ✓ Payment proof পাঠানো হয়েছে। Admin review করছেন।
             </div>
           </div>
 
-          <div class="detail-panel files-panel">
-            <div class="panel-head">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-              FILES
+          <!-- Payment History — left col, below payment summary -->
+          <div class="client-pay-history-card" id="clientPayHistoryCard" style="display:none">
+            <div class="pay-hist-header">
+              <div class="pay-hist-header-left">
+                <div class="pay-hist-header-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-2.8-2.8L7 14"/></svg>
+                </div>
+                <span class="pay-hist-header-title">PAYMENT HISTORY</span>
+              </div>
+              <div class="pay-hist-header-right">
+                <select class="pay-hist-filter" id="payHistFilterSelect" onchange="window._setPayHistFilter(this.value)">
+                  <option value="all">All Status</option>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <div class="pay-hist-filter-icon-btn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                </div>
+              </div>
             </div>
-            <div id="filesList">
-              <div class="empty-note">কোনো file নেই</div>
-            </div>
-            <div id="filesViewAllWrap" style="display:none">
-              <button class="files-view-all-btn" id="filesViewAllBtn">
-                View All Files (<span id="filesViewAllCount">0</span>) →
-              </button>
-            </div>
+            <div id="clientPayHistoryList" class="client-pay-history-list"></div>
+            <div id="clientPayHistoryViewAll" class="pay-hist-viewall-wrap" style="display:none"></div>
+          </div>
+
+        </div><!-- end left col -->
+
+        <!-- Right col — Files -->
+        <div class="detail-panel files-panel">
+          <div class="panel-head">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            FILES
+          </div>
+          <div id="filesList">
+            <div class="empty-note">কোনো file নেই</div>
+          </div>
+          <div id="filesViewAllWrap" style="display:none">
+            <button class="files-view-all-btn" id="filesViewAllBtn">
+              View All Files (<span id="filesViewAllCount">0</span>) →
+            </button>
           </div>
         </div>
 
-        <!-- Client Payment History — standalone full-width card -->
-        <div class="client-pay-history-card" id="clientPayHistoryCard" style="display:none">
-          <div class="pay-hist-header">
-            <div class="panel-head" style="margin-bottom:0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-2.8-2.8L7 14"/></svg>
-              PAYMENT HISTORY
-            </div>
-            <select class="pay-hist-filter" id="payHistFilterSelect" onchange="window._setPayHistFilter(this.value)">
-              <option value="all">All Status</option>
-              <option value="approved">Approved</option>
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
-          <div id="clientPayHistoryList" class="client-pay-history-list"></div>
-          <div id="clientPayHistoryViewAll" class="pay-hist-viewall-wrap" style="display:none"></div>
-        </div>
+      </div><!-- end detail-two-col -->
 
         <!-- Admin Message Preview -->
         <div class="admin-msg-card" id="adminMsgCard" style="display:none">
-          <div class="panel-head">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            ADMIN MESSAGE
+          <div class="admin-msg-left">
+            <div class="admin-msg-header">
+              <div class="admin-msg-header-icon">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <span class="admin-msg-header-title">ADMIN MESSAGE</span>
+            </div>
+            <div class="admin-msg-text" id="adminMsgText"></div>
+            <button class="go-chat-btn" id="goChatBtn">সম্পূর্ণ চ্যাট দেখুন →</button>
           </div>
-          <div class="admin-msg-text" id="adminMsgText"></div>
-          <button class="go-chat-btn" id="goChatBtn">সম্পূর্ণ চ্যাট দেখুন →</button>
+          <div class="admin-msg-right">
+            <img src="assets/message-icon.png" alt="message" class="admin-msg-img" draggable="false">
+          </div>
         </div>
       </div>
 
