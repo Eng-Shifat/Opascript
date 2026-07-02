@@ -260,19 +260,42 @@ async function openOrderDetail(orderId) {
   const hasDue = liveDue > 0;
 
   // Due hero + warning + Pay Now
-  const heroTitleEl = document.getElementById('ppsHeroTitle');
-  const heroSubEl   = document.getElementById('ppsHeroSub');
+  const heroTitleEl  = document.getElementById('ppsHeroTitle');
+  const heroSubEl    = document.getElementById('ppsHeroSub');
+  const heroBadgeEl  = document.getElementById('ppsHeroBadge');
+  const heroBadgeTxt = document.getElementById('ppsHeroBadgeText');
+  const heroBadgeIco = document.getElementById('ppsHeroBadgeIcon');
+  const heroRingEl   = document.getElementById('ppsHeroRing');
   if (hasDue) {
     heroTitleEl.textContent = 'Complete your payment to unlock your files';
     heroSubEl.textContent   = 'Unlock your files after payment confirmation. Your files will become available automatically once your payment has been fully verified by the admin. This process ensures secure transactions and guarantees that file access is granted only after successful payment confirmation';
+    heroBadgeEl.classList.remove('confirmed');
+    heroBadgeTxt.textContent = 'Action Required';
+    heroBadgeIco.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+    heroRingEl.style.display = 'none';
   } else {
-    heroTitleEl.textContent = 'Congratulations! You\'re all set!';
+    heroTitleEl.textContent = 'Congratulations! You\'re all set! 🎉';
     heroSubEl.textContent   = 'Your payment has been completed successfully. You now have full access to all your files.';
+    heroBadgeEl.classList.add('confirmed');
+    heroBadgeTxt.textContent = 'Payment Confirmed';
+    heroBadgeIco.innerHTML = '<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>';
+    heroRingEl.style.display = 'flex';
   }
+  heroBadgeEl.style.display = 'inline-flex';
   document.getElementById('payDueHero').style.display    = 'flex';
   document.getElementById('payDueWarning').style.display = hasDue ? 'flex'  : 'none';
   document.getElementById('payDueNote').style.display    = hasDue ? 'none'  : 'flex';
   document.getElementById('payNowSection').style.display = hasDue ? 'block' : 'none';
+
+  if (!hasDue) {
+    const accessEl = document.getElementById('payAccessUntil');
+    if (accessEl) {
+      const base = order.order_date ? new Date(order.order_date) : new Date();
+      const until = new Date(base.getTime());
+      until.setDate(until.getDate() + 60);
+      accessEl.textContent = until.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+  }
 
   // Pay Now → payment page
   document.getElementById('payNowBtn').onclick = () => {
