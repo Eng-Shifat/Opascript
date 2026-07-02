@@ -506,23 +506,27 @@ input, select, textarea { font-family: inherit; }
 
 /* Detail panels */
 .detail-two-col {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "payment files"
+    "history .";
   gap: 10px;
   align-items: stretch;
 }
-.detail-left-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.payment-panel {
+  grid-area: payment;
   min-width: 0;
 }
+.client-pay-history-card {
+  grid-area: history;
+}
 .files-panel {
-  flex: 1;
+  grid-area: files;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: 100%;
+  height: auto;
   box-sizing: border-box;
   position: relative;
   background: linear-gradient(145deg, #0c0e1a 0%, #10082a 45%, #190a3e 100%) !important;
@@ -1213,7 +1217,13 @@ input, select, textarea { font-family: inherit; }
 /* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .stat-row { grid-template-columns: repeat(2, 1fr); }
-  .detail-two-col { flex-direction: column; }
+  .detail-two-col {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "payment"
+      "files"
+      "history";
+  }
   .profile-grid-2 { grid-template-columns: 1fr; }
 }
 

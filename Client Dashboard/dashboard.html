@@ -111,6 +111,89 @@
     #folder-file1{ animation: fileFly1 3.2s ease-in-out infinite; }
     #folder-file2{ animation: fileFly2 3.2s ease-in-out infinite; }
     #folder-file3{ animation: fileFly3 3.2s ease-in-out infinite; }
+
+    /* ══ Payment Due Popup — "genie out of the lamp" open/close animation ══ */
+    #paymentDuePopupCard { transform-origin: center center; will-change: transform, opacity, filter; }
+
+    #paymentDueOverlay.pdp-active { animation: pdpOverlayFadeIn .3s ease forwards; }
+    @keyframes pdpOverlayFadeIn {
+      from { background: rgba(0,0,0,0); }
+      to   { background: rgba(0,0,0,0.6); }
+    }
+
+    /* Card rises out of the click point like smoke, wobbling as it widens
+       into shape, then settles into place at the centre of the screen. */
+    #paymentDueOverlay.pdp-active #paymentDuePopupCard {
+      animation: pdpGenieIn 1.6s cubic-bezier(.3,.1,.2,1) forwards;
+    }
+    @keyframes pdpGenieIn {
+      0%   { opacity: 0; transform: scale(0.9); filter: blur(8px); }
+      60%  { opacity: 0; transform: scale(0.9); filter: blur(8px); }
+      75%  { opacity: .35; transform: scale(0.95); filter: blur(4px); }
+      88%  { opacity: .75; transform: scale(0.985); filter: blur(1.5px); }
+      100% { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+
+    #paymentDueOverlay.pdp-closing { animation: pdpOverlayFadeOut .35s ease forwards; }
+    @keyframes pdpOverlayFadeOut {
+      from { background: rgba(0,0,0,0.6); }
+      to   { background: rgba(0,0,0,0); }
+    }
+    /* Sucked back into the lock, like the genie returning to the lamp */
+    #paymentDueOverlay.pdp-closing #paymentDuePopupCard {
+      animation: pdpGenieOut .4s cubic-bezier(.6,-0.1,.85,.35) forwards;
+    }
+    @keyframes pdpGenieOut {
+      0%   { opacity: 1; transform: scale(1); filter: blur(0); }
+      40%  { opacity: .5; transform: scale(0.96); filter: blur(3px); }
+      100% { opacity: 0; transform: scale(0.9); filter: blur(8px); }
+    }
+
+    /* Lock icon itself pops when clicked, selling the "unlocking" moment */
+    .pdp-lock-icon.pdp-lock-pop { animation: pdpLockPop .4s ease; }
+    @keyframes pdpLockPop {
+      0%   { transform: scale(1)    rotate(0deg); }
+      30%  { transform: scale(1.4)  rotate(-10deg); }
+      60%  { transform: scale(0.85) rotate(6deg); }
+      100% { transform: scale(1)    rotate(0deg); }
+    }
+
+    /* Small ring flash right at the click point, the instant before the smoke rises */
+    .pdp-burst-ring {
+      position: fixed;
+      width: 10px; height: 10px;
+      margin-left: -5px; margin-top: -5px;
+      border-radius: 50%;
+      border: 2px solid #a78bfa;
+      background: radial-gradient(circle, rgba(167,139,250,0.55), transparent 70%);
+      pointer-events: none;
+      z-index: 10001;
+      animation: pdpRingBurst .5s ease-out forwards;
+    }
+    @keyframes pdpRingBurst {
+      0%   { transform: scale(0.3); opacity: 0.9; }
+      100% { transform: scale(7);   opacity: 0; }
+    }
+
+    /* Magical smoke wisps that curl upward from the lock, like a genie's trail */
+    .pdp-smoke {
+      position: fixed;
+      width: 16px; height: 16px;
+      margin-left: -8px; margin-top: -8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(196,181,253,0.65) 0%, rgba(129,140,248,0.35) 55%, transparent 75%);
+      filter: blur(2px);
+      pointer-events: none;
+      z-index: 10001;
+      opacity: 0;
+      animation: pdpSmokeRise .75s ease-out forwards;
+    }
+    @keyframes pdpSmokeRise {
+      0%   { opacity: 0;   transform: translate(0,0) scale(0.5) rotate(0deg); }
+      14%  { opacity: .85; }
+      55%  { transform: translate(calc(var(--sx,0px) * 0.6), calc(var(--sy,-60px) * 0.6)) scale(1.5) rotate(calc(var(--sr,20deg) * 0.6)); }
+      100% { opacity: 0;   transform: translate(var(--sx,0px), var(--sy,-60px)) scale(2.4) rotate(var(--sr,20deg)); }
+    }
   </style>
 </head>
 <body>
@@ -344,7 +427,6 @@
 
         <!-- Payment + Files -->
         <div class="detail-two-col">
-          <div class="detail-left-col">
           <div class="detail-panel payment-panel">
 
             <!-- ── HEADER ── -->
@@ -494,8 +576,6 @@
             <div id="clientPayHistoryList" class="client-pay-history-list"></div>
             <div id="clientPayHistoryViewAll" class="pay-hist-viewall-wrap" style="display:none"></div>
           </div>
-
-        </div><!-- end left col -->
 
         <!-- Right col — Files -->
         <div class="detail-panel files-panel">
@@ -817,7 +897,7 @@
 
   <!-- Payment Due Popup -->
   <div id="paymentDueOverlay" onclick="if(event.target===this)closePaymentDuePopup()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;padding:16px;">
-    <div style="background:#0d1423;border:1px solid rgba(255,255,255,0.08);border-radius:16px;width:100%;max-width:420px;max-height:92vh;overflow-y:auto;position:relative;padding:24px 20px 20px;font-family:'Inter','Segoe UI',sans-serif;">
+    <div id="paymentDuePopupCard" style="background:#0d1423;border:1px solid rgba(255,255,255,0.08);border-radius:16px;width:100%;max-width:420px;max-height:92vh;overflow-y:auto;position:relative;padding:24px 20px 20px;font-family:'Inter','Segoe UI',sans-serif;">
 
       <!-- Close -->
       <button onclick="closePaymentDuePopup()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>

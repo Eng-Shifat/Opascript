@@ -377,7 +377,7 @@ async function loadOrderFiles(orderId, hasDue) {
           ? `<button class="file-view-btn cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#6ee7b7;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>`
-          : `<span title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;" onclick="showPaymentDuePopup()">🔒</span>`);
+          : `<span class="pdp-lock-icon" title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;display:inline-block;" onclick="showPaymentDuePopup(event)">🔒</span>`);
 
       div.innerHTML = `
         <div class="file-icon ${iconCls}">${ext}</div>
@@ -510,7 +510,7 @@ async function loadFilesPage() {
             ? `<button class="file-view-btn cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#6ee7b7;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               </button>`
-            : `<span title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;" onclick="showPaymentDuePopup()">🔒</span>`) +
+            : `<span class="pdp-lock-icon" title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;display:inline-block;" onclick="showPaymentDuePopup(event)">🔒</span>`) +
           `</div>`;
         card.appendChild(item);
       }
@@ -1455,7 +1455,63 @@ window._setPayHistFilter = function(val) {
 };
 
 /* ── Payment Due Popup ──────────────────────────────────────────────────── */
-window.showPaymentDuePopup = async function() {
+
+/* Small ring that bursts outward from the clicked lock icon */
+function _spawnPdpBurstRing(x, y) {
+  const ring = document.createElement('div');
+  ring.className = 'pdp-burst-ring';
+  ring.style.left = x + 'px';
+  ring.style.top  = y + 'px';
+  document.body.appendChild(ring);
+  const cleanup = () => ring.remove();
+  ring.addEventListener('animationend', cleanup, { once: true });
+  setTimeout(cleanup, 700); // fallback safety
+}
+
+/* A stream of smoke wisps that travels from the click point toward the
+   centre of the screen — like a genie's trail riding along with the file
+   as it drifts into place, thinning out only once it's arrived. */
+function _spawnPdpSmoke(x, y) {
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+  const dx = centerX - x;
+  const dy = centerY - y;
+
+  const waves = 8;
+  for (let w = 0; w < waves; w++) {
+    const waveDelay = w * 130; // ms between waves — last wave lands ~1.6s in, matching the card's reveal
+    const puffsInWave = 3;
+    for (let i = 0; i < puffsInWave; i++) {
+      const puff = document.createElement('div');
+      puff.className = 'pdp-smoke';
+
+      // where along the lock -> centre path this wave starts from
+      const along = Math.min(0.9, w / waves) + (Math.random() * 0.08);
+      const startX = x + dx * along + (Math.random() - 0.5) * 26;
+      const startY = y + dy * along + (Math.random() - 0.5) * 26;
+      puff.style.left = startX + 'px';
+      puff.style.top  = startY + 'px';
+
+      // each puff keeps drifting a bit further along the same path, curling as it goes
+      const remain  = 1 - along;
+      const travelX = dx * remain * (0.35 + Math.random() * 0.3) + (Math.random() - 0.5) * 40;
+      const travelY = dy * remain * (0.35 + Math.random() * 0.3) - (20 + Math.random() * 20);
+      const rotate  = (Math.random() - 0.5) * 90;
+
+      puff.style.setProperty('--sx', travelX + 'px');
+      puff.style.setProperty('--sy', travelY + 'px');
+      puff.style.setProperty('--sr', rotate + 'deg');
+      puff.style.animationDelay = (waveDelay + i * 25) + 'ms';
+
+      document.body.appendChild(puff);
+      const cleanup = () => puff.remove();
+      puff.addEventListener('animationend', cleanup, { once: true });
+      setTimeout(cleanup, waveDelay + 900); // fallback safety
+    }
+  }
+}
+
+window.showPaymentDuePopup = async function(event) {
   const order = allOrders.find(o => o.id === currentOrderId);
   if (!order) return;
 
@@ -1481,17 +1537,82 @@ window.showPaymentDuePopup = async function() {
   setTxt('popupDue2',      `৳${fmt(due)}`);
 
   const overlay = document.getElementById('paymentDueOverlay');
+  const card    = document.getElementById('paymentDuePopupCard');
+  if (!overlay) return;
+
+  overlay.classList.remove('pdp-closing');
+
+  /* Work out where the popup should "burst" from — the clicked lock icon,
+     falling back to screen centre if triggered without an event. */
+  let originX = window.innerWidth / 2;
+  let originY = window.innerHeight / 2;
+
+  if (event && typeof event.clientX === 'number') {
+    originX = event.clientX;
+    originY = event.clientY;
+
+    const trigger = event.currentTarget;
+    if (trigger && trigger.classList) {
+      trigger.classList.remove('pdp-lock-pop');
+      void trigger.offsetWidth; // restart animation if clicked repeatedly
+      trigger.classList.add('pdp-lock-pop');
+    }
+    _spawnPdpBurstRing(originX, originY);
+    _spawnPdpSmoke(originX, originY);
+  }
+
+  if (card) {
+    // Clear out any stale close-listener left over from a previous cycle —
+    // otherwise it can fire when THIS open's entrance animation ends and
+    // slam the popup shut again.
+    if (card._pdpAnimEndHandler) {
+      card.removeEventListener('animationend', card._pdpAnimEndHandler);
+      card._pdpAnimEndHandler = null;
+    }
+    card.style.setProperty('--pdp-x', (originX - window.innerWidth / 2) + 'px');
+    card.style.setProperty('--pdp-y', (originY - window.innerHeight / 2) + 'px');
+  }
+
   overlay.style.display = 'flex';
+  overlay.classList.remove('pdp-active');
+  void overlay.offsetWidth; // force reflow so the animation restarts every open
+  overlay.classList.add('pdp-active');
   document.body.style.overflow = 'hidden';
 };
 
 window.closePaymentDuePopup = function() {
   const overlay = document.getElementById('paymentDueOverlay');
-  if (overlay) overlay.style.display = 'none';
-  document.body.style.overflow = '';
-};
+  const card    = document.getElementById('paymentDuePopupCard');
+  if (!overlay || overlay.style.display === 'none') return;
 
-/* Close on overlay click */
-document.getElementById('paymentDueOverlay')?.addEventListener('click', function(e) {
-  if (e.target === this) closePaymentDuePopup();
-});
+  overlay.classList.remove('pdp-active');
+  overlay.classList.add('pdp-closing');
+
+  let fallbackId;
+  const finish = () => {
+    overlay.style.display = 'none';
+    overlay.classList.remove('pdp-closing');
+    document.body.style.overflow = '';
+    clearTimeout(fallbackId);
+    if (card && card._pdpAnimEndHandler) {
+      card.removeEventListener('animationend', card._pdpAnimEndHandler);
+      card._pdpAnimEndHandler = null;
+    }
+  };
+
+  if (card) {
+    // Only react to THIS card's own close animation ending (not a bubbled
+    // event from one of the little icon animations inside it), and make
+    // sure we never stack more than one listener across open/close cycles.
+    if (card._pdpAnimEndHandler) {
+      card.removeEventListener('animationend', card._pdpAnimEndHandler);
+    }
+    const onCardAnimEnd = (e) => {
+      if (e.target !== card || e.animationName !== 'pdpGenieOut') return;
+      finish();
+    };
+    card._pdpAnimEndHandler = onCardAnimEnd;
+    card.addEventListener('animationend', onCardAnimEnd);
+  }
+  fallbackId = setTimeout(finish, 420); // fallback safety
+};
