@@ -260,8 +260,18 @@ async function openOrderDetail(orderId) {
   const hasDue = liveDue > 0;
 
   // Due hero + warning + Pay Now
-  document.getElementById('payDueHero').style.display    = hasDue ? 'flex'  : 'none';
+  const heroTitleEl = document.getElementById('ppsHeroTitle');
+  const heroSubEl   = document.getElementById('ppsHeroSub');
+  if (hasDue) {
+    heroTitleEl.textContent = 'Complete your payment to unlock your files';
+    heroSubEl.textContent   = 'Unlock your files after payment confirmation. Your files will become available automatically once your payment has been fully verified by the admin. This process ensures secure transactions and guarantees that file access is granted only after successful payment confirmation';
+  } else {
+    heroTitleEl.textContent = 'Congratulations! You\'re all set!';
+    heroSubEl.textContent   = 'Your payment has been completed successfully. You now have full access to all your files.';
+  }
+  document.getElementById('payDueHero').style.display    = 'flex';
   document.getElementById('payDueWarning').style.display = hasDue ? 'flex'  : 'none';
+  document.getElementById('payDueNote').style.display    = hasDue ? 'none'  : 'flex';
   document.getElementById('payNowSection').style.display = hasDue ? 'block' : 'none';
 
   // Pay Now → payment page

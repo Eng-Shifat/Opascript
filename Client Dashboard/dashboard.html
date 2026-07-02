@@ -455,8 +455,8 @@
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                   Action Required
                 </div>
-                <h3 class="pps-hero-title">Complete your payment to unlock your files</h3>
-                <p class="pps-hero-sub">Unlock your files after payment confirmation. Your files will become available automatically once your payment has been fully verified by the admin. This process ensures secure transactions and guarantees that file access is granted only after successful payment confirmation</p>
+                <h3 class="pps-hero-title" id="ppsHeroTitle">Complete your payment to unlock your files</h3>
+                <p class="pps-hero-sub" id="ppsHeroSub">Unlock your files after payment confirmation. Your files will become available automatically once your payment has been fully verified by the admin. This process ensures secure transactions and guarantees that file access is granted only after successful payment confirmation</p>
               </div>
             </div>
 
@@ -495,6 +495,14 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
               <span>আপনার বাকি payment টি clear করলে সাথে সাথে ফাইল unlock করা যাবে।</span>
+            </div>
+
+            <!-- ── NOTE BOX (shown when fully paid) ── -->
+            <div class="pps-note" id="payDueNote" style="display:none">
+              <div class="pps-note-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span>Your files are available for 60 days from your order date, so be sure to download them in time.</span>
             </div>
 
             <!-- ── PAY NOW ── -->
