@@ -108,8 +108,8 @@ function renderHomePage() {
   const active=allOrders.filter(o=>!['completed','cancelled','pending'].includes(o.status)).length;
   const pending=allOrders.filter(o=>o.status==='pending').length;
   const completed=allOrders.filter(o=>o.status==='completed').length;
-  setText('totalOrders',total); setText('activeOrders',active);
-  setText('pendingOrders',pending); setText('completedOrders',completed);
+  animateStatNum('totalOrders',total); animateStatNum('activeOrders',active);
+  animateStatNum('pendingOrders',pending); animateStatNum('completedOrders',completed);
 
   const activeList=document.getElementById('activeOrdersList');
   const activeOrders=allOrders.filter(o=>o.status!=='completed');
@@ -128,7 +128,220 @@ function renderHomePage() {
     if(completedEmpty) completedEmpty.style.display = completedOrders.length===0?'block':'none';
   completedOrders.forEach(o=>completedList.appendChild(buildCompletedCard(o)));
   }
+
+  renderOrdersTable();
 }
+
+/* Counts a stat number up from its current value to the target, so the
+   dashboard feels alive on every load instead of just snapping to a number. */
+function animateStatNum(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = parseInt(el.textContent, 10) || 0;
+  if (start === target) { el.textContent = target; return; }
+  const duration = 700, startTime = performance.now();
+  function tick(now) {
+    const p = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+    el.textContent = Math.round(start + (target - start) * eased);
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DESKTOP ORDER TABLE (Dashboard home page)
+   ══════════════════════════════════════════════════════════════════════════ */
+const otState = { tab: 'all', sort: 'deadline', pkg: 'all', date: 'all', page: 1, pageSize: 8 };
+let otInitialized = false;
+
+function otIsOverdue(order) {
+  if (!order.deadline || order.status === 'completed') return false;
+  return new Date(order.deadline).getTime() < Date.now();
+}
+function otMatchesTab(order, tab) {
+  switch (tab) {
+    case 'in_progress': return ['confirmed','payment_done','writing'].includes(order.status);
+    case 'in_review':   return ['draft_sent','revision'].includes(order.status);
+    case 'completed':   return order.status === 'completed';
+    case 'pending':     return order.status === 'pending';
+    case 'overdue':     return otIsOverdue(order);
+    default:            return true; // 'all'
+  }
+}
+function otMatchesDate(order, range) {
+  if (range === 'all' || !order.deadline) return true;
+  const d = new Date(order.deadline), now = new Date();
+  if (range === 'week')  { const in7 = new Date(now); in7.setDate(in7.getDate()+7);  return d >= now && d <= in7; }
+  if (range === 'month') { const in30 = new Date(now); in30.setDate(in30.getDate()+30); return d >= now && d <= in30; }
+  if (range === 'year')  { return d.getFullYear() === now.getFullYear(); }
+  return true;
+}
+
+function otGetFiltered() {
+  let list = allOrders.filter(o => otMatchesTab(o, otState.tab));
+  if (otState.pkg !== 'all') list = list.filter(o => (o.package || '—') === otState.pkg);
+  list = list.filter(o => otMatchesDate(o, otState.date));
+
+  const sorted = [...list];
+  if (otState.sort === 'deadline')     sorted.sort((a,b)=> new Date(a.deadline||0) - new Date(b.deadline||0));
+  else if (otState.sort === 'newest')  sorted.sort((a,b)=> new Date(b.order_date||0) - new Date(a.order_date||0));
+  else if (otState.sort === 'amount_high') sorted.sort((a,b)=> Number(b.total_price||0) - Number(a.total_price||0));
+  else if (otState.sort === 'amount_low')  sorted.sort((a,b)=> Number(a.total_price||0) - Number(b.total_price||0));
+  return sorted;
+}
+
+function otDeadlineSub(order) {
+  if (!order.deadline) return '';
+  if (order.status === 'completed') return 'Completed';
+  const days = Math.ceil((new Date(order.deadline) - new Date()) / 86400000);
+  if (days < 0) return `${Math.abs(days)}d overdue`;
+  if (days === 0) return 'Due today';
+  return `${days}d left`;
+}
+
+function otInitials(title) {
+  const words = String(title||'?').trim().split(/\s+/);
+  return ((words[0]?.[0]||'') + (words[1]?.[0]||'')).toUpperCase() || '?';
+}
+function otAvatarColorClass(order) {
+  const palette = ['av-purple','av-blue','av-green','av-gold','av-pink','av-teal'];
+  const key = String(order.id ?? order.title ?? '');
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  return palette[hash % palette.length];
+}
+
+function renderOrdersTable() {
+  const tbody = document.getElementById('otTableBody');
+  if (!tbody) return; // desktop table not on this page
+
+  if (!otInitialized) { otInitTable(); otInitialized = true; }
+
+  // Tab counts (based on the full order set, not the current filters)
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+  setCount('otCountAll', allOrders.length);
+  setCount('otCountProgress', allOrders.filter(o=>otMatchesTab(o,'in_progress')).length);
+  setCount('otCountReview',   allOrders.filter(o=>otMatchesTab(o,'in_review')).length);
+  setCount('otCountCompleted',allOrders.filter(o=>otMatchesTab(o,'completed')).length);
+  setCount('otCountPending',  allOrders.filter(o=>otMatchesTab(o,'pending')).length);
+  setCount('otCountOverdue',  allOrders.filter(o=>otMatchesTab(o,'overdue')).length);
+
+  const filtered = otGetFiltered();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / otState.pageSize));
+  if (otState.page > totalPages) otState.page = totalPages;
+  const startIdx = (otState.page - 1) * otState.pageSize;
+  const pageItems = filtered.slice(startIdx, startIdx + otState.pageSize);
+
+  tbody.innerHTML = '';
+  document.getElementById('otEmpty').style.display = filtered.length === 0 ? 'flex' : 'none';
+
+  pageItems.forEach(order => {
+    const badge = getStatusBadge(order.status);
+    const overdue = otIsOverdue(order);
+    const tr = document.createElement('tr');
+    tr.className = 'ot-row';
+    tr.onclick = () => openOrderDetail(order.id);
+    const orderNo = order.order_number || ('#SCR-'+String(order.id).slice(-6).toUpperCase());
+    const subLabel = otDeadlineSub(order);
+    tr.innerHTML = `
+      <td>
+        <div class="ot-proj">
+          <div class="ot-proj-avatar ${otAvatarColorClass(order)}">${escHtml(otInitials(order.title))}</div>
+          <div class="ot-proj-text">
+            <div class="ot-proj-title">${escHtml(order.title||'Untitled')}</div>
+            <div class="ot-proj-meta">
+              <span>${escHtml(orderNo)}</span>
+              ${order.department ? `<span class="ot-proj-dept">${escHtml(order.department)}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      </td>
+      <td><span class="ot-package">${escHtml(order.package || '—')}</span></td>
+      <td><span class="ot-status"><span class="ot-status-dot" style="background:currentColor"></span>${badge.label}</span></td>
+      <td>
+        <div class="ot-deadline">${fmtDate(order.deadline)}</div>
+        <div class="ot-deadline-sub ${overdue?'urgent':(order.status==='completed'?'safe':'')}">${escHtml(subLabel)}</div>
+      </td>
+      <td class="ot-amount">৳${fmt(order.total_price)}</td>
+    `;
+    tr.querySelector('.ot-status').className = `ot-status ${badge.cls}`;
+    tbody.appendChild(tr);
+  });
+
+  // Pagination footer
+  const shownFrom = filtered.length === 0 ? 0 : startIdx + 1;
+  const shownTo = Math.min(startIdx + otState.pageSize, filtered.length);
+  setText('otPageInfo', `Showing ${shownFrom} to ${shownTo} of ${filtered.length} orders`);
+  setText('otPageNum', otState.page);
+  document.getElementById('otPrevBtn').disabled = otState.page <= 1;
+  document.getElementById('otNextBtn').disabled = otState.page >= totalPages;
+
+  // Package filter options (rebuilt only when the set of packages changes)
+  const pkgSelect = document.getElementById('otPackageSelect');
+  if (pkgSelect) {
+    const pkgs = Array.from(new Set(allOrders.map(o=>o.package).filter(Boolean))).sort();
+    const wanted = ['all', ...pkgs];
+    const current = Array.from(pkgSelect.options).map(o=>o.value);
+    if (JSON.stringify(current) !== JSON.stringify(wanted)) {
+      const prevVal = pkgSelect.value;
+      pkgSelect.innerHTML = `<option value="all">All Packages</option>` +
+        pkgs.map(p=>`<option value="${escHtml(p)}">${escHtml(p)}</option>`).join('');
+      if (wanted.includes(prevVal)) pkgSelect.value = prevVal;
+    }
+  }
+}
+
+function otInitTable() {
+  document.getElementById('otTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.ot-tab');
+    if (!btn) return;
+    document.querySelectorAll('.ot-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    otState.tab = btn.dataset.tab;
+    otState.page = 1;
+    renderOrdersTable();
+  });
+  document.getElementById('otSortSelect').addEventListener('change', (e) => {
+    otState.sort = e.target.value; otState.page = 1; renderOrdersTable();
+  });
+  document.getElementById('otPackageSelect').addEventListener('change', (e) => {
+    otState.pkg = e.target.value; otState.page = 1; renderOrdersTable();
+  });
+  document.getElementById('otDateSelect').addEventListener('change', (e) => {
+    otState.date = e.target.value; otState.page = 1; renderOrdersTable();
+  });
+  document.getElementById('otPrevBtn').addEventListener('click', () => {
+    if (otState.page > 1) { otState.page--; renderOrdersTable(); }
+  });
+  document.getElementById('otNextBtn').addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(otGetFiltered().length / otState.pageSize));
+    if (otState.page < totalPages) { otState.page++; renderOrdersTable(); }
+  });
+  document.getElementById('otExportBtn').addEventListener('click', otExportCsv);
+}
+
+function otExportCsv() {
+  const rows = otGetFiltered();
+  const header = ['Order Number','Title','Package','Department','Status','Deadline','Amount'];
+  const csvRows = [header.join(',')];
+  rows.forEach(o => {
+    const orderNo = o.order_number || ('SCR-'+String(o.id).slice(-6).toUpperCase());
+    const cells = [
+      orderNo, o.title||'', o.package||'', o.department||'',
+      getStatusBadge(o.status).label, o.deadline ? fmtDate(o.deadline) : '', o.total_price||0
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`);
+    csvRows.push(cells.join(','));
+  });
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `scriptora-orders-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
 
 function buildOrderCard(order) {
   const deadline=new Date(order.deadline), now=new Date();
@@ -283,6 +496,7 @@ async function openOrderDetail(orderId) {
   }
   heroBadgeEl.style.display = 'inline-flex';
   document.getElementById('payDueHero').style.display    = 'flex';
+  document.getElementById('payFeatureRow').style.display = hasDue ? 'none'  : 'flex';
   document.getElementById('payDueWarning').style.display = hasDue ? 'flex'  : 'none';
   document.getElementById('payDueNote').style.display    = hasDue ? 'none'  : 'flex';
   document.getElementById('payNowSection').style.display = hasDue ? 'block' : 'none';
@@ -290,7 +504,8 @@ async function openOrderDetail(orderId) {
   if (!hasDue) {
     const accessEl = document.getElementById('payAccessUntil');
     if (accessEl) {
-      const base = order.order_date ? new Date(order.order_date) : new Date();
+      let base = new Date(order.order_date || order.created_at || Date.now());
+      if (isNaN(base.getTime())) base = new Date();
       const until = new Date(base.getTime());
       until.setDate(until.getDate() + 60);
       accessEl.textContent = until.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -1186,7 +1401,7 @@ function fmtDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-
 function fmtDateLong(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-BD',{day:'numeric',month:'long',year:'numeric'});}
 function fmtTime(d){if(!d)return'';return new Date(d).toLocaleTimeString('en-BD',{hour:'2-digit',minute:'2-digit'});}
 function formatCountdown(ms){if(ms<=0)return'সময় শেষ!';const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);if(d>0)return`${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`;return`${pad(h)}h ${pad(m)}m ${pad(s)}s`;}
-function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed ✓'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
+function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-writing',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
 /* ═══════════════════════════════════════════
    PAYMENT PROOF SUBMIT — Client Side
@@ -1649,3 +1864,118 @@ window.closePaymentDuePopup = function() {
   }
   fallbackId = setTimeout(finish, 420); // fallback safety
 };
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TOPBAR GLOBAL SEARCH (search across the client's own orders)
+   ══════════════════════════════════════════════════════════════════════════ */
+(function initTopbarSearch() {
+  const input    = document.getElementById('cdSearchInput');
+  const wrap     = document.getElementById('cdSearchWrap');
+  const dropdown = document.getElementById('cdSearchDropdown');
+  if (!input || !wrap || !dropdown) return;
+
+  let activeIdx = -1;
+  let currentResults = [];
+
+  function getOrderPool() {
+    return Array.isArray(window.allOrders) ? window.allOrders : (typeof allOrders !== 'undefined' ? allOrders : []);
+  }
+
+  function searchOrders(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return getOrderPool().filter(o => {
+      const orderNo = (o.order_number || ('#SCR-' + String(o.id).slice(-6).toUpperCase())).toLowerCase();
+      return (o.title || '').toLowerCase().includes(q)
+          || orderNo.includes(q)
+          || (o.package || '').toLowerCase().includes(q)
+          || (o.department || '').toLowerCase().includes(q);
+    }).slice(0, 8);
+  }
+
+  function initialsOf(title) {
+    const words = String(title || '?').trim().split(/\s+/);
+    return ((words[0]?.[0] || '') + (words[1]?.[0] || '')).toUpperCase() || '?';
+  }
+
+  function renderResults(results) {
+    currentResults = results;
+    activeIdx = -1;
+    if (results.length === 0) {
+      dropdown.innerHTML = `<div class="cd-search-empty">কোনো matching order পাওয়া যায়নি</div>`;
+    } else {
+      dropdown.innerHTML = results.map((o, i) => {
+        const orderNo = o.order_number || ('#SCR-' + String(o.id).slice(-6).toUpperCase());
+        return `
+          <div class="cd-search-item" data-idx="${i}" data-id="${o.id}">
+            <div class="cd-search-item-avatar">${escHtml(initialsOf(o.title))}</div>
+            <div class="cd-search-item-text">
+              <div class="cd-search-item-title">${escHtml(o.title || 'Untitled')}</div>
+              <div class="cd-search-item-meta">${escHtml(orderNo)}${o.package ? ' · ' + escHtml(o.package) : ''}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+    dropdown.classList.add('open');
+  }
+
+  function closeDropdown() {
+    dropdown.classList.remove('open');
+    activeIdx = -1;
+  }
+
+  function pickResult(id) {
+    closeDropdown();
+    input.value = '';
+    input.blur();
+    if (typeof openOrderDetail === 'function') openOrderDetail(id);
+  }
+
+  input.addEventListener('input', () => {
+    const results = searchOrders(input.value);
+    if (input.value.trim()) renderResults(results); else closeDropdown();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (!dropdown.classList.contains('open')) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, currentResults.length - 1);
+      updateActive();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      updateActive();
+    } else if (e.key === 'Enter') {
+      if (activeIdx >= 0 && currentResults[activeIdx]) pickResult(currentResults[activeIdx].id);
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+      input.blur();
+    }
+  });
+
+  function updateActive() {
+    dropdown.querySelectorAll('.cd-search-item').forEach((el, i) => {
+      el.classList.toggle('active', i === activeIdx);
+    });
+  }
+
+  dropdown.addEventListener('click', (e) => {
+    const item = e.target.closest('.cd-search-item');
+    if (!item) return;
+    pickResult(Number(item.dataset.id));
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wrap.contains(e.target)) closeDropdown();
+  });
+
+  // Press "/" anywhere (outside of another input/textarea) to focus search
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/') return;
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
+    e.preventDefault();
+    input.focus();
+  });
+})();
