@@ -34,6 +34,7 @@ const STATUS_STEP_MAP = {
 };
 
 let currentUser=null, currentClient=null, allOrders=[], currentOrderId=null;
+let ordersPageFilter='all'; // 'all' | 'active' | 'completed' — set by the home page's View All links
 let countdownTimer=null, chatOrderId=null, realtimeSubs=[];
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -86,6 +87,14 @@ function updateSidebarUser() {
     document.getElementById('sbAvatar').innerHTML = `<img src="${currentClient.avatar_url}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
   }
 }
+
+function updatePageDate() {
+  const el = document.getElementById('pageDateText');
+  if (!el) return;
+  const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  el.textContent = dateStr;
+}
+updatePageDate();
 
 async function loadAllData() {
   await loadOrders();
@@ -352,34 +361,33 @@ function buildOrderCard(order) {
   card.onclick=()=>openOrderDetail(order.id);
   const badge=getStatusBadge(order.status);
   const cdColor=isUrgent?'cd-nums-urgent':'cd-nums-safe';
-  const prog=order.progress||0;
-  const progColor=isUrgent?'#ef4444':'#22c55e';
   const due=(order.due_amount||0)>0;
   card.innerHTML=`
     <div class="oc-top">
-      <div>
-        <div class="oc-title">${escHtml(order.title||'Untitled')}</div>
-        <div class="oc-meta">${escHtml(order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase()))} · ${escHtml(order.department||'')} · <span class="oc-price">৳${fmt(order.total_price)}</span></div>
+      <div class="oc-top-left">
+        <div class="oc-avatar ${otAvatarColorClass(order)}">${escHtml(otInitials(order.title))}</div>
+        <div class="oc-top-info">
+          <div class="oc-title">${escHtml(order.title||'Untitled')}</div>
+          <div class="oc-tags-row">
+            ${order.department?`<span class="oc-tag">${escHtml(order.department)}</span>`:''}
+          </div>
+        </div>
       </div>
       <span class="status-badge ${badge.cls}">${badge.label}</span>
+    </div>
+    <div class="oc-meta-row">
+      <div class="oc-meta">${escHtml(order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase()))} · <span class="oc-price">৳${fmt(order.total_price)}</span></div>
+      ${due
+        ?`<span class="oc-due">Due <strong class="oc-amount-strong">৳${fmt(order.due_amount)}</strong></span>`
+        :`<span class="oc-paid">Advance paid</span>`
+      }
     </div>
     <div class="oc-cd">
       <div class="cd-left">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Deadline — <strong>${fmtDate(order.deadline)}</strong>
       </div>
-      <div class="${cdColor}">${diffMs>0?formatCountdown(diffMs):'সময় শেষ!'}</div>
-    </div>
-    <div class="oc-prog-bar"><div class="oc-prog-fill" style="width:${prog}%;background:${progColor}"></div></div>
-    <div class="oc-foot">
-      <button class="oc-det-btn">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        Details দেখুন
-      </button>
-      ${due
-        ?`<span class="oc-due"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>৳${fmt(order.due_amount)} বাকি</span>`
-        :`<span class="oc-paid"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Advance paid ✓</span>`
-      }
+      <div class="${cdColor} js-countdown" data-deadline="${order.deadline}">${diffMs>0?formatCountdown(diffMs):'সময় শেষ!'}</div>
     </div>`;
   return card;
 }
@@ -388,9 +396,10 @@ function buildCompletedCard(order) {
   const card=document.createElement('div');
   card.className='completed-card'; card.onclick=()=>openOrderDetail(order.id);
   card.innerHTML=`
+    <div class="cc-avatar ${otAvatarColorClass(order)}">${escHtml(otInitials(order.title))}</div>
     <div><div class="cc-title">${escHtml(order.title||'Untitled')}</div><div class="cc-meta">${escHtml(order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase()))} · ${fmtDate(order.order_date)}</div></div>
     <div class="cc-right">
-      <span class="cc-done">✓ Done</span>
+      <span class="cc-done">Done</span>
       <button class="cc-dl-btn" onclick="event.stopPropagation();showPage('files')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download
@@ -403,9 +412,12 @@ function renderOrdersPage() {
   const list=document.getElementById('allOrdersList');
   const empty=document.getElementById('ordersEmpty');
   list.innerHTML='';
-  if(allOrders.length===0){empty.style.display='flex';return;}
+  const filtered = ordersPageFilter==='active' ? allOrders.filter(o=>o.status!=='completed')
+                  : ordersPageFilter==='completed' ? allOrders.filter(o=>o.status==='completed')
+                  : allOrders;
+  if(filtered.length===0){empty.style.display='flex';return;}
   empty.style.display='none';
-  allOrders.forEach(order=>{
+  filtered.forEach(order=>{
     const item=document.createElement('div');
     item.className='order-list-item'; item.onclick=()=>openOrderDetail(order.id);
     const badge=getStatusBadge(order.status);
@@ -1114,6 +1126,7 @@ function initNav() {
 
       const page=item.dataset.page;
       if(page==='files' && filesPageOrderFilter){ filesPageOrderFilter=null; loadFilesPage(); }
+      if(page==='orders'){ ordersPageFilter='all'; renderOrdersPage(); }
       showPage(page,item);
       if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}
     });
@@ -1136,8 +1149,18 @@ function initNav() {
 
       const page=item.dataset.page;
       if(page==='files' && filesPageOrderFilter){ filesPageOrderFilter=null; loadFilesPage(); }
+      if(page==='orders'){ ordersPageFilter='all'; renderOrdersPage(); }
       showPage(page);
       if(page==='messages'){const b=document.getElementById('msgBadge');b.textContent='0';b.style.display='none';}
+    });
+  });
+  document.querySelectorAll('.section-view-all').forEach(link=>{
+    link.addEventListener('click',e=>{
+      e.preventDefault();
+      const page=link.dataset.page;
+      ordersPageFilter=link.dataset.filter||'all';
+      showPage(page);
+      renderOrdersPage();
     });
   });
 }
@@ -1401,6 +1424,16 @@ function fmtDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-
 function fmtDateLong(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-BD',{day:'numeric',month:'long',year:'numeric'});}
 function fmtTime(d){if(!d)return'';return new Date(d).toLocaleTimeString('en-BD',{hour:'2-digit',minute:'2-digit'});}
 function formatCountdown(ms){if(ms<=0)return'সময় শেষ!';const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);if(d>0)return`${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`;return`${pad(h)}h ${pad(m)}m ${pad(s)}s`;}
+
+/* Ticks every second so the deadline countdown on each order card stays live,
+   instead of being frozen at the value computed when the card was rendered. */
+function tickLiveCountdowns() {
+  document.querySelectorAll('.js-countdown[data-deadline]').forEach(el => {
+    const diffMs = new Date(el.dataset.deadline) - new Date();
+    el.textContent = diffMs > 0 ? formatCountdown(diffMs) : 'সময় শেষ!';
+  });
+}
+setInterval(tickLiveCountdowns, 1000);
 function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-writing',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
 /* ═══════════════════════════════════════════
