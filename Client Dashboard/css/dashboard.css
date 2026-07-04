@@ -92,7 +92,7 @@ input, select, textarea { font-family: inherit; }
 
 .sb-nav {
   flex: 1;
-  padding: 10px 8px;
+  padding: 12px 8px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -2909,7 +2909,7 @@ input, select, textarea { font-family: inherit; }
 .cd-user-dd-item.logout:hover { background: rgba(248,113,113,0.08); color: #fca5a5; }
 
 /* Adjust main content for topbar */
-.db-main { padding-top: calc(56px + 24px) !important; }
+.db-main { padding-top: 56px !important; }
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
