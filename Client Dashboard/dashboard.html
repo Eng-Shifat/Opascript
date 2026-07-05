@@ -1,1170 +1,1834 @@
 <!DOCTYPE html>
 <html lang="bn">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — Scriptora</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="css/dashboard.css?v=3"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/dashboard.css?v=3" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     /* ══ Payment Due Popup — Animated Icons ══ */
 
     /* Plus signs float */
     @keyframes plusFloat {
-      0%, 100% { transform: translateY(0px) scale(1); opacity: 0.6; }
-      50%       { transform: translateY(-5px) scale(1.4); opacity: 1; }
+
+      0%,
+      100% {
+        transform: translateY(0px) scale(1);
+        opacity: 0.6;
+      }
+
+      50% {
+        transform: translateY(-5px) scale(1.4);
+        opacity: 1;
+      }
     }
-    .popup-plus-left  { display:inline-block; animation: plusFloat 2s ease-in-out infinite; }
-    .popup-plus-right { display:inline-block; animation: plusFloat 2s ease-in-out infinite 0.5s; }
+
+    .popup-plus-left {
+      display: inline-block;
+      animation: plusFloat 2s ease-in-out infinite;
+    }
+
+    .popup-plus-right {
+      display: inline-block;
+      animation: plusFloat 2s ease-in-out infinite 0.5s;
+    }
 
     /* Lock circle glow pulse */
     @keyframes lockGlow {
-      0%, 100% { box-shadow: 0 0 18px rgba(245,158,11,0.35); }
-      50%       { box-shadow: 0 0 36px rgba(245,158,11,0.75), 0 0 70px rgba(245,158,11,0.2); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 18px rgba(245, 158, 11, 0.35);
+      }
+
+      50% {
+        box-shadow: 0 0 36px rgba(245, 158, 11, 0.75), 0 0 70px rgba(245, 158, 11, 0.2);
+      }
     }
-    .popup-lock-circle { animation: lockGlow 2.2s ease-in-out infinite; }
+
+    .popup-lock-circle {
+      animation: lockGlow 2.2s ease-in-out infinite;
+    }
 
     /* SVG Lock shackle — up = unlocked, down = locked */
     @keyframes shackleMove {
-      0%,  15% { transform: translateY(0);    }   /* locked   */
-      30%, 45% { transform: translateY(-7px); }   /* unlocked */
-      60%, 75% { transform: translateY(0);    }   /* locked   */
-      90%,100% { transform: translateY(0);    }
+
+      0%,
+      15% {
+        transform: translateY(0);
+      }
+
+      /* locked   */
+      30%,
+      45% {
+        transform: translateY(-7px);
+      }
+
+      /* unlocked */
+      60%,
+      75% {
+        transform: translateY(0);
+      }
+
+      /* locked   */
+      90%,
+      100% {
+        transform: translateY(0);
+      }
     }
+
     @keyframes shackleFade {
-      0%,  15% { opacity:1; }
-      30%, 45% { opacity:0.55; }
-      60%, 75% { opacity:1; }
-      90%,100% { opacity:1; }
+
+      0%,
+      15% {
+        opacity: 1;
+      }
+
+      30%,
+      45% {
+        opacity: 0.55;
+      }
+
+      60%,
+      75% {
+        opacity: 1;
+      }
+
+      90%,
+      100% {
+        opacity: 1;
+      }
     }
-    #lock-shackle { animation: shackleMove 3.5s ease-in-out infinite, shackleFade 3.5s ease-in-out infinite; transform-origin: center bottom; }
+
+    #lock-shackle {
+      animation: shackleMove 3.5s ease-in-out infinite, shackleFade 3.5s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
 
     /* Lock body tiny bounce when locking */
     @keyframes lockBodyBounce {
-      0%,28%,46%,100% { transform: translateY(0) scale(1); }
-      34%             { transform: translateY(2px) scale(1.04,0.96); }
-      40%             { transform: translateY(-1px) scale(0.98,1.02); }
+
+      0%,
+      28%,
+      46%,
+      100% {
+        transform: translateY(0) scale(1);
+      }
+
+      34% {
+        transform: translateY(2px) scale(1.04, 0.96);
+      }
+
+      40% {
+        transform: translateY(-1px) scale(0.98, 1.02);
+      }
     }
-    #lock-body { animation: lockBodyBounce 3.5s ease-in-out infinite; transform-origin: center center; }
+
+    #lock-body {
+      animation: lockBodyBounce 3.5s ease-in-out infinite;
+      transform-origin: center center;
+    }
 
     /* Red border pulse */
     @keyframes redBorderPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0);    border-color: rgba(239,68,68,0.3); }
-      50%       { box-shadow: 0 0 14px 4px rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.75); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 0 14px 4px rgba(239, 68, 68, 0.22);
+        border-color: rgba(239, 68, 68, 0.75);
+      }
     }
-    .popup-due-box { animation: redBorderPulse 2s ease-in-out infinite; }
+
+    .popup-due-box {
+      animation: redBorderPulse 2s ease-in-out infinite;
+    }
 
     /* ── Money Note Fly animation ── */
     @keyframes noteFly1 {
-      0%          { transform: translate(0,0) rotate(0deg);    opacity:0; }
-      10%         { opacity:1; }
-      60%         { transform: translate(-18px,-28px) rotate(-20deg); opacity:1; }
-      80%,100%    { transform: translate(-26px,-40px) rotate(-25deg); opacity:0; }
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      60% {
+        transform: translate(-18px, -28px) rotate(-20deg);
+        opacity: 1;
+      }
+
+      80%,
+      100% {
+        transform: translate(-26px, -40px) rotate(-25deg);
+        opacity: 0;
+      }
     }
+
     @keyframes noteFly2 {
-      0%,15%      { transform: translate(0,0) rotate(0deg);    opacity:0; }
-      28%         { opacity:1; }
-      70%         { transform: translate(2px,-34px) rotate(8deg);  opacity:1; }
-      88%,100%    { transform: translate(4px,-46px) rotate(12deg); opacity:0; }
+
+      0%,
+      15% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+
+      28% {
+        opacity: 1;
+      }
+
+      70% {
+        transform: translate(2px, -34px) rotate(8deg);
+        opacity: 1;
+      }
+
+      88%,
+      100% {
+        transform: translate(4px, -46px) rotate(12deg);
+        opacity: 0;
+      }
     }
+
     @keyframes noteFly3 {
-      0%,28%      { transform: translate(0,0) rotate(0deg);    opacity:0; }
-      42%         { opacity:1; }
-      78%         { transform: translate(20px,-26px) rotate(22deg); opacity:1; }
-      92%,100%    { transform: translate(28px,-36px) rotate(28deg); opacity:0; }
+
+      0%,
+      28% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+
+      42% {
+        opacity: 1;
+      }
+
+      78% {
+        transform: translate(20px, -26px) rotate(22deg);
+        opacity: 1;
+      }
+
+      92%,
+      100% {
+        transform: translate(28px, -36px) rotate(28deg);
+        opacity: 0;
+      }
     }
+
     @keyframes noteWobble {
-      0%,100% { transform: translateY(0) rotate(-2deg); }
-      50%     { transform: translateY(-3px) rotate(2deg); }
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-2deg);
+      }
+
+      50% {
+        transform: translateY(-3px) rotate(2deg);
+      }
     }
-    #note-base  { animation: noteWobble 2s ease-in-out infinite; transform-origin: center center; }
-    #note-fly1  { animation: noteFly1 2.8s ease-in-out infinite; }
-    #note-fly2  { animation: noteFly2 2.8s ease-in-out infinite; }
-    #note-fly3  { animation: noteFly3 2.8s ease-in-out infinite; }
+
+    #note-base {
+      animation: noteWobble 2s ease-in-out infinite;
+      transform-origin: center center;
+    }
+
+    #note-fly1 {
+      animation: noteFly1 2.8s ease-in-out infinite;
+    }
+
+    #note-fly2 {
+      animation: noteFly2 2.8s ease-in-out infinite;
+    }
+
+    #note-fly3 {
+      animation: noteFly3 2.8s ease-in-out infinite;
+    }
 
     /* ── Folder fly animation ── */
     @keyframes folderLidOpen {
-      0%,20%       { transform: rotateX(0deg);   }
-      40%,80%      { transform: rotateX(-42deg); }
-      100%         { transform: rotateX(0deg);   }
+
+      0%,
+      20% {
+        transform: rotateX(0deg);
+      }
+
+      40%,
+      80% {
+        transform: rotateX(-42deg);
+      }
+
+      100% {
+        transform: rotateX(0deg);
+      }
     }
+
     @keyframes fileFly1 {
-      0%,25%  { transform: translate(0,0) rotate(0deg); opacity:0; }
-      35%     { opacity:1; }
-      65%     { transform: translate(-14px,-22px) rotate(-18deg); opacity:1; }
-      80%,100%{ transform: translate(-20px,-30px) rotate(-22deg); opacity:0; }
+
+      0%,
+      25% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+
+      35% {
+        opacity: 1;
+      }
+
+      65% {
+        transform: translate(-14px, -22px) rotate(-18deg);
+        opacity: 1;
+      }
+
+      80%,
+      100% {
+        transform: translate(-20px, -30px) rotate(-22deg);
+        opacity: 0;
+      }
     }
+
     @keyframes fileFly2 {
-      0%,35%  { transform: translate(0,0) rotate(0deg); opacity:0; }
-      45%     { opacity:1; }
-      70%     { transform: translate(4px,-26px) rotate(6deg); opacity:1; }
-      85%,100%{ transform: translate(6px,-34px) rotate(10deg); opacity:0; }
+
+      0%,
+      35% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+
+      45% {
+        opacity: 1;
+      }
+
+      70% {
+        transform: translate(4px, -26px) rotate(6deg);
+        opacity: 1;
+      }
+
+      85%,
+      100% {
+        transform: translate(6px, -34px) rotate(10deg);
+        opacity: 0;
+      }
     }
+
     @keyframes fileFly3 {
-      0%,42%  { transform: translate(0,0) rotate(0deg); opacity:0; }
-      52%     { opacity:1; }
-      75%     { transform: translate(16px,-20px) rotate(20deg); opacity:1; }
-      88%,100%{ transform: translate(22px,-28px) rotate(25deg); opacity:0; }
+
+      0%,
+      42% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+
+      52% {
+        opacity: 1;
+      }
+
+      75% {
+        transform: translate(16px, -20px) rotate(20deg);
+        opacity: 1;
+      }
+
+      88%,
+      100% {
+        transform: translate(22px, -28px) rotate(25deg);
+        opacity: 0;
+      }
     }
-    #folder-lid  { animation: folderLidOpen 3.2s ease-in-out infinite; transform-origin: bottom center; transform-box: fill-box; }
-    #folder-file1{ animation: fileFly1 3.2s ease-in-out infinite; }
-    #folder-file2{ animation: fileFly2 3.2s ease-in-out infinite; }
-    #folder-file3{ animation: fileFly3 3.2s ease-in-out infinite; }
+
+    #folder-lid {
+      animation: folderLidOpen 3.2s ease-in-out infinite;
+      transform-origin: bottom center;
+      transform-box: fill-box;
+    }
+
+    #folder-file1 {
+      animation: fileFly1 3.2s ease-in-out infinite;
+    }
+
+    #folder-file2 {
+      animation: fileFly2 3.2s ease-in-out infinite;
+    }
+
+    #folder-file3 {
+      animation: fileFly3 3.2s ease-in-out infinite;
+    }
 
     /* ══ Payment Due Popup — "genie out of the lamp" open/close animation ══ */
-    #paymentDuePopupCard { transform-origin: center center; will-change: transform, opacity, filter; }
+    #paymentDuePopupCard {
+      transform-origin: center center;
+      will-change: transform, opacity, filter;
+    }
 
-    #paymentDueOverlay.pdp-active { animation: pdpOverlayFadeIn .3s ease forwards; }
+    #paymentDueOverlay.pdp-active {
+      animation: pdpOverlayFadeIn .3s ease forwards;
+    }
+
     @keyframes pdpOverlayFadeIn {
-      from { background: rgba(0,0,0,0); }
-      to   { background: rgba(0,0,0,0.6); }
+      from {
+        background: rgba(0, 0, 0, 0);
+      }
+
+      to {
+        background: rgba(0, 0, 0, 0.6);
+      }
     }
 
     /* Card rises out of the click point like smoke, wobbling as it widens
        into shape, then settles into place at the centre of the screen. */
     #paymentDueOverlay.pdp-active #paymentDuePopupCard {
-      animation: pdpGenieIn 1.6s cubic-bezier(.3,.1,.2,1) forwards;
-    }
-    @keyframes pdpGenieIn {
-      0%   { opacity: 0; transform: scale(0.9); filter: blur(8px); }
-      60%  { opacity: 0; transform: scale(0.9); filter: blur(8px); }
-      75%  { opacity: .35; transform: scale(0.95); filter: blur(4px); }
-      88%  { opacity: .75; transform: scale(0.985); filter: blur(1.5px); }
-      100% { opacity: 1; transform: scale(1); filter: blur(0); }
+      animation: pdpGenieIn 1.6s cubic-bezier(.3, .1, .2, 1) forwards;
     }
 
-    #paymentDueOverlay.pdp-closing { animation: pdpOverlayFadeOut .35s ease forwards; }
-    @keyframes pdpOverlayFadeOut {
-      from { background: rgba(0,0,0,0.6); }
-      to   { background: rgba(0,0,0,0); }
+    @keyframes pdpGenieIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.9);
+        filter: blur(8px);
+      }
+
+      60% {
+        opacity: 0;
+        transform: scale(0.9);
+        filter: blur(8px);
+      }
+
+      75% {
+        opacity: .35;
+        transform: scale(0.95);
+        filter: blur(4px);
+      }
+
+      88% {
+        opacity: .75;
+        transform: scale(0.985);
+        filter: blur(1.5px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+      }
     }
+
+    #paymentDueOverlay.pdp-closing {
+      animation: pdpOverlayFadeOut .35s ease forwards;
+    }
+
+    @keyframes pdpOverlayFadeOut {
+      from {
+        background: rgba(0, 0, 0, 0.6);
+      }
+
+      to {
+        background: rgba(0, 0, 0, 0);
+      }
+    }
+
     /* Sucked back into the lock, like the genie returning to the lamp */
     #paymentDueOverlay.pdp-closing #paymentDuePopupCard {
-      animation: pdpGenieOut .4s cubic-bezier(.6,-0.1,.85,.35) forwards;
+      animation: pdpGenieOut .4s cubic-bezier(.6, -0.1, .85, .35) forwards;
     }
+
     @keyframes pdpGenieOut {
-      0%   { opacity: 1; transform: scale(1); filter: blur(0); }
-      40%  { opacity: .5; transform: scale(0.96); filter: blur(3px); }
-      100% { opacity: 0; transform: scale(0.9); filter: blur(8px); }
+      0% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+      }
+
+      40% {
+        opacity: .5;
+        transform: scale(0.96);
+        filter: blur(3px);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0.9);
+        filter: blur(8px);
+      }
     }
 
     /* Lock icon itself pops when clicked, selling the "unlocking" moment */
-    .pdp-lock-icon.pdp-lock-pop { animation: pdpLockPop .4s ease; }
+    .pdp-lock-icon.pdp-lock-pop {
+      animation: pdpLockPop .4s ease;
+    }
+
     @keyframes pdpLockPop {
-      0%   { transform: scale(1)    rotate(0deg); }
-      30%  { transform: scale(1.4)  rotate(-10deg); }
-      60%  { transform: scale(0.85) rotate(6deg); }
-      100% { transform: scale(1)    rotate(0deg); }
+      0% {
+        transform: scale(1) rotate(0deg);
+      }
+
+      30% {
+        transform: scale(1.4) rotate(-10deg);
+      }
+
+      60% {
+        transform: scale(0.85) rotate(6deg);
+      }
+
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
     }
 
     /* Small ring flash right at the click point, the instant before the smoke rises */
     .pdp-burst-ring {
       position: fixed;
-      width: 10px; height: 10px;
-      margin-left: -5px; margin-top: -5px;
+      width: 10px;
+      height: 10px;
+      margin-left: -5px;
+      margin-top: -5px;
       border-radius: 50%;
       border: 2px solid #a78bfa;
-      background: radial-gradient(circle, rgba(167,139,250,0.55), transparent 70%);
+      background: radial-gradient(circle, rgba(167, 139, 250, 0.55), transparent 70%);
       pointer-events: none;
       z-index: 10001;
       animation: pdpRingBurst .5s ease-out forwards;
     }
+
     @keyframes pdpRingBurst {
-      0%   { transform: scale(0.3); opacity: 0.9; }
-      100% { transform: scale(7);   opacity: 0; }
+      0% {
+        transform: scale(0.3);
+        opacity: 0.9;
+      }
+
+      100% {
+        transform: scale(7);
+        opacity: 0;
+      }
     }
 
     /* Magical smoke wisps that curl upward from the lock, like a genie's trail */
     .pdp-smoke {
       position: fixed;
-      width: 16px; height: 16px;
-      margin-left: -8px; margin-top: -8px;
+      width: 16px;
+      height: 16px;
+      margin-left: -8px;
+      margin-top: -8px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(196,181,253,0.65) 0%, rgba(129,140,248,0.35) 55%, transparent 75%);
+      background: radial-gradient(circle, rgba(196, 181, 253, 0.65) 0%, rgba(129, 140, 248, 0.35) 55%, transparent 75%);
       filter: blur(2px);
       pointer-events: none;
       z-index: 10001;
       opacity: 0;
       animation: pdpSmokeRise .75s ease-out forwards;
     }
+
     @keyframes pdpSmokeRise {
-      0%   { opacity: 0;   transform: translate(0,0) scale(0.5) rotate(0deg); }
-      14%  { opacity: .85; }
-      55%  { transform: translate(calc(var(--sx,0px) * 0.6), calc(var(--sy,-60px) * 0.6)) scale(1.5) rotate(calc(var(--sr,20deg) * 0.6)); }
-      100% { opacity: 0;   transform: translate(var(--sx,0px), var(--sy,-60px)) scale(2.4) rotate(var(--sr,20deg)); }
+      0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0.5) rotate(0deg);
+      }
+
+      14% {
+        opacity: .85;
+      }
+
+      55% {
+        transform: translate(calc(var(--sx, 0px) * 0.6), calc(var(--sy, -60px) * 0.6)) scale(1.5) rotate(calc(var(--sr, 20deg) * 0.6));
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(var(--sx, 0px), var(--sy, -60px)) scale(2.4) rotate(var(--sr, 20deg));
+      }
     }
   </style>
 </head>
+
 <body>
 
-<!-- LAYOUT ─────────────────────────────────────────────────────────── -->
-<div class="db-layout">
+  <!-- LAYOUT ─────────────────────────────────────────────────────────── -->
+  <div class="db-layout">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
 
-    <a class="sb-brand" href="../Homepage/index.html" style="text-decoration:none;color:inherit;">
-      <div class="sb-logo">S</div>
-      <span>Scriptora</span>
-    </a>
+      <a class="sb-brand" href="../Homepage/index.html" style="text-decoration:none;color:inherit;">
+        <div class="sb-logo">S</div>
+        <span>Scriptora</span>
+      </a>
 
-    <nav class="sb-nav">
-      <a class="sb-item active" data-page="home" href="#">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </a>
-      <a class="sb-item" data-page="orders" href="#">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        আমার Orders
-      </a>
-      <a class="sb-item" data-page="messages" href="#">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        Messages
-        <span class="sb-badge" id="msgBadge" style="display:none">0</span>
-      </a>
-      <a class="sb-item" data-page="files" href="#">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        Files
-      </a>
-      <a class="sb-item" data-page="payments" href="#">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        Payments
-      </a>
-      <a class="sb-item" data-page="profile" href="#">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Profile
-      </a>
-    </nav>
+      <nav class="sb-nav">
+        <a class="sb-item active" data-page="home" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          Dashboard
+        </a>
+        <a class="sb-item" data-page="orders" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          আমার Orders
+        </a>
+        <a class="sb-item" data-page="messages" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          Messages
+          <span class="sb-badge" id="msgBadge" style="display:none">0</span>
+        </a>
+        <a class="sb-item" data-page="files" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          </svg>
+          Files
+        </a>
+        <a class="sb-item" data-page="payments" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+          Payments
+        </a>
+        <a class="sb-item" data-page="profile" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          Profile
+        </a>
+      </nav>
 
-    <div class="sb-bottom">
-      <a href="../Order page/order.html" class="new-order-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        নতুন Order
-      </a>
-      <div class="sb-user">
-        <div class="sb-avatar" id="sbAvatar">?</div>
-        <div class="sb-userinfo">
-          <div class="sb-uname" id="sbName">Loading...</div>
-          <div class="sb-uemail" id="sbEmail"></div>
-        </div>
-        <button class="sb-logout" id="logoutBtn" title="Logout">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- TOP BAR -->
-  <header class="cd-topbar" id="cdTopbar">
-    <div class="cd-topbar-left">
-      <span class="cd-topbar-title" id="cdTopbarTitle">Dashboard</span>
-      <a class="cd-topbar-brand-mobile" href="../Homepage/index.html">
-        <div class="sb-logo">S</div><span>Scriptora</span>
-      </a>
-    </div>
-    <div class="cd-topbar-search-wrap" id="cdSearchWrap">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="cdSearchInput" class="cd-topbar-search" placeholder="Search your orders..." autocomplete="off">
-      <kbd class="cd-search-kbd">/</kbd>
-      <div class="cd-search-dropdown" id="cdSearchDropdown"></div>
-    </div>
-    <div class="cd-topbar-right">
-      <!-- Notification Bell -->
-      <div class="cd-notif-wrap" id="cdNotifWrap">
-        <button class="cd-notif-btn" id="cdNotifBtn" title="Notifications" onclick="cdToggleNotif()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="cd-notif-dot" id="cdNotifDot" style="display:none"></span>
-        </button>
-        <!-- Dropdown -->
-        <div class="cd-notif-dropdown" id="cdNotifDropdown">
-          <div class="cd-notif-head">
-            <span>Notifications</span>
-            <button onclick="cdMarkAllRead()" class="cd-notif-mark-all">সব পড়া হয়েছে</button>
+      <div class="sb-bottom">
+        <a href="../Order page/order.html" class="new-order-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          নতুন Order
+        </a>
+        <div class="sb-user">
+          <div class="sb-avatar" id="sbAvatar">?</div>
+          <div class="sb-userinfo">
+            <div class="sb-uname" id="sbName">Loading...</div>
+            <div class="sb-uemail" id="sbEmail"></div>
           </div>
-          <div class="cd-notif-list" id="cdNotifList">
-            <div class="cd-notif-empty">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <p>কোনো notification নেই</p>
+          <button class="sb-logout" id="logoutBtn" title="Logout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- TOP BAR -->
+    <header class="cd-topbar" id="cdTopbar">
+      <div class="cd-topbar-left">
+        <span class="cd-topbar-title" id="cdTopbarTitle">Dashboard</span>
+        <a class="cd-topbar-brand-mobile" href="../Homepage/index.html">
+          <div class="sb-logo">S</div><span>Scriptora</span>
+        </a>
+      </div>
+      <div class="cd-topbar-search-wrap" id="cdSearchWrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" id="cdSearchInput" class="cd-topbar-search" placeholder="Search your orders..."
+          autocomplete="off">
+        <kbd class="cd-search-kbd">/</kbd>
+        <div class="cd-search-dropdown" id="cdSearchDropdown"></div>
+      </div>
+      <div class="cd-topbar-right">
+        <!-- Notification Bell -->
+        <div class="cd-notif-wrap" id="cdNotifWrap">
+          <button class="cd-notif-btn" id="cdNotifBtn" title="Notifications" onclick="cdToggleNotif()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <span class="cd-notif-dot" id="cdNotifDot" style="display:none"></span>
+          </button>
+          <!-- Dropdown -->
+          <div class="cd-notif-dropdown" id="cdNotifDropdown">
+            <div class="cd-notif-head">
+              <span>Notifications</span>
+              <button onclick="cdMarkAllRead()" class="cd-notif-mark-all">সব পড়া হয়েছে</button>
+            </div>
+            <div class="cd-notif-list" id="cdNotifList">
+              <div class="cd-notif-empty">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                <p>কোনো notification নেই</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <!-- Avatar + Dropdown -->
-      <div class="cd-user-menu" id="cdUserMenu">
-        <div class="cd-topbar-avatar" id="cdTopbarAvatar" onclick="cdToggleUserMenu()">?</div>
-        <div class="cd-user-dropdown" id="cdUserDropdown">
-          <div class="cd-user-dropdown-header">
-            <div class="cd-user-dd-avatar" id="cdUserDdAvatar">?</div>
-          <div style="min-width:0; overflow:hidden;">
-            <div class="cd-user-dd-name" id="cdUserDdName">Loading...</div>
-            <div class="cd-user-dd-email" id="cdUserDdEmail"></div>
-          </div>
-          </div>
-          <div class="cd-user-dd-divider"></div>
-          <button class="cd-user-dd-item" onclick="cdUserMenuNav('home')">Homepage</button>
-          <button class="cd-user-dd-item" onclick="cdUserMenuNav('profile')">Profile</button>
-          <button class="cd-user-dd-item" onclick="cdUserMenuNav('settings')">Settings</button>
-          <div class="cd-user-dd-divider"></div>
-          <button class="cd-user-dd-item logout" onclick="cdUserLogout()">Logout</button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN CONTENT -->
-  <main class="db-main">
-
-    <!-- ── PAGE: HOME ──────────────────────────────────────────────────────── -->
-    <section class="page active" id="page-home">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">স্বাগতম, <span id="headerName">...</span> ভাই 👋</h1>
-          <p class="page-sub">আপনার active orders এক নজরে দেখুন</p>
-        </div>
-        <div class="page-date-badge" id="pageDateBadge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span id="pageDateText">—</span>
-        </div>
-      </div>
-
-      <!-- Stat Cards -->
-      <div class="stat-row" id="statRow">
-        <div class="stat-card purple">
-          <div class="stat-card-top">
-            <div class="stat-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-            <div><div class="stat-num" id="totalOrders">—</div><div class="stat-lbl">মোট Order</div></div>
-          </div>
-          <div class="stat-spark-wrap">
-            <svg class="stat-spark" viewBox="0 0 240 32" preserveAspectRatio="none">
-              <path id="spk-purple-area" class="stat-spark-area" d="M0,18 C5,6 9,4 15,12 C19,18 23,26 29,24 C35,22 39,10 47,8 C53,7 59,16 65,22 C71,28 77,20 85,14 C91,10 97,16 103,20 C109,24 115,20 120,18 L120,32 L0,32 Z"/>
-              <path id="spk-purple-line" class="stat-spark-line" d="M0,18 C5,6 9,4 15,12 C19,18 23,26 29,24 C35,22 39,10 47,8 C53,7 59,16 65,22 C71,28 77,20 85,14 C91,10 97,16 103,20 C109,24 115,20 120,18"/>
-              <use href="#spk-purple-area" x="120"/>
-              <use href="#spk-purple-line" x="120"/>
-            </svg>
-          </div>
-        </div>
-        <div class="stat-card blue">
-          <div class="stat-card-top">
-            <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div><div class="stat-num blue-text" id="activeOrders">—</div><div class="stat-lbl">চলছে</div></div>
-          </div>
-          <div class="stat-spark-wrap">
-            <svg class="stat-spark" viewBox="0 0 240 32" preserveAspectRatio="none">
-              <path id="spk-blue-area" class="stat-spark-area" d="M0,16 C4,28 7,30 11,20 C14,12 17,4 21,10 C25,16 28,26 32,22 C36,18 39,8 44,12 C49,16 52,24 57,20 C62,16 65,6 70,10 C75,14 78,24 83,22 C88,20 91,10 96,14 C101,18 105,26 110,22 C114,18 117,12 120,16 L120,32 L0,32 Z"/>
-              <path id="spk-blue-line" class="stat-spark-line" d="M0,16 C4,28 7,30 11,20 C14,12 17,4 21,10 C25,16 28,26 32,22 C36,18 39,8 44,12 C49,16 52,24 57,20 C62,16 65,6 70,10 C75,14 78,24 83,22 C88,20 91,10 96,14 C101,18 105,26 110,22 C114,18 117,12 120,16"/>
-              <use href="#spk-blue-area" x="120"/>
-              <use href="#spk-blue-line" x="120"/>
-            </svg>
-          </div>
-        </div>
-        <div class="stat-card gold">
-          <div class="stat-card-top">
-            <div class="stat-icon gold"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h12M6 22h12M6 2c0 5 6 6 6 10s-6 5-6 10M18 2c0 5-6 6-6 10s6 5 6 10"/></svg></div>
-            <div><div class="stat-num gold-text" id="pendingOrders">—</div><div class="stat-lbl">Pending</div></div>
-          </div>
-          <div class="stat-spark-wrap">
-            <svg class="stat-spark" viewBox="0 0 240 32" preserveAspectRatio="none">
-              <path id="spk-gold-area" class="stat-spark-area" d="M0,20 C8,10 14,8 22,16 C28,22 34,26 42,20 C48,16 54,8 62,12 C70,16 76,24 84,20 C90,17 96,10 104,14 C110,17 115,22 120,20 L120,32 L0,32 Z"/>
-              <path id="spk-gold-line" class="stat-spark-line" d="M0,20 C8,10 14,8 22,16 C28,22 34,26 42,20 C48,16 54,8 62,12 C70,16 76,24 84,20 C90,17 96,10 104,14 C110,17 115,22 120,20"/>
-              <use href="#spk-gold-area" x="120"/>
-              <use href="#spk-gold-line" x="120"/>
-            </svg>
-          </div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-card-top">
-            <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <div><div class="stat-num green-text" id="completedOrders">—</div><div class="stat-lbl">Completed</div></div>
-          </div>
-          <div class="stat-spark-wrap">
-            <svg class="stat-spark" viewBox="0 0 240 32" preserveAspectRatio="none">
-              <path id="spk-green-area" class="stat-spark-area" d="M0,17 C6,26 10,28 16,18 C20,10 24,4 30,10 C36,16 40,26 46,22 C52,18 56,8 62,12 C68,16 72,24 78,20 C84,16 88,8 94,12 C100,16 106,24 112,20 C116,17 118,17 120,17 L120,32 L0,32 Z"/>
-              <path id="spk-green-line" class="stat-spark-line" d="M0,17 C6,26 10,28 16,18 C20,10 24,4 30,10 C36,16 40,26 46,22 C52,18 56,8 62,12 C68,16 72,24 78,20 C84,16 88,8 94,12 C100,16 106,24 112,20 C116,17 118,17 120,17"/>
-              <use href="#spk-green-area" x="120"/>
-              <use href="#spk-green-line" x="120"/>
-            </svg>
+        <!-- Avatar + Dropdown -->
+        <div class="cd-user-menu" id="cdUserMenu">
+          <div class="cd-topbar-avatar" id="cdTopbarAvatar" onclick="cdToggleUserMenu()">?</div>
+          <div class="cd-user-dropdown" id="cdUserDropdown">
+            <div class="cd-user-dropdown-header">
+              <div class="cd-user-dd-avatar" id="cdUserDdAvatar">?</div>
+              <div style="min-width:0; overflow:hidden;">
+                <div class="cd-user-dd-name" id="cdUserDdName">Loading...</div>
+                <div class="cd-user-dd-email" id="cdUserDdEmail"></div>
+              </div>
+            </div>
+            <div class="cd-user-dd-divider"></div>
+            <button class="cd-user-dd-item" onclick="cdUserMenuNav('home')">Homepage</button>
+            <button class="cd-user-dd-item" onclick="cdUserMenuNav('profile')">Profile</button>
+            <button class="cd-user-dd-item" onclick="cdUserMenuNav('settings')">Settings</button>
+            <div class="cd-user-dd-divider"></div>
+            <button class="cd-user-dd-item logout" onclick="cdUserLogout()">Logout</button>
           </div>
         </div>
       </div>
+    </header>
 
-      <!-- Mobile: simple Active/Completed card lists -->
-      <div id="ordersMobileView" class="orders-mobile-view">
-        <!-- Active Orders -->
-        <div class="section-title-row">
-          <div class="section-title-row-left">
-            <div class="section-dot green pulse-dot"></div>
-            <span>ACTIVE ORDERS</span>
+    <!-- MAIN CONTENT -->
+    <main class="db-main">
+
+      <!-- ── PAGE: HOME ──────────────────────────────────────────────────────── -->
+      <section class="page active" id="page-home">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">স্বাগতম, <span id="headerName">...</span> ভাই 👋</h1>
+            <p class="page-sub">আপনার active orders এক নজরে দেখুন</p>
           </div>
-          <a href="#" class="section-view-all" data-page="orders" data-filter="active">View All</a>
+          <div class="page-date-badge" id="pageDateBadge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span id="pageDateText">—</span>
+          </div>
         </div>
-        <div id="activeOrdersList">
-          <div class="empty-state" id="activeEmpty" style="display:none">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <p>কোনো active order নেই</p>
+
+        <!-- Stat Cards -->
+        <div class="stat-row" id="statRow">
+          <div class="stat-card purple">
+            <div class="stat-card-top">
+              <div class="stat-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg></div>
+              <div>
+                <div class="stat-num" id="totalOrders">—</div>
+                <div class="stat-lbl">মোট Order</div>
+              </div>
+            </div>
+            <div class="stat-spark-wrap">
+              <svg class="stat-spark" viewBox="0 0 240 32" preserveAspectRatio="none">
+                <path id="spk-purple-area" class="stat-spark-area"
+                  d="M0,18 C5,6 9,4 15,12 C19,18 23,26 29,24 C35,22 39,10 47,8 C53,7 59,16 65,22 C71,28 77,20 85,14 C91,10 97,16 103,20 C109,24 115,20 120,18 L120,32 L0,32 Z" />
+                <path id="spk-purple-line" class="stat-spark-line"
+                  d="M0,18 C5,6 9,4 15,12 C19,18 23,26 29,24 C35,22 39,10 47,8 C53,7 59,16 65,22 C71,28 77,20 85,14 C91,10 97,16 103,20 C109,24 115,20 120,18" />
+                <use href="#spk-purple-area" x="120" />
+                <use href="#spk-purple-line" x="120" />
+              </svg>
+            </div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-card-top">
+              <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg></div>
+              <div>
+                <div class="stat-num blue-text" id="activeOrders">—</div>
+                <div class="stat-lbl">চলছে</div>
+              </div>
+            </div>
+            <div class="stat-spark-wrap">
+              <svg class="stat-spark" viewBox="0 0 240 32" preserveAspectRatio="none">
+                <path id="spk-blue-area" class="stat-spark-area"
+                  d="M0,16 C4,28 7,30 11,20 C14,12 17,4 21,10 C25,16 28,26 32,22 C36,18 39,8 44,12 C49,16 52,24 57,20 C62,16 65,6 70,10 C75,14 78,24 83,22 C88,20 91,10 96,14 C101,18 105,26 110,22 C114,18 117,12 120,16 L120,32 L0,32 Z" />
+                <path id="spk-blue-line" class="stat-spark-line"
+                  d="M0,16 C4,28 7,30 11,20 C14,12 17,4 21,10 C25,16 28,26 32,22 C36,18 39,8 44,12 C49,16 52,24 57,20 C62,16 65,6 70,10 C75,14 78,24 83,22 C88,20 91,10 96,14 C101,18 105,26 110,22 C114,18 117,12 120,16" />
+                <use href="#spk-blue-area" x="120" />
+                <use href="#spk-blue-line" x="120" />
+              </svg>
+            </div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-card-top">
+              <div class="stat-icon gold"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M6 2h12M6 22h12M6 2c0 5 6 6 6 10s-6 5-6 10M18 2c0 5-6 6-6 10s6 5 6 10" />
+                </svg></div>
+              <div>
+                <div class="stat-num gold-text" id="pendingOrders">—</div>
+                <div class="stat-lbl">Pending</div>
+              </div>
+            </div>
+            <div class="stat-spark-wrap">
+              <svg class="stat-spark" viewBox="0 0 240 32" preserveAspectRatio="none">
+                <path id="spk-gold-area" class="stat-spark-area"
+                  d="M0,20 C8,10 14,8 22,16 C28,22 34,26 42,20 C48,16 54,8 62,12 C70,16 76,24 84,20 C90,17 96,10 104,14 C110,17 115,22 120,20 L120,32 L0,32 Z" />
+                <path id="spk-gold-line" class="stat-spark-line"
+                  d="M0,20 C8,10 14,8 22,16 C28,22 34,26 42,20 C48,16 54,8 62,12 C70,16 76,24 84,20 C90,17 96,10 104,14 C110,17 115,22 120,20" />
+                <use href="#spk-gold-area" x="120" />
+                <use href="#spk-gold-line" x="120" />
+              </svg>
+            </div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-card-top">
+              <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>
+              <div>
+                <div class="stat-num green-text" id="completedOrders">—</div>
+                <div class="stat-lbl">Completed</div>
+              </div>
+            </div>
+            <div class="stat-spark-wrap">
+              <svg class="stat-spark" viewBox="0 0 240 32" preserveAspectRatio="none">
+                <path id="spk-green-area" class="stat-spark-area"
+                  d="M0,17 C6,26 10,28 16,18 C20,10 24,4 30,10 C36,16 40,26 46,22 C52,18 56,8 62,12 C68,16 72,24 78,20 C84,16 88,8 94,12 C100,16 106,24 112,20 C116,17 118,17 120,17 L120,32 L0,32 Z" />
+                <path id="spk-green-line" class="stat-spark-line"
+                  d="M0,17 C6,26 10,28 16,18 C20,10 24,4 30,10 C36,16 40,26 46,22 C52,18 56,8 62,12 C68,16 72,24 78,20 C84,16 88,8 94,12 C100,16 106,24 112,20 C116,17 118,17 120,17" />
+                <use href="#spk-green-area" x="120" />
+                <use href="#spk-green-line" x="120" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile: simple Active/Completed card lists -->
+        <div id="ordersMobileView" class="orders-mobile-view">
+          <!-- Active Orders -->
+          <div class="section-title-row">
+            <div class="section-title-row-left">
+              <div class="section-dot green pulse-dot"></div>
+              <span>ACTIVE ORDERS</span>
+            </div>
+            <a href="#" class="section-view-all" data-page="orders" data-filter="active">View All</a>
+          </div>
+          <div id="activeOrdersList">
+            <div class="empty-state" id="activeEmpty" style="display:none">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <p>কোনো active order নেই</p>
+              <a href="../Order page/order.html" class="empty-cta">প্রথম Order দিন →</a>
+            </div>
+          </div>
+
+          <!-- Completed Orders -->
+          <div class="section-title-row" style="margin-top:1.5rem">
+            <div class="section-title-row-left">
+              <div class="section-dot blue"></div>
+              <span>COMPLETED</span>
+            </div>
+            <a href="#" class="section-view-all" data-page="orders" data-filter="completed">View All</a>
+          </div>
+          <div id="completedOrdersList">
+            <div class="empty-note" id="completedEmpty" style="display:none">কোনো completed order নেই</div>
+          </div>
+        </div>
+
+        <!-- Desktop: full order table -->
+        <div id="ordersTableView" class="orders-table-view">
+          <div class="ot-tabs" id="otTabs">
+            <button class="ot-tab active" data-tab="all">All <span class="ot-tab-count"
+                id="otCountAll">0</span></button>
+            <button class="ot-tab" data-tab="in_progress">In Progress <span class="ot-tab-count"
+                id="otCountProgress">0</span></button>
+            <button class="ot-tab" data-tab="in_review">In Review <span class="ot-tab-count"
+                id="otCountReview">0</span></button>
+            <button class="ot-tab" data-tab="completed">Completed <span class="ot-tab-count"
+                id="otCountCompleted">0</span></button>
+            <button class="ot-tab" data-tab="pending">Pending <span class="ot-tab-count"
+                id="otCountPending">0</span></button>
+            <button class="ot-tab" data-tab="overdue">Overdue <span class="ot-tab-count"
+                id="otCountOverdue">0</span></button>
+          </div>
+
+          <div class="ot-toolbar">
+            <div class="ot-toolbar-left">
+              <div class="ot-select-wrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M6 12h12M10 18h4" />
+                </svg>
+                <select class="ot-select" id="otSortSelect">
+                  <option value="deadline">Sort: Deadline</option>
+                  <option value="newest">Sort: Newest</option>
+                  <option value="amount_high">Sort: Amount (High→Low)</option>
+                  <option value="amount_low">Sort: Amount (Low→High)</option>
+                </select>
+              </div>
+              <div class="ot-select-wrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                </svg>
+                <select class="ot-select" id="otPackageSelect">
+                  <option value="all">All Packages</option>
+                </select>
+              </div>
+              <div class="ot-select-wrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <select class="ot-select" id="otDateSelect">
+                  <option value="all">All Dates</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                </select>
+              </div>
+            </div>
+            <div class="ot-toolbar-right">
+              <button class="ot-export-btn" id="otExportBtn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <div class="ot-table-wrap">
+            <table class="ot-table">
+              <thead>
+                <tr>
+                  <th>ORDER / PROJECT</th>
+                  <th>PACKAGE</th>
+                  <th>STATUS</th>
+                  <th>DEADLINE</th>
+                  <th class="ot-th-amount">AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody id="otTableBody"></tbody>
+            </table>
+            <div class="empty-state" id="otEmpty" style="display:none">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <p>এই ফিল্টারে কোনো order পাওয়া যায়নি</p>
+            </div>
+          </div>
+
+          <div class="ot-pagination" id="otPagination">
+            <span class="ot-page-info" id="otPageInfo">Showing 0 to 0 of 0 orders</span>
+            <div class="ot-page-btns">
+              <button class="ot-page-arrow" id="otPrevBtn" aria-label="Previous page">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <span class="ot-page-num" id="otPageNum">1</span>
+              <button class="ot-page-arrow" id="otNextBtn" aria-label="Next page">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PAGE: ORDERS ────────────────────────────────────────────────────── -->
+      <section class="page" id="page-orders">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">আমার Orders</h1>
+            <p class="page-sub">সব orders এক জায়গায়</p>
+          </div>
+          <a href="../Order page/order.html" class="new-order-btn-top">+ নতুন Order</a>
+        </div>
+
+        <!-- Order Detail View -->
+        <div id="orderDetailView" style="display:none">
+          <button class="back-btn" id="backToOrders">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Orders এ ফিরে যান
+          </button>
+          <div class="od-header-card">
+            <div class="od-header-left">
+              <div class="od-title" id="detailTitle">—</div>
+              <div class="od-meta" id="detailMeta">—</div>
+            </div>
+            <span class="status-badge" id="detailStatus">—</span>
+          </div>
+
+          <!-- Countdown -->
+          <div class="countdown-card" id="countdownCard">
+            <div class="cd-inner">
+              <div class="cd-left">
+                <div class="cd-label">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  Deadline countdown চলছে
+                </div>
+                <div class="cd-blocks">
+                  <div class="cd-block">
+                    <div class="cd-num" id="cdDays">00</div>
+                    <div class="cd-unit">days</div>
+                  </div>
+                  <div class="cd-sep">:</div>
+                  <div class="cd-block">
+                    <div class="cd-num" id="cdHours">00</div>
+                    <div class="cd-unit">hours</div>
+                  </div>
+                  <div class="cd-sep">:</div>
+                  <div class="cd-block">
+                    <div class="cd-num" id="cdMins">00</div>
+                    <div class="cd-unit">mins</div>
+                  </div>
+                  <div class="cd-sep">:</div>
+                  <div class="cd-block">
+                    <div class="cd-num" id="cdSecs">00</div>
+                    <div class="cd-unit">secs</div>
+                  </div>
+                </div>
+                <div class="cd-footer">
+                  <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg> Deadline: <strong id="cdDeadline">—</strong></span>
+                </div>
+              </div>
+              <div class="cd-right">
+                <div class="cd-hourglass">
+                  <img src="assets/hourglass.png" alt="hourglass"
+                    style="width:130px;height:130px;object-fit:contain;filter:drop-shadow(0 0 22px rgba(124,58,237,0.7));">
+                </div>
+                <div class="cd-right-text">
+                  <div class="cd-days-big">আর মাত্র <span id="cdDaysLeft2">—</span> দিন বাকি</div>
+                  <div class="cd-days-sub">ডেডলাইন মিস না করতে কাজ এগিয়ে নিয়ে যান।</div>
+                  <button class="cd-view-btn" id="cdViewOrderBtn">View Order Details →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Stepper -->
+          <div class="progress-card">
+            <div class="progress-label">PROGRESS STATUS</div>
+            <div class="stepper" id="progressStepper">
+              <!-- JS দিয়ে render হবে -->
+            </div>
+          </div>
+
+          <!-- Payment + Files -->
+          <div class="detail-two-col">
+            <div class="detail-panel payment-panel">
+
+              <!-- ── HEADER ── -->
+              <div class="pps-header">
+                <div class="pps-header-left">
+                  <div class="pps-header-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="5" width="20" height="14" rx="2" />
+                      <line x1="2" y1="10" x2="22" y2="10" />
+                    </svg>
+                  </div>
+                  <span class="pps-header-title">PAYMENT SUMMARY</span>
+                </div>
+                <span class="pps-sparkle">✦</span>
+              </div>
+
+              <!-- ── HERO (shown when due) ── -->
+              <div class="pps-hero" id="payDueHero" style="display:none">
+                <div class="pps-shield-col">
+                  <div class="pps-shield-glow"></div>
+                  <div class="pps-shield-wrap">
+                    <img src="assets/security-icon.png" alt="payment shield" class="pps-shield-img" draggable="false"
+                      tabindex="-1">
+                  </div>
+                  <div class="pps-shield-spark pps-spark-tl">✦</div>
+                  <div class="pps-shield-spark pps-spark-br">✦</div>
+                </div>
+                <div class="pps-hero-text">
+                  <div class="pps-hero-badge" id="ppsHeroBadge" style="display:none">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      id="ppsHeroBadgeIcon">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    <span id="ppsHeroBadgeText">Action Required</span>
+                  </div>
+                  <h3 class="pps-hero-title" id="ppsHeroTitle">Complete your payment to unlock your files</h3>
+                  <p class="pps-hero-sub" id="ppsHeroSub">Unlock your files after payment confirmation. Your files will
+                    become available automatically once your payment has been fully verified by the admin. This process
+                    ensures secure transactions and guarantees that file access is granted only after successful payment
+                    confirmation</p>
+                </div>
+                <div class="pps-ring-wrap" id="ppsHeroRing" style="display:none">
+                  <svg width="86" height="86" viewBox="0 0 92 92">
+                    <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="7" />
+                    <circle cx="46" cy="46" r="38" fill="none" stroke="url(#ppsRingGrad)" stroke-width="7"
+                      stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="0"
+                      transform="rotate(-90 46 46)" />
+                    <defs>
+                      <linearGradient id="ppsRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#6366f1" />
+                        <stop offset="50%" stop-color="#a855f7" />
+                        <stop offset="100%" stop-color="#f97316" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div class="pps-ring-text">
+                    <span class="pps-ring-pct">100%</span>
+                    <span class="pps-ring-label">PAID</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── FEATURE CARDS (shown while payment is due) ── -->
+              <div class="pps-feature-row" id="payDueFeatureRow" style="display:none">
+                <div class="pps-feature-card">
+                  <div class="pps-feature-icon purple">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </div>
+                  <div class="pps-feature-text">
+                    <div class="pps-feature-title">Secure Payment</div>
+                    <div class="pps-feature-sub">SSL Encrypted</div>
+                  </div>
+                </div>
+                <div class="pps-feature-card">
+                  <div class="pps-feature-icon purple">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  </div>
+                  <div class="pps-feature-text">
+                    <div class="pps-feature-title">Admin Verified</div>
+                    <div class="pps-feature-sub">100% Safe</div>
+                  </div>
+                </div>
+                <div class="pps-feature-card">
+                  <div class="pps-feature-icon purple">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.2">
+                      <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
+                    </svg>
+                  </div>
+                  <div class="pps-feature-text">
+                    <div class="pps-feature-title">Instant Access</div>
+                    <div class="pps-feature-sub">After Payment</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── FEATURE CARDS (shown when fully paid) ── -->
+              <div class="pps-feature-row" id="payFeatureRow" style="display:none">
+                <div class="pps-feature-card">
+                  <div class="pps-feature-icon purple">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </div>
+                  <div class="pps-feature-text">
+                    <div class="pps-feature-title">All Files Unlocked</div>
+                    <div class="pps-feature-sub">Access granted</div>
+                  </div>
+                </div>
+                <div class="pps-feature-card">
+                  <div class="pps-feature-icon green">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                  </div>
+                  <div class="pps-feature-text">
+                    <div class="pps-feature-title">Download Enabled</div>
+                    <div class="pps-feature-sub">Instant access</div>
+                  </div>
+                </div>
+                <div class="pps-feature-card">
+                  <div class="pps-feature-icon amber">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  </div>
+                  <div class="pps-feature-text">
+                    <div class="pps-feature-title">Secure &amp; Encrypted</div>
+                    <div class="pps-feature-sub">100% protected</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── DIVIDER ── -->
+              <div class="pps-divider"></div>
+
+              <!-- ── PAYMENT ROWS ── -->
+              <div class="pps-rows">
+                <div class="pps-row">
+                  <div class="pps-row-left">
+                    <div class="pps-row-label">মোট মূল্য</div>
+                  </div>
+                  <span class="pps-row-amount pps-amt-white" id="detailTotal">—</span>
+                </div>
+
+                <div class="pps-row">
+                  <div class="pps-row-left">
+                    <div class="pps-row-label">Advance paid</div>
+                  </div>
+                  <span class="pps-row-amount pps-amt-green" id="detailAdvance">—</span>
+                </div>
+
+                <div class="pps-row pps-row-due">
+                  <div class="pps-row-left">
+                    <div class="pps-row-label">Due amount</div>
+                  </div>
+                  <span class="pps-row-amount pps-amt-red" id="detailDue">—</span>
+                </div>
+              </div>
+
+              <div class="pay-badges" id="payBadges"></div>
+
+              <!-- ── WARNING BOX ── -->
+              <div class="pps-warning" id="payDueWarning" style="display:none">
+                <div class="pps-warning-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path
+                      d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </div>
+                <span>আপনার বাকি payment টি clear করলে সাথে সাথে ফাইল unlock করা যাবে।</span>
+              </div>
+
+              <!-- ── NOTE (shown when fully paid) ── -->
+              <div class="pps-access-row" id="payDueNote" style="display:none">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                Files available for 60 days from order date — access until <strong id="payAccessUntil">—</strong>
+              </div>
+
+              <!-- ── PAY NOW ── -->
+              <div id="payNowSection" style="display:none">
+                <button class="pps-pay-btn" id="payNowBtn">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                  </svg>
+                  Pay Now
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </button>
+                <div class="pps-secure">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  Secure payment powered by SSL encryption
+                </div>
+              </div>
+
+              <!-- Payment Proof Submit -->
+              <div class="proof-submit-section" id="proofSubmitSection" style="display:none">
+                <div class="proof-submit-title">💳 Payment Proof পাঠান</div>
+                <div class="proof-field">
+                  <label>আপনি কত টাকা পাঠিয়েছেন?</label>
+                  <input type="number" id="proofClaimedAmount" placeholder="যেমন: 4300" min="1" />
+                </div>
+                <div class="proof-field">
+                  <label>Payment Method</label>
+                  <select id="proofMethod">
+                    <option value="">-- Select Method --</option>
+                    <option value="bKash">bKash</option>
+                    <option value="Nagad">Nagad</option>
+                    <option value="Rocket">Rocket</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="proof-field">
+                  <label>Transaction ID / Reference</label>
+                  <input type="text" id="proofTxnId" placeholder="যেমন: bKash TXN: 8N7XA2..." />
+                </div>
+                <div class="proof-field">
+                  <label>Payment Screenshot</label>
+                  <label class="proof-upload-btn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <span id="proofFileName">Screenshot বেছে নিন</span>
+                    <input type="file" id="proofScreenshot" accept="image/*" style="display:none" />
+                  </label>
+                </div>
+                <div class="proof-field">
+                  <label>Note (optional)</label>
+                  <input type="text" id="proofClientNote" placeholder="কোনো বিশেষ তথ্য থাকলে লিখুন..." />
+                </div>
+                <div class="proof-status" id="proofStatus"></div>
+                <button class="proof-send-btn" id="proofSendBtn">💸 Proof পাঠান</button>
+              </div>
+              <div class="proof-submitted" id="proofSubmitted" style="display:none">
+                ✓ Payment proof পাঠানো হয়েছে। Admin review করছেন।
+              </div>
+            </div>
+
+            <!-- Payment History — left col, below payment summary -->
+            <div class="client-pay-history-card" id="clientPayHistoryCard" style="display:none">
+              <div class="pay-hist-header">
+                <div class="pay-hist-header-left">
+                  <div class="pay-hist-header-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 3v18h18" />
+                      <path d="M18.7 8l-5.1 5.1-2.8-2.8L7 14" />
+                    </svg>
+                  </div>
+                  <span class="pay-hist-header-title">PAYMENT HISTORY</span>
+                </div>
+                <div class="pay-hist-header-right">
+                  <select class="pay-hist-filter" id="payHistFilterSelect"
+                    onchange="window._setPayHistFilter(this.value)">
+                    <option value="all">All Status</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+              <div id="clientPayHistoryList" class="client-pay-history-list"></div>
+              <div id="clientPayHistoryViewAll" class="pay-hist-viewall-wrap" style="display:none"></div>
+            </div>
+
+            <!-- Right col — Files -->
+            <div class="detail-panel files-panel">
+              <div class="pps-header">
+                <div class="pps-header-left">
+                  <div class="pps-header-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </div>
+                  <span class="pps-header-title">MY FILES</span>
+                </div>
+                <span class="pps-sparkle">✦</span>
+              </div>
+
+              <div class="pps-hero" style="margin-bottom:10px;">
+                <div class="fps-icon-col">
+                  <div class="fps-icon-glow"></div>
+                  <div class="fps-icon-wrap">
+                    <img src="assets/files-icon.png" alt="files" class="fps-icon-img" draggable="false" tabindex="-1">
+                  </div>
+                  <div class="pps-shield-spark pps-spark-tl">✦</div>
+                  <div class="pps-shield-spark pps-spark-br">✦</div>
+                </div>
+                <div class="pps-hero-text">
+                  <h3 class="pps-hero-title">Secure file access after payment confirmation</h3>
+                  <p class="pps-hero-sub">Your project files are securely stored and will become available automatically
+                    once your payment has been verified and confirmed. Download and manage your files anytime with safe,
+                    encrypted access.</p>
+                </div>
+              </div>
+
+              <div class="pps-divider"></div>
+
+              <div id="filesList">
+                <div class="empty-note">কোনো file নেই</div>
+              </div>
+              <div id="filesViewAllWrap" style="display:none">
+                <button class="files-view-all-btn" id="filesViewAllBtn">
+                  View All Files (<span id="filesViewAllCount">0</span>) →
+                </button>
+              </div>
+            </div>
+
+          </div><!-- end detail-two-col -->
+
+
+          <!-- Admin Message Preview -->
+          <div class="admin-msg-card" id="adminMsgCard" style="display:none">
+            <div class="admin-msg-left">
+              <div class="admin-msg-header">
+                <div class="admin-msg-header-icon">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                </div>
+                <span class="admin-msg-header-title">ADMIN MESSAGE</span>
+              </div>
+              <div class="admin-msg-text" id="adminMsgText"></div>
+              <button class="go-chat-btn" id="goChatBtn">সম্পূর্ণ চ্যাট দেখুন →</button>
+            </div>
+            <img src="assets/message-icon.png" alt="message" class="admin-msg-img" draggable="false">
+
+          </div>
+        </div>
+
+        <!-- Orders List View -->
+        <div id="ordersListView">
+          <div id="allOrdersList"></div>
+          <div class="empty-state" id="ordersEmpty" style="display:none">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            <p>এখনো কোনো order নেই</p>
             <a href="../Order page/order.html" class="empty-cta">প্রথম Order দিন →</a>
           </div>
         </div>
+      </section>
 
-        <!-- Completed Orders -->
-        <div class="section-title-row" style="margin-top:1.5rem">
-          <div class="section-title-row-left">
-            <div class="section-dot blue"></div>
-            <span>COMPLETED</span>
+      <!-- ── PAGE: MESSAGES ──────────────────────────────────────────────────── -->
+      <section class="page" id="page-messages">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Messages</h1>
+            <p class="page-sub">Admin এর সাথে কথা বলুন</p>
           </div>
-          <a href="#" class="section-view-all" data-page="orders" data-filter="completed">View All</a>
-        </div>
-        <div id="completedOrdersList">
-          <div class="empty-note" id="completedEmpty" style="display:none">কোনো completed order নেই</div>
-        </div>
-      </div>
-
-      <!-- Desktop: full order table -->
-      <div id="ordersTableView" class="orders-table-view">
-        <div class="ot-tabs" id="otTabs">
-          <button class="ot-tab active" data-tab="all">All <span class="ot-tab-count" id="otCountAll">0</span></button>
-          <button class="ot-tab" data-tab="in_progress">In Progress <span class="ot-tab-count" id="otCountProgress">0</span></button>
-          <button class="ot-tab" data-tab="in_review">In Review <span class="ot-tab-count" id="otCountReview">0</span></button>
-          <button class="ot-tab" data-tab="completed">Completed <span class="ot-tab-count" id="otCountCompleted">0</span></button>
-          <button class="ot-tab" data-tab="pending">Pending <span class="ot-tab-count" id="otCountPending">0</span></button>
-          <button class="ot-tab" data-tab="overdue">Overdue <span class="ot-tab-count" id="otCountOverdue">0</span></button>
+          <select class="order-select" id="chatOrderSelect">
+            <option value="">Order বেছে নিন</option>
+          </select>
         </div>
 
-        <div class="ot-toolbar">
-          <div class="ot-toolbar-left">
-            <div class="ot-select-wrap">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
-              <select class="ot-select" id="otSortSelect">
-                <option value="deadline">Sort: Deadline</option>
-                <option value="newest">Sort: Newest</option>
-                <option value="amount_high">Sort: Amount (High→Low)</option>
-                <option value="amount_low">Sort: Amount (Low→High)</option>
-              </select>
-            </div>
-            <div class="ot-select-wrap">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-              <select class="ot-select" id="otPackageSelect">
-                <option value="all">All Packages</option>
-              </select>
-            </div>
-            <div class="ot-select-wrap">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <select class="ot-select" id="otDateSelect">
-                <option value="all">All Dates</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="year">This Year</option>
-              </select>
-            </div>
+        <div class="chat-container" id="chatContainer">
+          <div class="chat-select-prompt" id="chatSelectPrompt">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <p>উপরে Order বেছে নিন</p>
           </div>
-          <div class="ot-toolbar-right">
-            <button class="ot-export-btn" id="otExportBtn">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Export CSV
-            </button>
-          </div>
-        </div>
 
-        <div class="ot-table-wrap">
-          <table class="ot-table">
-            <thead>
-              <tr>
-                <th>ORDER / PROJECT</th>
-                <th>PACKAGE</th>
-                <th>STATUS</th>
-                <th>DEADLINE</th>
-                <th class="ot-th-amount">AMOUNT</th>
-              </tr>
-            </thead>
-            <tbody id="otTableBody"></tbody>
-          </table>
-          <div class="empty-state" id="otEmpty" style="display:none">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <p>এই ফিল্টারে কোনো order পাওয়া যায়নি</p>
-          </div>
-        </div>
-
-        <div class="ot-pagination" id="otPagination">
-          <span class="ot-page-info" id="otPageInfo">Showing 0 to 0 of 0 orders</span>
-          <div class="ot-page-btns">
-            <button class="ot-page-arrow" id="otPrevBtn" aria-label="Previous page">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <span class="ot-page-num" id="otPageNum">1</span>
-            <button class="ot-page-arrow" id="otNextBtn" aria-label="Next page">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── PAGE: ORDERS ────────────────────────────────────────────────────── -->
-    <section class="page" id="page-orders">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">আমার Orders</h1>
-          <p class="page-sub">সব orders এক জায়গায়</p>
-        </div>
-        <a href="../Order page/order.html" class="new-order-btn-top">+ নতুন Order</a>
-      </div>
-
-      <!-- Order Detail View -->
-      <div id="orderDetailView" style="display:none">
-        <button class="back-btn" id="backToOrders">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-          Orders এ ফিরে যান
-        </button>
-        <div class="od-header-card">
-          <div class="od-header-left">
-            <div class="od-title" id="detailTitle">—</div>
-            <div class="od-meta" id="detailMeta">—</div>
-          </div>
-          <span class="status-badge" id="detailStatus">—</span>
-        </div>
-
-        <!-- Countdown -->
-        <div class="countdown-card" id="countdownCard">
-          <div class="cd-inner">
-            <div class="cd-left">
-              <div class="cd-label">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Deadline countdown চলছে
-              </div>
-              <div class="cd-blocks">
-                <div class="cd-block"><div class="cd-num" id="cdDays">00</div><div class="cd-unit">days</div></div>
-                <div class="cd-sep">:</div>
-                <div class="cd-block"><div class="cd-num" id="cdHours">00</div><div class="cd-unit">hours</div></div>
-                <div class="cd-sep">:</div>
-                <div class="cd-block"><div class="cd-num" id="cdMins">00</div><div class="cd-unit">mins</div></div>
-                <div class="cd-sep">:</div>
-                <div class="cd-block"><div class="cd-num" id="cdSecs">00</div><div class="cd-unit">secs</div></div>
-              </div>
-              <div class="cd-footer">
-                <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Deadline: <strong id="cdDeadline">—</strong></span>
-              </div>
-            </div>
-            <div class="cd-right">
-              <div class="cd-hourglass">
-                <img src="assets/hourglass.png" alt="hourglass" style="width:130px;height:130px;object-fit:contain;filter:drop-shadow(0 0 22px rgba(124,58,237,0.7));">
-              </div>
-              <div class="cd-right-text">
-                <div class="cd-days-big">আর মাত্র <span id="cdDaysLeft2">—</span> দিন বাকি</div>
-                <div class="cd-days-sub">ডেডলাইন মিস না করতে কাজ এগিয়ে নিয়ে যান।</div>
-                <button class="cd-view-btn" id="cdViewOrderBtn">View Order Details →</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Progress Stepper -->
-        <div class="progress-card">
-          <div class="progress-label">PROGRESS STATUS</div>
-          <div class="stepper" id="progressStepper">
-            <!-- JS দিয়ে render হবে -->
-          </div>
-        </div>
-
-        <!-- Payment + Files -->
-        <div class="detail-two-col">
-          <div class="detail-panel payment-panel">
-
-            <!-- ── HEADER ── -->
-            <div class="pps-header">
-              <div class="pps-header-left">
-                <div class="pps-header-icon">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <div class="chat-box" id="chatBox" style="display:none">
+            <div class="chat-head">
+              <div class="chat-head-left">
+                <div class="chat-admin-av">SA</div>
+                <div>
+                  <div class="chat-admin-name">Scriptora Admin</div>
+                  <div class="chat-online"><span class="online-dot"></span> Online</div>
                 </div>
-                <span class="pps-header-title">PAYMENT SUMMARY</span>
               </div>
-              <span class="pps-sparkle">✦</span>
+              <div class="chat-order-id" id="chatOrderId"></div>
             </div>
 
-            <!-- ── HERO (shown when due) ── -->
-            <div class="pps-hero" id="payDueHero" style="display:none">
-              <div class="pps-shield-col">
-                <div class="pps-shield-glow"></div>
-                <div class="pps-shield-wrap">
-                  <img src="assets/security-icon.png" alt="payment shield" class="pps-shield-img" draggable="false" tabindex="-1">
-                </div>
-                <div class="pps-shield-spark pps-spark-tl">✦</div>
-                <div class="pps-shield-spark pps-spark-br">✦</div>
+            <div class="chat-body" id="chatBody">
+              <div class="chat-loading" id="chatLoading">
+                <div class="spinner"></div>
               </div>
-              <div class="pps-hero-text">
-                <div class="pps-hero-badge" id="ppsHeroBadge" style="display:none">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="ppsHeroBadgeIcon"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  <span id="ppsHeroBadgeText">Action Required</span>
-                </div>
-                <h3 class="pps-hero-title" id="ppsHeroTitle">Complete your payment to unlock your files</h3>
-                <p class="pps-hero-sub" id="ppsHeroSub">Unlock your files after payment confirmation. Your files will become available automatically once your payment has been fully verified by the admin. This process ensures secure transactions and guarantees that file access is granted only after successful payment confirmation</p>
-              </div>
-              <div class="pps-ring-wrap" id="ppsHeroRing" style="display:none">
-                <svg width="86" height="86" viewBox="0 0 92 92">
-                  <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="7"/>
-                  <circle cx="46" cy="46" r="38" fill="none" stroke="url(#ppsRingGrad)" stroke-width="7" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="0" transform="rotate(-90 46 46)"/>
-                  <defs>
-                    <linearGradient id="ppsRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#6366f1"/>
-                      <stop offset="50%" stop-color="#a855f7"/>
-                      <stop offset="100%" stop-color="#f97316"/>
-                    </linearGradient>
-                  </defs>
+            </div>
+
+            <div class="chat-input-row">
+              <textarea class="chat-input" id="chatInput" placeholder="Message লিখুন..." rows="1"></textarea>
+              <button class="chat-send-btn" id="chatSendBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
                 </svg>
-                <div class="pps-ring-text">
-                  <span class="pps-ring-pct">100%</span>
-                  <span class="pps-ring-label">PAID</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- ── FEATURE CARDS (shown when fully paid) ── -->
-            <div class="pps-feature-row" id="payFeatureRow" style="display:none">
-              <div class="pps-feature-card">
-                <div class="pps-feature-icon purple">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </div>
-                <div class="pps-feature-text">
-                  <div class="pps-feature-title">All Files Unlocked</div>
-                  <div class="pps-feature-sub">Access granted</div>
-                </div>
-              </div>
-              <div class="pps-feature-card">
-                <div class="pps-feature-icon green">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                </div>
-                <div class="pps-feature-text">
-                  <div class="pps-feature-title">Download Enabled</div>
-                  <div class="pps-feature-sub">Instant access</div>
-                </div>
-              </div>
-              <div class="pps-feature-card">
-                <div class="pps-feature-icon amber">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                </div>
-                <div class="pps-feature-text">
-                  <div class="pps-feature-title">Secure &amp; Encrypted</div>
-                  <div class="pps-feature-sub">100% protected</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ── DIVIDER ── -->
-            <div class="pps-divider"></div>
-
-            <!-- ── PAYMENT ROWS ── -->
-            <div class="pps-rows">
-              <div class="pps-row">
-                <div class="pps-row-left">
-                  <div class="pps-row-label">মোট মূল্য</div>
-                </div>
-                <span class="pps-row-amount pps-amt-white" id="detailTotal">—</span>
-              </div>
-
-              <div class="pps-row">
-                <div class="pps-row-left">
-                  <div class="pps-row-label">Advance paid</div>
-                </div>
-                <span class="pps-row-amount pps-amt-green" id="detailAdvance">—</span>
-              </div>
-
-              <div class="pps-row pps-row-due">
-                <div class="pps-row-left">
-                  <div class="pps-row-label">Due amount</div>
-                </div>
-                <span class="pps-row-amount pps-amt-red" id="detailDue">—</span>
-              </div>
-            </div>
-
-            <div class="pay-badges" id="payBadges"></div>
-
-            <!-- ── WARNING BOX ── -->
-            <div class="pps-warning" id="payDueWarning" style="display:none">
-              <div class="pps-warning-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              </div>
-              <span>আপনার বাকি payment টি clear করলে সাথে সাথে ফাইল unlock করা যাবে।</span>
-            </div>
-
-            <!-- ── NOTE (shown when fully paid) ── -->
-            <div class="pps-access-row" id="payDueNote" style="display:none">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              Files available for 60 days from order date — access until <strong id="payAccessUntil">—</strong>
-            </div>
-
-            <!-- ── PAY NOW ── -->
-            <div id="payNowSection" style="display:none">
-              <button class="pps-pay-btn" id="payNowBtn">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                Pay Now
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
-              <div class="pps-secure">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Secure payment powered by SSL encryption
-              </div>
-            </div>
-
-            <!-- Payment Proof Submit -->
-            <div class="proof-submit-section" id="proofSubmitSection" style="display:none">
-              <div class="proof-submit-title">💳 Payment Proof পাঠান</div>
-              <div class="proof-field">
-                <label>আপনি কত টাকা পাঠিয়েছেন?</label>
-                <input type="number" id="proofClaimedAmount" placeholder="যেমন: 4300" min="1" />
-              </div>
-              <div class="proof-field">
-                <label>Payment Method</label>
-                <select id="proofMethod">
-                  <option value="">-- Select Method --</option>
-                  <option value="bKash">bKash</option>
-                  <option value="Nagad">Nagad</option>
-                  <option value="Rocket">Rocket</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div class="proof-field">
-                <label>Transaction ID / Reference</label>
-                <input type="text" id="proofTxnId" placeholder="যেমন: bKash TXN: 8N7XA2..." />
-              </div>
-              <div class="proof-field">
-                <label>Payment Screenshot</label>
-                <label class="proof-upload-btn">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  <span id="proofFileName">Screenshot বেছে নিন</span>
-                  <input type="file" id="proofScreenshot" accept="image/*" style="display:none"/>
-                </label>
-              </div>
-              <div class="proof-field">
-                <label>Note (optional)</label>
-                <input type="text" id="proofClientNote" placeholder="কোনো বিশেষ তথ্য থাকলে লিখুন..." />
-              </div>
-              <div class="proof-status" id="proofStatus"></div>
-              <button class="proof-send-btn" id="proofSendBtn">💸 Proof পাঠান</button>
-            </div>
-          <div class="proof-submitted" id="proofSubmitted" style="display:none">
-              ✓ Payment proof পাঠানো হয়েছে। Admin review করছেন।
             </div>
           </div>
+        </div>
+      </section>
 
-          <!-- Payment History — left col, below payment summary -->
-          <div class="client-pay-history-card" id="clientPayHistoryCard" style="display:none">
-            <div class="pay-hist-header">
-              <div class="pay-hist-header-left">
-                <div class="pay-hist-header-icon">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-2.8-2.8L7 14"/></svg>
-                </div>
-                <span class="pay-hist-header-title">PAYMENT HISTORY</span>
-              </div>
-              <div class="pay-hist-header-right">
-                <select class="pay-hist-filter" id="payHistFilterSelect" onchange="window._setPayHistFilter(this.value)">
-                  <option value="all">All Status</option>
-                  <option value="approved">Approved</option>
-                  <option value="pending">Pending</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-                <div class="pay-hist-filter-icon-btn">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-                </div>
-              </div>
-            </div>
-            <div id="clientPayHistoryList" class="client-pay-history-list"></div>
-            <div id="clientPayHistoryViewAll" class="pay-hist-viewall-wrap" style="display:none"></div>
+      <!-- ── PAGE: FILES ─────────────────────────────────────────────────────── -->
+      <section class="page" id="page-files">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Files</h1>
+            <p class="page-sub">সব order এর files এক জায়গায়</p>
           </div>
+        </div>
+        <div id="filesFilterChip" class="files-filter-chip" style="display:none">
+          <span id="filesFilterChipText"></span>
+          <button id="filesFilterChipClear" type="button">সব Order দেখুন ✕</button>
+        </div>
+        <div id="allFilesList"></div>
+        <div class="empty-state" id="filesEmpty" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          </svg>
+          <p>কোনো file নেই</p>
+        </div>
+      </section>
 
-        <!-- Right col — Files -->
-        <div class="detail-panel files-panel">
-          <div class="pps-header">
-            <div class="pps-header-left">
-              <div class="pps-header-icon">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <span class="pps-header-title">MY FILES</span>
-            </div>
-            <span class="pps-sparkle">✦</span>
+      <!-- ── PAGE: PAYMENTS ──────────────────────────────────────────────────── -->
+      <section class="page" id="page-payments">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Payments</h1>
+            <p class="page-sub">Payment history ও status</p>
           </div>
+        </div>
+        <div id="paymentsList"></div>
+        <div class="empty-state" id="paymentsEmpty" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+          <p>কোনো payment নেই</p>
+        </div>
+      </section>
 
-          <div class="pps-hero" style="margin-bottom:10px;">
-            <div class="fps-icon-col">
-              <div class="fps-icon-glow"></div>
-              <div class="fps-icon-wrap">
-                <img src="assets/files-icon.png" alt="files" class="fps-icon-img" draggable="false" tabindex="-1">
-              </div>
-              <div class="pps-shield-spark pps-spark-tl">✦</div>
-              <div class="pps-shield-spark pps-spark-br">✦</div>
-            </div>
-            <div class="pps-hero-text">
-              <h3 class="pps-hero-title">Secure file access after payment confirmation</h3>
-              <p class="pps-hero-sub">Your project files are securely stored and will become available automatically once your payment has been verified and confirmed. Download and manage your files anytime with safe, encrypted access.</p>
-            </div>
-          </div>
-
-          <div class="pps-divider"></div>
-
-          <div id="filesList">
-            <div class="empty-note">কোনো file নেই</div>
-          </div>
-          <div id="filesViewAllWrap" style="display:none">
-            <button class="files-view-all-btn" id="filesViewAllBtn">
-              View All Files (<span id="filesViewAllCount">0</span>) →
-            </button>
+      <!-- ── PAGE: PROFILE ───────────────────────────────────────────────────── -->
+      <section class="page" id="page-profile">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">আমার Profile</h1>
+            <p class="page-sub">তথ্য আপডেট করুন</p>
           </div>
         </div>
 
-      </div><!-- end detail-two-col -->
+        <!-- Avatar Section -->
+        <div class="profile-avatar-card">
+          <div class="profile-av-wrap">
+            <div class="profile-avatar" id="profileAvatar">?</div>
+            <label class="av-cam-btn" title="Avatar পরিবর্তন">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <input type="file" id="avatarInput" accept="image/*" style="display:none" />
+            </label>
+          </div>
+          <div>
+            <div class="profile-av-name" id="profileAvName">—</div>
+            <div class="profile-av-since" id="profileAvSince">—</div>
+            <div class="profile-av-orders" id="profileAvOrders">— orders</div>
+          </div>
+        </div>
 
-
-        <!-- Admin Message Preview -->
-        <div class="admin-msg-card" id="adminMsgCard" style="display:none">
-          <div class="admin-msg-left">
-            <div class="admin-msg-header">
-              <div class="admin-msg-header-icon">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <span class="admin-msg-header-title">ADMIN MESSAGE</span>
+        <!-- Personal Info -->
+        <div class="profile-card">
+          <div class="profile-section-label">ব্যক্তিগত তথ্য</div>
+          <div class="profile-grid-2">
+            <div class="profile-field">
+              <label>প্রথম নাম</label>
+              <input type="text" id="pFirstName" placeholder="Rahim" />
             </div>
-            <div class="admin-msg-text" id="adminMsgText"></div>
-            <button class="go-chat-btn" id="goChatBtn">সম্পূর্ণ চ্যাট দেখুন →</button>
-          </div>
-          <img src="assets/message-icon.png" alt="message" class="admin-msg-img" draggable="false">
-
-        </div>
-      </div>
-
-      <!-- Orders List View -->
-      <div id="ordersListView">
-        <div id="allOrdersList"></div>
-        <div class="empty-state" id="ordersEmpty" style="display:none">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <p>এখনো কোনো order নেই</p>
-          <a href="../Order page/order.html" class="empty-cta">প্রথম Order দিন →</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── PAGE: MESSAGES ──────────────────────────────────────────────────── -->
-    <section class="page" id="page-messages">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Messages</h1>
-          <p class="page-sub">Admin এর সাথে কথা বলুন</p>
-        </div>
-        <select class="order-select" id="chatOrderSelect">
-          <option value="">Order বেছে নিন</option>
-        </select>
-      </div>
-
-      <div class="chat-container" id="chatContainer">
-        <div class="chat-select-prompt" id="chatSelectPrompt">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <p>উপরে Order বেছে নিন</p>
-        </div>
-
-        <div class="chat-box" id="chatBox" style="display:none">
-          <div class="chat-head">
-            <div class="chat-head-left">
-              <div class="chat-admin-av">SA</div>
-              <div>
-                <div class="chat-admin-name">Scriptora Admin</div>
-                <div class="chat-online"><span class="online-dot"></span> Online</div>
-              </div>
+            <div class="profile-field">
+              <label>শেষ নাম</label>
+              <input type="text" id="pLastName" placeholder="Hossain" />
             </div>
-            <div class="chat-order-id" id="chatOrderId"></div>
-          </div>
-
-          <div class="chat-body" id="chatBody">
-            <div class="chat-loading" id="chatLoading">
-              <div class="spinner"></div>
-            </div>
-          </div>
-
-          <div class="chat-input-row">
-            <textarea class="chat-input" id="chatInput" placeholder="Message লিখুন..." rows="1"></textarea>
-            <button class="chat-send-btn" id="chatSendBtn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── PAGE: FILES ─────────────────────────────────────────────────────── -->
-    <section class="page" id="page-files">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Files</h1>
-          <p class="page-sub">সব order এর files এক জায়গায়</p>
-        </div>
-      </div>
-      <div id="filesFilterChip" class="files-filter-chip" style="display:none">
-        <span id="filesFilterChipText"></span>
-        <button id="filesFilterChipClear" type="button">সব Order দেখুন ✕</button>
-      </div>
-      <div id="allFilesList"></div>
-      <div class="empty-state" id="filesEmpty" style="display:none">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        <p>কোনো file নেই</p>
-      </div>
-    </section>
-
-    <!-- ── PAGE: PAYMENTS ──────────────────────────────────────────────────── -->
-    <section class="page" id="page-payments">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Payments</h1>
-          <p class="page-sub">Payment history ও status</p>
-        </div>
-      </div>
-      <div id="paymentsList"></div>
-      <div class="empty-state" id="paymentsEmpty" style="display:none">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        <p>কোনো payment নেই</p>
-      </div>
-    </section>
-
-    <!-- ── PAGE: PROFILE ───────────────────────────────────────────────────── -->
-    <section class="page" id="page-profile">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">আমার Profile</h1>
-          <p class="page-sub">তথ্য আপডেট করুন</p>
-        </div>
-      </div>
-
-      <!-- Avatar Section -->
-      <div class="profile-avatar-card">
-        <div class="profile-av-wrap">
-          <div class="profile-avatar" id="profileAvatar">?</div>
-          <label class="av-cam-btn" title="Avatar পরিবর্তন">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            <input type="file" id="avatarInput" accept="image/*" style="display:none"/>
-          </label>
-        </div>
-        <div>
-          <div class="profile-av-name" id="profileAvName">—</div>
-          <div class="profile-av-since" id="profileAvSince">—</div>
-          <div class="profile-av-orders" id="profileAvOrders">— orders</div>
-        </div>
-      </div>
-
-      <!-- Personal Info -->
-      <div class="profile-card">
-        <div class="profile-section-label">ব্যক্তিগত তথ্য</div>
-        <div class="profile-grid-2">
-          <div class="profile-field">
-            <label>প্রথম নাম</label>
-            <input type="text" id="pFirstName" placeholder="Rahim"/>
           </div>
           <div class="profile-field">
-            <label>শেষ নাম</label>
-            <input type="text" id="pLastName" placeholder="Hossain"/>
-          </div>
-        </div>
-        <div class="profile-field">
-          <label>Email <span class="verified-badge">✓ verified</span></label>
-          <input type="email" id="pEmail" readonly class="readonly-input"/>
-        </div>
-        <div class="profile-field">
-          <label>Phone</label>
-          <input type="tel" id="pPhone" placeholder="01XXXXXXXXX"/>
-        </div>
-
-        <div class="profile-section-label" style="margin-top:1rem">একাডেমিক তথ্য</div>
-        <div class="profile-field">
-          <label>University</label>
-          <input type="text" id="pUniversity" placeholder="যেমন: BUET, DU, NSU, BRAC..."/>
-        </div>
-        <div class="profile-grid-2">
-          <div class="profile-field">
-            <label>Department / Subject</label>
-            <input type="text" id="pSubject" placeholder="যেমন: CSE, BBA, EEE..."/>
+            <label>Email <span class="verified-badge">✓ verified</span></label>
+            <input type="email" id="pEmail" readonly class="readonly-input" />
           </div>
           <div class="profile-field">
-            <label>Academic Year</label>
-            <input type="text" id="pYear" placeholder="যেমন: 4th Year, Masters..."/>
+            <label>Phone</label>
+            <input type="tel" id="pPhone" placeholder="01XXXXXXXXX" />
           </div>
+
+          <div class="profile-section-label" style="margin-top:1rem">একাডেমিক তথ্য</div>
+          <div class="profile-field">
+            <label>University</label>
+            <input type="text" id="pUniversity" placeholder="যেমন: BUET, DU, NSU, BRAC..." />
+          </div>
+          <div class="profile-grid-2">
+            <div class="profile-field">
+              <label>Department / Subject</label>
+              <input type="text" id="pSubject" placeholder="যেমন: CSE, BBA, EEE..." />
+            </div>
+            <div class="profile-field">
+              <label>Academic Year</label>
+              <input type="text" id="pYear" placeholder="যেমন: 4th Year, Masters..." />
+            </div>
+          </div>
+
+          <button class="profile-save-btn" id="profileSaveBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Profile Save করুন
+          </button>
+          <div class="profile-msg" id="profileMsg"></div>
         </div>
 
-        <button class="profile-save-btn" id="profileSaveBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Profile Save করুন
-        </button>
-        <div class="profile-msg" id="profileMsg"></div>
-      </div>
-
-      <!-- Password Change -->
-      <div class="profile-card">
-        <div class="profile-section-label">Password পরিবর্তন</div>
-        <div class="profile-field">
-          <label>বর্তমান Password</label>
-          <input type="password" id="pCurrentPass" placeholder="Current password"/>
+        <!-- Password Change -->
+        <div class="profile-card">
+          <div class="profile-section-label">Password পরিবর্তন</div>
+          <div class="profile-field">
+            <label>বর্তমান Password</label>
+            <input type="password" id="pCurrentPass" placeholder="Current password" />
+          </div>
+          <div class="profile-field">
+            <label>নতুন Password</label>
+            <input type="password" id="pNewPass" placeholder="New password (min 8 chars)" />
+          </div>
+          <div class="profile-field">
+            <label>নতুন Password নিশ্চিত করুন</label>
+            <input type="password" id="pConfirmPass" placeholder="Confirm new password" />
+          </div>
+          <button class="profile-pass-btn" id="passChangeBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            Password Update করুন
+          </button>
+          <div class="profile-msg" id="passMsg"></div>
         </div>
-        <div class="profile-field">
-          <label>নতুন Password</label>
-          <input type="password" id="pNewPass" placeholder="New password (min 8 chars)"/>
-        </div>
-        <div class="profile-field">
-          <label>নতুন Password নিশ্চিত করুন</label>
-          <input type="password" id="pConfirmPass" placeholder="Confirm new password"/>
-        </div>
-        <button class="profile-pass-btn" id="passChangeBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Password Update করুন
-        </button>
-        <div class="profile-msg" id="passMsg"></div>
-      </div>
-    </section>
+      </section>
 
-  </main>
-</div>
-
-<!-- ORDER CONFIRMED POPUP -->
-<div class="confirm-overlay" id="confirmOverlay" style="display:none">
-  <div class="confirm-popup" id="confirmPopup">
-    <div class="confirm-icon">🎉</div>
-    <div class="confirm-title">Order Confirmed!</div>
-    <div class="confirm-msg" id="confirmMsg">আপনার order confirm হয়েছে এবং কাজ শুরু হয়েছে।</div>
-    <div class="confirm-order-id" id="confirmOrderId"></div>
-    <div class="confirm-timer-label">Deadline countdown শুরু হয়েছে</div>
-    <div class="confirm-cd" id="confirmCd">00d 00:00:00</div>
-    <button class="confirm-close-btn" onclick="closeConfirmPopup()">চলুন শুরু করি →</button>
+    </main>
   </div>
-</div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- ── PROTECTED FILE VIEWER MODAL ───────────────────────────── -->
-<div id="fileViewerOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);flex-direction:column;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;">
-  <div style="width:100%;max-width:900px;height:90vh;display:flex;flex-direction:column;padding:0 12px;box-sizing:border-box;">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 10px;flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <!-- Protected badge: always shown -->
-        <div id="viewerProtectedBadge" style="background:#1e1b4b;border:1px solid #3730a3;border-radius:8px;padding:6px 12px;font-size:12px;color:#a5b4fc;font-family:Sora,sans-serif;display:flex;align-items:center;gap:6px;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Protected View
-        </div>
-        <!-- Download button: shown only when download IS allowed -->
-        <button id="viewerDownloadBtn" onclick="viewerDownload()" style="display:none;background:#064e3b;border:1px solid #059669;border-radius:8px;padding:6px 14px;font-size:12px;color:#6ee7b7;font-family:Sora,sans-serif;cursor:pointer;align-items:center;gap:6px;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download
-        </button>
-        <span id="viewerFileName" style="font-size:13px;color:#e2e8f0;font-family:Sora,sans-serif;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
-      </div>
-      <button onclick="closeFileViewer()" style="background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:Sora,sans-serif;">&#x2715; Close</button>
-    </div>
-    <div id="viewerContainer" style="flex:1;position:relative;border-radius:12px;overflow:hidden;background:#0f0f0f;border:1px solid #1e293b;">
-      <div id="viewerWatermark" style="position:absolute;inset:0;z-index:9;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0.07;font-size:48px;font-weight:800;color:#fff;letter-spacing:6px;transform:rotate(-30deg);user-select:none;font-family:Sora,sans-serif;white-space:nowrap;"></div>
-      <iframe id="viewerFrame" src="" style="width:100%;height:100%;border:none;display:none;" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
-      <img id="viewerImg" src="" alt="" style="display:none;max-width:100%;max-height:100%;object-fit:contain;position:absolute;inset:0;margin:auto;user-select:none;pointer-events:none;" draggable="false"/>
-      <div id="viewerPdfCanvas" style="display:none;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;padding:12px;box-sizing:border-box;background:#1a1a2e;user-select:none;-webkit-user-select:none;" oncontextmenu="return false;"></div>
-    </div>
-    <div style="text-align:center;padding:8px 0 4px;font-size:11px;color:#475569;font-family:Sora,sans-serif;">
-      এই file শুধুমাত্র viewing এর জন্য। Unauthorized copy বা screenshot নিষিদ্ধ।
+  <!-- ORDER CONFIRMED POPUP -->
+  <div class="confirm-overlay" id="confirmOverlay" style="display:none">
+    <div class="confirm-popup" id="confirmPopup">
+      <div class="confirm-icon">🎉</div>
+      <div class="confirm-title">Order Confirmed!</div>
+      <div class="confirm-msg" id="confirmMsg">আপনার order confirm হয়েছে এবং কাজ শুরু হয়েছে।</div>
+      <div class="confirm-order-id" id="confirmOrderId"></div>
+      <div class="confirm-timer-label">Deadline countdown শুরু হয়েছে</div>
+      <div class="confirm-cd" id="confirmCd">00d 00:00:00</div>
+      <button class="confirm-close-btn" onclick="closeConfirmPopup()">চলুন শুরু করি →</button>
     </div>
   </div>
-</div>
 
-<script src="js/dashboard.js"></script>
-<!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-bottom-nav">
-  <a class="mbn-item active" data-page="home" href="#">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-    <span>Home</span>
-  </a>
-  <a class="mbn-item" data-page="orders" href="#">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-    <span>Orders</span>
-  </a>
-  <a class="mbn-item" data-page="messages" href="#">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    <span>Messages</span>
-  </a>
-  <a class="mbn-item" data-page="files" href="#">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-    <span>Files</span>
-  </a>
-  <a class="mbn-item" data-page="profile" href="#">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    <span>Profile</span>
-  </a>
-</nav>
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── PROTECTED FILE VIEWER MODAL ───────────────────────────── -->
+  <div id="fileViewerOverlay"
+    style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);flex-direction:column;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;">
+    <div
+      style="width:100%;max-width:900px;height:90vh;display:flex;flex-direction:column;padding:0 12px;box-sizing:border-box;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 10px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <!-- Protected badge: always shown -->
+          <div id="viewerProtectedBadge"
+            style="background:#1e1b4b;border:1px solid #3730a3;border-radius:8px;padding:6px 12px;font-size:12px;color:#a5b4fc;font-family:Sora,sans-serif;display:flex;align-items:center;gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            Protected View
+          </div>
+          <!-- Download button: shown only when download IS allowed -->
+          <button id="viewerDownloadBtn" onclick="viewerDownload()"
+            style="display:none;background:#064e3b;border:1px solid #059669;border-radius:8px;padding:6px 14px;font-size:12px;color:#6ee7b7;font-family:Sora,sans-serif;cursor:pointer;align-items:center;gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download
+          </button>
+          <span id="viewerFileName"
+            style="font-size:13px;color:#e2e8f0;font-family:Sora,sans-serif;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        </div>
+        <button onclick="closeFileViewer()"
+          style="background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:Sora,sans-serif;">&#x2715;
+          Close</button>
+      </div>
+      <div id="viewerContainer"
+        style="flex:1;position:relative;border-radius:12px;overflow:hidden;background:#0f0f0f;border:1px solid #1e293b;">
+        <div id="viewerWatermark"
+          style="position:absolute;inset:0;z-index:9;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0.07;font-size:48px;font-weight:800;color:#fff;letter-spacing:6px;transform:rotate(-30deg);user-select:none;font-family:Sora,sans-serif;white-space:nowrap;">
+        </div>
+        <iframe id="viewerFrame" src="" style="width:100%;height:100%;border:none;display:none;"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+        <img id="viewerImg" src="" alt=""
+          style="display:none;max-width:100%;max-height:100%;object-fit:contain;position:absolute;inset:0;margin:auto;user-select:none;pointer-events:none;"
+          draggable="false" />
+        <div id="viewerPdfCanvas"
+          style="display:none;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;padding:12px;box-sizing:border-box;background:#1a1a2e;user-select:none;-webkit-user-select:none;"
+          oncontextmenu="return false;"></div>
+      </div>
+      <div style="text-align:center;padding:8px 0 4px;font-size:11px;color:#475569;font-family:Sora,sans-serif;">
+        এই file শুধুমাত্র viewing এর জন্য। Unauthorized copy বা screenshot নিষিদ্ধ।
+      </div>
+    </div>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="mobile-bottom-nav">
+    <a class="mbn-item active" data-page="home" href="#">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+      </svg>
+      <span>Home</span>
+    </a>
+    <a class="mbn-item" data-page="orders" href="#">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+      </svg>
+      <span>Orders</span>
+    </a>
+    <a class="mbn-item" data-page="messages" href="#">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+      <span>Messages</span>
+    </a>
+    <a class="mbn-item" data-page="files" href="#">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+      </svg>
+      <span>Files</span>
+    </a>
+    <a class="mbn-item" data-page="profile" href="#">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
 
   <!-- Payment Due Popup -->
-  <div id="paymentDueOverlay" onclick="if(event.target===this)closePaymentDuePopup()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;padding:16px;">
-    <div id="paymentDuePopupCard" style="background:#0d1423;border:1px solid rgba(255,255,255,0.08);border-radius:16px;width:100%;max-width:420px;max-height:92vh;overflow-y:auto;position:relative;padding:24px 20px 20px;font-family:'Inter','Segoe UI',sans-serif;">
+  <div id="paymentDueOverlay" onclick="if(event.target===this)closePaymentDuePopup()"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;padding:16px;">
+    <div id="paymentDuePopupCard"
+      style="background:#0d1423;border:1px solid rgba(255,255,255,0.08);border-radius:16px;width:100%;max-width:420px;max-height:92vh;overflow-y:auto;position:relative;padding:24px 20px 20px;font-family:'Inter','Segoe UI',sans-serif;">
 
       <!-- Close -->
-      <button onclick="closePaymentDuePopup()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>
+      <button onclick="closePaymentDuePopup()"
+        style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>
 
       <!-- Header icon -->
       <div style="text-align:center;margin-bottom:16px;">
         <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
           <span class="popup-plus-left" style="color:#f59e0b;font-size:14px;font-weight:300;">+</span>
-          <div class="popup-lock-circle" style="width:54px;height:54px;background:linear-gradient(135deg,#c47d0e,#f59e0b);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(245,158,11,0.3);">
+          <div class="popup-lock-circle"
+            style="width:54px;height:54px;background:linear-gradient(135deg,#c47d0e,#f59e0b);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(245,158,11,0.3);">
             <svg width="26" height="28" viewBox="0 0 26 28" fill="none" xmlns="http://www.w3.org/2000/svg">
               <!-- shackle (U shape) -->
               <g id="lock-shackle">
-                <path d="M8 14V10C8 6.686 10.686 4 14 4C17.314 4 20 6.686 20 10V14" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <path d="M8 14V10C8 6.686 10.686 4 14 4C17.314 4 20 6.686 20 10V14" stroke="white" stroke-width="2.5"
+                  stroke-linecap="round" fill="none" />
               </g>
               <!-- body -->
               <g id="lock-body">
-                <rect x="5" y="13" width="18" height="13" rx="3" fill="white" opacity="0.95"/>
-                <circle cx="14" cy="19.5" r="2.5" fill="#c47d0e"/>
-                <rect x="13" y="19.5" width="2" height="4" rx="1" fill="#c47d0e"/>
+                <rect x="5" y="13" width="18" height="13" rx="3" fill="white" opacity="0.95" />
+                <circle cx="14" cy="19.5" r="2.5" fill="#c47d0e" />
+                <rect x="13" y="19.5" width="2" height="4" rx="1" fill="#c47d0e" />
               </g>
             </svg>
           </div>
           <span class="popup-plus-right" style="color:#f59e0b;font-size:14px;font-weight:300;">+</span>
         </div>
         <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:6px;">Payment Due</div>
-        <div style="font-size:12px;color:#9ca3af;line-height:1.55;">You have an outstanding due amount. As per our policy,<br>files will remain locked until the full payment is cleared.</div>
+        <div style="font-size:12px;color:#9ca3af;line-height:1.55;">You have an outstanding due amount. As per our
+          policy,<br>files will remain locked until the full payment is cleared.</div>
       </div>
 
       <!-- Pending Due Box -->
-      <div class="popup-due-box" style="background:rgba(127,29,29,0.3);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <div class="popup-due-box"
+        style="background:rgba(127,29,29,0.3);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
         <div>
-          <div style="font-size:10px;color:#fca5a5;font-weight:600;letter-spacing:.06em;margin-bottom:4px;">Pending Due Amount</div>
+          <div style="font-size:10px;color:#fca5a5;font-weight:600;letter-spacing:.06em;margin-bottom:4px;">Pending Due
+            Amount</div>
           <div id="popupDueAmount" style="font-size:26px;font-weight:800;color:#f87171;margin-bottom:5px;">৳0</div>
-          <div style="font-size:11px;color:#9ca3af;line-height:1.45;">Please clear the due amount to unlock all files and<br>access your project materials.</div>
+          <div style="font-size:11px;color:#9ca3af;line-height:1.45;">Please clear the due amount to unlock all files
+            and<br>access your project materials.</div>
         </div>
-        <div style="background:rgba(239,68,68,0.15);border-radius:12px;padding:8px;display:flex;align-items:center;justify-content:center;overflow:visible;">
+        <div
+          style="background:rgba(239,68,68,0.15);border-radius:12px;padding:8px;display:flex;align-items:center;justify-content:center;overflow:visible;">
           <svg width="52" height="52" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" overflow="visible">
 
             <!-- Flying note 1 (left-up) -->
             <g id="note-fly1" opacity="0">
-              <rect x="14" y="22" width="18" height="11" rx="2" fill="#4ade80"/>
-              <rect x="16" y="24" width="14" height="7" rx="1" fill="#166534" opacity="0.4"/>
-              <text x="23" y="30" text-anchor="middle" font-size="6" font-weight="800" fill="white" font-family="Arial,sans-serif">$</text>
+              <rect x="14" y="22" width="18" height="11" rx="2" fill="#4ade80" />
+              <rect x="16" y="24" width="14" height="7" rx="1" fill="#166534" opacity="0.4" />
+              <text x="23" y="30" text-anchor="middle" font-size="6" font-weight="800" fill="white"
+                font-family="Arial,sans-serif">$</text>
             </g>
 
             <!-- Flying note 2 (straight-up) -->
             <g id="note-fly2" opacity="0">
-              <rect x="14" y="22" width="18" height="11" rx="2" fill="#86efac"/>
-              <rect x="16" y="24" width="14" height="7" rx="1" fill="#166534" opacity="0.35"/>
-              <text x="23" y="30" text-anchor="middle" font-size="6" font-weight="800" fill="white" font-family="Arial,sans-serif">$</text>
+              <rect x="14" y="22" width="18" height="11" rx="2" fill="#86efac" />
+              <rect x="16" y="24" width="14" height="7" rx="1" fill="#166534" opacity="0.35" />
+              <text x="23" y="30" text-anchor="middle" font-size="6" font-weight="800" fill="white"
+                font-family="Arial,sans-serif">$</text>
             </g>
 
             <!-- Flying note 3 (right-up) -->
             <g id="note-fly3" opacity="0">
-              <rect x="14" y="22" width="18" height="11" rx="2" fill="#4ade80"/>
-              <rect x="16" y="24" width="14" height="7" rx="1" fill="#166534" opacity="0.4"/>
-              <text x="23" y="30" text-anchor="middle" font-size="6" font-weight="800" fill="white" font-family="Arial,sans-serif">$</text>
+              <rect x="14" y="22" width="18" height="11" rx="2" fill="#4ade80" />
+              <rect x="16" y="24" width="14" height="7" rx="1" fill="#166534" opacity="0.4" />
+              <text x="23" y="30" text-anchor="middle" font-size="6" font-weight="800" fill="white"
+                font-family="Arial,sans-serif">$</text>
             </g>
 
             <!-- Base note (static, wobbles) -->
             <g id="note-base">
               <!-- shadow -->
-              <rect x="10" y="36" width="30" height="14" rx="3" fill="#991b1b" opacity="0.5"/>
+              <rect x="10" y="36" width="30" height="14" rx="3" fill="#991b1b" opacity="0.5" />
               <!-- main note body -->
-              <rect x="8" y="30" width="32" height="18" rx="3" fill="#16a34a"/>
+              <rect x="8" y="30" width="32" height="18" rx="3" fill="#16a34a" />
               <!-- inner frame -->
-              <rect x="11" y="33" width="26" height="12" rx="1.5" fill="none" stroke="#4ade80" stroke-width="0.8" opacity="0.6"/>
+              <rect x="11" y="33" width="26" height="12" rx="1.5" fill="none" stroke="#4ade80" stroke-width="0.8"
+                opacity="0.6" />
               <!-- dollar sign -->
-              <text x="24" y="42" text-anchor="middle" font-size="11" font-weight="900" fill="white" font-family="Arial,sans-serif">$</text>
+              <text x="24" y="42" text-anchor="middle" font-size="11" font-weight="900" fill="white"
+                font-family="Arial,sans-serif">$</text>
               <!-- left oval -->
-              <ellipse cx="14" cy="39" rx="3.5" ry="4.5" fill="#15803d" opacity="0.7"/>
+              <ellipse cx="14" cy="39" rx="3.5" ry="4.5" fill="#15803d" opacity="0.7" />
               <!-- right oval -->
-              <ellipse cx="34" cy="39" rx="3.5" ry="4.5" fill="#15803d" opacity="0.7"/>
+              <ellipse cx="34" cy="39" rx="3.5" ry="4.5" fill="#15803d" opacity="0.7" />
             </g>
 
           </svg>
@@ -1173,25 +1837,40 @@
 
       <!-- Breakdown -->
       <div style="margin-bottom:12px;">
-        <div style="font-size:9px;font-weight:700;color:#6b7280;letter-spacing:.1em;margin-bottom:8px;">PAYMENT BREAKDOWN</div>
+        <div style="font-size:9px;font-weight:700;color:#6b7280;letter-spacing:.1em;margin-bottom:8px;">PAYMENT
+          BREAKDOWN</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-          <div style="background:#0f1e33;border-radius:9px;padding:10px 6px;text-align:center;overflow:hidden;min-width:0;">
+          <div
+            style="background:#0f1e33;border-radius:9px;padding:10px 6px;text-align:center;overflow:hidden;min-width:0;">
             <div style="font-size:9px;color:#9ca3af;margin-bottom:4px;white-space:nowrap;">Total Amount</div>
-            <div id="popupTotal" style="font-size:14px;font-weight:800;color:#f1f5f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">৳0</div>
+            <div id="popupTotal"
+              style="font-size:14px;font-weight:800;color:#f1f5f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              ৳0</div>
           </div>
-          <div style="background:#0f1e33;border:1px solid rgba(34,197,94,0.2);border-radius:9px;padding:10px 6px;text-align:center;overflow:hidden;min-width:0;">
-            <div style="font-size:9px;color:#9ca3af;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;"><span style="color:#4ade80;">✔</span> Paid Amount</div>
-            <div id="popupPaid" style="font-size:14px;font-weight:800;color:#4ade80;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">৳0</div>
+          <div
+            style="background:#0f1e33;border:1px solid rgba(34,197,94,0.2);border-radius:9px;padding:10px 6px;text-align:center;overflow:hidden;min-width:0;">
+            <div
+              style="font-size:9px;color:#9ca3af;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;">
+              <span style="color:#4ade80;">✔</span> Paid Amount</div>
+            <div id="popupPaid"
+              style="font-size:14px;font-weight:800;color:#4ade80;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              ৳0</div>
           </div>
-          <div style="background:#0f1e33;border:1px solid rgba(239,68,68,0.2);border-radius:9px;padding:10px 6px;text-align:center;overflow:hidden;min-width:0;">
-            <div style="font-size:9px;color:#9ca3af;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;"><span style="color:#f87171;">●</span> Due Amount</div>
-            <div id="popupDue2" style="font-size:14px;font-weight:800;color:#f87171;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">৳0</div>
+          <div
+            style="background:#0f1e33;border:1px solid rgba(239,68,68,0.2);border-radius:9px;padding:10px 6px;text-align:center;overflow:hidden;min-width:0;">
+            <div
+              style="font-size:9px;color:#9ca3af;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;">
+              <span style="color:#f87171;">●</span> Due Amount</div>
+            <div id="popupDue2"
+              style="font-size:14px;font-weight:800;color:#f87171;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              ৳0</div>
           </div>
         </div>
       </div>
 
       <!-- Why clear -->
-      <div style="background:#0f1e33;border-radius:10px;padding:13px 14px;margin-bottom:14px;display:flex;align-items:center;gap:14px;">
+      <div
+        style="background:#0f1e33;border-radius:10px;padding:13px 14px;margin-bottom:14px;display:flex;align-items:center;gap:14px;">
         <div style="flex:1;">
           <div style="font-size:12px;font-weight:600;color:#f1f5f9;margin-bottom:7px;">Why clear the due amount?</div>
           <div style="font-size:11px;color:#9ca3af;line-height:1.9;display:flex;flex-direction:column;gap:1px;">
@@ -1204,41 +1883,43 @@
           <svg width="52" height="52" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" overflow="visible">
             <!-- flying file 1 -->
             <g id="folder-file1" opacity="0">
-              <rect x="18" y="20" width="10" height="13" rx="1.5" fill="#93c5fd"/>
-              <line x1="20" y1="25" x2="26" y2="25" stroke="white" stroke-width="1" opacity="0.7"/>
-              <line x1="20" y1="28" x2="26" y2="28" stroke="white" stroke-width="1" opacity="0.7"/>
+              <rect x="18" y="20" width="10" height="13" rx="1.5" fill="#93c5fd" />
+              <line x1="20" y1="25" x2="26" y2="25" stroke="white" stroke-width="1" opacity="0.7" />
+              <line x1="20" y1="28" x2="26" y2="28" stroke="white" stroke-width="1" opacity="0.7" />
             </g>
             <!-- flying file 2 -->
             <g id="folder-file2" opacity="0">
-              <rect x="21" y="19" width="10" height="13" rx="1.5" fill="#6ee7b7"/>
-              <line x1="23" y1="24" x2="29" y2="24" stroke="white" stroke-width="1" opacity="0.7"/>
-              <line x1="23" y1="27" x2="29" y2="27" stroke="white" stroke-width="1" opacity="0.7"/>
+              <rect x="21" y="19" width="10" height="13" rx="1.5" fill="#6ee7b7" />
+              <line x1="23" y1="24" x2="29" y2="24" stroke="white" stroke-width="1" opacity="0.7" />
+              <line x1="23" y1="27" x2="29" y2="27" stroke="white" stroke-width="1" opacity="0.7" />
             </g>
             <!-- flying file 3 -->
             <g id="folder-file3" opacity="0">
-              <rect x="24" y="20" width="10" height="13" rx="1.5" fill="#fca5a5"/>
-              <line x1="26" y1="25" x2="32" y2="25" stroke="white" stroke-width="1" opacity="0.7"/>
-              <line x1="26" y1="28" x2="32" y2="28" stroke="white" stroke-width="1" opacity="0.7"/>
+              <rect x="24" y="20" width="10" height="13" rx="1.5" fill="#fca5a5" />
+              <line x1="26" y1="25" x2="32" y2="25" stroke="white" stroke-width="1" opacity="0.7" />
+              <line x1="26" y1="28" x2="32" y2="28" stroke="white" stroke-width="1" opacity="0.7" />
             </g>
             <!-- folder body (back) -->
-            <rect x="6" y="22" width="40" height="24" rx="3.5" fill="#b45309"/>
+            <rect x="6" y="22" width="40" height="24" rx="3.5" fill="#b45309" />
             <!-- folder lid -->
             <g id="folder-lid" style="transform-origin:26px 22px;">
-              <path d="M6 22 Q6 18 10 18 L22 18 Q25 18 26 20 L46 20 Q46 20 46 22 Z" fill="#d97706"/>
+              <path d="M6 22 Q6 18 10 18 L22 18 Q25 18 26 20 L46 20 Q46 20 46 22 Z" fill="#d97706" />
             </g>
             <!-- folder front -->
-            <rect x="6" y="22" width="40" height="22" rx="3" fill="#f59e0b"/>
+            <rect x="6" y="22" width="40" height="22" rx="3" fill="#f59e0b" />
             <!-- folder shine -->
-            <rect x="10" y="26" width="32" height="3" rx="1.5" fill="white" opacity="0.12"/>
+            <rect x="10" y="26" width="32" height="3" rx="1.5" fill="white" opacity="0.12" />
           </svg>
         </div>
       </div>
 
       <!-- Buttons -->
-      <button onclick="closePaymentDuePopup();showPage('payments')" style="width:100%;padding:13px;background:linear-gradient(135deg,#6366f1,#4338ca);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:7px;display:flex;align-items:center;justify-content:center;gap:6px;">
+      <button onclick="closePaymentDuePopup();showPage('payments')"
+        style="width:100%;padding:13px;background:linear-gradient(135deg,#6366f1,#4338ca);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:7px;display:flex;align-items:center;justify-content:center;gap:6px;">
         <span style="font-size:14px;">💳</span> Pay Due Amount Now <span style="font-size:15px;">›</span>
       </button>
-      <button onclick="closePaymentDuePopup()" style="width:100%;padding:11px;background:transparent;border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:#9ca3af;font-size:12px;cursor:pointer;">
+      <button onclick="closePaymentDuePopup()"
+        style="width:100%;padding:11px;background:transparent;border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:#9ca3af;font-size:12px;cursor:pointer;">
         I'll Pay Later
       </button>
     </div>
@@ -1246,4 +1927,5 @@
 
   <script src="js/cd-topbar.js"></script>
 </body>
+
 </html>

@@ -551,6 +551,7 @@ input, select, textarea { font-family: inherit; }
 }
 .ot-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; white-space: nowrap; color: var(--text-secondary); background: none; }
 .ot-status.badge-writing   { color: var(--accent-light); background: none; }
+.ot-status.badge-review    { color: #2dd4bf; background: none; }
 .ot-status.badge-pending   { color: var(--gold); background: none; }
 .ot-status.badge-completed { color: var(--green); background: none; }
 .ot-status.badge-confirmed { color: #c4b5fd; background: none; }
@@ -609,9 +610,13 @@ input, select, textarea { font-family: inherit; }
   cursor: pointer;
 }
 .order-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
-.order-card.urgent { border-left: 3px solid var(--red); }
-.order-card.safe   { border-left: 3px solid var(--green); }
-.order-card.pending { border-left: 3px solid var(--gold); }
+/* Left border color always matches the order's status badge color */
+.order-card.badge-writing   { border-left: 3px solid var(--accent-light); }
+.order-card.badge-review    { border-left: 3px solid #2dd4bf; }
+.order-card.badge-pending   { border-left: 3px solid var(--gold); }
+.order-card.badge-completed { border-left: 3px solid var(--green); }
+.order-card.badge-confirmed { border-left: 3px solid #c4b5fd; }
+.order-card.badge-revision  { border-left: 3px solid var(--red); }
 
 .oc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .oc-top-left { display: flex; align-items: flex-start; gap: 10px; min-width: 0; flex: 1; }
@@ -688,11 +693,12 @@ input, select, textarea { font-family: inherit; }
   flex-shrink: 0;
 }
 .status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-.badge-writing   { background: rgba(59,130,246,.15);  color: var(--accent-light); }
-.badge-pending   { background: var(--gold-bg);          color: var(--gold); }
-.badge-completed { background: var(--green-bg);         color: var(--green); }
-.badge-confirmed { background: var(--purple-bg);        color: #c4b5fd; }
-.badge-revision  { background: var(--red-bg);           color: var(--red); }
+.status-badge.badge-writing   { background: rgba(59,130,246,.15);  color: var(--accent-light); }
+.status-badge.badge-pending   { background: var(--gold-bg);          color: var(--gold); }
+.status-badge.badge-completed { background: var(--green-bg);         color: var(--green); }
+.status-badge.badge-confirmed { background: var(--purple-bg);        color: #c4b5fd; }
+.status-badge.badge-revision  { background: var(--red-bg);           color: var(--red); }
+.status-badge.badge-review    { background: rgba(20,184,166,.15);   color: #2dd4bf; }
 
 /* Completed card */
 .completed-card {
@@ -709,6 +715,13 @@ input, select, textarea { font-family: inherit; }
   transition: border-color .2s;
 }
 .completed-card:hover { border-color: var(--border-hover); }
+/* Left border color matches status, same rule as active order cards */
+.completed-card.badge-completed { border-left: 3px solid var(--green); }
+.completed-card.badge-writing   { border-left: 3px solid var(--accent-light); }
+.completed-card.badge-review    { border-left: 3px solid #2dd4bf; }
+.completed-card.badge-pending   { border-left: 3px solid var(--gold); }
+.completed-card.badge-confirmed { border-left: 3px solid #c4b5fd; }
+.completed-card.badge-revision  { border-left: 3px solid var(--red); }
 .cc-avatar {
   width: 34px; height: 34px;
   border-radius: 9px;
@@ -1559,18 +1572,53 @@ input, select, textarea { font-family: inherit; }
   .db-main { padding-bottom: 70px; width: 100%; }
   .page { padding: 16px; }
   .stat-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .stat-card { padding: 12px 0 0; min-height: 0; gap: 8px; }
+  .stat-card { padding: 14px 8px 12px; min-height: 92px; gap: 0; position: relative; }
   .stat-spark-wrap { display: none; }
-  .stat-card-top { gap: 9px; padding: 0 12px 12px; }
-  .stat-icon { width: 38px; height: 38px; border-radius: 10px; }
-  .stat-icon svg { width: 18px; height: 18px; }
-  .stat-num { font-size: 24px; }
+  .stat-card-top {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0;
+    height: 100%;
+  }
+  .stat-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+  }
+  .stat-icon svg { width: 14px; height: 14px; }
+  .stat-card-top > div:last-child { text-align: center; }
+  .stat-num { font-size: 34px; text-align: center; }
+  .stat-lbl { text-align: center; margin-top: 2px; }
+  .stat-card.purple { background: linear-gradient(115deg, rgba(124,58,237,0.16), var(--bg-card) 60%); }
+  .stat-card.blue   { background: linear-gradient(115deg, rgba(59,130,246,0.16), var(--bg-card) 60%); }
+  .stat-card.gold   { background: linear-gradient(115deg, rgba(245,158,11,0.16), var(--bg-card) 60%); }
+  .stat-card.green  { background: linear-gradient(115deg, rgba(34,197,94,0.16), var(--bg-card) 60%); }
   .cd-blocks { gap: 5px; }
   .cd-block { min-width: 48px; padding: 8px 10px; }
   .cd-num { font-size: 20px; }
 
   .order-select { min-width: unset; width: 100%; }
-  .page-header { flex-wrap: wrap; gap: 8px; }
+  .page-header {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .page-header > div:first-child { min-width: 0; flex: 1 1 auto; }
+  .page-title { white-space: normal; overflow-wrap: break-word; }
+
+  /* Date badge — pinned to the top-right of the header row itself,
+     so it never wraps below the title on small screens and never
+     overlaps stat cards further down the page. */
+  .page-date-badge {
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
   .chat-container { min-height: 0; flex: 1; }
   .chat-box { height: 360px; }
 
@@ -1595,10 +1643,10 @@ input, select, textarea { font-family: inherit; }
 @media (max-width: 380px) {
   .page { padding: 12px; }
   .stat-row { gap: 6px; }
-  .stat-card-top { padding: 0 10px 10px; gap: 7px; }
-  .stat-icon { width: 34px; height: 34px; border-radius: 9px; }
-  .stat-icon svg { width: 16px; height: 16px; }
-  .stat-num { font-size: 20px; }
+  .stat-card { min-height: 82px; padding: 12px 6px 10px; }
+  .stat-icon { position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; border-radius: 7px; }
+  .stat-icon svg { width: 12px; height: 12px; }
+  .stat-num { font-size: 28px; }
   .stat-lbl { font-size: 10.5px; }
   .page-title { font-size: 1.15rem; white-space: normal; }
   .page-date-badge { font-size: 11px; padding: 7px 10px; }
@@ -2534,8 +2582,18 @@ input, select, textarea { font-family: inherit; }
 }
 
 @media (max-width: 480px) {
-  .pay-hist-card { flex-wrap: wrap; }
-  .pay-hist-card-right { align-items: flex-start; width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .pay-hist-card { gap: 10px; padding: 12px; }
+  .pay-hist-icon-circle { width: 34px; height: 34px; }
+  .pay-hist-icon-circle svg { width: 15px; height: 15px; }
+  .pay-hist-card-title { font-size: 12px; }
+  .pay-hist-card-meta { font-size: 9.5px; gap: 6px; margin-bottom: 5px; }
+  .pay-hist-card-method { font-size: 9.5px; padding: 2px 7px; }
+  .pay-hist-card-right { gap: 4px; }
+  .pay-hist-card-amount { font-size: 13px; }
+  .pay-hist-card-badge { font-size: 9px; padding: 3px 7px; }
+  .pay-hist-view-btn { font-size: 8.5px; padding: 3px 7px; }
+  .pay-hist-header-right { gap: 6px; }
+  .pay-hist-filter { font-size: 10px; padding: 5px 8px; }
 }
 
 /* ═══════════════════════════════════════════
@@ -3019,6 +3077,7 @@ input, select, textarea { font-family: inherit; }
   :root { --sidebar-w: 0px; }
   .cd-topbar {
     left: 0;
+    padding: 0 16px; /* matches .page padding so logo aligns with content below */
   }
   .cd-topbar-title { display: none; }
   .cd-topbar-brand-mobile { display: flex; }
@@ -3168,3 +3227,50 @@ input, select, textarea { font-family: inherit; }
 
 /* Fix gap between page header and order detail */
 #orderDetailView { margin-top: -8px; }
+
+/* Progress stepper: compact horizontal row on mobile — smaller circles,
+   labels allowed to wrap onto 2 lines so all 6 steps fit without overlap. */
+@media (max-width: 768px) {
+  .stepper {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+    padding: 4px 0 !important;
+  }
+  .step {
+    flex-direction: column !important;
+    align-items: center !important;
+    width: auto !important;
+    gap: 0 !important;
+  }
+  .step-circle { width: 24px !important; height: 24px !important; font-size: 9px !important; }
+  .step-circle svg { width: 9px !important; height: 9px !important; }
+  .step-label {
+    margin-top: 6px !important;
+    text-align: center !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    font-size: 8.3px !important;
+    line-height: 1.25 !important;
+    padding: 0 2px !important;
+  }
+  .step:not(:last-child)::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 11px !important;
+    left: 50% !important;
+    width: 100% !important;
+    height: 2px !important;
+    background: #1a2438 !important;
+    z-index: 0 !important;
+  }
+  .step.done:not(:last-child)::after { background: var(--green) !important; }
+  .step.active:not(:last-child)::after { background: linear-gradient(90deg, var(--accent) 50%, #1a2438 50%) !important; }
+}
+
+@media (max-width: 380px) {
+  .step-circle { width: 20px !important; height: 20px !important; font-size: 8px !important; }
+  .step-circle svg { width: 8px !important; height: 8px !important; }
+  .step-label { font-size: 7.5px !important; margin-top: 4px !important; }
+  .step:not(:last-child)::after { top: 9px !important; }
+}

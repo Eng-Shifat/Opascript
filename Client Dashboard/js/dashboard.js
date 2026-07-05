@@ -355,11 +355,11 @@ function otExportCsv() {
 function buildOrderCard(order) {
   const deadline=new Date(order.deadline), now=new Date();
   const diffMs=deadline-now, daysLeft=Math.floor(diffMs/86400000);
-  const isUrgent=daysLeft<=3, isPending=order.status==='pending';
+  const isUrgent=daysLeft<=3;
   const card=document.createElement('div');
-  card.className=`order-card ${isPending?'pending':isUrgent?'urgent':'safe'}`;
-  card.onclick=()=>openOrderDetail(order.id);
   const badge=getStatusBadge(order.status);
+  card.className=`order-card ${badge.cls}`; // left border color = status badge color
+  card.onclick=()=>openOrderDetail(order.id);
   const cdColor=isUrgent?'cd-nums-urgent':'cd-nums-safe';
   const due=(order.due_amount||0)>0;
   card.innerHTML=`
@@ -394,7 +394,8 @@ function buildOrderCard(order) {
 
 function buildCompletedCard(order) {
   const card=document.createElement('div');
-  card.className='completed-card'; card.onclick=()=>openOrderDetail(order.id);
+  const badge=getStatusBadge(order.status);
+  card.className=`completed-card ${badge.cls}`; card.onclick=()=>openOrderDetail(order.id);
   card.innerHTML=`
     <div class="cc-avatar ${otAvatarColorClass(order)}">${escHtml(otInitials(order.title))}</div>
     <div><div class="cc-title">${escHtml(order.title||'Untitled')}</div><div class="cc-meta">${escHtml(order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase()))} · ${fmtDate(order.order_date)}</div></div>
@@ -492,8 +493,8 @@ async function openOrderDetail(orderId) {
   const heroBadgeIco = document.getElementById('ppsHeroBadgeIcon');
   const heroRingEl   = document.getElementById('ppsHeroRing');
   if (hasDue) {
-    heroTitleEl.textContent = 'Complete your payment to unlock your files';
-    heroSubEl.textContent   = 'Unlock your files after payment confirmation. Your files will become available automatically once your payment has been fully verified by the admin. This process ensures secure transactions and guarantees that file access is granted only after successful payment confirmation';
+    heroTitleEl.textContent = 'Complete payment to unlock your files';
+    heroSubEl.textContent   = 'Secure your files and get full access after successful payment confirmation.';
     heroBadgeEl.classList.remove('confirmed');
     heroBadgeTxt.textContent = 'Action Required';
     heroBadgeIco.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
@@ -508,6 +509,7 @@ async function openOrderDetail(orderId) {
   }
   heroBadgeEl.style.display = 'inline-flex';
   document.getElementById('payDueHero').style.display    = 'flex';
+  document.getElementById('payDueFeatureRow').style.display = hasDue ? 'flex'  : 'none';
   document.getElementById('payFeatureRow').style.display = hasDue ? 'none'  : 'flex';
   document.getElementById('payDueWarning').style.display = hasDue ? 'flex'  : 'none';
   document.getElementById('payDueNote').style.display    = hasDue ? 'none'  : 'flex';
@@ -1434,7 +1436,7 @@ function tickLiveCountdowns() {
   });
 }
 setInterval(tickLiveCountdowns, 1000);
-function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-writing',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
+function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
 /* ═══════════════════════════════════════════
    PAYMENT PROOF SUBMIT — Client Side
@@ -1696,7 +1698,6 @@ function _drawPayHistList() {
         <div class="pay-hist-card-right">
           <span class="pay-hist-card-amount" style="color:${meta.key === 'pending' ? '#fbbf24' : meta.key === 'rejected' ? '#f87171' : '#4ade80'}">৳${Number(p.amount || 0).toLocaleString()}</span>
           <span class="pay-hist-card-badge" style="color:${meta.color};border-color:${meta.color}44;background:${meta.color}12">
-            ${meta.key === 'approved' ? `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : meta.key === 'pending' ? `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>` : `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`}
             ${meta.label}
           </span>
           ${p.screenshot_url
