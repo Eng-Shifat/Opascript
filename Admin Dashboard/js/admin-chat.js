@@ -1,13 +1,20 @@
-/* ── ADMIN CHAT — admin-chat.js ────────────────────────────────────────── */
+/* ── ADMIN CHAT — admin-chat.js  v2 (unified schema, presence, typing, files) ── */
 
 const sb = window.scriptoraSupabase;
+const CHAT_BUCKET = 'scriptora-files';
+const CHAT_FILE_MAX_MB = 15;
 
 /* ── State ─────────────────────────────────────────────────────────────── */
-let conversations  = [];
-let currentOrderId = null;
-let adminId        = null;
-let chatChannel    = null;
-let globalChannel  = null;
+let conversations   = [];
+let currentOrderId  = null;
+let adminId         = null;
+let chatChannel     = null;
+let globalChannel   = null;
+let typingChannel   = null;
+let presenceChannel = null;
+let myTypingTimer   = null;
+let iAmTyping       = false;
+let pendingAttachment = null;
 
 /* ── Init ──────────────────────────────────────────────────────────────── */
 async function init() {
@@ -23,33 +30,44 @@ async function init() {
 
   await loadConversations();
   subscribeGlobal();
+  trackAdminPresence();
   bindEvents();
 
-  /* Topbar message থেকে সরাসরি কোনো order-এর conversation এ আসা হলে */
+  window.addEventListener('beforeunload', () => {
+    if (presenceChannel) presenceChannel.untrack();
+  });
+
   const wantedOrderId = new URLSearchParams(window.location.search).get('order');
   if (wantedOrderId) openConv(wantedOrderId);
 }
 
+/* ── Presence: tell every client dashboard that admin is online ────────── */
+function trackAdminPresence() {
+  presenceChannel = sb.channel('presence-admin-status', { config: { presence: { key: adminId } } });
+  presenceChannel.subscribe(async status => {
+    if (status === 'SUBSCRIBED') {
+      await presenceChannel.track({ role: 'admin', online_at: new Date().toISOString() });
+    }
+  });
+}
+
 /* ── Load all orders that have messages ────────────────────────────────── */
 async function loadConversations() {
-  /* Get all orders with client info */
   const { data: orders } = await sb
     .from('orders')
-    .select('id, title, service_type, status, client_id, created_at')
-    .order('created_at', { ascending: false });
+    .select('*')
+    .order('order_date', { ascending: false });
 
   if (!orders || !orders.length) {
     document.getElementById('convList').innerHTML = '<div class="conv-empty">কোনো order নেই</div>';
     return;
   }
 
-  /* Get latest message per order */
   const { data: msgs } = await sb
     .from('messages')
-    .select('order_id, text, from_admin, sent_at, read')
-    .order('sent_at', { ascending: false });
+    .select('order_id, message, message_type, sender, status, created_at')
+    .order('created_at', { ascending: false });
 
-  /* Get all client profiles */
   const clientIds = [...new Set(orders.map(o => o.client_id).filter(Boolean))];
   let profileMap = {};
   if (clientIds.length) {
@@ -60,18 +78,16 @@ async function loadConversations() {
     (clients || []).forEach(c => profileMap[c.id] = c);
   }
 
-  /* Build conversation list */
   const msgMap    = {};
   const unreadMap = {};
 
   (msgs || []).forEach(m => {
     if (!msgMap[m.order_id]) msgMap[m.order_id] = m;
-    if (!m.from_admin && !m.read) {
+    if (m.sender === 'client' && m.status !== 'read') {
       unreadMap[m.order_id] = (unreadMap[m.order_id] || 0) + 1;
     }
   });
 
-  /* Only show orders that have at least one message */
   conversations = orders
     .filter(o => msgMap[o.id])
     .map(o => ({
@@ -80,7 +96,7 @@ async function loadConversations() {
       unread:    unreadMap[o.id] || 0,
       profile:   profileMap[o.client_id] || {}
     }))
-    .sort((a, b) => new Date(b.latestMsg.sent_at) - new Date(a.latestMsg.sent_at));
+    .sort((a, b) => new Date(b.latestMsg.created_at) - new Date(a.latestMsg.created_at));
 
   renderConvList(conversations);
   updateGlobalBadge(conversations.reduce((s, c) => s + c.unread, 0));
@@ -101,8 +117,9 @@ function renderConvList(list) {
     const name = p.name || p.email || 'Unknown Client';
     const initials = name.substring(0, 2).toUpperCase();
     const title    = c.title || c.service_type || 'Order';
-    const preview  = c.latestMsg?.text || '';
-    const time     = formatTime(c.latestMsg?.sent_at);
+    const lm = c.latestMsg;
+    const preview  = previewText(lm);
+    const time     = formatTime(lm?.created_at);
     const active   = currentOrderId === c.id ? 'active' : '';
     const unreadCls = c.unread > 0 ? 'unread' : '';
 
@@ -112,7 +129,7 @@ function renderConvList(list) {
       <div class="conv-info">
         <div class="conv-name">${escH(name)}</div>
         <div class="conv-order-title">${escH(title)}</div>
-        <div class="conv-preview">${c.latestMsg?.from_admin ? 'আপনি: ' : ''}${escH(preview)}</div>
+        <div class="conv-preview">${lm?.sender === 'admin' ? 'আপনি: ' : ''}${escH(preview)}</div>
       </div>
       <div class="conv-meta">
         <span class="conv-time">${time}</span>
@@ -120,6 +137,14 @@ function renderConvList(list) {
       </div>
     </div>`;
   }).join('');
+}
+
+function previewText(m) {
+  if (!m) return '';
+  if (m.message_type === 'image')              return '📷 Photo';
+  if (m.message_type === 'payment_screenshot')  return '💳 Payment Screenshot';
+  if (m.message_type === 'file')                return '📄 File';
+  return m.message || '';
 }
 
 /* ── Open a conversation ───────────────────────────────────────────────── */
@@ -132,7 +157,6 @@ async function openConv(orderId) {
   document.getElementById('chatEmptyState').style.display = 'none';
   document.getElementById('adminChatBox').style.display = 'flex';
 
-  /* Fill header */
   const conv = conversations.find(c => c.id === orderId);
   if (conv) {
     const p    = conv.profile;
@@ -147,7 +171,6 @@ async function openConv(orderId) {
     badge.className   = `order-status-badge ${conv.status || ''}`;
   }
 
-  /* Load messages */
   const body = document.getElementById('adminChatBody');
   body.innerHTML = '<div class="chat-loading-wrap"><div class="spinner"></div></div>';
 
@@ -155,17 +178,17 @@ async function openConv(orderId) {
     .from('messages')
     .select('*')
     .eq('order_id', orderId)
-    .order('sent_at', { ascending: true });
+    .order('created_at', { ascending: true });
 
   renderMessages(msgs || [], conv?.profile);
   subscribeToOrder(orderId);
+  subscribeTypingChannel(orderId);
 
-  /* Mark client messages as read */
   await sb.from('messages')
-    .update({ read: true })
+    .update({ status: 'read' })
     .eq('order_id', orderId)
-    .eq('from_admin', false)
-    .eq('read', false);
+    .eq('sender', 'client')
+    .neq('status', 'read');
 
   const c = conversations.find(x => x.id === orderId);
   if (c) c.unread = 0;
@@ -194,8 +217,8 @@ function renderMessages(msgs, profile) {
 
   let lastDate = '';
   msgs.forEach(msg => {
-    const d       = new Date(msg.sent_at);
-    const dateStr = d.toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
+    const d       = new Date(msg.created_at);
+    const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
     if (dateStr !== lastDate) {
       const div = document.createElement('div');
@@ -212,25 +235,56 @@ function renderMessages(msgs, profile) {
 }
 
 /* ── Build bubble ──────────────────────────────────────────────────────── */
+function statusTicksSVG(status) {
+  if (status === 'read') {
+    return `<svg class="tick tick-read" width="15" height="10" viewBox="0 0 16 11" fill="none"><path d="M1 5.5L4.5 9L11 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 5.5L9 9L15.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+  if (status === 'delivered') {
+    return `<svg class="tick tick-delivered" width="15" height="10" viewBox="0 0 16 11" fill="none"><path d="M1 5.5L4.5 9L11 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 5.5L9 9L15.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+  return `<svg class="tick tick-sent" width="12" height="10" viewBox="0 0 12 11" fill="none"><path d="M1 5.5L4.5 9L11 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
 function buildBubble(msg, clientInitials = 'C') {
-  const isAdmin = msg.from_admin;
-  const time    = new Date(msg.sent_at).toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
+  const isAdmin = msg.sender === 'admin';
+  const time    = new Date(msg.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   const row = document.createElement('div');
   row.className = `msg-row ${isAdmin ? 'admin' : 'client'}`;
+  row.dataset.id = msg.id;
+  if (msg.is_pinned) row.classList.add('is-pinned-msg');
 
   const av = document.createElement('div');
   av.className   = `msg-av ${isAdmin ? 'admin-av' : 'client-av'}`;
   av.textContent = isAdmin ? 'SA' : clientInitials;
 
   const wrap  = document.createElement('div');
-  const bubble = document.createElement('div');
-  bubble.className   = 'msg-bubble';
-  bubble.textContent = msg.text;
+  wrap.className = 'msg-wrap';
+  let bubble = document.createElement('div');
+
+  if (msg.message_type === 'image' || msg.message_type === 'payment_screenshot') {
+    bubble.className = 'msg-bubble msg-media-bubble';
+    if (msg.message_type === 'payment_screenshot') bubble.innerHTML += `<div class="msg-file-tag">💳 Payment Screenshot</div>`;
+    bubble.innerHTML += `<a href="${msg.file_url}" target="_blank" rel="noopener"><img src="${msg.file_url}" class="msg-img" loading="lazy"/></a>`;
+    if (msg.message) bubble.innerHTML += `<div class="msg-caption">${escH(msg.message)}</div>`;
+  } else if (msg.message_type === 'file') {
+    bubble.className = 'msg-bubble msg-file-bubble';
+    bubble.innerHTML = `<a href="${msg.file_url}" target="_blank" rel="noopener" class="msg-file-link"><span class="msg-file-icon">📄</span><span class="msg-file-name">${escH(msg.file_name || 'File')}</span><span class="msg-file-download">⬇</span></a>`;
+  } else {
+    bubble.className = 'msg-bubble';
+    if (msg.is_pinned) bubble.classList.add('msg-notice-bubble');
+    bubble.textContent = msg.message || '';
+  }
 
   const t = document.createElement('div');
   t.className   = 'msg-time';
-  t.textContent = time;
+  t.innerHTML   = `<span>${time}</span>`;
+  if (isAdmin) {
+    const ticks = document.createElement('span');
+    ticks.className = 'msg-ticks';
+    ticks.innerHTML = statusTicksSVG(msg.status || 'sent');
+    t.appendChild(ticks);
+  }
 
   wrap.appendChild(bubble);
   wrap.appendChild(t);
@@ -244,7 +298,7 @@ function subscribeToOrder(orderId) {
   if (chatChannel) sb.removeChannel(chatChannel);
 
   chatChannel = sb
-    .channel(`admin:chat:${orderId}`)
+    .channel(`admin-chat-${orderId}`)
     .on('postgres_changes', {
       event:  'INSERT',
       schema: 'public',
@@ -260,30 +314,57 @@ function subscribeToOrder(orderId) {
       body.appendChild(buildBubble(payload.new, init));
       scrollToBottom();
 
-      if (!payload.new.from_admin) {
-        sb.from('messages').update({ read: true }).eq('id', payload.new.id);
+      if (payload.new.sender === 'client') {
+        sb.from('messages').update({ status: 'read' }).eq('id', payload.new.id);
       }
       updateConvPreview(orderId, payload.new);
     })
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}`
+    }, payload => {
+      const row = document.querySelector(`.msg-row[data-id="${payload.new.id}"]`);
+      if (row) {
+        const t = row.querySelector('.msg-ticks');
+        if (t) t.innerHTML = statusTicksSVG(payload.new.status || 'sent');
+      }
+    })
     .subscribe();
+}
+
+/* ── Typing indicator (broadcast to client) ─────────────────────────────── */
+function subscribeTypingChannel(orderId) {
+  typingChannel = sb.channel(`typing-order-${orderId}`);
+  typingChannel.subscribe();
+}
+
+function broadcastTyping(isTyping) {
+  if (!typingChannel || !currentOrderId) return;
+  if (isTyping === iAmTyping) { if (isTyping) resetMyTypingTimer(); return; }
+  iAmTyping = isTyping;
+  typingChannel.send({ type: 'broadcast', event: 'typing', payload: { sender: 'admin', typing: isTyping } });
+  if (isTyping) resetMyTypingTimer();
+}
+function resetMyTypingTimer() {
+  clearTimeout(myTypingTimer);
+  myTypingTimer = setTimeout(() => broadcastTyping(false), 2500);
 }
 
 /* ── Realtime: all orders (new messages from clients) ──────────────────── */
 function subscribeGlobal() {
   globalChannel = sb
-    .channel('admin:all:messages')
+    .channel('admin-all-messages')
     .on('postgres_changes', {
       event:  'INSERT',
       schema: 'public',
       table:  'messages'
     }, payload => {
       const msg = payload.new;
-      if (!msg.from_admin && msg.order_id !== currentOrderId) {
+      if (msg.sender === 'client' && msg.order_id !== currentOrderId) {
         const c = conversations.find(x => x.id === msg.order_id);
         if (c) {
           c.unread++;
           c.latestMsg = msg;
-          conversations.sort((a, b) => new Date(b.latestMsg.sent_at) - new Date(a.latestMsg.sent_at));
+          conversations.sort((a, b) => new Date(b.latestMsg.created_at) - new Date(a.latestMsg.created_at));
           renderConvList(conversations);
           updateGlobalBadge(conversations.reduce((s, c) => s + c.unread, 0));
         } else {
@@ -294,29 +375,81 @@ function subscribeGlobal() {
     .subscribe();
 }
 
-/* ── Send reply ────────────────────────────────────────────────────────── */
-async function sendReply() {
+/* ── Attach + send ─────────────────────────────────────────────────────── */
+function stageAttachment(file, kind) {
+  if (file.size > CHAT_FILE_MAX_MB * 1024 * 1024) {
+    showToast(`ফাইল সাইজ ${CHAT_FILE_MAX_MB}MB এর বেশি হতে পারবে না।`);
+    return;
+  }
+  pendingAttachment = { file, kind };
+  const preview = document.getElementById('adminAttachPreview');
+  if (!preview) return;
+  preview.style.display = 'flex';
+  preview.innerHTML = `<div class="cap-info"><span>📎 ${escH(file.name)}</span></div><button class="cap-remove" id="adminCapRemove">&times;</button>`;
+  document.getElementById('adminCapRemove').addEventListener('click', () => {
+    pendingAttachment = null;
+    preview.style.display = 'none';
+    preview.innerHTML = '';
+  });
+}
+
+async function uploadAndSendAttachment(caption) {
+  const { file, kind } = pendingAttachment;
+  const ext  = file.name.split('.').pop();
+  const path = `chat-attachments/${currentOrderId}/${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+
+  const { error: upErr } = await sb.storage.from(CHAT_BUCKET).upload(path, file, { upsert: true });
+  if (upErr) { showToast('ফাইল আপলোড হয়নি: ' + upErr.message); return; }
+  const { data: urlData } = sb.storage.from(CHAT_BUCKET).getPublicUrl(path);
+
+  const { error } = await sb.from('messages').insert({
+    order_id:     currentOrderId,
+    sender:       'admin',
+    sender_id:    adminId,
+    message:      caption || null,
+    message_type: kind,
+    file_url:     urlData.publicUrl,
+    file_name:    file.name,
+    file_size:    file.size,
+    status:       'sent'
+  });
+  if (error) showToast('মেসেজ পাঠানো যায়নি: ' + error.message);
+
+  pendingAttachment = null;
+  const preview = document.getElementById('adminAttachPreview');
+  if (preview) { preview.style.display = 'none'; preview.innerHTML = ''; }
+}
+
+/* ── Send reply (text / attachment / pinned notice) ─────────────────────── */
+async function sendReply(pinAsNotice = false) {
   const input = document.getElementById('adminChatInput');
   const btn   = document.getElementById('adminSendBtn');
   const text  = input.value.trim();
 
-  if (!text || !currentOrderId) return;
+  if (!currentOrderId) return;
+  if (!text && !pendingAttachment) return;
 
   btn.disabled = true;
-  input.value  = '';
-  input.style.height = 'auto';
+  broadcastTyping(false);
 
-  /* Get client_id from order */
-  const conv      = conversations.find(c => c.id === currentOrderId);
-  const client_id = conv?.client_id || null;
+  if (pendingAttachment) {
+    await uploadAndSendAttachment(text);
+    input.value = ''; input.style.height = 'auto';
+    btn.disabled = false;
+    return;
+  }
+
+  input.value = '';
+  input.style.height = 'auto';
 
   const { error } = await sb.from('messages').insert({
     order_id:   currentOrderId,
-    client_id:  client_id,
-    text:       text,
-    from_admin: true,
-    sent_at:    new Date().toISOString(),
-    read:       false
+    sender:     'admin',
+    sender_id:  adminId,
+    message:    text,
+    message_type: 'text',
+    is_pinned:  !!pinAsNotice,
+    status:     'sent'
   });
 
   btn.disabled = false;
@@ -324,6 +457,8 @@ async function sendReply() {
     input.value = text;
     showToast('Message পাঠানো যায়নি: ' + error.message);
     console.error(error);
+  } else if (pinAsNotice) {
+    showToast('📌 Notice pin করা হয়েছে — client-এর chat-এ উপরে দেখাবে।');
   }
 }
 
@@ -332,9 +467,9 @@ function updateConvPreview(orderId, msg) {
   const item = document.querySelector(`.conv-item[data-id="${orderId}"]`);
   if (!item) return;
   const prev = item.querySelector('.conv-preview');
-  if (prev) prev.textContent = msg.from_admin ? `আপনি: ${msg.text}` : msg.text;
+  if (prev) prev.textContent = msg.sender === 'admin' ? `আপনি: ${previewText(msg)}` : previewText(msg);
   const time = item.querySelector('.conv-time');
-  if (time) time.textContent = formatTime(msg.sent_at);
+  if (time) time.textContent = formatTime(msg.created_at);
 }
 
 /* ── Search ────────────────────────────────────────────────────────────── */
@@ -352,15 +487,25 @@ function filterConversations(q) {
 
 /* ── Bind events ───────────────────────────────────────────────────────── */
 function bindEvents() {
-  document.getElementById('adminSendBtn')?.addEventListener('click', sendReply);
+  document.getElementById('adminSendBtn')?.addEventListener('click', () => sendReply(false));
+  document.getElementById('adminPinBtn')?.addEventListener('click', () => sendReply(true));
 
   document.getElementById('adminChatInput')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(false); }
   });
 
   document.getElementById('adminChatInput')?.addEventListener('input', function () {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    broadcastTyping(this.value.length > 0);
+  });
+  document.getElementById('adminChatInput')?.addEventListener('blur', () => broadcastTyping(false));
+
+  document.getElementById('adminAttachBtn')?.addEventListener('click', () => document.getElementById('adminFileInput')?.click());
+  document.getElementById('adminFileInput')?.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) stageAttachment(file, file.type.startsWith('image/') ? 'image' : 'file');
+    e.target.value = '';
   });
 
   document.getElementById('convSearch')?.addEventListener('input', e => filterConversations(e.target.value));
@@ -370,6 +515,7 @@ function bindEvents() {
   });
 
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    if (presenceChannel) await presenceChannel.untrack();
     await sb.auth.signOut();
     window.location.href = 'admin.html';
   });
@@ -386,10 +532,10 @@ function formatTime(isoStr) {
   const d    = new Date(isoStr);
   const now  = new Date();
   const diff = Math.floor((now - d) / 86400000);
-  if (diff === 0) return d.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
+  if (diff === 0) return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   if (diff === 1) return 'গতকাল';
-  if (diff < 7)  return d.toLocaleDateString('bn-BD', { weekday: 'short' });
-  return d.toLocaleDateString('bn-BD', { day: 'numeric', month: 'short' });
+  if (diff < 7)  return d.toLocaleDateString('en-GB', { weekday: 'short' });
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
 function updateGlobalBadge(count) {

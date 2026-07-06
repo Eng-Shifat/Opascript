@@ -2,10 +2,19 @@
    SCRIPTORA - style.css
    ===================== */
 
+@font-face {
+  font-family: 'Kalpurush';
+  src: url('https://banglawebfonts.pages.dev/fonts/kalpurush/kalpurush-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0980-09FF, U+200C-200D;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', 'Kalpurush', sans-serif;
   background: #0f1b3d;
   color: white;
 }
@@ -284,14 +293,24 @@ nav {
 }
 .section-header { text-align: center; margin-bottom: 2.5rem; }
 .section-badge {
-  display: inline-block;
-  background: rgba(255,255,255,0.08);
-  border: 0.5px solid rgba(255,255,255,0.18);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(124,58,237,0.14);
+  border: 1px solid rgba(167,139,250,0.4);
   border-radius: 20px;
-  padding: 5px 18px;
-  font-size: 13px;
-  color: rgba(255,255,255,0.75);
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #c4b5fd;
   margin-bottom: 1rem;
+  box-shadow: 0 0 16px rgba(124,58,237,0.22);
+}
+.section-badge .badge-icon {
+  color: #a78bfa;
+  font-size: 12px;
 }
 .section-title {
   font-size: 28px;
@@ -329,8 +348,153 @@ nav {
   transform: translateY(-2px);
 }
 .card-icon { font-size: 26px; margin-bottom: 1rem; display: block; }
-.card-title { font-size: 15px; font-weight: 600; color: white; margin-bottom: 0.5rem; }
-.card-desc { font-size: 12.5px; color: rgba(255,255,255,0.48); line-height: 1.6; }
+.card-title { font-size: 16.5px; font-weight: 600; color: white; margin-bottom: 0.5rem; }
+.card-desc { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.75; text-align: justify; }
+
+/* -------- SERVICES V2 (icon cards + trust bar) -------- */
+.section-title-2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.35;
+  margin-bottom: 0.9rem;
+}
+.grad-text {
+  background: linear-gradient(90deg, #a855f7, #6366f1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.services-grid-2 {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 1150px;
+  margin: 0 auto 1.8rem;
+}
+.services-grid-2 .service-card {
+  position: relative;
+  padding: 1.5rem 1.4rem 1.3rem;
+  overflow: hidden;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.card-icon-box {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 1rem 0;
+}
+.card-icon-box svg { width: 22px; height: 22px; }
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 14px;
+}
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.04);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.card-btn:active {
+  transform: scale(0.97);
+}
+.card-btn svg { flex-shrink: 0; transition: transform 0.2s; }
+.service-card:hover .card-btn svg { transform: translateX(2px); }
+
+/* per-card colors */
+.sc-purple .card-icon-box { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
+.sc-purple .card-btn { color: #a78bfa; }
+
+.sc-pink .card-icon-box { background: linear-gradient(135deg, #ec4899, #be185d); }
+.sc-pink .card-btn { color: #f472b6; }
+
+.sc-amber .card-icon-box { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.sc-amber .card-btn { color: #fbbf24; }
+
+.sc-teal .card-icon-box { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+.sc-teal .card-btn { color: #2dd4bf; }
+
+.sc-green .card-icon-box { background: linear-gradient(135deg, #22c55e, #15803d); }
+.sc-green .card-btn { color: #4ade80; }
+
+.sc-blue .card-icon-box { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.sc-blue .card-btn { color: #60a5fa; }
+
+.sc-cyan .card-icon-box { background: linear-gradient(135deg, #06b6d4, #0e7490); }
+.sc-cyan .card-btn { color: #22d3ee; }
+
+.sc-red .card-icon-box { background: linear-gradient(135deg, #f97316, #dc2626); }
+.sc-red .card-btn { color: #fb923c; }
+
+.services-grid-2 .service-card:hover .card-btn {
+  border-color: currentColor;
+  background: rgba(255,255,255,0.08);
+}
+
+/* -------- TRUST BAR -------- */
+.trust-bar {
+  max-width: 1150px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 1.4rem 2rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+}
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.trust-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.trust-purple { background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(99,102,241,0.35)); }
+.trust-blue { background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(37,99,235,0.35)); }
+.trust-pink { background: linear-gradient(135deg, rgba(236,72,153,0.35), rgba(190,24,93,0.35)); }
+.trust-green { background: linear-gradient(135deg, rgba(34,197,94,0.35), rgba(21,128,61,0.35)); }
+.trust-title { font-size: 13.5px; font-weight: 600; color: white; }
+.trust-sub { font-size: 11.5px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+@media (max-width: 1024px) {
+  .services-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .trust-bar { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .services-grid-2 { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .services-grid-2 .service-card { padding: 1.1rem 1rem 1.2rem; }
+  .card-icon-box { width: 40px; height: 40px; }
+  .card-icon-box svg { width: 19px; height: 19px; }
+  .section-title-2 { font-size: 21px; }
+  .trust-bar { grid-template-columns: 1fr; padding: 1.2rem 1.4rem; }
+}
 
 /* -------- HAMBURGER MENU -------- */
 .hamburger { display: none; background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
@@ -386,23 +550,23 @@ nav {
   .services-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .section-title { font-size: 22px; }
   .service-card { padding: 1.1rem; }
-  .card-title { font-size: 14px; }
-  .card-desc { font-size: 12px; }
+  .card-title { font-size: 15px; }
+  .card-desc { font-size: 14px; }
 }
 
 @media (max-width: 480px) {
   .services-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .service-card { padding: 1rem 0.9rem; }
   .card-icon { font-size: 22px; margin-bottom: 0.7rem; }
-  .card-title { font-size: 13px; }
-  .card-desc { font-size: 11.5px; }
+  .card-title { font-size: 14px; }
+  .card-desc { font-size: 13.5px; }
 }
 
 @media (max-width: 360px) {
   .services-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
   .service-card { padding: 0.85rem 0.7rem; }
-  .card-title { font-size: 12px; }
-  .card-desc { font-size: 11px; }
+  .card-title { font-size: 13px; }
+  .card-desc { font-size: 13px; }
   .hero-title-en { font-size: 20px; }
 }
 

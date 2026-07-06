@@ -6,6 +6,7 @@ const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+window._sb = sb; /* shared client — chat.js reuses this instead of opening a 2nd socket */
 
 const LOGIN_PATH = '../Login page/login.html';
 
@@ -32,6 +33,8 @@ const STATUS_STEP_MAP = {
   /* Step 6 — Completed */
   'completed':6,
 };
+window._STATUS_STEP_MAP = STATUS_STEP_MAP;
+window._STEPS_TOTAL = STEPS.length;
 
 let currentUser=null, currentClient=null, allOrders=[], currentOrderId=null;
 let ordersPageFilter='all'; // 'all' | 'active' | 'completed' — set by the home page's View All links
@@ -109,7 +112,6 @@ async function loadOrders() {
   allOrders = orders || [];
   renderHomePage();
   renderOrdersPage();
-  populateChatOrderSelect();
 }
 
 function renderHomePage() {
@@ -685,12 +687,14 @@ async function loadOrderFiles(orderId, hasDue) {
 }
 
 async function loadLatestAdminMsg(orderId) {
-  const {data:msgs}=await sb.from('messages').select('*').eq('order_id',orderId).eq('from_admin',true).order('sent_at',{ascending:false}).limit(1);
+  const {data:msgs}=await sb.from('messages').select('*').eq('order_id',orderId).eq('sender','admin').order('created_at',{ascending:false}).limit(1);
   const card=document.getElementById('adminMsgCard');
   if(msgs&&msgs.length>0){
+    const m=msgs[0];
     card.style.display='block';
-    document.getElementById('adminMsgText').textContent=msgs[0].text;
-    document.getElementById('goChatBtn').onclick=()=>{showPage('messages');document.getElementById('chatOrderSelect').value=orderId;loadChat(orderId);};
+    document.getElementById('adminMsgText').textContent=m.message || (m.message_type==='file'?'📄 একটি ফাইল পাঠিয়েছেন':'📷 একটি ছবি পাঠিয়েছেন');
+    document.getElementById('goChatBtn').dataset.orderId=orderId;
+    document.getElementById('goChatBtn').onclick=()=>{showPage('messages');const sel=document.getElementById('chatOrderSelect');sel.value=orderId;if(typeof window.chatModule!=='undefined'&&window.chatModule.loadChat)window.chatModule.loadChat(orderId);};
   } else { card.style.display='none'; }
 }
 
@@ -818,63 +822,11 @@ async function loadPaymentsPage() {
   });
 }
 
-function initChat() {
-  const select=document.getElementById('chatOrderSelect');
-  const sendBtn=document.getElementById('chatSendBtn');
-  const input=document.getElementById('chatInput');
-  select.addEventListener('change',()=>{const id=parseInt(select.value);if(!id)return;chatOrderId=id;loadChat(id);});
-  sendBtn.addEventListener('click',sendChatMessage);
-  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage();}});
-  input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,100)+'px';});
-}
-
-function populateChatOrderSelect() {
-  const select=document.getElementById('chatOrderSelect');
-  select.innerHTML='<option value="">Order বেছে নিন</option>';
-  allOrders.forEach(order=>{
-    const opt=document.createElement('option');
-    opt.value=order.id; opt.textContent=`${order.order_number ? '#SCR-'+order.order_number : '#SCR-'+String(order.id).slice(-6).toUpperCase()} — ${truncate(order.title,30)}`;
-    select.appendChild(opt);
-  });
-}
-
-async function loadChat(orderId) {
-  document.getElementById('chatSelectPrompt').style.display='none';
-  document.getElementById('chatBox').style.display='flex';
-  document.getElementById('chatOrderId').textContent=`#SCR-${allOrders.find(o=>o.id===orderId)?.order_number || String(orderId).slice(-6).toUpperCase()}`;
-  const body=document.getElementById('chatBody');
-  const loading=document.getElementById('chatLoading');
-  body.innerHTML=''; body.appendChild(loading); loading.style.display='flex';
-  const {data:msgs}=await sb.from('messages').select('*').eq('order_id',orderId).order('sent_at',{ascending:true});
-  loading.style.display='none'; body.innerHTML='';
-  if(!msgs||msgs.length===0){body.innerHTML='<div class="empty-note">এখনো কোনো message নেই। Admin কে message করুন!</div>';}
-  else{msgs.forEach(msg=>appendChatMsg(msg));}
-  scrollChatToBottom();
-  const chatSub=sb.channel(`chat-${orderId}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`order_id=eq.${orderId}`},payload=>{appendChatMsg(payload.new);scrollChatToBottom();if(payload.new.from_admin)updateMsgBadge(1);}).subscribe();
-  realtimeSubs.push(chatSub);
-}
-
-function appendChatMsg(msg) {
-  const body=document.getElementById('chatBody');
-  const isAdmin=msg.from_admin;
-  const emptyNote=body.querySelector('.empty-note');
-  if(emptyNote) emptyNote.remove();
-  const div=document.createElement('div');
-  div.className=`chat-msg ${isAdmin?'admin':'client'}`;
-  div.innerHTML=`<div class="msg-meta-label">${isAdmin?'Scriptora Admin':'আপনি'} · ${fmtTime(msg.sent_at)}</div><div class="msg-bubble">${escHtml(msg.text)}</div>`;
-  body.appendChild(div);
-}
-
-async function sendChatMessage() {
-  const input=document.getElementById('chatInput');
-  const text=input.value.trim();
-  if(!text||!chatOrderId) return;
-  input.value=''; input.style.height='auto';
-  const {error}=await sb.from('messages').insert({order_id:chatOrderId,client_id:currentUser.id,text,from_admin:false,sent_at:new Date().toISOString()});
-  if(error){showToast('Message পাঠানো যায়নি','error');input.value=text;}
-}
-
-function scrollChatToBottom(){const body=document.getElementById('chatBody');setTimeout(()=>{body.scrollTop=body.scrollHeight;},50);}
+/* NOTE: the full Messages page (order select, chat box, presence, typing,
+   attachments, read receipts) is owned entirely by chat.js now — see
+   window.chatModule. The old inline chat implementation that used to live
+   here (initChat/loadChat/appendChatMsg/sendChatMessage) has been removed
+   because it used an incompatible messages schema and duplicated chat.js. */
 
 function loadProfileData() {
   if(!currentClient) return;
