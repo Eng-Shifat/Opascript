@@ -1,14 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SCRIPTORA — CHAT MODULE (Client Side)  v2
+   SCRIPTORA — CHAT MODULE (Client Side)  v3
    Order-based real-time support chat: text, files, images, payment
    screenshots, quick actions, pinned notices, typing indicator,
-   admin online/offline presence, read receipts (sent/delivered/read).
+   admin online/offline presence, read receipts, reply-to, emoji
+   reactions, delete message.
    ═══════════════════════════════════════════════════════════════════════ */
 
 const SUPA_URL = 'https://hivrmntxpmpwthmjtoem.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
-const CHAT_BUCKET = 'scriptora-files';           /* same bucket payment proofs already use */
+const CHAT_BUCKET = 'scriptora-files';
 const CHAT_FILE_MAX_MB = 15;
+const REACTION_EMOJIS = ['👍','❤️','😂','😮','😢','🙏'];
 
 function getSB() {
   if (window._sb) return window._sb;
@@ -17,18 +19,63 @@ function getSB() {
 }
 
 /* ── State ─────────────────────────────────────────────────────────────── */
-let chatActiveOrderId   = null;
-let currentUserId    = null;
-let userInitials     = 'U';
-let ordersCache      = {};   /* id -> order row */
-let chatChannel       = null;
-let typingChannel     = null;
-let presenceChannel   = null;
-let adminIsOnline     = false;
-let typingHideTimer   = null;
-let myTypingTimer     = null;
-let iAmTyping         = false;
-let pendingAttachment = null; /* { file, kind: 'image'|'file'|'payment_screenshot' } */
+let chatActiveOrderId = null;
+let currentUserId     = null;
+let userInitials       = 'U';
+let ordersCache        = {};
+let messagesById       = {};   /* id -> message row, for reply-quote lookups */
+let chatChannel        = null;
+let typingChannel      = null;
+let presenceChannel    = null;
+let adminIsOnline      = false;
+let typingHideTimer    = null;
+let myTypingTimer      = null;
+let iAmTyping          = false;
+let pendingAttachment  = null;
+let replyTarget        = null; /* message row being replied to */
+let openEmojiPickerId  = null;
+
+/* ── Browser notifications (desktop/tab-level) ──────────────────────────── */
+function requestNotifyPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function notifyNewMessage(title, body, orderId) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (document.visibilityState === 'visible' && document.hasFocus()) return; /* user is already looking */
+
+  const n = new Notification(title, {
+    body,
+    icon: 'assets/icon.png',
+    tag: `scriptora-order-${orderId}`
+  });
+  n.onclick = () => {
+    window.focus();
+    if (typeof window.showPage === 'function') window.showPage('messages');
+    const sel = document.getElementById('chatOrderSelect');
+    if (sel) { sel.value = orderId; loadChat(orderId); }
+    n.close();
+  };
+}
+
+/* Global listener (independent of which chat is open) — fires a desktop
+   notification whenever admin replies on ANY of this client's orders. */
+function subscribeGlobalNotifications() {
+  const sb = getSB();
+  sb.channel('client-global-messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+      const msg = payload.new;
+      if (msg.sender !== 'admin') return;
+      if (!ordersCache[msg.order_id]) return; /* not one of my orders */
+      const order = ordersCache[msg.order_id];
+      const preview = msg.message || (msg.message_type === 'file' ? '📄 File পাঠিয়েছেন' : '📷 Photo পাঠিয়েছেন');
+      notifyNewMessage(`Admin Support — ${order.order_number ? '#' + order.order_number : 'Order'}`, preview, msg.order_id);
+    })
+    .subscribe();
+}
 
 /* ── Init ──────────────────────────────────────────────────────────────── */
 async function initChat() {
@@ -44,6 +91,8 @@ async function initChat() {
   await loadOrdersIntoSelect(user.id);
   bindChatEvents();
   subscribeAdminPresence();
+  requestNotifyPermission();
+  subscribeGlobalNotifications();
 }
 
 /* ── Load orders into dropdown + cache full rows for the summary strip ──── */
@@ -76,7 +125,6 @@ async function loadOrdersIntoSelect(userId) {
     sel.appendChild(opt);
   });
 
-  /* URL param থেকে auto-select — order detail page-এর "সম্পূর্ণ চ্যাট দেখুন" বাটন থেকে আসলে */
   const params = new URLSearchParams(window.location.search);
   const preOrder = params.get('order');
   if (preOrder && ordersCache[preOrder]) {
@@ -90,10 +138,11 @@ function bindChatEvents() {
   const sel     = document.getElementById('chatOrderSelect');
   const sendBtn = document.getElementById('chatSendBtn');
   const input   = document.getElementById('chatInput');
-  const attachBtn   = document.getElementById('chatAttachBtn');
-  const fileInput   = document.getElementById('chatFileInput');
+  const attachBtn    = document.getElementById('chatAttachBtn');
+  const fileInput    = document.getElementById('chatFileInput');
   const imgOnlyInput = document.getElementById('chatImageOnlyInput');
-  const cpnClose    = document.getElementById('cpnClose');
+  const cpnClose     = document.getElementById('cpnClose');
+  const crpClose     = document.getElementById('crpClose');
 
   sel?.addEventListener('change', e => {
     const oid = e.target.value;
@@ -110,7 +159,6 @@ function bindChatEvents() {
     }
   });
 
-  /* Auto-resize + typing broadcast */
   input?.addEventListener('input', () => {
     input.style.height = 'auto';
     input.style.height = Math.min(input.scrollHeight, 120) + 'px';
@@ -141,57 +189,137 @@ function bindChatEvents() {
     banner.style.display = 'none';
   });
 
-  /* Quick actions */
-  document.getElementById('chatQuickActions')?.addEventListener('click', e => {
-    const btn = e.target.closest('.qa-btn');
-    if (!btn) return;
-    handleQuickAction(btn.dataset.action);
-  });
-}
+  crpClose?.addEventListener('click', clearReplyTarget);
 
-/* ── Quick actions ─────────────────────────────────────────────────────── */
-function handleQuickAction(action) {
-  if (!chatActiveOrderId) return;
+  /* Delegate reply/react/delete clicks + reaction pill clicks + reply-quote scroll */
+  document.getElementById('chatBody')?.addEventListener('click', e => {
+    const replyBtn  = e.target.closest('[data-act="reply"]');
+    const reactBtn  = e.target.closest('[data-act="react"]');
+    const delBtn    = e.target.closest('[data-act="delete"]');
+    const pill      = e.target.closest('.msg-reaction-pill');
+    const quote     = e.target.closest('.msg-reply-quote');
+    const emojiOpt  = e.target.closest('.emoji-picker-popup span');
 
-  if (action === 'upload-payment') {
-    /* Order detail page-এর payment proof section-এ নিয়ে যাওয়া */
-    if (typeof window.openOrderDetail === 'function' && typeof window.showPage === 'function') {
-      window.showPage('orders');
-      window.openOrderDetail(chatActiveOrderId);
-      setTimeout(() => {
-        document.getElementById('proofSubmitSection')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300);
+    if (emojiOpt) {
+      const msgId = emojiOpt.closest('.msg-row')?.dataset.id;
+      if (msgId) toggleReaction(msgId, emojiOpt.textContent);
+      closeEmojiPicker();
+      return;
     }
-    return;
-  }
+    if (replyBtn) {
+      const msgId = replyBtn.closest('.msg-row')?.dataset.id;
+      if (msgId && messagesById[msgId]) setReplyTarget(messagesById[msgId]);
+      return;
+    }
+    if (reactBtn) {
+      const msgId = reactBtn.closest('.msg-row')?.dataset.id;
+      if (msgId) openEmojiPicker(msgId, reactBtn);
+      return;
+    }
+    if (delBtn) {
+      const msgId = delBtn.closest('.msg-row')?.dataset.id;
+      if (msgId) deleteMessage(msgId);
+      return;
+    }
+    if (pill) {
+      const msgId = pill.closest('.msg-row')?.dataset.id;
+      const emoji = pill.dataset.emoji;
+      if (msgId && emoji) toggleReaction(msgId, emoji);
+      return;
+    }
+    if (quote) {
+      const targetId = quote.dataset.targetId;
+      const targetRow = document.querySelector(`.msg-row[data-id="${targetId}"]`);
+      if (targetRow) {
+        targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetRow.classList.add('msg-highlight');
+        setTimeout(() => targetRow.classList.remove('msg-highlight'), 1200);
+      }
+      return;
+    }
+    /* clicking elsewhere closes any open emoji picker */
+    if (!e.target.closest('.emoji-picker-popup')) closeEmojiPicker();
+  });
+}
 
-  if (action === 'send-screenshot') {
-    document.getElementById('chatImageOnlyInput')?.click();
-    return;
-  }
+/* ── Reply-to ──────────────────────────────────────────────────────────── */
+function setReplyTarget(msg) {
+  replyTarget = msg;
+  const bar = document.getElementById('chatReplyPreview');
+  const txt = document.getElementById('crpText');
+  const label = bar.querySelector('.crp-label');
+  label.textContent = msg.sender === 'client' ? 'নিজেকে Reply করছেন' : 'Admin-কে Reply করছেন';
+  txt.textContent = msg.message || (msg.message_type === 'file' ? '📄 File' : '📷 Photo');
+  bar.style.display = 'flex';
+  document.getElementById('chatInput')?.focus();
+}
+function clearReplyTarget() {
+  replyTarget = null;
+  document.getElementById('chatReplyPreview').style.display = 'none';
+}
 
-  if (action === 'need-help') {
-    sendQuickText('🙋 আমার সাহায্য দরকার। Please contact me regarding this order.');
-    return;
-  }
+/* ── Emoji reactions ───────────────────────────────────────────────────── */
+function openEmojiPicker(msgId, anchorBtn) {
+  closeEmojiPicker();
+  const actionsBar = anchorBtn.closest('.msg-actions');
+  const popup = document.createElement('div');
+  popup.className = 'emoji-picker-popup';
+  popup.innerHTML = REACTION_EMOJIS.map(e => `<span>${e}</span>`).join('');
+  actionsBar.style.position = 'relative';
+  actionsBar.appendChild(popup);
+  openEmojiPickerId = msgId;
+}
+function closeEmojiPicker() {
+  document.querySelectorAll('.emoji-picker-popup').forEach(p => p.remove());
+  openEmojiPickerId = null;
+}
 
-  if (action === 'download-file') {
-    sendQuickText('📥 Please share the latest file for my order.');
-    return;
+async function toggleReaction(msgId, emoji) {
+  const msg = messagesById[msgId];
+  if (!msg || !currentUserId) return;
+  const reactions = { ...(msg.reactions || {}) };
+  const list = new Set(reactions[emoji] || []);
+  if (list.has(currentUserId)) list.delete(currentUserId); else list.add(currentUserId);
+  if (list.size) reactions[emoji] = [...list]; else delete reactions[emoji];
+
+  const sb = getSB();
+  const { error } = await sb.from('messages').update({ reactions }).eq('id', msgId);
+  if (error) { console.error(error); return; }
+
+  msg.reactions = reactions;
+  const row = document.querySelector(`.msg-row[data-id="${msgId}"]`);
+  if (row) {
+    const wrap = row.querySelector('.msg-wrap');
+    let reactEl = wrap.querySelector('.msg-reactions');
+    const newHtml = buildReactionsHtml(reactions);
+    if (reactEl) reactEl.outerHTML = newHtml || '';
+    else if (newHtml) wrap.insertAdjacentHTML('beforeend', newHtml);
   }
 }
 
-async function sendQuickText(text) {
+function buildReactionsHtml(reactions) {
+  const entries = Object.entries(reactions || {}).filter(([, users]) => users && users.length);
+  if (!entries.length) return '';
+  const pills = entries.map(([emoji, users]) => {
+    const mine = users.includes(currentUserId) ? 'mine' : '';
+    return `<span class="msg-reaction-pill ${mine}" data-emoji="${emoji}">${emoji} ${users.length}</span>`;
+  }).join('');
+  return `<div class="msg-reactions">${pills}</div>`;
+}
+
+/* ── Delete message (soft delete) ─────────────────────────────────────── */
+async function deleteMessage(msgId) {
+  const msg = messagesById[msgId];
+  if (!msg || msg.sender !== 'client') return; /* only delete own messages */
+  if (!confirm('এই message delete করতে চান?')) return;
+
   const sb = getSB();
-  const { error } = await sb.from('messages').insert({
-    order_id:     chatActiveOrderId,
-    sender:       'client',
-    sender_id:    currentUserId,
-    message:      text,
-    message_type: 'quick_action',
-    status:       'sent'
-  });
-  if (error) showToast('পাঠানো যায়নি। আবার চেষ্টা করুন।', 'error');
+  const { error } = await sb.from('messages').update({ is_deleted: true }).eq('id', msgId);
+  if (error) { showToast('Delete করা যায়নি', 'error'); return; }
+
+  msg.is_deleted = true;
+  const row = document.querySelector(`.msg-row[data-id="${msgId}"]`);
+  if (row) row.replaceWith(buildBubble(msg));
 }
 
 /* ── Stage / preview an attachment before sending ─────────────────────── */
@@ -294,7 +422,7 @@ function subscribeTyping(orderId) {
   typingChannel = sb.channel(`typing-order-${orderId}`);
   typingChannel
     .on('broadcast', { event: 'typing' }, payload => {
-      if (payload.payload.sender === 'client') return; /* ignore our own echo */
+      if (payload.payload.sender === 'client') return;
       showTypingRow(payload.payload.typing);
     })
     .subscribe();
@@ -338,11 +466,14 @@ async function loadChat(orderId) {
   body.innerHTML = '<div class="chat-loading"><div class="spinner"></div></div>';
 
   const sb = getSB();
-  const { data: msgs, error } = await sb
+  const { data: msgs } = await sb
     .from('messages')
     .select('*')
     .eq('order_id', orderId)
     .order('created_at', { ascending: true });
+
+  messagesById = {};
+  (msgs || []).forEach(m => messagesById[m.id] = m);
 
   renderMessages(msgs || []);
   renderPinnedNotice(msgs || []);
@@ -354,7 +485,7 @@ async function loadChat(orderId) {
 /* ── Pinned notice banner ──────────────────────────────────────────────── */
 function renderPinnedNotice(msgs) {
   const banner = document.getElementById('chatPinnedNotice');
-  const pinned = [...msgs].reverse().find(m => m.is_pinned);
+  const pinned = [...msgs].reverse().find(m => m.is_pinned && !m.is_deleted);
   const dismissed = JSON.parse(localStorage.getItem('scriptora_dismissed_notices') || '[]');
 
   if (!pinned || dismissed.includes(pinned.id)) {
@@ -426,30 +557,30 @@ function buildBubble(msg) {
   const wrap = document.createElement('div');
   wrap.className = 'msg-wrap';
 
-  let bubble;
-  if (msg.message_type === 'image' || msg.message_type === 'payment_screenshot') {
-    bubble = document.createElement('div');
-    bubble.className = 'msg-bubble msg-media-bubble';
-    if (msg.message_type === 'payment_screenshot') {
-      bubble.innerHTML += `<div class="msg-file-tag">💳 Payment Screenshot</div>`;
-    }
-    bubble.innerHTML += `<a href="${msg.file_url}" target="_blank" rel="noopener"><img src="${msg.file_url}" alt="attachment" class="msg-img" loading="lazy"/></a>`;
-    if (msg.message) bubble.innerHTML += `<div class="msg-caption">${escHtml(msg.message)}</div>`;
+  let bubbleHtml = '';
+  const replyQuoteHtml = buildReplyQuoteHtml(msg);
+
+  if (msg.is_deleted) {
+    bubbleHtml = `<div class="msg-bubble msg-deleted">🚫 এই message-টি delete করা হয়েছে</div>`;
+  } else if (msg.message_type === 'image' || msg.message_type === 'payment_screenshot') {
+    let inner = replyQuoteHtml;
+    if (msg.message_type === 'payment_screenshot') inner += `<div class="msg-file-tag">💳 Payment Screenshot</div>`;
+    inner += `<a href="${msg.file_url}" target="_blank" rel="noopener"><img src="${msg.file_url}" alt="attachment" class="msg-img" loading="lazy"/></a>`;
+    if (msg.message) inner += `<div class="msg-caption">${escHtml(msg.message)}</div>`;
+    bubbleHtml = `<div class="msg-bubble msg-media-bubble">${inner}</div>`;
   } else if (msg.message_type === 'file') {
-    bubble = document.createElement('div');
-    bubble.className = 'msg-bubble msg-file-bubble';
-    bubble.innerHTML = `
+    bubbleHtml = `<div class="msg-bubble msg-file-bubble">${replyQuoteHtml}
       <a href="${msg.file_url}" target="_blank" rel="noopener" class="msg-file-link">
         <span class="msg-file-icon">📄</span>
         <span class="msg-file-name">${escHtml(msg.file_name || 'File')}</span>
         <span class="msg-file-download">⬇</span>
-      </a>`;
+      </a></div>`;
   } else {
-    bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    if (msg.message_type === 'quick_action') bubble.classList.add('msg-quick-action');
-    bubble.textContent = msg.message || '';
+    const cls = msg.message_type === 'quick_action' ? 'msg-bubble msg-quick-action' : 'msg-bubble';
+    bubbleHtml = `<div class="${cls}">${replyQuoteHtml}${escHtml(msg.message || '')}</div>`;
   }
+
+  wrap.innerHTML = bubbleHtml;
 
   const t = document.createElement('div');
   t.className = 'msg-time';
@@ -460,12 +591,42 @@ function buildBubble(msg) {
     ticks.innerHTML = statusTicksSVG(msg.status || 'sent');
     t.appendChild(ticks);
   }
-
-  wrap.appendChild(bubble);
   wrap.appendChild(t);
+
+  if (!msg.is_deleted) {
+    const reactHtml = buildReactionsHtml(msg.reactions);
+    if (reactHtml) wrap.insertAdjacentHTML('beforeend', reactHtml);
+  }
+
   row.appendChild(av);
   row.appendChild(wrap);
+  if (!msg.is_deleted) row.appendChild(buildActionsBar(msg));
+
   return row;
+}
+
+/* Hover action bar: Reply + React for everyone, + Delete only on your own (client) messages */
+function buildActionsBar(msg) {
+  const div = document.createElement('div');
+  div.className = 'msg-actions';
+  let html = `<button class="msg-action-btn" data-act="reply" title="Reply">↩</button>
+    <button class="msg-action-btn" data-act="react" title="React">😊</button>`;
+  if (msg.sender === 'client') html += `<button class="msg-action-btn" data-act="delete" title="Delete">🗑</button>`;
+  div.innerHTML = html;
+  return div;
+}
+
+function buildReplyQuoteHtml(msg) {
+  if (!msg.reply_to_id) return '';
+  const parent = messagesById[msg.reply_to_id];
+  if (!parent) return '';
+  const senderLabel = parent.sender === 'client' ? 'আপনি' : 'Admin';
+  const snippet = parent.is_deleted
+    ? '🚫 Message deleted'
+    : (parent.message || (parent.message_type === 'file' ? '📄 File' : '📷 Photo'));
+  return `<div class="msg-reply-quote" data-target-id="${parent.id}">
+    <span class="rq-sender">${senderLabel}</span>${escHtml(snippet.slice(0, 80))}
+  </div>`;
 }
 
 /* ── Realtime subscription ─────────────────────────────────────────────── */
@@ -476,11 +637,9 @@ function subscribeToChat(orderId) {
   chatChannel = sb
     .channel(`messages-order-${orderId}`)
     .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'messages',
-      filter: `order_id=eq.${orderId}`
+      event: 'INSERT', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}`
     }, payload => {
+      messagesById[payload.new.id] = payload.new;
       const body = document.getElementById('chatBody');
       const empty = body.querySelector('.chat-empty');
       if (empty) empty.remove();
@@ -488,7 +647,7 @@ function subscribeToChat(orderId) {
       body.appendChild(buildBubble(payload.new));
       scrollToBottom();
 
-      if (payload.new.is_pinned) renderPinnedNotice([payload.new]);
+      if (payload.new.is_pinned) renderPinnedNotice(Object.values(messagesById));
 
       if (payload.new.sender === 'admin') {
         showTypingRow(false);
@@ -497,16 +656,17 @@ function subscribeToChat(orderId) {
       }
     })
     .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'messages',
-      filter: `order_id=eq.${orderId}`
+      event: 'UPDATE', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}`
     }, payload => {
-      /* Refresh ticks when admin marks our messages as read/delivered */
+      messagesById[payload.new.id] = payload.new;
       const row = document.querySelector(`.msg-row[data-id="${payload.new.id}"]`);
       if (row) {
-        const ticksEl = row.querySelector('.msg-ticks');
-        if (ticksEl) ticksEl.innerHTML = statusTicksSVG(payload.new.status || 'sent');
+        if (payload.new.is_deleted || payload.new.reactions) {
+          row.replaceWith(buildBubble(payload.new));
+        } else {
+          const ticksEl = row.querySelector('.msg-ticks');
+          if (ticksEl) ticksEl.innerHTML = statusTicksSVG(payload.new.status || 'sent');
+        }
       }
     })
     .subscribe();
@@ -530,16 +690,18 @@ async function sendMessage() {
   btn.disabled = true;
   broadcastTyping(false);
 
+  const replyToId = replyTarget ? replyTarget.id : null;
+
   if (pendingAttachment) {
-    await uploadAndSendAttachment(text);
-    input.value = '';
-    input.style.height = 'auto';
+    await uploadAndSendAttachment(text, replyToId);
+    input.value = ''; input.style.height = 'auto';
+    clearReplyTarget();
     btn.disabled = false;
     return;
   }
 
-  input.value = '';
-  input.style.height = 'auto';
+  input.value = ''; input.style.height = 'auto';
+  clearReplyTarget();
 
   const sb = getSB();
   const { error } = await sb.from('messages').insert({
@@ -548,6 +710,7 @@ async function sendMessage() {
     sender_id:    currentUserId,
     message:      text,
     message_type: 'text',
+    reply_to_id:  replyToId,
     status:       'sent'
   });
 
@@ -559,7 +722,7 @@ async function sendMessage() {
   }
 }
 
-async function uploadAndSendAttachment(caption) {
+async function uploadAndSendAttachment(caption, replyToId) {
   const { file, kind } = pendingAttachment;
   const sb = getSB();
   const ext  = file.name.split('.').pop();
@@ -578,6 +741,7 @@ async function uploadAndSendAttachment(caption) {
     sender_id:    currentUserId,
     message:      caption || null,
     message_type: kind,
+    reply_to_id:  replyToId || null,
     file_url:     urlData.publicUrl,
     file_name:    file.name,
     file_size:    file.size,
@@ -614,11 +778,7 @@ async function updateUnreadBadge() {
   if (!currentUserId) return;
   const sb = getSB();
 
-  const { data: orders } = await sb
-    .from('orders')
-    .select('id')
-    .eq('client_id', currentUserId);
-
+  const { data: orders } = await sb.from('orders').select('id').eq('client_id', currentUserId);
   if (!orders || !orders.length) return;
   const orderIds = orders.map(o => o.id);
 
@@ -632,12 +792,8 @@ async function updateUnreadBadge() {
   const badge = document.getElementById('msgBadge');
   if (!badge) return;
 
-  if (count > 0) {
-    badge.textContent = count;
-    badge.style.display = '';
-  } else {
-    badge.style.display = 'none';
-  }
+  if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+  else badge.style.display = 'none';
 }
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
@@ -663,37 +819,26 @@ function showToast(msg, type = 'info') {
   }
 }
 
-/* "সম্পূর্ণ চ্যাট দেখুন" button — order detail page থেকে */
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('goChatBtn')?.addEventListener('click', () => {
     const orderId = document.getElementById('goChatBtn')?.dataset.orderId;
     if (!orderId) return;
-
     if (typeof window.showPage === 'function') window.showPage('messages');
-
     const sel = document.getElementById('chatOrderSelect');
-    if (sel) {
-      sel.value = orderId;
-      loadChat(orderId);
-    }
+    if (sel) { sel.value = orderId; loadChat(orderId); }
   });
 });
 
-/* ── Page switch hook — Messages page-এ ঢুকলে init করো ─────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('[data-page="messages"]')?.addEventListener('click', () => {
-    setTimeout(() => {
-      if (!currentUserId) initChat();
-    }, 100);
+    setTimeout(() => { if (!currentUserId) initChat(); }, 100);
   });
   document.querySelectorAll('.mbn-item[data-page="messages"]').forEach(el => {
     el.addEventListener('click', () => setTimeout(() => { if (!currentUserId) initChat(); }, 100));
   });
-
   if (document.getElementById('page-messages')?.classList.contains('active')) {
     initChat();
   }
 });
 
-/* Export for dashboard.js */
 window.chatModule = { init: initChat, updateBadge: updateUnreadBadge, loadChat };

@@ -1,20 +1,43 @@
-/* ── ADMIN CHAT — admin-chat.js  v2 (unified schema, presence, typing, files) ── */
+/* ── ADMIN CHAT — admin-chat.js  v3 (unified schema, presence, typing, files, reply/react/delete) ── */
 
 const sb = window.scriptoraSupabase;
 const CHAT_BUCKET = 'scriptora-files';
 const CHAT_FILE_MAX_MB = 15;
+const REACTION_EMOJIS = ['👍','❤️','😂','😮','😢','🙏'];
 
 /* ── State ─────────────────────────────────────────────────────────────── */
-let conversations   = [];
-let currentOrderId  = null;
-let adminId         = null;
-let chatChannel     = null;
-let globalChannel   = null;
-let typingChannel   = null;
-let presenceChannel = null;
-let myTypingTimer   = null;
-let iAmTyping       = false;
+let conversations     = [];
+let currentOrderId    = null;
+let adminId           = null;
+let chatChannel       = null;
+let globalChannel     = null;
+let typingChannel     = null;
+let presenceChannel   = null;
+let myTypingTimer     = null;
+let iAmTyping         = false;
 let pendingAttachment = null;
+let messagesById      = {};
+let replyTarget       = null;
+
+/* ── Browser notifications (desktop/tab-level) ──────────────────────────── */
+function requestNotifyPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function notifyNewMessage(title, body, orderId) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (document.visibilityState === 'visible' && document.hasFocus()) return;
+
+  const n = new Notification(title, { body, icon: '../Client Dashboard/assets/icon.png', tag: `scriptora-admin-order-${orderId}` });
+  n.onclick = () => {
+    window.focus();
+    openConv(orderId);
+    n.close();
+  };
+}
 
 /* ── Init ──────────────────────────────────────────────────────────────── */
 async function init() {
@@ -32,6 +55,7 @@ async function init() {
   subscribeGlobal();
   trackAdminPresence();
   bindEvents();
+  requestNotifyPermission();
 
   window.addEventListener('beforeunload', () => {
     if (presenceChannel) presenceChannel.untrack();
@@ -41,7 +65,6 @@ async function init() {
   if (wantedOrderId) openConv(wantedOrderId);
 }
 
-/* ── Presence: tell every client dashboard that admin is online ────────── */
 function trackAdminPresence() {
   presenceChannel = sb.channel('presence-admin-status', { config: { presence: { key: adminId } } });
   presenceChannel.subscribe(async status => {
@@ -65,7 +88,7 @@ async function loadConversations() {
 
   const { data: msgs } = await sb
     .from('messages')
-    .select('order_id, message, message_type, sender, status, created_at')
+    .select('order_id, message, message_type, sender, status, is_deleted, created_at')
     .order('created_at', { ascending: false });
 
   const clientIds = [...new Set(orders.map(o => o.client_id).filter(Boolean))];
@@ -141,6 +164,7 @@ function renderConvList(list) {
 
 function previewText(m) {
   if (!m) return '';
+  if (m.is_deleted) return '🚫 Message deleted';
   if (m.message_type === 'image')              return '📷 Photo';
   if (m.message_type === 'payment_screenshot')  return '💳 Payment Screenshot';
   if (m.message_type === 'file')                return '📄 File';
@@ -150,6 +174,7 @@ function previewText(m) {
 /* ── Open a conversation ───────────────────────────────────────────────── */
 async function openConv(orderId) {
   currentOrderId = orderId;
+  clearReplyTarget();
 
   document.querySelectorAll('.conv-item').forEach(i => i.classList.remove('active'));
   document.querySelector(`.conv-item[data-id="${orderId}"]`)?.classList.add('active');
@@ -179,6 +204,9 @@ async function openConv(orderId) {
     .select('*')
     .eq('order_id', orderId)
     .order('created_at', { ascending: true });
+
+  messagesById = {};
+  (msgs || []).forEach(m => messagesById[m.id] = m);
 
   renderMessages(msgs || [], conv?.profile);
   subscribeToOrder(orderId);
@@ -234,7 +262,7 @@ function renderMessages(msgs, profile) {
   scrollToBottom();
 }
 
-/* ── Build bubble ──────────────────────────────────────────────────────── */
+/* ── Ticks / reactions / reply-quote helpers ─────────────────────────────── */
 function statusTicksSVG(status) {
   if (status === 'read') {
     return `<svg class="tick tick-read" width="15" height="10" viewBox="0 0 16 11" fill="none"><path d="M1 5.5L4.5 9L11 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 5.5L9 9L15.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -245,6 +273,30 @@ function statusTicksSVG(status) {
   return `<svg class="tick tick-sent" width="12" height="10" viewBox="0 0 12 11" fill="none"><path d="M1 5.5L4.5 9L11 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
+function buildReactionsHtml(reactions) {
+  const entries = Object.entries(reactions || {}).filter(([, users]) => users && users.length);
+  if (!entries.length) return '';
+  const pills = entries.map(([emoji, users]) => {
+    const mine = users.includes(adminId) ? 'mine' : '';
+    return `<span class="msg-reaction-pill ${mine}" data-emoji="${emoji}">${emoji} ${users.length}</span>`;
+  }).join('');
+  return `<div class="msg-reactions">${pills}</div>`;
+}
+
+function buildReplyQuoteHtml(msg, clientInitials) {
+  if (!msg.reply_to_id) return '';
+  const parent = messagesById[msg.reply_to_id];
+  if (!parent) return '';
+  const senderLabel = parent.sender === 'admin' ? 'আপনি' : (clientInitials ? 'Client' : 'Client');
+  const snippet = parent.is_deleted
+    ? '🚫 Message deleted'
+    : (parent.message || (parent.message_type === 'file' ? '📄 File' : '📷 Photo'));
+  return `<div class="msg-reply-quote" data-target-id="${parent.id}">
+    <span class="rq-sender">${senderLabel}</span>${escH(snippet.slice(0, 80))}
+  </div>`;
+}
+
+/* ── Build bubble ──────────────────────────────────────────────────────── */
 function buildBubble(msg, clientInitials = 'C') {
   const isAdmin = msg.sender === 'admin';
   const time    = new Date(msg.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -252,29 +304,33 @@ function buildBubble(msg, clientInitials = 'C') {
   const row = document.createElement('div');
   row.className = `msg-row ${isAdmin ? 'admin' : 'client'}`;
   row.dataset.id = msg.id;
-  if (msg.is_pinned) row.classList.add('is-pinned-msg');
 
   const av = document.createElement('div');
   av.className   = `msg-av ${isAdmin ? 'admin-av' : 'client-av'}`;
   av.textContent = isAdmin ? 'SA' : clientInitials;
 
-  const wrap  = document.createElement('div');
+  const wrap = document.createElement('div');
   wrap.className = 'msg-wrap';
-  let bubble = document.createElement('div');
 
-  if (msg.message_type === 'image' || msg.message_type === 'payment_screenshot') {
-    bubble.className = 'msg-bubble msg-media-bubble';
-    if (msg.message_type === 'payment_screenshot') bubble.innerHTML += `<div class="msg-file-tag">💳 Payment Screenshot</div>`;
-    bubble.innerHTML += `<a href="${msg.file_url}" target="_blank" rel="noopener"><img src="${msg.file_url}" class="msg-img" loading="lazy"/></a>`;
-    if (msg.message) bubble.innerHTML += `<div class="msg-caption">${escH(msg.message)}</div>`;
+  const replyQuoteHtml = buildReplyQuoteHtml(msg, clientInitials);
+  let bubbleHtml = '';
+
+  if (msg.is_deleted) {
+    bubbleHtml = `<div class="msg-bubble msg-deleted">🚫 এই message-টি delete করা হয়েছে</div>`;
+  } else if (msg.message_type === 'image' || msg.message_type === 'payment_screenshot') {
+    let inner = replyQuoteHtml;
+    if (msg.message_type === 'payment_screenshot') inner += `<div class="msg-file-tag">💳 Payment Screenshot</div>`;
+    inner += `<a href="${msg.file_url}" target="_blank" rel="noopener"><img src="${msg.file_url}" class="msg-img" loading="lazy"/></a>`;
+    if (msg.message) inner += `<div class="msg-caption">${escH(msg.message)}</div>`;
+    bubbleHtml = `<div class="msg-bubble msg-media-bubble">${inner}</div>`;
   } else if (msg.message_type === 'file') {
-    bubble.className = 'msg-bubble msg-file-bubble';
-    bubble.innerHTML = `<a href="${msg.file_url}" target="_blank" rel="noopener" class="msg-file-link"><span class="msg-file-icon">📄</span><span class="msg-file-name">${escH(msg.file_name || 'File')}</span><span class="msg-file-download">⬇</span></a>`;
+    bubbleHtml = `<div class="msg-bubble msg-file-bubble">${replyQuoteHtml}<a href="${msg.file_url}" target="_blank" rel="noopener" class="msg-file-link"><span class="msg-file-icon">📄</span><span class="msg-file-name">${escH(msg.file_name || 'File')}</span><span class="msg-file-download">⬇</span></a></div>`;
   } else {
-    bubble.className = 'msg-bubble';
-    if (msg.is_pinned) bubble.classList.add('msg-notice-bubble');
-    bubble.textContent = msg.message || '';
+    const cls = msg.is_pinned ? 'msg-bubble msg-notice-bubble' : 'msg-bubble';
+    bubbleHtml = `<div class="${cls}">${replyQuoteHtml}${escH(msg.message || '')}</div>`;
   }
+
+  wrap.innerHTML = bubbleHtml;
 
   const t = document.createElement('div');
   t.className   = 'msg-time';
@@ -285,12 +341,95 @@ function buildBubble(msg, clientInitials = 'C') {
     ticks.innerHTML = statusTicksSVG(msg.status || 'sent');
     t.appendChild(ticks);
   }
-
-  wrap.appendChild(bubble);
   wrap.appendChild(t);
+
+  if (!msg.is_deleted) {
+    const reactHtml = buildReactionsHtml(msg.reactions);
+    if (reactHtml) wrap.insertAdjacentHTML('beforeend', reactHtml);
+  }
+
   row.appendChild(av);
   row.appendChild(wrap);
+  if (!msg.is_deleted) row.appendChild(buildActionsBar(msg));
+
   return row;
+}
+
+function buildActionsBar(msg) {
+  const div = document.createElement('div');
+  div.className = 'msg-actions';
+  let html = `<button class="msg-action-btn" data-act="reply" title="Reply">↩</button>
+    <button class="msg-action-btn" data-act="react" title="React">😊</button>`;
+  if (msg.sender === 'admin') html += `<button class="msg-action-btn" data-act="delete" title="Delete">🗑</button>`;
+  div.innerHTML = html;
+  return div;
+}
+
+/* ── Reply-to ──────────────────────────────────────────────────────────── */
+function setReplyTarget(msg) {
+  replyTarget = msg;
+  const bar = document.getElementById('adminReplyPreview');
+  const txt = document.getElementById('adminCrpText');
+  bar.querySelector('.crp-label').textContent = msg.sender === 'admin' ? 'নিজেকে Reply করছেন' : 'Client-কে Reply করছেন';
+  txt.textContent = msg.message || (msg.message_type === 'file' ? '📄 File' : '📷 Photo');
+  bar.style.display = 'flex';
+  document.getElementById('adminChatInput')?.focus();
+}
+function clearReplyTarget() {
+  replyTarget = null;
+  const bar = document.getElementById('adminReplyPreview');
+  if (bar) bar.style.display = 'none';
+}
+
+/* ── Emoji reactions ───────────────────────────────────────────────────── */
+function openEmojiPicker(msgId, anchorBtn) {
+  closeEmojiPicker();
+  const actionsBar = anchorBtn.closest('.msg-actions');
+  const popup = document.createElement('div');
+  popup.className = 'emoji-picker-popup';
+  popup.innerHTML = REACTION_EMOJIS.map(e => `<span>${e}</span>`).join('');
+  actionsBar.style.position = 'relative';
+  actionsBar.appendChild(popup);
+}
+function closeEmojiPicker() {
+  document.querySelectorAll('.emoji-picker-popup').forEach(p => p.remove());
+}
+
+async function toggleReaction(msgId, emoji) {
+  const msg = messagesById[msgId];
+  if (!msg || !adminId) return;
+  const reactions = { ...(msg.reactions || {}) };
+  const list = new Set(reactions[emoji] || []);
+  if (list.has(adminId)) list.delete(adminId); else list.add(adminId);
+  if (list.size) reactions[emoji] = [...list]; else delete reactions[emoji];
+
+  const { error } = await sb.from('messages').update({ reactions }).eq('id', msgId);
+  if (error) { console.error(error); return; }
+
+  msg.reactions = reactions;
+  const row = document.querySelector(`.msg-row[data-id="${msgId}"]`);
+  if (row) {
+    const wrap = row.querySelector('.msg-wrap');
+    let reactEl = wrap.querySelector('.msg-reactions');
+    const newHtml = buildReactionsHtml(reactions);
+    if (reactEl) reactEl.outerHTML = newHtml || '';
+    else if (newHtml) wrap.insertAdjacentHTML('beforeend', newHtml);
+  }
+}
+
+/* ── Delete message (soft delete, admin's own only) ─────────────────────── */
+async function deleteMessage(msgId) {
+  const msg = messagesById[msgId];
+  if (!msg || msg.sender !== 'admin') return;
+  if (!confirm('এই message delete করতে চান?')) return;
+
+  const { error } = await sb.from('messages').update({ is_deleted: true }).eq('id', msgId);
+  if (error) { showToast('Delete করা যায়নি'); return; }
+
+  msg.is_deleted = true;
+  const conv = conversations.find(c => c.id === currentOrderId);
+  const row = document.querySelector(`.msg-row[data-id="${msgId}"]`);
+  if (row) row.replaceWith(buildBubble(msg, (conv?.profile?.name || 'C').substring(0,2).toUpperCase()));
 }
 
 /* ── Realtime: one order ───────────────────────────────────────────────── */
@@ -300,11 +439,9 @@ function subscribeToOrder(orderId) {
   chatChannel = sb
     .channel(`admin-chat-${orderId}`)
     .on('postgres_changes', {
-      event:  'INSERT',
-      schema: 'public',
-      table:  'messages',
-      filter: `order_id=eq.${orderId}`
+      event: 'INSERT', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}`
     }, payload => {
+      messagesById[payload.new.id] = payload.new;
       const body  = document.getElementById('adminChatBody');
       const empty = body.querySelector('.chat-body-empty');
       if (empty) empty.remove();
@@ -322,21 +459,26 @@ function subscribeToOrder(orderId) {
     .on('postgres_changes', {
       event: 'UPDATE', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}`
     }, payload => {
+      messagesById[payload.new.id] = payload.new;
       const row = document.querySelector(`.msg-row[data-id="${payload.new.id}"]`);
       if (row) {
-        const t = row.querySelector('.msg-ticks');
-        if (t) t.innerHTML = statusTicksSVG(payload.new.status || 'sent');
+        if (payload.new.is_deleted || payload.new.reactions) {
+          const conv = conversations.find(c => c.id === orderId);
+          const init = (conv?.profile?.name || 'C').substring(0, 2).toUpperCase();
+          row.replaceWith(buildBubble(payload.new, init));
+        } else {
+          const t = row.querySelector('.msg-ticks');
+          if (t) t.innerHTML = statusTicksSVG(payload.new.status || 'sent');
+        }
       }
     })
     .subscribe();
 }
 
-/* ── Typing indicator (broadcast to client) ─────────────────────────────── */
 function subscribeTypingChannel(orderId) {
   typingChannel = sb.channel(`typing-order-${orderId}`);
   typingChannel.subscribe();
 }
-
 function broadcastTyping(isTyping) {
   if (!typingChannel || !currentOrderId) return;
   if (isTyping === iAmTyping) { if (isTyping) resetMyTypingTimer(); return; }
@@ -349,16 +491,17 @@ function resetMyTypingTimer() {
   myTypingTimer = setTimeout(() => broadcastTyping(false), 2500);
 }
 
-/* ── Realtime: all orders (new messages from clients) ──────────────────── */
 function subscribeGlobal() {
   globalChannel = sb
     .channel('admin-all-messages')
-    .on('postgres_changes', {
-      event:  'INSERT',
-      schema: 'public',
-      table:  'messages'
-    }, payload => {
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
       const msg = payload.new;
+      if (msg.sender === 'client') {
+        const c0 = conversations.find(x => x.id === msg.order_id);
+        const name = c0?.profile?.name || c0?.profile?.email || 'Client';
+        const preview = msg.message || (msg.message_type === 'file' ? '📄 File পাঠিয়েছেন' : '📷 Photo পাঠিয়েছেন');
+        notifyNewMessage(name, preview, msg.order_id);
+      }
       if (msg.sender === 'client' && msg.order_id !== currentOrderId) {
         const c = conversations.find(x => x.id === msg.order_id);
         if (c) {
@@ -393,7 +536,7 @@ function stageAttachment(file, kind) {
   });
 }
 
-async function uploadAndSendAttachment(caption) {
+async function uploadAndSendAttachment(caption, replyToId) {
   const { file, kind } = pendingAttachment;
   const ext  = file.name.split('.').pop();
   const path = `chat-attachments/${currentOrderId}/${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
@@ -408,6 +551,7 @@ async function uploadAndSendAttachment(caption) {
     sender_id:    adminId,
     message:      caption || null,
     message_type: kind,
+    reply_to_id:  replyToId || null,
     file_url:     urlData.publicUrl,
     file_name:    file.name,
     file_size:    file.size,
@@ -431,16 +575,18 @@ async function sendReply(pinAsNotice = false) {
 
   btn.disabled = true;
   broadcastTyping(false);
+  const replyToId = replyTarget ? replyTarget.id : null;
 
   if (pendingAttachment) {
-    await uploadAndSendAttachment(text);
+    await uploadAndSendAttachment(text, replyToId);
     input.value = ''; input.style.height = 'auto';
+    clearReplyTarget();
     btn.disabled = false;
     return;
   }
 
-  input.value = '';
-  input.style.height = 'auto';
+  input.value = ''; input.style.height = 'auto';
+  clearReplyTarget();
 
   const { error } = await sb.from('messages').insert({
     order_id:   currentOrderId,
@@ -448,6 +594,7 @@ async function sendReply(pinAsNotice = false) {
     sender_id:  adminId,
     message:    text,
     message_type: 'text',
+    reply_to_id: replyToId,
     is_pinned:  !!pinAsNotice,
     status:     'sent'
   });
@@ -508,6 +655,8 @@ function bindEvents() {
     e.target.value = '';
   });
 
+  document.getElementById('adminCrpClose')?.addEventListener('click', clearReplyTarget);
+
   document.getElementById('convSearch')?.addEventListener('input', e => filterConversations(e.target.value));
 
   document.getElementById('backMobileBtn')?.addEventListener('click', () => {
@@ -518,6 +667,55 @@ function bindEvents() {
     if (presenceChannel) await presenceChannel.untrack();
     await sb.auth.signOut();
     window.location.href = 'admin.html';
+  });
+
+  /* Delegate reply/react/delete + reaction pill + reply-quote-scroll clicks */
+  document.getElementById('adminChatBody')?.addEventListener('click', e => {
+    const replyBtn = e.target.closest('[data-act="reply"]');
+    const reactBtn = e.target.closest('[data-act="react"]');
+    const delBtn   = e.target.closest('[data-act="delete"]');
+    const pill     = e.target.closest('.msg-reaction-pill');
+    const quote    = e.target.closest('.msg-reply-quote');
+    const emojiOpt = e.target.closest('.emoji-picker-popup span');
+
+    if (emojiOpt) {
+      const msgId = emojiOpt.closest('.msg-row')?.dataset.id;
+      if (msgId) toggleReaction(msgId, emojiOpt.textContent);
+      closeEmojiPicker();
+      return;
+    }
+    if (replyBtn) {
+      const msgId = replyBtn.closest('.msg-row')?.dataset.id;
+      if (msgId && messagesById[msgId]) setReplyTarget(messagesById[msgId]);
+      return;
+    }
+    if (reactBtn) {
+      const msgId = reactBtn.closest('.msg-row')?.dataset.id;
+      if (msgId) openEmojiPicker(msgId, reactBtn);
+      return;
+    }
+    if (delBtn) {
+      const msgId = delBtn.closest('.msg-row')?.dataset.id;
+      if (msgId) deleteMessage(msgId);
+      return;
+    }
+    if (pill) {
+      const msgId = pill.closest('.msg-row')?.dataset.id;
+      const emoji = pill.dataset.emoji;
+      if (msgId && emoji) toggleReaction(msgId, emoji);
+      return;
+    }
+    if (quote) {
+      const targetId = quote.dataset.targetId;
+      const targetRow = document.querySelector(`.msg-row[data-id="${targetId}"]`);
+      if (targetRow) {
+        targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetRow.classList.add('msg-highlight');
+        setTimeout(() => targetRow.classList.remove('msg-highlight'), 1200);
+      }
+      return;
+    }
+    if (!e.target.closest('.emoji-picker-popup')) closeEmojiPicker();
   });
 }
 
@@ -557,5 +755,4 @@ function escH(str) {
   return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/* ── Start ─────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', init);

@@ -9,7 +9,7 @@
     href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="css/dashboard.css?v=3" />
-  <link rel="stylesheet" href="css/chat.css?v=3" />
+  <link rel="stylesheet" href="css/chat.css?v=8" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     /* ══ Payment Due Popup — Animated Icons ══ */
@@ -1449,6 +1449,7 @@
 
           <div class="chat-box" id="chatBox" style="display:none">
 
+            <div class="chat-sticky-header">
             <!-- Order summary strip -->
             <div class="chat-order-summary" id="chatOrderSummary">
               <div class="cos-top">
@@ -1487,6 +1488,7 @@
                 <span class="chat-reply-time">Usually replies within 5 min</span>
               </div>
             </div>
+            </div>
 
             <!-- Pinned notice -->
             <div class="chat-pinned-notice" id="chatPinnedNotice" style="display:none">
@@ -1509,24 +1511,13 @@
               <div class="typing-bubble"><span></span><span></span><span></span></div>
             </div>
 
-            <!-- Quick actions -->
-            <div class="chat-quick-actions" id="chatQuickActions">
-              <button class="qa-btn qa-green" data-action="upload-payment">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Upload Payment
-              </button>
-              <button class="qa-btn qa-blue" data-action="send-screenshot">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                Send Screenshot
-              </button>
-              <button class="qa-btn qa-amber" data-action="need-help">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Need Help?
-              </button>
-              <button class="qa-btn qa-purple" data-action="download-file">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Download File
-              </button>
+            <div class="chat-reply-preview" id="chatReplyPreview" style="display:none">
+              <div class="crp-bar"></div>
+              <div class="crp-body">
+                <span class="crp-label">Reply করছেন</span>
+                <span class="crp-text" id="crpText"></span>
+              </div>
+              <button class="crp-close" id="crpClose">&times;</button>
             </div>
 
             <div class="chat-attach-preview" id="chatAttachPreview" style="display:none"></div>
@@ -1764,7 +1755,7 @@
   </div>
 
   <script src="js/dashboard.js?v=2"></script>
-  <script src="js/chat.js?v=4"></script>
+  <script src="js/chat.js?v=8"></script>
   <!-- MOBILE BOTTOM NAV -->
   <nav class="mobile-bottom-nav">
     <a class="mbn-item active" data-page="home" href="#">
