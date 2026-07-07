@@ -641,7 +641,7 @@ async function loadOrderFiles(orderId, hasDue) {
           ? `<button class="file-view-btn cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#6ee7b7;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>`
-          : `<span class="pdp-lock-icon" title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;display:inline-block;" onclick="showPaymentDuePopup(event)">🔒</span>`);
+          : `<span class="pdp-lock-icon" title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;display:inline-block;" onclick="showPaymentDuePopup(event, '${orderId}')">🔒</span>`);
 
       div.innerHTML = `
         <div class="file-icon ${iconCls}">${ext}</div>
@@ -776,7 +776,7 @@ async function loadFilesPage() {
             ? `<button class="file-view-btn cdv-dl-btn" title="Download" data-path="${escHtml(row.storage_path)}" data-name="${escHtml(fileName)}" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.4);color:#6ee7b7;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               </button>`
-            : `<span class="pdp-lock-icon" title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;display:inline-block;" onclick="showPaymentDuePopup(event)">🔒</span>`) +
+            : `<span class="pdp-lock-icon" title="Download locked" style="font-size:16px;opacity:0.7;cursor:pointer;display:inline-block;" onclick="showPaymentDuePopup(event, '${orderId}')">🔒</span>`) +
           `</div>`;
         card.appendChild(item);
       }
@@ -1745,8 +1745,9 @@ function _spawnPdpSmoke(x, y) {
   }
 }
 
-window.showPaymentDuePopup = async function(event) {
-  const order = allOrders.find(o => o.id === currentOrderId);
+window.showPaymentDuePopup = async function(event, orderIdArg) {
+  const targetOrderId = orderIdArg || currentOrderId;
+  const order = allOrders.find(o => o.id === targetOrderId);
   if (!order) return;
 
   const total = Number(order.total_price || 0);
@@ -1756,7 +1757,7 @@ window.showPaymentDuePopup = async function(event) {
   try {
     const { data: approvedPays } = await sb
       .from('payments').select('amount')
-      .eq('order_id', currentOrderId).eq('confirmed', true).in('type', ['received','approval']);
+      .eq('order_id', targetOrderId).eq('confirmed', true).in('type', ['received','approval']);
     paid = (approvedPays || []).reduce((s, p) => s + Number(p.amount || 0), 0);
     due  = Math.max(0, total - paid);
   } catch(_) {
