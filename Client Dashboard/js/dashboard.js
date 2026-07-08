@@ -1653,7 +1653,7 @@ function _drawPayHistList() {
             ${meta.label}
           </span>
           ${p.screenshot_url
-            ? `<button class="pay-hist-view-btn" onclick="window.open('${p.screenshot_url}','_blank')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${meta.key === 'pending' ? 'View Proof' : 'View Receipt'}</button>`
+            ? `<button class="pay-hist-view-btn" onclick="showReceiptModal('${p.screenshot_url}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${meta.key === 'pending' ? 'View Proof' : 'View Receipt'}</button>`
             : ''}
         </div>
       </div>`;
@@ -1744,6 +1744,43 @@ function _spawnPdpSmoke(x, y) {
     }
   }
 }
+
+/* ── Receipt / payment screenshot lightbox ────────────────────────────── */
+window.showReceiptModal = function(url) {
+  if (!url) return;
+  let overlay = document.getElementById('receiptModalOverlay');
+
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'receiptModalOverlay';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10001;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="position:relative;max-width:520px;width:100%;max-height:88vh;background:#0d1423;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:center;">
+        <button id="receiptModalClose" style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+        <img id="receiptModalImg" src="" alt="Receipt" style="max-width:100%;max-height:76vh;border-radius:10px;object-fit:contain;margin-top:8px;" />
+        <a id="receiptModalDownload" href="" download target="_blank" style="margin-top:12px;font-size:0.8rem;color:#a78bfa;text-decoration:none;display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Full size-এ দেখুন / Download
+        </a>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', e => { if (e.target === overlay) window.closeReceiptModal(); });
+    document.getElementById('receiptModalClose').addEventListener('click', window.closeReceiptModal);
+  }
+
+  document.getElementById('receiptModalImg').src = url;
+  document.getElementById('receiptModalDownload').href = url;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeReceiptModal = function() {
+  const overlay = document.getElementById('receiptModalOverlay');
+  if (!overlay) return;
+  overlay.style.display = 'none';
+  document.body.style.overflow = '';
+};
 
 window.showPaymentDuePopup = async function(event, orderIdArg) {
   const targetOrderId = orderIdArg || currentOrderId;
