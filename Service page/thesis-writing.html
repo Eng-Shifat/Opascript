@@ -288,32 +288,63 @@
       <aside class="svc-sidebar">
 
         <div class="svc-card svc-package-card">
-          <div class="svc-package-label">Select Your Package</div>
+          <div class="svc-pkg-badge"><span>★</span> MOST POPULAR</div>
+
+          <h3 class="svc-pkg-title" id="svc-pkg-title">Premium Thesis Package</h3>
+          <p class="svc-pkg-subtitle" id="svc-pkg-subtitle">Everything you need for a complete thesis — professionally done.</p>
 
           <div class="svc-package-tabs">
             <button class="svc-tab" data-pkg="standard">Standard</button>
-            <button class="svc-tab active" data-pkg="recommended">Recommended</button>
-            <button class="svc-tab" data-pkg="premium">Premium</button>
+            <button class="svc-tab" data-pkg="recommended">Recommended</button>
+            <button class="svc-tab active" data-pkg="premium">Premium</button>
           </div>
 
-          <div class="svc-price-row">
-            <div class="svc-price" id="svc-pkg-price">৳28,000</div>
-            <span class="svc-badge-pill" id="svc-popular-tag">Most Popular</span>
+          <div class="svc-pkg-starting">STARTING FROM</div>
+          <div class="svc-price" id="svc-pkg-price">৳45,000</div>
+
+          <div class="svc-pkg-bestvalue" id="svc-pkg-bestvalue">
+            <span class="svc-pkg-bestvalue-icon">◆</span>
+            <span id="svc-pkg-bestvalue-text">Best value for Master's &amp; PhD students</span>
           </div>
 
-          <ul class="svc-feature-list" id="svc-pkg-features">
-            <li>Delivery in 15 Days</li>
-            <li>Unlimited Revisions</li>
-            <li>Turnitin Report</li>
-            <li>AI + Human Quality Check</li>
-            <li>Editable Source File</li>
-            <li>Progress Dashboard Access</li>
-          </ul>
+          <ul class="svc-pkg-feature-list" id="svc-pkg-features"></ul>
 
-          <button class="svc-btn-primary">Continue to Order</button>
-          <button class="svc-btn-secondary">Talk to Expert</button>
+          <button class="svc-btn-order" id="svc-pkg-order-btn" onclick="orderThesisPackage()">
+            <svg class="svc-btn-order-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span id="svc-pkg-order-text">Order Premium Package</span>
+            <span class="svc-btn-order-arrow">→</span>
+          </button>
 
-          <div class="svc-secure-note">🔒 Secure &amp; Safe Payments</div>
+          <div class="svc-pkg-or">— OR —</div>
+
+          <button class="svc-btn-talk" onclick="window.open('https://wa.me/8801XXXXXXXXX','_blank')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            Talk to an Expert
+          </button>
+
+          <div class="svc-pkg-stats">
+            <div class="svc-pkg-stat">
+              <span class="svc-pkg-stat-icon svc-stat-lock">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M7.5 11V7.5a4.5 4.5 0 0 1 9 0V11"/></svg>
+              </span>
+              <strong>100%</strong>
+              <span>Confidential</span>
+            </div>
+            <div class="svc-pkg-stat">
+              <span class="svc-pkg-stat-icon svc-stat-star">
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </span>
+              <strong>4.9/5</strong>
+              <span>Student Rating</span>
+            </div>
+            <div class="svc-pkg-stat">
+              <span class="svc-pkg-stat-icon svc-stat-shield">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </span>
+              <strong>Secure</strong>
+              <span>Payment</span>
+            </div>
+          </div>
         </div>
 
         <div class="svc-card svc-side-card">
