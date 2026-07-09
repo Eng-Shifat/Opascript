@@ -2731,10 +2731,10 @@ input, select, textarea { font-family: inherit; }
 .cd-menu-btn:hover { background: rgba(255,255,255,0.08); }
 
 .cd-topbar-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.85);
-  letter-spacing: 0.01em;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.2px;
 }
 
 .cd-topbar-brand-mobile {
@@ -2978,10 +2978,9 @@ input, select, textarea { font-family: inherit; }
   color: #fff;
   cursor: pointer;
   flex-shrink: 0;
-  border: 2px solid transparent;
-  transition: border-color .2s;
+  overflow: hidden;
+  border: none;
 }
-.cd-user-menu.open .cd-topbar-avatar { border-color: #6366f1; }
 
 /* User dropdown wrapper */
 .cd-user-menu {

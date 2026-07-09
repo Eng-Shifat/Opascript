@@ -658,6 +658,31 @@
         <div class="cd-search-dropdown" id="cdSearchDropdown"></div>
       </div>
       <div class="cd-topbar-right">
+        <!-- Messages -->
+        <div class="cd-notif-wrap" id="cdMsgWrap">
+          <button class="cd-notif-btn" id="cdMsgBtn" title="Messages" onclick="cdToggleMsg()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="cd-notif-dot" id="cdMsgDot" style="display:none"></span>
+          </button>
+          <!-- Dropdown -->
+          <div class="cd-notif-dropdown" id="cdMsgDropdown">
+            <div class="cd-notif-head">
+              <span>Messages</span>
+              <button onclick="showPage('messages');cdCloseMsg();" class="cd-notif-mark-all">সব দেখুন</button>
+            </div>
+            <div class="cd-notif-list" id="cdMsgList">
+              <div class="cd-notif-empty">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <p>কোনো message নেই</p>
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- Notification Bell -->
         <div class="cd-notif-wrap" id="cdNotifWrap">
           <button class="cd-notif-btn" id="cdNotifBtn" title="Notifications" onclick="cdToggleNotif()">
@@ -1754,7 +1779,7 @@
     </div>
   </div>
 
-  <script src="js/dashboard.js?v=4"></script>
+  <script src="js/dashboard.js?v=5"></script>
   <script src="js/chat.js?v=8"></script>
   <!-- MOBILE BOTTOM NAV -->
   <nav class="mobile-bottom-nav">
@@ -1989,7 +2014,7 @@
     </div>
   </div>
 
-  <script src="js/cd-topbar.js"></script>
+  <script src="js/cd-topbar.js?v=4"></script>
 </body>
 
 </html>

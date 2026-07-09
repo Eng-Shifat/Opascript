@@ -450,7 +450,7 @@ async function openOrderDetail(orderId) {
   // Hide page header and remove top padding in detail view
   const pageHeader = document.querySelector('#page-orders .page-header');
   if(pageHeader) pageHeader.style.display='none';
-  document.getElementById('page-orders').style.paddingTop='0';
+  document.getElementById('page-orders').style.paddingTop='20px';
   setText('detailTitle',order.title||'Untitled');
   setText('detailMeta',`${order.order_number||('#SCR-'+String(order.id).slice(-6).toUpperCase())} · ${order.department||''} · Order: ${fmtDate(order.order_date)}`);
   const badge=getStatusBadge(order.status);

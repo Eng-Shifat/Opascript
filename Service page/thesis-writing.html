@@ -5,7 +5,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Professional Thesis Writing Service – Scriptora</title>
-  <link rel="stylesheet" href="css/thesis.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/service.css" />
 </head>
 
 <body>
@@ -14,198 +17,291 @@
   <script src="../shared/navbar.js"></script>
 
   <!-- ═══════════════════════════════════════════
-       PAGE BODY — main column (hero + info) + sidebar
+       SERVICE PAGE TEMPLATE
+       Reusable for: Thesis / Assignment / Research Proposal / SPSS / Proofreading
+       Only swap: hero title+desc, deliverables grid, workflow steps, samples, pricing.
+       Everything else (sidebar, FAQ, reviews, CTA, structure) stays identical.
   ════════════════════════════════════════════ -->
-  <section class="th-page-wrap">
+  <section class="svc-page">
 
     <!-- Breadcrumb -->
-    <div class="th-breadcrumb">
+    <div class="svc-breadcrumb">
       <a href="../Homepage/index.html">Home</a>
-      <span class="th-crumb-sep">›</span>
+      <span class="svc-crumb-sep">/</span>
       <a href="../Homepage/index.html#services">Services</a>
-      <span class="th-crumb-sep">›</span>
-      <span class="th-crumb-current">Thesis Writing</span>
+      <span class="svc-crumb-sep">/</span>
+      <span class="svc-crumb-current">Thesis Writing</span>
     </div>
 
-    <div class="th-page-grid">
+    <div class="svc-grid">
 
-      <!-- MAIN COLUMN: hero content + info cards -->
-      <div class="th-main-col">
+      <!-- MAIN COLUMN -->
+      <div class="svc-main">
 
         <!-- HERO -->
-        <div class="th-hero-left">
+        <div class="svc-card svc-hero">
+          <div class="svc-hero-row">
+            <div class="svc-hero-text">
+              <h1 class="svc-hero-title">Professional Thesis Writing Service</h1>
+              <p class="svc-hero-subtitle">From Topic Selection to Final Submission</p>
+              <p class="svc-hero-desc">
+                <strong>আপনার থিসিস, আপনার পরিচয়।</strong><br>
+                প্রতিটি গবেষণার পেছনে থাকে অসংখ্য রাতের পরিশ্রম, শত শত রেফারেন্স এবং অগণিত ঘণ্টার অধ্যবসায়। সেই মূল্যবান
+                কাজটি যেন উপস্থাপনায় কোনোভাবেই পিছিয়ে না থাকে।<br><br>
+                Scriptora নিশ্চিত করে একটি নির্ভুল, পেশাদার, সুবিন্যস্ত এবং সম্পূর্ণ প্লেজিয়ারিজম-মুক্ত থিসিস। ভাষা থেকে
+                ফরম্যাটিং, সম্পাদনা থেকে একাডেমিক মান — প্রতিটি ধাপে আমরা গুরুত্ব দিই খুঁটিনাটির প্রতি, যাতে আপনার গবেষণা
+                হয়ে ওঠে আরও গ্রহণযোগ্য, আরও প্রভাবশালী এবং সত্যিকার অর্থেই প্রকাশের জন্য প্রস্তুত।
+              </p>
 
-          <div class="th-title-col">
-            <h1 class="th-hero-title">Professional Thesis Writing Service</h1>
-            <div class="th-hero-subtitle">From Topic Selection to Final Submission</div>
-
-            <p class="th-hero-desc">
-              থিসিস একটি শিক্ষার্থী পরিশ্রম, সময় ও বিশ্ববিদ্যালয়ের প্রত্যাশার এক নিখুঁত সমন্বয়।
-              Scriptora আপনার থিসিসকে করে তোলে আরও পেশাদারিত্বপূর্ণ, নির্ভুল, সুবিন্যস্ত এবং প্রফেশনাল।
-            </p>
-          </div>
-
-          <div class="th-hero-image-col">
-            <img src="thesis-book-hero.png" alt="Thesis Book" class="th-hero-img" />
-          </div>
-
-          <!-- Stats row -->
-          <div class="th-stats-row">
-            <div class="th-stat-item">
-              <span class="th-stat-icon th-icon-star">★</span>
-              <div>
-                <div class="th-stat-value">4.9/5</div>
-                <div class="th-stat-label">(312 Reviews)</div>
+              <div class="svc-badges">
+                <div class="svc-badge"><span class="svc-badge-icon svc-icon-star">★</span><span><strong>4.9</strong> Rating</span></div>
+                <div class="svc-badge"><span class="svc-badge-icon">◆</span><span><strong>500+</strong> Projects</span></div>
+                <div class="svc-badge"><span class="svc-badge-icon">◷</span><span><strong>98%</strong> On-time Delivery</span></div>
+                <div class="svc-badge"><span class="svc-badge-icon">◈</span><span><strong>100%</strong> Confidential</span></div>
               </div>
             </div>
-            <div class="th-stat-item">
-              <span class="th-stat-icon th-icon-purple">🏆</span>
-              <div>
-                <div class="th-stat-value">500+</div>
-                <div class="th-stat-label">Projects Delivered</div>
-              </div>
-            </div>
-            <div class="th-stat-item">
-              <span class="th-stat-icon th-icon-purple">⏱</span>
-              <div>
-                <div class="th-stat-value">98%</div>
-                <div class="th-stat-label">On-Time Delivery</div>
-              </div>
-            </div>
-            <div class="th-stat-item">
-              <span class="th-stat-icon th-icon-purple">🛡</span>
-              <div>
-                <div class="th-stat-value">100%</div>
-                <div class="th-stat-label">Confidential</div>
+
+            <div class="svc-hero-visual">
+              <div class="svc-hero-visual-glow"></div>
+              <img src="thesis-book-hero.png" alt="Thesis Book" class="svc-hero-img" />
+              <div class="svc-hero-float-badge">
+                <span class="svc-float-icon">✓</span>
+                <span>100% Plagiarism Free</span>
               </div>
             </div>
           </div>
 
-          <div class="th-divider"></div>
-
-          <!-- Feature pills -->
-          <div class="th-pills-row">
-            <span class="th-pill"><span class="th-pill-check">✓</span>Research-Based Writing</span>
-            <span class="th-pill"><span class="th-pill-check">✓</span>Professional Formatting</span>
-            <span class="th-pill"><span class="th-pill-check">✓</span>Turnitin Report</span>
-            <span class="th-pill"><span class="th-pill-check">✓</span>Unlimited Revision</span>
-            <span class="th-pill"><span class="th-pill-check">✓</span>Live Progress Tracking</span>
-            <span class="th-pill"><span class="th-pill-check">✓</span>Timely Delivery</span>
+          <div class="svc-pills">
+            <span class="svc-pill">Research-Based Writing</span>
+            <span class="svc-pill">Professional Formatting</span>
+            <span class="svc-pill">Unlimited Revision</span>
+            <span class="svc-pill">Progress Tracking</span>
+            <span class="svc-pill">On-Time Delivery</span>
           </div>
-
         </div>
 
-        <!-- INFO CARD: About / What's Included / Why Trust -->
-        <div class="th-info-card">
+        <!-- ABOUT -->
+        <div class="svc-card">
+          <h2 class="svc-h2">About This Thesis Writing Service</h2>
+          <p class="svc-text">
+            Scriptora provides end-to-end thesis writing support for undergraduate, master's and PhD students.
+            We follow a research-based workflow to deliver high-quality, plagiarism-free and well-structured
+            theses that meet university guidelines — from topic selection to final submission, handled with
+            complete professionalism, accuracy and confidentiality.
+          </p>
+        </div>
 
-          <!-- ABOUT -->
-          <div class="th-info-block">
-            <div class="th-block-header">
-              <span class="th-block-icon">📄</span>
-              <span class="th-block-title">About This Thesis Writing Service</span>
-            </div>
-            <p class="th-block-text">
-              Scriptora provides end-to-end thesis writing support for undergraduate, master's and PhD students.
-              We follow a research-based workflow to deliver high-quality, plagiarism-free and well-structured theses
-              that meet university guidelines.
-            </p>
-            <p class="th-block-text">
-              From topic selection to final submission, we handle everything with professionalism, accuracy and
-              complete confidentiality.
-            </p>
+        <!-- WHAT'S INCLUDED -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <h2 class="svc-h2">What's Included in Your Thesis</h2>
+            <a href="#" class="svc-link">View Details →</a>
           </div>
-
-          <div class="th-section-divider"></div>
-
-          <!-- WHAT'S INCLUDED -->
-          <div class="th-info-block">
-            <div class="th-block-header th-block-header-split">
-              <div class="th-block-header">
-                <span class="th-block-icon">📄</span>
-                <span class="th-block-title">What's Included in Your Thesis</span>
-              </div>
-              <a href="#" class="th-view-details">View Details →</a>
-            </div>
-
-            <div class="th-included-grid">
-              <div class="th-included-item"><span class="th-inc-icon">🎯</span>Topic Selection &amp; Proposal</div>
-              <div class="th-included-item"><span class="th-inc-icon">📚</span>Literature Review</div>
-              <div class="th-included-item"><span class="th-inc-icon">🧪</span>Research Methodology</div>
-              <div class="th-included-item"><span class="th-inc-icon">🗄️</span>Data Collection &amp; SPSS Analysis</div>
-              <div class="th-included-item"><span class="th-inc-icon">📈</span>Results &amp; Discussion</div>
-              <div class="th-included-item"><span class="th-inc-icon">✅</span>Conclusion &amp; Recommendations</div>
-              <div class="th-included-item"><span class="th-inc-icon">📄</span>References &amp; Citations</div>
-              <div class="th-included-item"><span class="th-inc-icon">🛡️</span>Professional Formatting (APA, IEEE, etc.)</div>
-              <div class="th-included-item"><span class="th-inc-icon">📊</span>Turnitin Report</div>
-              <div class="th-included-item"><span class="th-inc-icon">🔄</span>Unlimited Revisions</div>
-            </div>
+          <div class="svc-included-grid">
+            <div class="svc-included-card">Topic Selection &amp; Proposal</div>
+            <div class="svc-included-card">Literature Review</div>
+            <div class="svc-included-card">Research Methodology</div>
+            <div class="svc-included-card">SPSS Analysis</div>
+            <div class="svc-included-card">Data Collection</div>
+            <div class="svc-included-card">Results &amp; Discussion</div>
+            <div class="svc-included-card">Conclusion &amp; Recommendations</div>
+            <div class="svc-included-card">References &amp; Citations</div>
+            <div class="svc-included-card">Professional Formatting</div>
+            <div class="svc-included-card">Turnitin Report</div>
+            <div class="svc-included-card">Unlimited Revision</div>
           </div>
+        </div>
 
-          <div class="th-section-divider"></div>
-
-          <!-- WHY STUDENTS TRUST -->
-          <div class="th-info-block">
-            <div class="th-block-header">
-              <span class="th-block-icon">📃</span>
-              <span class="th-block-title">Why Students Trust Scriptora</span>
+        <!-- WHY CHOOSE SCRIPTORA -->
+        <div class="svc-card">
+          <h2 class="svc-h2">Why Choose Scriptora</h2>
+          <div class="svc-why-grid">
+            <div class="svc-why-card">
+              <span class="svc-why-icon">◷</span>
+              <div class="svc-why-title">Time Management</div>
+              <div class="svc-why-desc">প্রতিটি Deadline আমাদের কাছে Commitment — Late Delivery আমাদের Process-এর অংশ নয়।</div>
             </div>
-
-            <div class="th-trust-grid">
-
-              <div class="th-trust-card">
-                <span class="th-trust-icon">🎯</span>
-                <div class="th-trust-title">সময়ের সর্বোচ্চ মূল্য</div>
-                <div class="th-trust-desc">প্রতিটি Deadline আমাদের কাছে Commitment. Late Delivery আমাদের Process-এর অংশ নয়।</div>
-              </div>
-
-              <div class="th-trust-card">
-                <span class="th-trust-icon">🛡️</span>
-                <div class="th-trust-title">প্রফেশনাল কোয়ালিটি</div>
-                <div class="th-trust-desc">Research-based Workflow অনুসরণ করে প্রতিটি ধাপ Quality Checked।</div>
-              </div>
-
-              <div class="th-trust-card">
-                <span class="th-trust-icon">🔒</span>
-                <div class="th-trust-title">সম্পূর্ণ গোপনীয়তা</div>
-                <div class="th-trust-desc">আপনার Project সম্পূর্ণ গোপনীয়। কোনো Third Party-র সাথে শেয়ার করা হয় না।</div>
-              </div>
-
-              <div class="th-trust-card">
-                <span class="th-trust-icon">📊</span>
-                <div class="th-trust-title">লাইভ প্রগ্রেস ট্র্যাকিং</div>
-                <div class="th-trust-desc">Writing, Review, Formatting সবকিছুই Dashboard থেকে Real-time দেখতে পারবেন।</div>
-              </div>
-
-              <div class="th-trust-card">
-                <span class="th-trust-icon">📄</span>
-                <div class="th-trust-title">প্রফেশনাল ফরম্যাটিং</div>
-                <div class="th-trust-desc">APA, IEEE, Harvard, MLA, Chicago সহ প্রয়োজনীয় সকল Formatting অন্তর্ভুক্তি।</div>
-              </div>
-
+            <div class="svc-why-card">
+              <span class="svc-why-icon">⟲</span>
+              <div class="svc-why-title">Research Workflow</div>
+              <div class="svc-why-desc">Research-based Workflow অনুসরণ করে প্রতিটি ধাপ Quality Checked।</div>
+            </div>
+            <div class="svc-why-card">
+              <span class="svc-why-icon">◈</span>
+              <div class="svc-why-title">Confidentiality</div>
+              <div class="svc-why-desc">আপনার Project সম্পূর্ণ গোপনীয়, কোনো Third Party-র সাথে শেয়ার করা হয় না।</div>
+            </div>
+            <div class="svc-why-card">
+              <span class="svc-why-icon">▤</span>
+              <div class="svc-why-title">Progress Tracking</div>
+              <div class="svc-why-desc">Writing, Review, Formatting — সবকিছুই Dashboard থেকে Real-time দেখতে পারবেন।</div>
+            </div>
+            <div class="svc-why-card">
+              <span class="svc-why-icon">▦</span>
+              <div class="svc-why-title">Professional Formatting</div>
+              <div class="svc-why-desc">APA, IEEE, Harvard, MLA, Chicago সহ প্রয়োজনীয় সকল Formatting Style।</div>
+            </div>
+            <div class="svc-why-card">
+              <span class="svc-why-icon">✓</span>
+              <div class="svc-why-title">Expert Writers</div>
+              <div class="svc-why-desc">বিষয়ভিত্তিক অভিজ্ঞ Academic Writer প্যানেল দিয়ে কাজ সম্পন্ন হয়।</div>
             </div>
           </div>
+        </div>
 
+        <!-- ACADEMIC EXPERT -->
+        <div class="svc-card svc-expert">
+          <div class="svc-expert-avatar">YK</div>
+          <div class="svc-expert-info">
+            <h2 class="svc-h2">Meet Your Academic Expert</h2>
+            <ul class="svc-expert-list">
+              <li>Bangladesh's First Level 2 Seller in Fiverr (Ghostwriting Category)</li>
+              <li>Level 2 Certified Fiverr Seller</li>
+              <li>Extensive Experience in Academic Writing</li>
+              <li>Hundreds of Successfully Delivered Projects</li>
+              <li>Specialized in Thesis &amp; Research Documentation</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- WORKFLOW -->
+        <div class="svc-card">
+          <h2 class="svc-h2">How Your Thesis Will Be Completed</h2>
+          <div class="svc-timeline">
+            <div class="svc-tl-line"></div>
+            <div class="svc-tl-step">
+              <div class="svc-tl-dot">1</div>
+              <div class="svc-tl-title">Share Your Topic</div>
+              <div class="svc-tl-desc">আপনার Topic, Guidelines ও Requirements দিন</div>
+            </div>
+            <div class="svc-tl-step">
+              <div class="svc-tl-dot">2</div>
+              <div class="svc-tl-title">Planning &amp; Research</div>
+              <div class="svc-tl-desc">Project Planning, Research ও Outline Preparation</div>
+            </div>
+            <div class="svc-tl-step">
+              <div class="svc-tl-dot">3</div>
+              <div class="svc-tl-title">Writing</div>
+              <div class="svc-tl-desc">Professional Academic Writing শুরু হয়</div>
+            </div>
+            <div class="svc-tl-step">
+              <div class="svc-tl-dot">4</div>
+              <div class="svc-tl-title">Review &amp; Formatting</div>
+              <div class="svc-tl-desc">Grammar, Formatting, Citation ও Quality Check</div>
+            </div>
+            <div class="svc-tl-step">
+              <div class="svc-tl-dot">5</div>
+              <div class="svc-tl-title">Delivery</div>
+              <div class="svc-tl-desc">Dashboard Notification ও Final Delivery</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAMPLE PREVIEW -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <h2 class="svc-h2">Sample Thesis Preview</h2>
+            <a href="#" class="svc-link">View Full Samples →</a>
+          </div>
+          <div class="svc-samples-grid">
+            <div class="svc-sample-thumb">📄<span>Sample 1</span></div>
+            <div class="svc-sample-thumb">📄<span>Sample 2</span></div>
+            <div class="svc-sample-thumb">📄<span>Sample 3</span></div>
+            <div class="svc-sample-thumb">📄<span>Sample 4</span></div>
+            <div class="svc-sample-thumb">📄<span>Sample 5</span></div>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="svc-card">
+          <h2 class="svc-h2">Frequently Asked Questions</h2>
+          <div class="svc-faq">
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">Is the content 100% original? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a">হ্যাঁ, প্রতিটি থিসিস সম্পূর্ণ Original ও Plagiarism-free — Turnitin Report সহ Deliver করা হয়।</div>
+            </div>
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">Will I get a Turnitin report? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a">Premium Package-এর সাথে Turnitin Report Include করা থাকে।</div>
+            </div>
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">Can you follow my university guidelines? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a">অবশ্যই — আপনার University-র নির্দিষ্ট Guideline অনুযায়ী Format করা হয়।</div>
+            </div>
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">What if I need revisions? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a">Premium Package-এ Unlimited Revision Included।</div>
+            </div>
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">How will we communicate during the project? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a">Client Dashboard-এর Messages ট্যাব থেকে Real-time Update ও Communication করতে পারবেন।</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVIEWS -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <h2 class="svc-h2">What Our Clients Say</h2>
+            <a href="#" class="svc-link">View All Reviews →</a>
+          </div>
+          <div class="svc-reviews-grid">
+            <div class="svc-review-card">
+              <div class="svc-stars">★★★★★</div>
+              <p class="svc-review-text">Excellent service! My thesis was delivered before the deadline and the quality exceeded my expectations.</p>
+              <div class="svc-review-author">
+                <div class="svc-avatar-sm">FT</div>
+                <div>
+                  <div class="svc-author-name">Farhan T.</div>
+                  <div class="svc-author-uni">University of Dhaka</div>
+                </div>
+              </div>
+            </div>
+            <div class="svc-review-card">
+              <div class="svc-stars">★★★★★</div>
+              <p class="svc-review-text">Very professional team. They understood my requirements perfectly and helped a lot.</p>
+              <div class="svc-review-author">
+                <div class="svc-avatar-sm">AR</div>
+                <div>
+                  <div class="svc-author-name">Ahmed R.</div>
+                  <div class="svc-author-uni">BRAC University</div>
+                </div>
+              </div>
+            </div>
+            <div class="svc-review-card">
+              <div class="svc-stars">★★★★★</div>
+              <p class="svc-review-text">The work was original and well-structured. Highly recommended for thesis writing.</p>
+              <div class="svc-review-author">
+                <div class="svc-avatar-sm">NJ</div>
+                <div>
+                  <div class="svc-author-name">Nusrat J.</div>
+                  <div class="svc-author-uni">North South University</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
 
-      <!-- SIDEBAR -->
-      <aside class="th-sidebar">
+      <!-- STICKY SIDEBAR -->
+      <aside class="svc-sidebar">
 
-        <div class="th-package-card">
-          <div class="th-package-label">Select Your Package</div>
+        <div class="svc-card svc-package-card">
+          <div class="svc-package-label">Select Your Package</div>
 
-          <div class="th-package-select">
-            <span>Premium (Recommended)</span>
-            <span class="th-select-right">
-              <span class="th-most-popular">Most Popular</span>
-              <span class="th-select-arrow">▾</span>
-            </span>
+          <div class="svc-package-tabs">
+            <button class="svc-tab" data-pkg="standard">Standard</button>
+            <button class="svc-tab active" data-pkg="recommended">Recommended</button>
+            <button class="svc-tab" data-pkg="premium">Premium</button>
           </div>
 
-          <div class="th-price">৳28,000</div>
+          <div class="svc-price-row">
+            <div class="svc-price" id="svc-pkg-price">৳28,000</div>
+            <span class="svc-badge-pill" id="svc-popular-tag">Most Popular</span>
+          </div>
 
-          <ul class="th-feature-list">
+          <ul class="svc-feature-list" id="svc-pkg-features">
             <li>Delivery in 15 Days</li>
             <li>Unlimited Revisions</li>
             <li>Turnitin Report</li>
@@ -214,71 +310,42 @@
             <li>Progress Dashboard Access</li>
           </ul>
 
-          <button class="th-btn-primary">🛒 Continue to Order</button>
-          <button class="th-btn-secondary">💬 Talk to Expert</button>
+          <button class="svc-btn-primary">Continue to Order</button>
+          <button class="svc-btn-secondary">Talk to Expert</button>
 
-          <div class="th-secure-note">🔒 Secure &amp; Safe Payments</div>
+          <div class="svc-secure-note">🔒 Secure &amp; Safe Payments</div>
         </div>
 
-        <!-- SAFETY CARD -->
-        <div class="th-side-card">
-          <div class="th-side-header">
-            <span class="th-side-icon">🛡️</span>
-            <span class="th-side-title">Your Project is 100% Safe</span>
+        <div class="svc-card svc-side-card">
+          <div class="svc-side-header">
+            <span class="svc-side-title">Your Project is 100% Safe</span>
           </div>
-          <ul class="th-check-list">
+          <ul class="svc-check-list">
             <li>Complete Confidentiality</li>
             <li>Secure File Delivery</li>
             <li>Only You Can Access</li>
             <li>Data Never Shared</li>
           </ul>
-          <button class="th-btn-secondary">View Our Privacy Policy</button>
+          <button class="svc-btn-secondary">View Our Privacy Policy</button>
         </div>
 
-        <!-- HELP CARD -->
-        <div class="th-side-card">
-          <div class="th-side-header">
-            <span class="th-side-icon">💬</span>
-            <span class="th-side-title">Need Help Before Order?</span>
+        <div class="svc-card svc-side-card">
+          <div class="svc-side-header">
+            <span class="svc-side-title">Need Help Before Order?</span>
           </div>
-          <p class="th-side-text">Chat with our academic experts</p>
-          <button class="th-btn-secondary">💬 Start Live Chat</button>
+          <p class="svc-side-text">Chat with our academic experts</p>
+          <button class="svc-btn-secondary">Start Live Chat</button>
         </div>
 
-        <!-- TRUSTED STATS CARD -->
-        <div class="th-side-card">
-          <div class="th-side-header">
-            <span class="th-side-title">Trusted by 500+ Students</span>
+        <div class="svc-card svc-side-card">
+          <div class="svc-side-header">
+            <span class="svc-side-title">Trusted by 500+ Students</span>
           </div>
-          <div class="th-side-stats-list">
-            <div class="th-side-stat-item">
-              <span class="th-stat-icon th-icon-purple">🏆</span>
-              <div>
-                <div class="th-stat-value">500+</div>
-                <div class="th-stat-label">Projects Completed</div>
-              </div>
-            </div>
-            <div class="th-side-stat-item">
-              <span class="th-stat-icon th-icon-purple">⏱</span>
-              <div>
-                <div class="th-stat-value">98%</div>
-                <div class="th-stat-label">On-Time Delivery</div>
-              </div>
-            </div>
-            <div class="th-side-stat-item">
-              <span class="th-stat-icon th-icon-purple">🛡</span>
-              <div>
-                <div class="th-stat-value">100%</div>
-                <div class="th-stat-label">Confidential Workflow</div>
-              </div>
-            </div>
-            <div class="th-side-stat-item">
-              <span class="th-stat-icon th-icon-star">★</span>
-              <div>
-                <div class="th-stat-value">4.9/5</div>
-                <div class="th-stat-label">Client Satisfaction</div>
-              </div>
-            </div>
+          <div class="svc-side-stats">
+            <div class="svc-side-stat"><span>500+</span><span>Projects Completed</span></div>
+            <div class="svc-side-stat"><span>98%</span><span>On-Time Delivery</span></div>
+            <div class="svc-side-stat"><span>100%</span><span>Confidential Workflow</span></div>
+            <div class="svc-side-stat"><span>4.9/5</span><span>Client Satisfaction</span></div>
           </div>
         </div>
 
@@ -286,7 +353,21 @@
 
     </div>
 
+    <!-- FINAL CTA -->
+    <div class="svc-cta">
+      <div class="svc-cta-text">
+        <h2>Ready to Start Your Thesis?</h2>
+        <p>Let our experts help you achieve academic success.</p>
+      </div>
+      <div class="svc-cta-buttons">
+        <button class="svc-btn-primary svc-btn-lg">Start Your Project Today →</button>
+        <button class="svc-btn-outline-lg">Talk to Expert</button>
+      </div>
+    </div>
+
   </section>
+
+  <script src="js/service.js"></script>
 
 </body>
 </html>
