@@ -14,7 +14,12 @@
 <body>
 
   <!-- SHARED NAVBAR -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../shared/supabaseClient.js"></script>
   <script src="../shared/navbar.js"></script>
+
+  <!-- LIVE CHAT WIDGET -->
+  <script src="../shared/chatWidget.js"></script>
 
   <!-- ═══════════════════════════════════════════
        SERVICE PAGE TEMPLATE
@@ -321,30 +326,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
             Talk to an Expert
           </button>
-
-          <div class="svc-pkg-stats">
-            <div class="svc-pkg-stat">
-              <span class="svc-pkg-stat-icon svc-stat-lock">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M7.5 11V7.5a4.5 4.5 0 0 1 9 0V11"/></svg>
-              </span>
-              <strong>100%</strong>
-              <span>Confidential</span>
-            </div>
-            <div class="svc-pkg-stat">
-              <span class="svc-pkg-stat-icon svc-stat-star">
-                <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              </span>
-              <strong>4.9/5</strong>
-              <span>Student Rating</span>
-            </div>
-            <div class="svc-pkg-stat">
-              <span class="svc-pkg-stat-icon svc-stat-shield">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </span>
-              <strong>Secure</strong>
-              <span>Payment</span>
-            </div>
-          </div>
         </div>
 
         <div class="svc-card svc-side-card">

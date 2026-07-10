@@ -647,29 +647,6 @@ body {
 }
 .svc-btn-talk:hover { border-color: rgba(255,255,255,0.3); }
 
-.svc-pkg-stats {
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--sp-3);
-  padding-top: var(--sp-3);
-  border-top: 1px solid var(--border);
-}
-.svc-pkg-stat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  font-size: 10.5px;
-  color: var(--text-secondary);
-}
-.svc-pkg-stat strong { font-size: 13px; color: var(--text); font-weight: 700; }
-.svc-pkg-stat-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 2px; }
-.svc-pkg-stat-icon svg { width: 16px; height: 16px; }
-.svc-stat-lock svg   { color: #FBBF24; }
-.svc-stat-star svg   { color: #FBBF24; }
-.svc-stat-shield svg { color: var(--success); }
-
 .svc-btn-primary {
   width: 100%;
   padding: 13px;
