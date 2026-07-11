@@ -613,9 +613,18 @@ body {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  animation: svc-order-glow 2.4s ease-in-out infinite;
 }
-.svc-btn-order:hover { opacity: 0.9; }
+.svc-btn-order:hover { opacity: 0.9; transform: translateY(-1px); }
+.svc-btn-order:active { transform: translateY(0) scale(0.98); }
+@keyframes svc-order-glow {
+  0%, 100% { box-shadow: 0 4px 16px rgba(124,58,237,0.35), 0 0 0px rgba(192,38,211,0); }
+  50%      { box-shadow: 0 6px 28px rgba(124,58,237,0.6), 0 0 26px rgba(192,38,211,0.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .svc-btn-order { animation: none; box-shadow: 0 6px 22px rgba(124,58,237,0.5), 0 0 18px rgba(192,38,211,0.3); }
+}
 .svc-btn-order-icon { width: 15px; height: 15px; flex-shrink: 0; }
 .svc-btn-order-arrow { font-size: 15px; }
 
