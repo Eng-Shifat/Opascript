@@ -225,6 +225,19 @@
   }
   .scw-msg-label { display: block; font-size: 10px; opacity: 0.6; margin-bottom: 3px; font-weight: 600; letter-spacing: 0.02em; }
 
+  /* ---------- Resolve prompt (Yes/No) buttons ---------- */
+  .scw-msg-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .scw-msg-actions button {
+    flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--scw-border);
+    background: rgba(255,255,255,0.05); color: var(--scw-text); font-family: inherit;
+    font-size: 12.5px; font-weight: 700; cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .scw-msg-actions button:hover:not(:disabled) { background: rgba(139,92,246,0.18); border-color: var(--scw-accent); }
+  .scw-msg-actions button:active:not(:disabled) { transform: scale(0.97); }
+  .scw-msg-actions button:disabled { opacity: 0.45; cursor: default; }
+  .scw-msg-actions .scw-btn-yes { border-color: rgba(139,92,246,0.45); }
+
   /* ---------- Input row ---------- */
   .scw-input-row { display: none; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--scw-border); flex-shrink: 0; background: var(--scw-card-2); }
   .scw-input-row input {
@@ -432,13 +445,49 @@
       inputRow.style.display = 'flex';
     }
 
-    function appendMsg(sender, text) {
+    function appendMsg(msg, opts = {}) {
+      const sender = msg.sender;
       const label = sender === 'visitor' ? 'You' : sender === 'admin' ? 'Scriptora Team' : 'Scriptora Bot';
       const div = document.createElement('div');
       div.className = 'scw-msg scw-msg-' + sender;
-      div.innerHTML = '<span class="scw-msg-label">' + label + '</span>' + escapeHtml(text);
+      div.innerHTML = '<span class="scw-msg-label">' + label + '</span>' + escapeHtml(msg.message || '');
+
+      if (msg.message_type === 'resolve_prompt' && !opts.answered) {
+        const actions = document.createElement('div');
+        actions.className = 'scw-msg-actions';
+        actions.innerHTML =
+          '<button class="scw-btn-yes" data-answer="yes">Yes, I need help</button>' +
+          '<button class="scw-btn-no" data-answer="no">No, I\'m all set</button>';
+        actions.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => handleResolveAnswer(msg.id, btn.dataset.answer === 'yes', actions));
+        });
+        div.appendChild(actions);
+      }
+
       messagesEl.appendChild(div);
       document.getElementById('scw-body').scrollTop = document.getElementById('scw-body').scrollHeight;
+    }
+
+    /* Client-এর Yes/No answer handle করা — lead status update + (No হলে) closing message */
+    async function handleResolveAnswer(promptMsgId, needsHelp, actionsEl) {
+      actionsEl.querySelectorAll('button').forEach(b => b.disabled = true);
+
+      const replyText = needsHelp ? 'Yes, I still need help.' : "No, I'm all set. Thank you!";
+      appendMsg({ sender: 'visitor', message: replyText, message_type: 'text' });
+
+      const sb = getSB();
+      if (!sb || !leadId) return;
+
+      await sb.from('website_chat_messages').insert({ lead_id: leadId, sender: 'visitor', message: replyText });
+      await sb.from('website_chat_leads').update({ status: needsHelp ? 'open' : 'closed' }).eq('id', leadId);
+
+      if (!needsHelp) {
+        const closingMsg = 'Thanks for contacting us! Feel free to reach out again if you need anything.';
+        /* এখানে locally append করছি না — realtime channel (যেটা এখন
+           sender==='bot' message-ও ধরে) নিজেই এই insert-এর event ফেরত
+           দেবে, তাই optimistic append করলে message দুইবার দেখাত। */
+        await sb.from('website_chat_messages').insert({ lead_id: leadId, sender: 'bot', message: closingMsg });
+      }
     }
 
     function escapeHtml(str) {
@@ -451,7 +500,10 @@
       const sb = getSB();
       if (!sb || !leadId) return;
       const { data } = await sb.from('website_chat_messages').select('*').eq('lead_id', leadId).order('created_at', { ascending: true });
-      if (data) data.forEach(m => appendMsg(m.sender, m.message));
+      if (data) data.forEach((m, i) => {
+        const answered = m.message_type === 'resolve_prompt' && data.slice(i + 1).some(x => x.sender === 'visitor');
+        appendMsg(m, { answered });
+      });
     }
 
     function subscribeRealtime() {
@@ -459,7 +511,7 @@
       if (!sb || !leadId || realtimeChannel) return;
       realtimeChannel = sb.channel('scw-lead-' + leadId)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'website_chat_messages', filter: `lead_id=eq.${leadId}` }, (payload) => {
-          if (payload.new.sender === 'admin') appendMsg('admin', payload.new.message);
+          if (payload.new.sender === 'admin' || payload.new.sender === 'bot') appendMsg(payload.new);
         })
         .subscribe();
     }
@@ -507,25 +559,35 @@
       }
 
       showChatView();
-      appendMsg('visitor', message);
+      appendMsg({ sender: 'visitor', message: message, message_type: 'text' });
       const fallbackReply = (DEPT_REPLIES[dept] || DEPT_REPLIES['General Inquiry']) + (online ? '' : ' (বর্তমানে আমরা অফিস সময়ের বাইরে আছি — কাজের সময় সকাল ১০টা–রাত ১০টা)');
-      appendMsg('bot', fallbackReply);
+      appendMsg({ sender: 'bot', message: fallbackReply, message_type: 'text' });
 
       startBtn.disabled = false;
       startBtn.textContent = 'Start The Chat';
     });
 
-    /* Send follow-up message */
+    /* Send follow-up message
+       — client যদি আগে "No, I'm all set" বলে chat closed/resolved করে
+         দিয়ে থাকে, তারপর যদি এখানে আবার কিছু লেখে (নতুন query), তাহলে
+         lead status আবার 'open'-এ ফিরিয়ে দেওয়া হয় — এতে admin side
+         (realtime subscription) automatically "Resolved" থেকে "Open"-এ
+         চলে আসবে, আলাদা করে admin-কে reopen করতে হবে না। */
     async function sendFollowUp() {
       const text = chatInput.value.trim();
       if (!text) return;
       chatInput.value = '';
-      appendMsg('visitor', text);
+      appendMsg({ sender: 'visitor', message: text, message_type: 'text' });
 
       const sb = getSB();
       if (sb && leadId) {
         const { error } = await sb.from('website_chat_messages').insert({ lead_id: leadId, sender: 'visitor', message: text });
         if (error) console.error('[Scriptora ChatWidget] message insert failed:', error);
+
+        /* Reopen if this lead was closed — no-op (harmless extra update)
+           if it was already open */
+        const { error: reopenErr } = await sb.from('website_chat_leads').update({ status: 'open' }).eq('id', leadId);
+        if (reopenErr) console.error('[Scriptora ChatWidget] auto-reopen failed:', reopenErr);
       }
     }
     sendBtn.addEventListener('click', sendFollowUp);

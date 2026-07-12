@@ -1,0 +1,111 @@
+/* ── WEBSITE CHATS — extra styles on top of admin-chat.css ─────────────── */
+
+/* Fix: hardcoded "calc(100vh - 60px)" fragile ছিল কারণ topbar-এর real
+   height ঠিক ৬০px না (sticky element, content-ভিত্তিক dynamic height)।
+   এখন flexbox দিয়ে dynamically bottom পর্যন্ত fill করানো হচ্ছে — শুধু
+   এই page-এ (.wc-main scope করা, অন্য page-এ effect পড়বে না)। */
+.main.wc-main {
+  height: 100vh;
+  overflow: hidden;
+}
+.main.wc-main > .content {
+  flex: 1;
+  min-height: 0;   /* flex child-কে ঠিকমতো shrink/scroll করতে দেওয়ার জন্য জরুরি */
+  overflow: hidden;
+}
+.admin-chat-layout { height: 100%; }
+
+/* Filter chips (All / Open / Resolved) */
+.wc-filter-row {
+  display: flex;
+  gap: 8px;
+  padding: 0.6rem 1rem 0.75rem;
+  border-bottom: 1px solid #1c1733;
+}
+.wc-filter-chip {
+  background: #1c1733;
+  border: 1px solid #2a2450;
+  color: #9ca3af;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.wc-filter-chip:hover { color: #e2e8f0; }
+.wc-filter-chip.active {
+  background: #7c5cff;
+  border-color: #7c5cff;
+  color: #fff;
+}
+
+/* Department + page-source tag inside each conv-item */
+.wc-conv-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  flex-wrap: wrap;
+}
+.wc-dept-tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #a78bfa;
+  background: rgba(124, 92, 255, 0.14);
+  border: 1px solid rgba(124, 92, 255, 0.28);
+  padding: 1px 7px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.wc-status-tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.wc-status-tag.open   { color: #4ade80; background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.28); }
+.wc-status-tag.closed { color: #9ca3af; background: rgba(156,163,175,0.12); border: 1px solid rgba(156,163,175,0.24); }
+
+/* Resolve / Reopen button in chat header */
+.wc-resolve-btn {
+  background: #1c1733;
+  border: 1px solid #2a2450;
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.wc-resolve-btn:hover { background: #2a2450; }
+.wc-resolve-btn.is-closed {
+  background: rgba(74,222,128,0.14);
+  border-color: rgba(74,222,128,0.3);
+  color: #4ade80;
+}
+
+/* Force Close — subtle, Resolve-er theke kom prominent */
+.wc-force-close-btn {
+  background: transparent;
+  border: 1px solid rgba(248,113,113,0.3);
+  color: #f87171;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.wc-force-close-btn:hover { background: rgba(248,113,113,0.12); }
+
+/* Bot message bubble — visually distinct from admin/visitor */
+.msg-row.bot .msg-av { background: #2a2450; color: #a78bfa; }
+.msg-row.bot .msg-bubble {
+  background: #1c1733;
+  border: 1px dashed #3a3268;
+  color: #9ca3af;
+  font-style: italic;
+}

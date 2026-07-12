@@ -33,6 +33,7 @@
   function detectPage() {
     const path = window.location.pathname;
     if (path.includes('order-management')) return 'orders';
+    if (path.includes('website-chats'))    return 'website-chats';
     if (path.includes('messages'))         return 'messages';
     if (path.includes('admin'))            return 'dashboard';
     if (path.includes('client'))           return 'clients';
@@ -65,6 +66,10 @@
       <a class="s-nav-item" href="admin-messages.html" data-page="messages" data-tooltip="Messages">
         <i class="ti ti-message-circle"></i><span class="s-nav-item-label">Messages</span>
         <span class="s-badge" id="sidebarMsgBadge" style="display:none">0</span>
+      </a>
+      <a class="s-nav-item" href="admin-website-chats.html" data-page="website-chats" data-tooltip="Website Chats">
+        <i class="ti ti-brand-hipchat"></i><span class="s-nav-item-label">Website Chats</span>
+        <span class="s-badge" id="sidebarWcBadge" style="display:none">0</span>
       </a>
       <a class="s-nav-item" href="#" data-page="clients" data-tooltip="Client List">
         <i class="ti ti-users"></i><span class="s-nav-item-label">Client List</span>
@@ -165,6 +170,7 @@
 
     /* Check unread messages badge */
     loadUnreadBadge();
+    loadWebsiteChatBadge();
     if (window.scriptoraSupabase) setupAdminPresence(window.scriptoraSupabase);
   });
 
@@ -186,6 +192,37 @@
         badge.style.display = '';
       }
     } catch(e) { /* silently ignore */ }
+  }
+
+  /* Unread website-chat lead count for sidebar badge
+     (কোনো lead-এর latest message যদি visitor-এর হয় এবং admin এখনো
+     reply না করে থাকে, সেটা unread ধরা হয়) */
+  async function loadWebsiteChatBadge() {
+    try {
+      if (!window.scriptoraSupabase) return;
+      const sb = window.scriptoraSupabase;
+
+      const { data: leads } = await sb.from('website_chat_leads').select('id').eq('status', 'open');
+      if (!leads || !leads.length) return;
+
+      const { data: msgs } = await sb
+        .from('website_chat_messages')
+        .select('lead_id, sender, created_at')
+        .order('created_at', { ascending: false });
+
+      const latestByLead = {};
+      (msgs || []).forEach(m => { if (!latestByLead[m.lead_id]) latestByLead[m.lead_id] = m; });
+
+      const leadIds = new Set(leads.map(l => l.id));
+      const unreadCount = Object.entries(latestByLead)
+        .filter(([leadId, m]) => leadIds.has(leadId) && m.sender === 'visitor').length;
+
+      const badge = document.getElementById('sidebarWcBadge');
+      if (badge && unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.style.display = '';
+      }
+    } catch (e) { /* silently ignore */ }
   }
 
   window.toggleGlobalSidebar = function () {

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Website Chats — Scriptora Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/admin.css"/>
+  <link rel="stylesheet" href="css/admin-chat.css"/>
+  <link rel="stylesheet" href="css/admin-website-chat.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<!-- sidebar.js inject করবে automatically -->
+<script src="js/supabaseClient.js"></script>
+<script src="js/topbar.js" data-title="Website Chats" data-sub="Website chatbot থেকে আসা lead গুলোর reply দিন"></script>
+<script src="js/sidebar.js" data-page="website-chats"></script>
+
+<div class="main wc-main">
+
+  <!-- CONTENT -->
+  <div class="content" style="padding:0; overflow:hidden;">
+
+    <div class="admin-chat-layout">
+
+      <!-- LEFT: Lead list -->
+      <div class="conv-panel" id="convPanel">
+        <div class="conv-header">
+          <h2>Website Chats</h2>
+          <span class="conv-count" id="convCount">0</span>
+        </div>
+
+        <div class="conv-search-wrap">
+          <input type="text" class="conv-search" id="convSearch" placeholder="নাম, email বা department খুঁজুন..."/>
+        </div>
+
+        <div class="wc-filter-row">
+          <button class="wc-filter-chip active" data-filter="all">সব</button>
+          <button class="wc-filter-chip" data-filter="open">Open</button>
+          <button class="wc-filter-chip" data-filter="closed">Resolved</button>
+        </div>
+
+        <div class="conv-list" id="convList">
+          <div class="conv-loading">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Chat area -->
+      <div class="chat-area" id="chatArea">
+
+        <!-- Empty state -->
+        <div class="chat-empty-state" id="chatEmptyState">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>বাম থেকে একটি website chat বেছে নিন</p>
+        </div>
+
+        <!-- Active chat -->
+        <div class="chat-box" id="adminChatBox" style="display:none">
+          <div class="chat-head">
+            <button class="back-mobile-btn" id="backMobileBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <div class="chat-head-left">
+              <div class="chat-client-av" id="clientAv">?</div>
+              <div>
+                <div class="chat-client-name" id="clientName">—</div>
+                <div class="chat-order-meta" id="chatOrderMeta">—</div>
+              </div>
+            </div>
+            <div class="chat-head-actions">
+              <span class="order-status-badge" id="chatStatusBadge"></span>
+              <button class="wc-force-close-btn" id="wcForceCloseBtn" title="Client-কে না জিজ্ঞেস করেই সাথে সাথে resolve করুন">Force Close</button>
+              <button class="wc-resolve-btn" id="wcResolveBtn">Resolve</button>
+            </div>
+          </div>
+
+          <div class="chat-body" id="adminChatBody">
+            <div class="chat-loading-wrap" id="chatLoading">
+              <div class="spinner"></div>
+            </div>
+          </div>
+
+          <div class="chat-input-row">
+            <textarea class="chat-input" id="adminChatInput" placeholder="Reply লিখুন... (Enter = send, Shift+Enter = নতুন লাইন)" rows="1"></textarea>
+            <button class="chat-send-btn" id="adminSendBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /chat-area -->
+    </div><!-- /admin-chat-layout -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script src="js/admin-website-chats.js"></script>
+</body>
+</html>
