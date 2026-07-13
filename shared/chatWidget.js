@@ -309,6 +309,10 @@
             <span>Your Email</span>
             <input type="email" id="scw-email" placeholder="আপনার ইমেইল" />
           </label>
+          <label class="scw-field" id="scw-phone-field">
+            <span>Mobile Number</span>
+            <input type="tel" id="scw-phone" placeholder="আপনার মোবাইল নম্বর (e.g. 017XXXXXXXX)" />
+          </label>
           <label class="scw-field">
             <span>Chat Department</span>
             <select id="scw-department">
@@ -373,6 +377,8 @@
     const inputRow           = document.getElementById('scw-input-row');
     const nameInput          = document.getElementById('scw-name');
     const emailInput         = document.getElementById('scw-email');
+    const phoneInput         = document.getElementById('scw-phone');
+    const phoneField         = document.getElementById('scw-phone-field');
     const deptSelect         = document.getElementById('scw-department');
     const msgTextarea        = document.getElementById('scw-message');
     const startBtn           = document.getElementById('scw-start-btn');
@@ -384,6 +390,8 @@
 
     let leadId = sessionStorage.getItem('scw_lead_id') || null;
     let realtimeChannel = null;
+    const clientId = localStorage.getItem('scriptora_client_id') || null;
+    const isRegistered = !!clientId;
 
     /* Online/offline status */
     const online = isOnlineNow();
@@ -400,6 +408,18 @@
         loggedBadge.style.display = 'flex';
         loggedNameEl.textContent = savedName;
       }
+    }
+
+    /* Mobile number — শুধু unregistered (guest) visitor-দের জন্য বাধ্যতামূলক।
+       Registered client হলে account-এই phone number থাকার কথা, তাই ওদের
+       আবার জিজ্ঞেস করার দরকার নেই — field-টা hide করে দেওয়া হয়। Guest হলে
+       আগে একবার দেওয়া নম্বর থাকলে সেটাই prefill করা হয়, যাতে বারবার একই
+       browser থেকে চ্যাট শুরু করলে আবার টাইপ করতে না হয়। */
+    if (isRegistered) {
+      phoneField.style.display = 'none';
+    } else {
+      const savedPhone = localStorage.getItem('scriptora_guest_phone') || '';
+      if (savedPhone) phoneInput.value = savedPhone;
     }
 
     /* Stop scroll from chaining to the page behind the widget (extra safety
@@ -520,11 +540,20 @@
     startBtn.addEventListener('click', async () => {
       const name    = nameInput.value.trim();
       const email   = emailInput.value.trim();
+      const phone   = phoneInput.value.trim();
       const dept    = deptSelect.value;
       const message = msgTextarea.value.trim();
 
       if (!name || !email || !dept || !message) {
         formError.textContent = 'সব field fill করুন।';
+        return;
+      }
+      if (!isRegistered && !phone) {
+        formError.textContent = 'অনুগ্রহ করে আপনার মোবাইল নম্বর দিন।';
+        return;
+      }
+      if (!isRegistered && !/^[+]?[\d\s-]{7,15}$/.test(phone)) {
+        formError.textContent = 'সঠিক মোবাইল নম্বর দিন।';
         return;
       }
       formError.textContent = '';
@@ -533,11 +562,12 @@
 
       const sb = getSB();
       if (!sb) console.warn('[Scriptora ChatWidget] window.scriptoraSupabase পাওয়া যায়নি — এই page-এ supabase-js CDN + shared/supabaseClient.js লোড হয়েছে কিনা check করুন। Widget local-only mode-এ চলবে (কিছু save হবে না)।');
-      const clientId = localStorage.getItem('scriptora_client_id') || null;
+
+      if (!isRegistered && phone) localStorage.setItem('scriptora_guest_phone', phone);
 
       if (sb) {
         const { data: lead, error } = await sb.from('website_chat_leads').insert({
-          name, email, department: dept, client_id: clientId, page_source: pageSource, status: 'open',
+          name, email, phone: phone || null, department: dept, client_id: clientId, page_source: pageSource, status: 'open',
         }).select().single();
 
         if (error) {

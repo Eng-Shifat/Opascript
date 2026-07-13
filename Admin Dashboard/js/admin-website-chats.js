@@ -166,7 +166,7 @@ async function openLead(leadId) {
     document.getElementById('clientAv').textContent = name.substring(0, 2).toUpperCase();
     document.getElementById('clientName').textContent = name;
     document.getElementById('chatOrderMeta').textContent =
-      `${lead.email || ''}${lead.page_source ? ' · ' + lead.page_source : ''}`;
+      `${lead.email || ''}${lead.phone ? ' · 📱 ' + lead.phone : ''}${lead.page_source ? ' · ' + lead.page_source : ''}`;
 
     const badge = document.getElementById('chatStatusBadge');
     badge.textContent = lead.department || '';
@@ -423,7 +423,8 @@ function filterLeads(q) {
     const name = (l.name || '').toLowerCase();
     const email = (l.email || '').toLowerCase();
     const dept  = (l.department || '').toLowerCase();
-    return name.includes(lower) || email.includes(lower) || dept.includes(lower);
+    const phone = (l.phone || '').toLowerCase();
+    return name.includes(lower) || email.includes(lower) || dept.includes(lower) || phone.includes(lower);
   }));
 }
 
