@@ -1,0 +1,263 @@
+/* =====================================================
+   MOBILE SERVICE PAGE — mobile.js
+   Handles: mobile navbar injection + FAQ accordion
+   ===================================================== */
+
+(function () {
+  'use strict';
+
+  /* ── INJECT MOBILE SECTIONS ── */
+  function buildMobileContent() {
+    var svcPage = document.querySelector('.svc-page');
+    if (!svcPage) return;
+
+    var checkSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    var html =
+      /* ── HERO ── */
+      '<div class="mob-hero">' +
+        '<div class="mob-hero-label">Professional Thesis Writing Service</div>' +
+        '<div class="mob-hero-top">' +
+          '<div class="mob-hero-titles">' +
+            '<h1 class="mob-hero-title">From Topic Selection to<span class="mob-hero-title-accent">Final Submission</span></h1>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mob-hero-desc">' +
+          '<strong>আপনার থিসিস, আপনার পরিচয়।</strong><br><br>' +
+          'প্রতিটি গবেষণার পেছনে থাকে অসংখ্য রাতের পরিশ্রম, শত শত রেফারেন্স এবং অগণিত ঘণ্টার অধ্যবসায়। সেই মূল্যবান কাজটি যেন উপস্থাপনায় কোনোভাবেই পিছিয়ে না থাকে।<br><br>' +
+          'Scriptora নিশ্চিত করে একটি নির্ভুল, পেশাদার, সুবিন্যস্ত এবং সম্পূর্ণ প্লেজিয়ারিজম-মুক্ত থিসিস। ভাষা থেকে ফরম্যাটিং, সম্পাদনা থেকে একাডেমিক মান — প্রতিটি ধাপে আমরা গুরুত্ব দিই খুঁটিনাটির প্রতি।' +
+        '</div>' +
+        '<div class="mob-hero-bottom">' +
+          '<ul class="mob-checklist">' +
+            ['Research-Based Writing','Professional Formatting','Turnitin Report','Unlimited Revision','Timely Delivery'].map(function(t){
+              return '<li><span class="mob-check-icon">✓</span>' + t + '</li>';
+            }).join('') +
+          '</ul>' +
+          '<div class="mob-hero-img-side">' +
+            '<img src="thesis-book-hero.png" alt="Thesis" />' +
+          '</div>' +
+        '</div>' +
+        '<button class="mob-cta-primary" onclick="orderThesisPackage && orderThesisPackage()">View Pricing &amp; Packages</button>' +
+        '<button class="mob-cta-outline">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+          'Talk to Expert' +
+        '</button>' +
+      '</div>' +
+
+      /* ── STATS ── */
+      '<div class="mob-stats">' +
+        '<div class="mob-stat"><div class="mob-stat-icon star">★</div><div class="mob-stat-val">4.9/5</div><div class="mob-stat-sub">(312 Reviews)</div></div>' +
+        '<div class="mob-stat"><div class="mob-stat-icon">🏆</div><div class="mob-stat-val">500+</div><div class="mob-stat-sub">Projects</div></div>' +
+        '<div class="mob-stat"><div class="mob-stat-icon">⏱</div><div class="mob-stat-val">98%</div><div class="mob-stat-sub">On-Time</div></div>' +
+        '<div class="mob-stat"><div class="mob-stat-icon">🔒</div><div class="mob-stat-val">100%</div><div class="mob-stat-sub">Confidential</div></div>' +
+      '</div>' +
+
+      /* ── WHAT'S INCLUDED ── */
+      '<div class="mob-section">' +
+        '<h2 class="mob-sec-title">What\'s Included in Your Thesis</h2>' +
+        '<div class="mob-included-grid">' +
+          [
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>', label:'Topic &amp; Proposal'},
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>', label:'Literature Review'},
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>', label:'Methodology'},
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', label:'Data Analysis (SPSS)'},
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>', label:'Results &amp; Discussion'},
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>', label:'References &amp; Citations'},
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>', label:'Formatting (APA, IEEE, etc.)'},
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', label:'Turnitin Report'},
+            {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/></svg>', label:'Unlimited Revisions'},
+          ].map(function(item){
+            return '<div class="mob-inc-item"><div class="mob-inc-icon">' + item.icon + '</div><span class="mob-inc-label">' + item.label + '</span></div>';
+          }).join('') +
+        '</div>' +
+        '<div class="mob-view-more"><a href="#">View All Details →</a></div>' +
+      '</div>' +
+
+      /* ── WHY TRUST ── */
+      '<div class="mob-section">' +
+        '<h2 class="mob-sec-title">Why Students Trust Scriptora</h2>' +
+        '<ul class="mob-why-list">' +
+          [
+            {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', title:'সময়ের সর্বোচ্চ মূল্য', desc:'Deadline আমাদের Commitment।'},
+            {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>', title:'প্রফেশনাল কোয়ালিটি', desc:'Research-based Workflow, Quality Checked।'},
+            {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', title:'সম্পূর্ণ গোপনীয়তা', desc:'আপনার তথ্য 100% Confidential।'},
+            {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>', title:'Live Progress Tracking', desc:'Dashboard-এ সবকিছু Real-time দেখুন।'},
+            {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>', title:'প্রফেশনাল ফরম্যাটিং', desc:'APA, IEEE, Harvard, MLA, Chicago সহ সব ধরনের Formatting।'},
+          ].map(function(w){
+            return '<li class="mob-why-item"><div class="mob-why-icon-wrap">' + w.svg + '</div><div><div class="mob-why-title">' + w.title + '</div><div class="mob-why-desc">' + w.desc + '</div></div></li>';
+          }).join('') +
+        '</ul>' +
+        '<div class="mob-view-more" style="margin-top:20px"><a href="#">View All Benefits →</a></div>' +
+      '</div>' +
+
+      /* ── EXPERT ── */
+      '<div class="mob-section">' +
+        '<h2 class="mob-sec-title">Meet Your Academic Expert</h2>' +
+        '<div class="mob-expert">' +
+          '<div class="mob-expert-photo">YK</div>' +
+          '<ul class="mob-expert-points">' +
+            ['Level 2 Seller in Fiverr', '100+ Successfully Delivered Projects', 'Extensive Experience in Academic Writing', 'Specialized in Thesis &amp; Research Documentation'].map(function(p){
+              return '<li>' + checkSVG + '<span>' + p + '</span></li>';
+            }).join('') +
+          '</ul>' +
+        '</div>' +
+        '<p class="mob-expert-tagline">Your project is in expert hands.</p>' +
+      '</div>' +
+
+      /* ── WORKFLOW ── */
+      '<div class="mob-section">' +
+        '<h2 class="mob-sec-title">How Your Thesis Will Be Completed</h2>' +
+        '<div class="mob-workflow">' +
+          [
+            {n:'1', title:'Share Your Topic', desc:'Topic, Guidelines &amp; Requirements'},
+            {n:'2', title:'Planning &amp; Research', desc:'Project Planning, Research Outline Preparation'},
+            {n:'3', title:'Writing', desc:'Professional Academic Writing'},
+            {n:'4', title:'Review &amp; Formatting', desc:'Grammar, Formatting, Citation Quality Check'},
+            {n:'5', title:'Delivery', desc:'Dashboard Notification, Preview Final Delivery'},
+          ].map(function(s){
+            return '<div class="mob-wf-step">' +
+              '<div class="mob-wf-left"><div class="mob-wf-dot">' + s.n + '</div></div>' +
+              '<div class="mob-wf-right"><div class="mob-wf-title">' + s.title + '</div><div class="mob-wf-desc">' + s.desc + '</div></div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+
+      /* ── WHAT YOU RECEIVE ── */
+      '<div class="mob-section">' +
+        '<h2 class="mob-sec-title">What You Will Receive</h2>' +
+        '<div class="mob-receive-grid">' +
+          ['Research-based Writing','Professional Formatting','Proper Citation','AI + Human Quality Review','Editable Source Files','Progress Dashboard','Revision Support','Secure File Delivery','Turnitin Report'].map(function(item){
+            return '<div class="mob-receive-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>' + item + '</span></div>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+
+      /* ── SAMPLE PREVIEW ── */
+      '<div class="mob-section">' +
+        '<div class="mob-sec-header">' +
+          '<h2 class="mob-sec-title" style="margin-bottom:0">Sample Thesis Preview</h2>' +
+          '<a class="mob-sec-link" href="#">View All Samples →</a>' +
+        '</div>' +
+        '<div class="mob-samples-scroll">' +
+          [1,2,3,4,5].map(function(){
+            return '<div class="mob-sample-card"><div class="mob-sample-card-inner">' +
+              '<div class="mob-sample-line title"></div>' +
+              '<div class="mob-sample-line"></div>' +
+              '<div class="mob-sample-line short"></div>' +
+              '<div class="mob-sample-line"></div>' +
+              '<div class="mob-sample-line short"></div>' +
+              '<div class="mob-sample-line"></div>' +
+              '<div class="mob-sample-line short"></div>' +
+            '</div></div>';
+          }).join('') +
+        '</div>' +
+        '<div class="mob-sample-dots"><span class="mob-sample-dot active"></span><span class="mob-sample-dot"></span></div>' +
+      '</div>' +
+
+      /* ── DASHBOARD PREVIEW ── */
+      '<div class="mob-section">' +
+        '<h2 class="mob-sec-title">Professional Dashboard</h2>' +
+        '<p style="font-size:13px;color:var(--muted);margin-bottom:16px">Track your project progress in real time.</p>' +
+        '<div class="mob-dash-card">' +
+          '<div class="mob-dash-label">Project Progress</div>' +
+          '<div class="mob-dash-pct">65%</div>' +
+          '<div class="mob-progress-bar"><div class="mob-progress-fill"></div></div>' +
+          '<div class="mob-dash-steps">' +
+            [
+              {icon:'✍️', label:'Writing', val:'65%'},
+              {icon:'🔍', label:'Review', val:'20%'},
+              {icon:'📐', label:'Formatting', val:'10%'},
+              {icon:'📦', label:'Delivery', val:'Pending', cls:'pending'},
+            ].map(function(s){
+              return '<div class="mob-dash-step">' +
+                '<div class="mob-dash-step-icon">' + s.icon + '</div>' +
+                '<span class="mob-dash-step-label">' + s.label + '</span>' +
+                '<span class="mob-dash-step-val' + (s.cls ? ' ' + s.cls : '') + '">' + s.val + '</span>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+          '<div class="mob-dash-footer">' +
+            '<div><div class="mob-dash-footer-label">Deadline</div><div class="mob-dash-footer-val">10 Days Left</div></div>' +
+            '<div style="text-align:right"><div class="mob-dash-footer-label">Payment Status</div><div class="mob-dash-footer-val paid">Paid</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<a class="mob-open-dash" href="../Client Dashboard/dashboard.html">Open Dashboard →</a>' +
+      '</div>' +
+
+      /* ── FAQ ── */
+      '<div class="mob-section">' +
+        '<div class="mob-sec-header">' +
+          '<h2 class="mob-sec-title" style="margin-bottom:0">Frequently Asked Questions</h2>' +
+          '<a class="mob-sec-link" href="#">View All →</a>' +
+        '</div>' +
+        '<div class="mob-faq-list">' +
+          [
+            {q:'Is the content 100% original?', a:'হ্যাঁ, প্রতিটি থিসিস সম্পূর্ণ Original ও Plagiarism-free — Turnitin Report সহ Deliver করা হয়।'},
+            {q:'Will I get Turnitin report?', a:'Premium Package-এর সাথে Turnitin Report Include করা থাকে।'},
+            {q:'Can you follow my university guidelines?', a:'অবশ্যই — আপনার University-র নির্দিষ্ট Guideline অনুযায়ী Format করা হয়।'},
+            {q:'What if I need revisions?', a:'Premium Package-এ Unlimited Revision Included।'},
+            {q:'How long does it take to complete a thesis?', a:'Package অনুযায়ী 10–20 দিনের মধ্যে Deliver করা হয়।'},
+          ].map(function(f){
+            return '<div class="mob-faq-item">' +
+              '<button class="mob-faq-q">' + f.q + '<span class="mob-faq-plus">+</span></button>' +
+              '<div class="mob-faq-a">' + f.a + '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+
+      /* ── FINAL CTA ── */
+      '<div class="mob-final-cta">' +
+        '<span class="mob-final-cta-icon">🎓</span>' +
+        '<h2>Ready to Start<br>Your Thesis?</h2>' +
+        '<p>Let our experts help you achieve academic success.</p>' +
+        '<button class="mob-cta-primary" onclick="orderThesisPackage && orderThesisPackage()">Start Your Project Today →</button>' +
+        '<button class="mob-cta-outline" style="margin-top:10px">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+          'Talk to Expert' +
+        '</button>' +
+      '</div>' +
+
+      '';
+
+    var mobileWrapper = document.createElement('div');
+    mobileWrapper.id = 'mob-content';
+    mobileWrapper.innerHTML = html;
+    svcPage.insertBefore(mobileWrapper, svcPage.firstChild);
+  }
+
+  /* ── FAQ ACCORDION (mobile) ── */
+  function initFAQ() {
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.mob-faq-q');
+      if (!btn) return;
+      var item = btn.closest('.mob-faq-item');
+      if (item) item.classList.toggle('open');
+    });
+  }
+
+  /* ── HIDE DESKTOP CONTENT ON MOBILE ── */
+  function hideDesktopOnMobile() {
+    if (window.innerWidth > 768) return;
+    var desktopCards = document.querySelectorAll('.svc-grid .svc-card, .svc-breadcrumb, .svc-cta');
+    desktopCards.forEach(function(el){ el.style.display = 'none'; });
+    document.querySelector('.svc-grid') && (document.querySelector('.svc-grid').style.display = 'none');
+  }
+
+  /* ── INIT ── */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  function init() {
+    if (window.innerWidth <= 768) {
+      buildMobileContent();
+      hideDesktopOnMobile();
+    }
+    initFAQ();
+  }
+
+})();

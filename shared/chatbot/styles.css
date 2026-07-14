@@ -1,0 +1,283 @@
+/* ================================================================
+   SCRIPTORA — chatbot/styles.css
+   Design tokens Service page / purono chatWidget.js theke reused:
+   #070B17 navy, #8B5CF6 → #6D5EF6 purple gradient, 8px spacing scale,
+   Inter typeface. "sca-" prefix (Scriptora Chat Assistant) — purono
+   "scw-" widget-er sathe collide korbe na, dutoi ekshathe thakte pare.
+   ================================================================ */
+
+#sca-root {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  font-family: 'Inter', 'Segoe UI', 'Kalpurush', sans-serif;
+  --sca-bg: #070B17;
+  --sca-card: #101826;
+  --sca-card-2: #0c1320;
+  --sca-border: rgba(255,255,255,0.08);
+  --sca-accent: #8B5CF6;
+  --sca-accent-2: #6D5EF6;
+  --sca-success: #22C55E;
+  --sca-danger: #F87171;
+  --sca-text: #FFFFFF;
+  --sca-text-2: #9CA3AF;
+}
+
+/* ---------- Toggle launcher ---------- */
+.sca-toggle {
+  position: relative; width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--sca-accent), var(--sca-accent-2));
+  box-shadow: 0 10px 28px rgba(139,92,246,0.4), 0 2px 6px rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+}
+.sca-toggle::before {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%;
+  border: 1.5px solid rgba(139,92,246,0.55); animation: sca-pulse-ring 2.6s ease-out infinite;
+}
+#sca-root.sca-open .sca-toggle::before { display: none; }
+@keyframes sca-pulse-ring { 0% { transform: scale(0.85); opacity: 0.7; } 70%, 100% { transform: scale(1.18); opacity: 0; } }
+.sca-toggle:hover { transform: scale(1.07); box-shadow: 0 12px 32px rgba(139,92,246,0.5), 0 2px 6px rgba(0,0,0,0.35); }
+.sca-toggle:active { transform: scale(0.96); }
+#sca-root.sca-open .sca-toggle { opacity: 0; transform: scale(0.4); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; }
+.sca-toggle svg { width: 25px; height: 25px; position: absolute; transition: opacity 0.25s ease, transform 0.3s cubic-bezier(.34,1.56,.64,1); }
+.sca-toggle .sca-icon-close { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+.sca-toggle .sca-icon-chat  { opacity: 1; transform: rotate(0) scale(1); }
+#sca-root.sca-open .sca-toggle .sca-icon-chat  { opacity: 0; transform: rotate(90deg) scale(0.6); }
+#sca-root.sca-open .sca-toggle .sca-icon-close { opacity: 1; transform: rotate(0) scale(1); }
+
+/* ---------- Greeting bubble ---------- */
+.sca-bubble {
+  position: absolute; bottom: 74px; right: 2px; max-width: 220px;
+  background: var(--sca-card); border: 1px solid var(--sca-border); color: var(--sca-text);
+  padding: 12px 16px; border-radius: 14px 14px 4px 14px; font-size: 13px; line-height: 1.5;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  opacity: 0; transform: translateY(8px) scale(0.94); transform-origin: bottom right; pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(.34,1.56,.64,1), transform 0.35s cubic-bezier(.34,1.56,.64,1);
+}
+.sca-bubble.sca-show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; cursor: pointer; }
+.sca-bubble:hover { border-color: rgba(139,92,246,0.4); }
+
+/* ---------- Panel shell (spec §3.1 — 400x640, rounded 24px, glass) ---------- */
+.sca-panel {
+  position: fixed; bottom: 24px; right: 24px;
+  width: 400px; max-width: calc(100vw - 32px);
+  height: 640px; max-height: calc(100vh - 48px); min-height: 480px;
+  overscroll-behavior: contain;
+  background: var(--sca-bg);
+  background-image: radial-gradient(120% 100% at 100% 0%, rgba(139,92,246,0.16), transparent 55%);
+  border: 1px solid rgba(139,92,246,0.18); border-radius: 24px; overflow: hidden;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02);
+  display: flex; flex-direction: column; transform-origin: bottom right;
+  transform: translateY(16px) scale(0.85);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: transform 0.38s cubic-bezier(.2,1,.3,1), opacity 0.24s ease, visibility 0s linear 0.38s;
+  z-index: 9998;
+}
+#sca-root.sca-open .sca-panel {
+  transform: translateY(0) scale(1); opacity: 1; visibility: visible; pointer-events: auto;
+  transition: transform 0.42s cubic-bezier(.34,1.56,.64,1), opacity 0.3s ease, visibility 0s linear 0s;
+}
+
+/* ---------- Header (spec §3.2, ~72px) ---------- */
+.sca-header {
+  height: 72px; flex-shrink: 0; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border-bottom: 1px solid var(--sca-border);
+}
+.sca-header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.sca-avatar {
+  position: relative; width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(109,94,246,0.15));
+  border: 1px solid rgba(139,92,246,0.4);
+  display: flex; align-items: center; justify-content: center;
+  animation: sca-breathe 3.2s ease-in-out infinite;
+}
+@keyframes sca-breathe { 0%,100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.25); } 50% { box-shadow: 0 0 0 6px rgba(139,92,246,0); } }
+.sca-avatar svg { width: 19px; height: 19px; color: var(--sca-accent); }
+.sca-header-text { min-width: 0; }
+.sca-header-title-row { display: flex; align-items: center; gap: 7px; }
+.sca-header-title { color: #fff; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.sca-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sca-success); flex-shrink: 0; box-shadow: 0 0 0 3px rgba(34,197,94,0.25); animation: sca-dot-pulse 2.4s ease-in-out infinite; }
+.sca-status-dot.sca-offline { background: var(--sca-danger); box-shadow: 0 0 0 3px rgba(248,113,113,0.25); }
+@keyframes sca-dot-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+.sca-header-status { color: var(--sca-text-2); font-size: 12px; margin-top: 2px; }
+.sca-header-close {
+  background: transparent; border: none; color: var(--sca-text-2); cursor: pointer;
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; padding: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.sca-header-close:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.sca-header-close svg { width: 14px; height: 14px; }
+
+/* ---------- Body ---------- */
+.sca-body { flex: 1; overflow-y: auto; padding: 20px; overscroll-behavior: contain; }
+.sca-body::-webkit-scrollbar { width: 5px; }
+.sca-body::-webkit-scrollbar-track { background: transparent; }
+.sca-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 10px; }
+
+/* ---------- Welcome + collapse behavior (spec §3.3, §6) ---------- */
+.sca-top-section { overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.3s ease; max-height: 600px; opacity: 1; margin-bottom: 4px; }
+.sca-top-section.sca-collapsed { max-height: 44px; }
+.sca-top-section.sca-collapsed .sca-welcome-block,
+.sca-top-section.sca-collapsed .sca-snapshot { display: none; }
+.sca-welcome-block { margin-bottom: 18px; }
+.sca-welcome-title { color: var(--sca-text); font-size: 14.5px; font-weight: 600; margin: 0 0 4px; }
+.sca-welcome-sub { color: var(--sca-text-2); font-size: 13px; line-height: 1.55; margin: 0; }
+
+/* ---------- Account snapshot (auth mode) ---------- */
+.sca-snapshot { background: var(--sca-card); border: 1px solid var(--sca-border); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
+.sca-snapshot-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.sca-snapshot-name { color: var(--sca-text); font-size: 13.5px; font-weight: 600; }
+.sca-snapshot-badge { background: rgba(139,92,246,0.16); color: var(--sca-accent); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+.sca-snapshot-bar { height: 5px; border-radius: 6px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 10px; }
+.sca-snapshot-bar-fill { height: 100%; background: linear-gradient(90deg, var(--sca-accent), var(--sca-accent-2)); border-radius: 6px; }
+.sca-snapshot-link, .sca-snapshot-label { font-size: 12.5px; }
+.sca-snapshot-link { color: var(--sca-accent); text-decoration: none; font-weight: 600; }
+.sca-snapshot-link:hover { text-decoration: underline; }
+.sca-snapshot-empty { display: flex; align-items: center; justify-content: space-between; }
+.sca-snapshot-label { color: var(--sca-text-2); }
+
+/* ---------- Quick Action Cards (spec §3.4 — 2-col grid) ---------- */
+.sca-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.sca-card {
+  height: 88px; text-align: left; background: transparent; border: 1px solid transparent; border-radius: 14px;
+  padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  font-family: inherit;
+}
+.sca-card:hover { background: rgba(255,255,255,0.04); border-color: rgba(139,92,246,0.3); transform: translateY(-1px); }
+.sca-card:active { transform: translateY(0) scale(0.98); }
+.sca-card-icon { width: 20px; height: 20px; color: var(--sca-accent); }
+.sca-card-title { color: var(--sca-text); font-size: 13px; font-weight: 600; }
+.sca-card-desc { color: var(--sca-text-2); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Popular topic pills (spec §3.5) ---------- */
+.sca-pills-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 4px; }
+.sca-pills-row::-webkit-scrollbar { display: none; }
+.sca-pill {
+  flex-shrink: 0; height: 32px; padding: 0 14px; border-radius: 20px; border: 1px solid var(--sca-border);
+  background: transparent; color: var(--sca-text-2); font-size: 12.5px; font-family: inherit; cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.sca-pill:hover { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.4); color: var(--sca-text); }
+
+.sca-show-topics {
+  display: block; margin: 0 0 12px; background: transparent; border: 1px dashed var(--sca-border);
+  color: var(--sca-text-2); font-size: 12px; font-family: inherit; border-radius: 20px; padding: 6px 14px; cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.sca-show-topics:hover { border-color: rgba(139,92,246,0.4); color: var(--sca-text); }
+
+/* ---------- Authenticated quick actions ---------- */
+.sca-auth-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.sca-auth-action {
+  display: block; text-align: center; padding: 12px 10px; border-radius: 12px; border: 1px solid var(--sca-border);
+  color: var(--sca-text); font-size: 12.5px; font-weight: 600; text-decoration: none;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.sca-auth-action:hover { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.35); }
+
+/* ---------- Conversation thread ---------- */
+.sca-messages { display: flex; flex-direction: column; gap: 12px; }
+.sca-msg { max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; animation: sca-msg-in 0.3s cubic-bezier(.2,1,.3,1); }
+@keyframes sca-msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.sca-msg-ai { align-self: flex-start; background: var(--sca-card); border: 1px solid var(--sca-border); color: rgba(255,255,255,0.92); border-bottom-left-radius: 4px; }
+.sca-msg-user { align-self: flex-end; background: linear-gradient(135deg, var(--sca-accent), var(--sca-accent-2)); color: #fff; border-bottom-right-radius: 4px; }
+.sca-msg-label { display: block; font-size: 10px; opacity: 0.6; margin-bottom: 3px; font-weight: 600; letter-spacing: 0.02em; }
+.sca-msg-text { white-space: pre-wrap; }
+
+/* ---------- Typing indicator — inside AI bubble shape, not a spinner ---------- */
+.sca-typing { padding: 12px 16px; }
+.sca-typing-dots { display: flex; gap: 4px; align-items: center; }
+.sca-typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--sca-text-2); animation: sca-typing-bounce 1.2s ease-in-out infinite; }
+.sca-typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.sca-typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes sca-typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+/* ---------- Human handoff card (Screen D — inline, not a modal) ---------- */
+.sca-handoff-card { max-width: 92%; background: var(--sca-card); border: 1px solid rgba(139,92,246,0.3); border-radius: 14px; padding: 14px; }
+.sca-handoff-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.sca-handoff-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--sca-accent), var(--sca-accent-2)); color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sca-handoff-name { color: var(--sca-text); font-size: 13px; font-weight: 600; }
+.sca-handoff-sub { color: var(--sca-text-2); font-size: 12px; margin-top: 2px; }
+.sca-handoff-actions { display: flex; gap: 8px; }
+.sca-handoff-btn {
+  flex: 1; padding: 9px 10px; border-radius: 9px; border: 1px solid var(--sca-border);
+  background: rgba(255,255,255,0.05); color: var(--sca-text); font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.sca-handoff-btn:hover { background: rgba(139,92,246,0.16); border-color: rgba(139,92,246,0.4); }
+.sca-handoff-btn:active { transform: scale(0.97); }
+.sca-handoff-primary { background: linear-gradient(135deg, var(--sca-accent), var(--sca-accent-2)); border-color: transparent; color: #fff; }
+.sca-handoff-primary:hover { filter: brightness(1.08); }
+
+/* ---------- Inline lead-capture form ---------- */
+.sca-leadform { max-width: 92%; background: var(--sca-card); border: 1px solid var(--sca-border); border-radius: 14px; padding: 14px; }
+.sca-leadform-hint { color: var(--sca-text-2); font-size: 12.5px; margin: 0 0 10px; }
+.sca-leadform-input {
+  width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.045); border: 1px solid var(--sca-border);
+  border-radius: 10px; padding: 10px 12px; color: var(--sca-text); font-family: inherit; font-size: 13px; outline: none;
+  margin-bottom: 8px; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sca-leadform-input::placeholder { color: rgba(255,255,255,0.32); }
+.sca-leadform-input:focus { border-color: var(--sca-accent); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
+.sca-leadform-error { color: var(--sca-danger); font-size: 11.5px; min-height: 14px; margin-bottom: 6px; }
+.sca-leadform-submit {
+  width: 100%; padding: 11px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  background: linear-gradient(135deg, var(--sca-accent), var(--sca-accent-2)); color: #fff;
+  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), opacity 0.2s ease;
+}
+.sca-leadform-submit:hover { transform: translateY(-1px); }
+.sca-leadform-submit:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+/* ---------- Input bar (spec §3.7 — sticky, ~64px) ---------- */
+.sca-input-row {
+  flex-shrink: 0; display: flex; align-items: flex-end; gap: 8px; padding: 12px 16px;
+  border-top: 1px solid var(--sca-border); background: var(--sca-card-2);
+}
+.sca-icon-btn {
+  width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; border: none; background: transparent;
+  color: var(--sca-text-2); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.sca-icon-btn:hover { background: rgba(255,255,255,0.06); color: var(--sca-text); }
+.sca-icon-btn svg { width: 18px; height: 18px; }
+#sca-chat-input {
+  flex: 1; resize: none; max-height: 96px; background: rgba(255,255,255,0.05); border: 1px solid var(--sca-border);
+  border-radius: 18px; padding: 9px 14px; color: var(--sca-text); font-family: inherit; font-size: 13.5px;
+  line-height: 1.4; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+#sca-chat-input::placeholder { color: rgba(255,255,255,0.32); }
+#sca-chat-input:focus { border-color: var(--sca-accent); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
+.sca-send-btn {
+  width: 38px; height: 38px; border-radius: 50%; border: none; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sca-accent), var(--sca-accent-2)); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), opacity 0.2s ease;
+}
+.sca-send-btn:hover:not(:disabled) { transform: scale(1.08); }
+.sca-send-btn:active:not(:disabled) { transform: scale(0.94); }
+.sca-send-btn:disabled { opacity: 0.4; cursor: default; }
+.sca-send-btn svg { width: 15px; height: 15px; }
+
+/* ---------- Footer ---------- */
+.sca-footer { text-align: center; padding: 10px 20px; font-size: 10.5px; color: var(--sca-text-2); flex-shrink: 0; }
+.sca-footer strong { color: rgba(255,255,255,0.65); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sca-panel, .sca-bubble, .sca-toggle, .sca-toggle svg, .sca-msg, .sca-avatar, .sca-status-dot,
+  .sca-header-close, .sca-send-btn, .sca-card { transition: none !important; animation: none !important; }
+}
+
+/* ---------- Mobile — full-height bottom sheet (Screen E) ---------- */
+@media (max-width: 480px) {
+  #sca-root { bottom: 0; right: 0; }
+  .sca-panel {
+    bottom: 0; right: 0; width: 100vw; height: 100vh; max-height: 100vh;
+    border-radius: 0; border: none;
+  }
+  .sca-toggle { position: fixed; bottom: 16px; right: 16px; }
+  .sca-bubble { right: 14px; max-width: 190px; }
+  .sca-cards-grid, .sca-auth-actions { grid-template-columns: 1fr; }
+  #sca-root.sca-open .sca-toggle { display: none; }
+}
