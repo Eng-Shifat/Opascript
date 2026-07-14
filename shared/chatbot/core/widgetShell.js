@@ -24,7 +24,7 @@ function loadStyles(baseUrl) {
   ['tokens.css', 'shell.css'].forEach((file) => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = baseUrl + 'styles/' + file;
+    link.href = baseUrl + 'style/' + file; // folder is `style/` (singular) on disk
     document.head.appendChild(link);
   });
 }

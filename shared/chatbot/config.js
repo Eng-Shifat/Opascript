@@ -6,9 +6,13 @@
    ================================================================ */
 
 export const Config = {
-  /* widgetShell.js styles/*.css load korার জন্য base path — deployment
-     onujayi change korte hobe (e.g. '/shared/chatbot/' production-e) */
-  baseUrl: 'shared/chatbot/',
+  /* widgetShell.js style/*.css load korার জন্য base path. Ekhon ei
+     module-er nijer location theke absolute URL hishebe derive kora
+     hoy (page-relative hardcoded string age bug chilo — Homepage/ ar
+     Service page/ different depth-e thakay path bhenge jeto). Kono
+     page-e ei script kothao theke include hok na কেন, eta shobsomoy
+     thik jaygay resolve hobe. */
+  baseUrl: new URL('./', import.meta.url).href,
 
   /* Ei path-gulote widget mount hobe na (widgetShell.mount() nijei check kore) */
   excludedPages: ['/payment', '/checkout', '/admin'],

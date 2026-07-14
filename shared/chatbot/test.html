@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scriptora Chatbot V2 — isolated test harness</title>
+<style>
+  body { margin: 0; min-height: 100vh; background: #05070F; font-family: sans-serif; color: #e5e7eb;
+         display: flex; align-items: center; justify-content: center; }
+  .note { max-width: 420px; text-align: center; font-size: 14px; line-height: 1.6; color: #9CA3AF; }
+</style>
+</head>
+<body>
+  <p class="note">
+    This page loads ONLY the V2 chatbot bootstrap (<code>main.js</code>), in isolation —
+    it does not touch Homepage or Service page, and does not load the legacy widget.
+    Click the floating button bottom-right to test.
+  </p>
+
+  <!-- V2 entry point. Path is relative to this file's own location
+       (shared/chatbot/test.html), so it's just './main.js' here — on a
+       real page elsewhere in the project it would be
+       '../shared/chatbot/main.js' or similar depending on page depth. -->
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
