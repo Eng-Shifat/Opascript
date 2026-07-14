@@ -1,0 +1,33 @@
+/* ================================================================
+   SAVE AT: shared/chatbot/modules/ai/ai.css
+   AI module-only styles — "ai-" prefix, jate shell.css/tokens.css
+   (Phase 2, frozen) ba onno kono future module-er CSS-er sathe
+   collide na kore. Ei file ai.module.js nijei <link> kore load kore.
+   ================================================================ */
+
+.ai-welcome-block { margin-bottom: var(--sca-space-5); }
+.ai-welcome-title { color: var(--sca-text); font-size: var(--sca-fs-md); font-weight: 600; margin: 0 0 4px; }
+.ai-welcome-sub { color: var(--sca-text-2); font-size: var(--sca-fs-base); line-height: var(--sca-lh-base); margin: 0; }
+
+.ai-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sca-space-2); margin-bottom: var(--sca-space-4); }
+
+.ai-info-block {
+  background: var(--sca-surface-2); border: 1px solid var(--sca-border);
+  border-radius: var(--sca-radius-lg); padding: var(--sca-space-3);
+  margin-bottom: var(--sca-space-4); max-width: 92%;
+}
+.ai-info-text { color: var(--sca-text-2); font-size: var(--sca-fs-sm); margin: var(--sca-space-2) 0 0; line-height: var(--sca-lh-base); }
+
+.ai-handoff-card {
+  background: var(--sca-surface-2); border: 1px solid var(--sca-accent-border);
+  border-radius: var(--sca-radius-lg); padding: var(--sca-space-3); max-width: 92%;
+}
+.ai-handoff-text { color: var(--sca-text-2); font-size: var(--sca-fs-sm); margin: var(--sca-space-2) 0 var(--sca-space-3); line-height: var(--sca-lh-base); }
+.ai-handoff-actions { display: flex; gap: var(--sca-space-2); }
+.ai-handoff-actions .ui-btn { flex: 1; }
+
+#ai-top { transition: max-height var(--sca-duration-base) ease; }
+
+@media (max-width: 480px) {
+  .ai-cards-grid { grid-template-columns: 1fr; }
+}

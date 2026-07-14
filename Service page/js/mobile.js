@@ -237,14 +237,6 @@
     });
   }
 
-  /* ── HIDE DESKTOP CONTENT ON MOBILE ── */
-  function hideDesktopOnMobile() {
-    if (window.innerWidth > 768) return;
-    var desktopCards = document.querySelectorAll('.svc-grid .svc-card, .svc-breadcrumb, .svc-cta');
-    desktopCards.forEach(function(el){ el.style.display = 'none'; });
-    document.querySelector('.svc-grid') && (document.querySelector('.svc-grid').style.display = 'none');
-  }
-
   /* ── INIT ── */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -255,7 +247,6 @@
   function init() {
     if (window.innerWidth <= 768) {
       buildMobileContent();
-      hideDesktopOnMobile();
     }
     initFAQ();
   }

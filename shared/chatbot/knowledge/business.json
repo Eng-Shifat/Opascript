@@ -1,0 +1,79 @@
+{
+  "companyName": "Scriptora",
+  "brand": {
+    "tagline": "Academic writing support, done right.",
+    "description": "Scriptora is an academic service platform helping students with thesis writing, proposals, and full research support from Honours through PhD level."
+  },
+  "services": [
+    {
+      "key": "thesis",
+      "name": "Thesis Writing",
+      "description": "Full support from topic selection to final formatting, Honours through PhD.",
+      "levels": ["Honours", "Masters", "PhD"]
+    },
+    {
+      "key": "proposal",
+      "name": "Research Proposal",
+      "description": "Problem statement through methodology, ready for committee review."
+    },
+    {
+      "key": "spss",
+      "name": "SPSS Data Analysis",
+      "description": "Hypothesis testing, regression, and full statistical analysis."
+    },
+    {
+      "key": "plagiarism",
+      "name": "Turnitin / Plagiarism Check",
+      "description": "Similarity report checks to help ensure originality before submission."
+    },
+    {
+      "key": "editing",
+      "name": "Grammar & Proofreading",
+      "description": "Language, grammar, and formatting review for academic documents."
+    },
+    {
+      "key": "citation",
+      "name": "Citation & Referencing",
+      "description": "APA, MLA, Chicago, and other citation styles formatted correctly."
+    }
+  ],
+  "workflow": [
+    { "step": 1, "title": "Consultation", "description": "Share your topic, level, and deadline with our team." },
+    { "step": 2, "title": "Quote & Package", "description": "Receive a package and price based on scope and timeline." },
+    { "step": 3, "title": "Writing & Drafts", "description": "Your writer works in stages, with drafts shared for review." },
+    { "step": 4, "title": "Revisions", "description": "Feedback incorporated until you're satisfied." },
+    { "step": 5, "title": "Final Delivery", "description": "Formatted, checked, and delivered on your deadline." }
+  ],
+  "deliveryPolicy": {
+    "summary": "Deadlines are agreed at order time and are flexible where possible; urgent turnarounds can be discussed with the team.",
+    "expressAvailable": true
+  },
+  "revisionPolicy": {
+    "summary": "Unlimited revisions within 30 days of delivery, as long as the request stays within the original scope.",
+    "windowDays": 30
+  },
+  "refundPolicy": {
+    "summary": "Refund eligibility depends on work progress at the time of cancellation — contact support to review your specific order.",
+    "contactRequired": true
+  },
+  "paymentPolicy": {
+    "summary": "Payments can be made in installments; bKash, Nagad, and card payments are accepted.",
+    "methods": ["bKash", "Nagad", "Card", "Bank Transfer"]
+  },
+  "workingHours": {
+    "timezone": "Asia/Dhaka",
+    "start": "10:00",
+    "end": "22:00"
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "whatsapp": ""
+  },
+  "socialLinks": {
+    "facebook": "",
+    "instagram": "",
+    "linkedin": ""
+  },
+  "website": ""
+}

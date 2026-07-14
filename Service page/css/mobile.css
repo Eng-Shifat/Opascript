@@ -32,22 +32,25 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── HIDE DESKTOP ELEMENTS ──────────────────────────── */
+/* ── HIDE DESKTOP ELEMENTS — instant, no flash ──────── */
 .svc-breadcrumb,
 .svc-sidebar,
 .svc-hero-visual,
 .svc-hero-float-badge,
-.svc-cta { display: none !important; }
-
+.svc-cta,
+.svc-card { display: none !important; }
 
 /* ── PAGE WRAPPER ────────────────────────────────────── */
-.svc-page { padding-bottom: 0 !important; }
+.svc-page { padding: 0 !important; }
 .svc-grid {
   display: block !important;
   padding: 0 !important;
   max-width: 100% !important;
 }
-.svc-main { gap: 0 !important; }
+.svc-main {
+  display: block !important;
+  gap: 0 !important;
+}
 
 /* ── SECTION SPACING ─────────────────────────────────── */
 .mob-section {
@@ -127,7 +130,8 @@ body {
 }
 .mob-hero-img-side {
   flex-shrink: 0;
-  width: 115px;
+  width: 120px;
+  margin-left: auto;
 }
 .mob-hero-img-side img {
   width: 100%;
@@ -188,14 +192,15 @@ body {
   gap: 8px;
   width: 100%;
   padding: 14px;
-  border: 1px solid var(--border);
+  border: 1.5px solid rgba(255,255,255,0.2);
   border-radius: var(--radius);
-  background: transparent;
+  background: rgba(255,255,255,0.04);
   color: var(--text);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  margin-bottom: 4px;
 }
 
 /* ── STATS ROW ───────────────────────────────────────── */

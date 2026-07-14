@@ -1,0 +1,97 @@
+/* ================================================================
+   SCRIPTORA CHATBOT V2 — styles/tokens.css
+   Design tokens ONLY — kono structural/layout rule ekhane thakbe
+   na (oita shell.css-e). Premium dark SaaS theme, purple accent.
+   Shob variable #sca-root-er upor scoped, jate onno kono page-er
+   style-er sathe collide na kore.
+   ================================================================ */
+
+#sca-root {
+  /* ---------- Surfaces ---------- */
+  --sca-bg: #070B17;
+  --sca-surface-1: #0c1320;
+  --sca-surface-2: #101826;
+  --sca-surface-3: #141d2e;
+  --sca-border: rgba(255, 255, 255, 0.08);
+  --sca-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* ---------- Accent (purple) ---------- */
+  --sca-accent: #8B5CF6;
+  --sca-accent-2: #6D5EF6;
+  --sca-accent-soft: rgba(139, 92, 246, 0.14);
+  --sca-accent-border: rgba(139, 92, 246, 0.35);
+
+  /* ---------- Status ---------- */
+  --sca-success: #22C55E;
+  --sca-success-soft: rgba(34, 197, 94, 0.14);
+  --sca-warning: #F59E0B;
+  --sca-warning-soft: rgba(245, 158, 11, 0.14);
+  --sca-danger: #F87171;
+  --sca-danger-soft: rgba(248, 113, 113, 0.14);
+  --sca-info: #38BDF8;
+  --sca-info-soft: rgba(56, 189, 248, 0.14);
+
+  /* ---------- Text ---------- */
+  --sca-text: #FFFFFF;
+  --sca-text-2: #9CA3AF;
+  --sca-text-3: #6B7280;
+
+  /* ---------- Typography ---------- */
+  --sca-font: 'Inter', 'Segoe UI', 'Kalpurush', sans-serif;
+  --sca-fs-xs: 11px;
+  --sca-fs-sm: 12.5px;
+  --sca-fs-base: 13.5px;
+  --sca-fs-md: 14.5px;
+  --sca-fs-lg: 16px;
+  --sca-lh-tight: 1.3;
+  --sca-lh-base: 1.5;
+  --sca-lh-relaxed: 1.65;
+
+  /* ---------- Spacing scale (4px base) ---------- */
+  --sca-space-1: 4px;
+  --sca-space-2: 8px;
+  --sca-space-3: 12px;
+  --sca-space-4: 16px;
+  --sca-space-5: 20px;
+  --sca-space-6: 24px;
+  --sca-space-8: 32px;
+
+  /* ---------- Radius ---------- */
+  --sca-radius-sm: 8px;
+  --sca-radius-md: 12px;
+  --sca-radius-lg: 14px;
+  --sca-radius-xl: 20px;
+  --sca-radius-pill: 999px;
+
+  /* ---------- Shadow ---------- */
+  --sca-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --sca-shadow-md: 0 12px 28px rgba(0, 0, 0, 0.4);
+  --sca-shadow-lg: 0 30px 70px rgba(0, 0, 0, 0.55);
+  --sca-shadow-accent: 0 10px 28px rgba(139, 92, 246, 0.4);
+
+  /* ---------- Motion ---------- */
+  --sca-ease-out: cubic-bezier(0.2, 1, 0.3, 1);
+  --sca-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --sca-duration-fast: 0.15s;
+  --sca-duration-base: 0.25s;
+  --sca-duration-slow: 0.4s;
+
+  /* ---------- Focus ring (accessibility) ---------- */
+  --sca-focus-ring: 0 0 0 3px rgba(139, 92, 246, 0.35);
+
+  /* ---------- Z-index scale ---------- */
+  --sca-z-toggle: 9999;
+  --sca-z-panel: 9998;
+
+  color-scheme: dark;
+}
+
+/* Reduced motion — respected globally by any component using these
+   duration tokens via animation/transition (see shell.css usage) */
+@media (prefers-reduced-motion: reduce) {
+  #sca-root {
+    --sca-duration-fast: 0.001s;
+    --sca-duration-base: 0.001s;
+    --sca-duration-slow: 0.001s;
+  }
+}
