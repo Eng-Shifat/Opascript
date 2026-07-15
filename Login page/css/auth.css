@@ -413,6 +413,32 @@
   to { stroke-dashoffset: 0; }
 }
 
+/* Spark ripple — continuous decorative rings just below the login button */
+.auth-btn-ripple-wrap {
+  position: relative;
+}
+.btn-ripple-ring {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 52%, rgba(56, 214, 240, 0.85) 60%, transparent 72%);
+  filter: blur(0.3px) drop-shadow(0 0 5px rgba(56, 214, 240, 0.9));
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  pointer-events: none;
+  animation: tcBtnRipple 2.6s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+}
+.btn-ripple-ring.r2 { animation-delay: 0.9s; }
+.btn-ripple-ring.r3 { animation-delay: 1.8s; }
+@keyframes tcBtnRipple {
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0.9; }
+  60%  { opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(4.2); opacity: 0; }
+}
+
 .auth-divider {
   display: flex;
   align-items: center;
