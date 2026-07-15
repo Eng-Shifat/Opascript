@@ -1,0 +1,123 @@
+/* ---------------------------------------------------------
+   Precision Biometric Scanner — demo styles
+   Integrate by copying `.login-btn`, `.scanner-wrap`, `.fp-icon`,
+   `#scannerCanvas`, `.success-tick` rules into your stylesheet.
+--------------------------------------------------------- */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0b1226;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.demo-wrap {
+  width: 260px;
+}
+
+.login-btn {
+  position: relative;
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #2d6ef7, #6366f1);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.35s ease, height 0.35s ease, border-radius 0.35s ease;
+  overflow: visible;
+}
+
+/* Solid, clean circular pad — a one-time pop-in only, no distracting
+   continuous glow/pulse on the button shape itself. */
+.login-btn.is-scanning {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto;
+  cursor: default;
+  background: radial-gradient(circle at 35% 30%, #3b7af9, #1d4fbf 75%);
+  animation: tcPop 0.3s ease;
+}
+@keyframes tcPop {
+  0%   { transform: scale(0.88); }
+  60%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.btn-text {
+  transition: opacity 0.15s ease;
+}
+.login-btn.is-scanning .btn-text {
+  display: none;
+}
+
+/* Scanner container — exactly the size of the circular button */
+.scanner-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+}
+.login-btn.is-scanning .scanner-wrap {
+  display: flex;
+}
+
+/* Fingerprint fills ~95% of the circle — embedded in the sensor, not
+   floating with padding around it. */
+.fp-icon {
+  position: relative;
+  width: 53px;
+  height: 53px;
+  z-index: 1;
+  opacity: 0.6; /* dim "resting" state — the scan line brightens it as it passes */
+}
+
+#scannerCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen; /* scan line visually lights up the icon strokes beneath it */
+}
+
+/* Success tick — hidden by default, fades in with a quick pulse once
+   the scan completes (see showSuccess() in script.js) */
+.success-tick {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  z-index: 3;
+  opacity: 0;
+  transform: scale(0.6);
+  display: none;
+}
+.success-tick.show {
+  display: block;
+  animation: tcTickIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes tcTickIn {
+  0%   { opacity: 0; transform: scale(0.6); }
+  60%  { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
