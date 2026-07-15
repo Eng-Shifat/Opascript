@@ -40,6 +40,14 @@ body {
 .svc-cta,
 .svc-card { display: none !important; }
 
+/* ── MOBILE: banner image full width ─── */
+.svc-hero-banner {
+  border-radius: 8px !important;
+}
+.svc-hero-banner-img {
+  border-radius: 8px !important;
+}
+
 /* ── PAGE WRAPPER ────────────────────────────────────── */
 .svc-page { padding: 0 !important; }
 .svc-grid {
@@ -62,82 +70,41 @@ body {
 /* ── MOBILE HERO ─────────────────────────────────────── */
 .mob-hero { padding: 20px 20px 0; }
 
-.mob-hero-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(167,139,250,0.1);
-  border: 1px solid rgba(167,139,250,0.3);
-  border-radius: 20px;
-  padding: 6px 13px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--label);
-  margin-bottom: 14px;
-}
-
-/* title + image side by side */
-.mob-hero-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
+/* ── New: Title + Subtitle heading ── */
+.mob-hero-heading {
   margin-bottom: 16px;
 }
-.mob-hero-titles { flex: 1; }
-
 .mob-hero-title {
   font-size: 26px;
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.4px;
+  color: #fff;
+}
+.mob-hero-subtitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--label);
+  margin-top: 6px;
+  line-height: 1.4;
 }
 .mob-hero-title-accent {
   color: var(--label);
-  display: block;
 }
 
-.mob-hero-img-wrap {
-  flex-shrink: 0;
-  width: 120px;
-}
-.mob-hero-img-wrap img {
+/* ── New: Full-width banner image ── */
+.mob-hero-banner {
   width: 100%;
-  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6));
-}
-
-/* full-width description */
-.mob-hero-desc {
-  font-size: 13.5px;
-  line-height: 1.75;
-  color: var(--muted);
-  margin-bottom: 18px;
-}
-.mob-hero-desc strong {
-  color: rgba(255,255,255,0.9);
-  font-weight: 700;
-}
-
-/* checklist left + image right */
-.mob-hero-bottom {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-.mob-hero-bottom .mob-checklist {
-  flex: 1;
+  border-radius: 12px;
+  overflow: hidden;
   margin-bottom: 0;
+  line-height: 0;
 }
-.mob-hero-img-side {
-  flex-shrink: 0;
-  width: 120px;
-  margin-left: auto;
-}
-.mob-hero-img-side img {
+.mob-hero-banner-img {
   width: 100%;
   height: auto;
   display: block;
-  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+  border-radius: 12px;
 }
 
 .mob-checklist {

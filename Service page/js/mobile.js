@@ -16,32 +16,9 @@
     var html =
       /* ── HERO ── */
       '<div class="mob-hero">' +
-        '<div class="mob-hero-label">Professional Thesis Writing Service</div>' +
-        '<div class="mob-hero-top">' +
-          '<div class="mob-hero-titles">' +
-            '<h1 class="mob-hero-title">From Topic Selection to<span class="mob-hero-title-accent">Final Submission</span></h1>' +
-          '</div>' +
+        '<div class="mob-hero-banner">' +
+          '<img src="hero-banner.png" alt="Scriptora Thesis Writing" class="mob-hero-banner-img" />' +
         '</div>' +
-        '<div class="mob-hero-desc">' +
-          '<strong>আপনার থিসিস, আপনার পরিচয়।</strong><br><br>' +
-          'প্রতিটি গবেষণার পেছনে থাকে অসংখ্য রাতের পরিশ্রম, শত শত রেফারেন্স এবং অগণিত ঘণ্টার অধ্যবসায়। সেই মূল্যবান কাজটি যেন উপস্থাপনায় কোনোভাবেই পিছিয়ে না থাকে।<br><br>' +
-          'Scriptora নিশ্চিত করে একটি নির্ভুল, পেশাদার, সুবিন্যস্ত এবং সম্পূর্ণ প্লেজিয়ারিজম-মুক্ত থিসিস। ভাষা থেকে ফরম্যাটিং, সম্পাদনা থেকে একাডেমিক মান — প্রতিটি ধাপে আমরা গুরুত্ব দিই খুঁটিনাটির প্রতি।' +
-        '</div>' +
-        '<div class="mob-hero-bottom">' +
-          '<ul class="mob-checklist">' +
-            ['Research-Based Writing','Professional Formatting','Turnitin Report','Unlimited Revision','Timely Delivery'].map(function(t){
-              return '<li><span class="mob-check-icon">✓</span>' + t + '</li>';
-            }).join('') +
-          '</ul>' +
-          '<div class="mob-hero-img-side">' +
-            '<img src="thesis-book-hero.png" alt="Thesis" />' +
-          '</div>' +
-        '</div>' +
-        '<button class="mob-cta-primary" onclick="orderThesisPackage && orderThesisPackage()">View Pricing &amp; Packages</button>' +
-        '<button class="mob-cta-outline">' +
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
-          'Talk to Expert' +
-        '</button>' +
       '</div>' +
 
       /* ── STATS ── */
