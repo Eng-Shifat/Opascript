@@ -102,7 +102,9 @@ body {
   font-size: 15px;
   line-height: 1.8;
   color: var(--text-secondary);
-  max-width: 70ch;
+  max-width: none;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .svc-link {
@@ -117,7 +119,157 @@ body {
 }
 .svc-link:hover { border-color: rgba(255,255,255,0.3); }
 
-/* -------- HERO -------- */
+/* -------- HERO (background-image card, sits in the 2-column layout) -------- */
+.svc-hero-fb-card {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  min-height: 540px;
+  display: flex;
+  align-items: flex-end;
+  background-image: url('../hero-banner.png');
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.5),
+    inset 1px 0 0 rgba(255,255,255,0.08),
+    inset -1px 0 0 rgba(0,0,0,0.35),
+    0 24px 60px -12px rgba(0,0,0,0.65),
+    0 0 0 1px rgba(139,92,246,0.15);
+}
+
+.svc-hero-fb-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 6%);
+}
+
+.svc-hero-fb-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(100deg, rgba(7,11,23,0.97) 0%, rgba(7,11,23,0.8) 45%, rgba(7,11,23,0.2) 100%),
+    linear-gradient(to top, rgba(7,11,23,1) 0%, rgba(7,11,23,0.05) 40%, transparent 65%);
+}
+
+.svc-hero-fb-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 48px 40px 36px;
+}
+
+.svc-hero-fb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 7px 16px;
+  margin-bottom: var(--sp-2);
+}
+.svc-hero-fb-badge span {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #C4B5FD;
+}
+
+.svc-hero-fb-title {
+  display: flex;
+  flex-direction: column;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.4px;
+  margin-bottom: var(--sp-2);
+  max-width: 560px;
+  background: linear-gradient(90deg, #FFFFFF 30%, #C4B5FD 65%, #A855F7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.svc-hero-fb-desc {
+  max-width: 560px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.75;
+  margin-bottom: var(--sp-3);
+}
+.svc-hero-fb-desc p + p { margin-top: var(--sp-2); }
+.svc-hero-fb-desc strong { color: var(--text); font-weight: 600; }
+
+.svc-hero-fb-cta {
+  display: flex;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+  flex-wrap: wrap;
+}
+.svc-hero-fb-btn-primary,
+.svc-hero-fb-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.svc-hero-fb-btn-primary {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+}
+.svc-hero-fb-btn-primary:hover { background: var(--accent-2); }
+.svc-hero-fb-btn-outline {
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+}
+.svc-hero-fb-btn-outline:hover { border-color: rgba(255,255,255,0.4); }
+
+.svc-hero-fb-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--border);
+  backdrop-filter: blur(12px);
+}
+.svc-hero-fb-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: rgba(16,24,38,0.6);
+}
+.svc-hero-fb-stat-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+.svc-hero-fb-stat-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* -------- HERO (legacy, mobile.js uses its own .mob-hero markup) -------- */
 .svc-hero {
   position: relative;
   display: flex;
@@ -775,12 +927,17 @@ body {
   .svc-why-grid { grid-template-columns: repeat(2, 1fr); }
   .svc-reviews-grid { grid-template-columns: 1fr; }
   .svc-samples-grid { grid-template-columns: repeat(3, 1fr); }
+
+  .svc-hero-fb-title { font-size: 30px; max-width: 100%; }
 }
 
 @media (max-width: 980px) {
   .svc-grid { grid-template-columns: 1fr; padding: var(--sp-3) var(--sp-3) 0; }
   .svc-breadcrumb { padding: var(--sp-3) var(--sp-3) 0; }
   .svc-sidebar { position: static; }
+
+  .svc-hero-fb-inner { padding: 36px 24px 28px; }
+  .svc-hero-fb-desc { max-width: 100%; }
 
   .svc-hero-row { flex-direction: column-reverse; text-align: center; }
   .svc-hero-title { white-space: normal; }
@@ -815,7 +972,7 @@ body {
 .svc-about-intro {
   font-size: 15px;
   line-height: 1.8;
-  margin-bottom: var(--sp-3);
+  margin-bottom: var(--sp-4);
   color: rgba(255,255,255,0.75);
 }
 

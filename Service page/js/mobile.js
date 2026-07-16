@@ -16,17 +16,59 @@
     var html =
       /* ── HERO ── */
       '<div class="mob-hero">' +
-        '<div class="mob-hero-banner">' +
-          '<img src="hero-banner.png" alt="Scriptora Thesis Writing" class="mob-hero-banner-img" />' +
+        '<div class="mob-hero-card">' +
+          '<div class="mob-hero-card-overlay"></div>' +
+          '<div class="mob-hero-card-inner">' +
+            '<div class="mob-hero-badge">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' +
+              '<span>Professional Thesis Writing Service</span>' +
+            '</div>' +
+            '<h1 class="mob-hero-card-title">Writing a Thesis is Your Defining Milestone</h1>' +
+            '<p class="mob-hero-card-desc-short">Premium, AI-free &amp; plagiarism-free thesis support — delivered on time, every time.</p>' +
+            '<div class="mob-hero-card-cta">' +
+              '<button class="mob-cta-primary">Start Your Project <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
+              '<button class="mob-cta-outline" onclick="window.open(\'https://wa.me/8801XXXXXXXXX\',\'_blank\')">Talk to an Expert</button>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
+      '</div>' +
+
+      /* ── HERO FEATURE STATS (moved off the photo, own section) ── */
+      '<div class="mob-hero-features">' +
+        [
+          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>', title:'Expert Writers', desc:'Led by Level-2 Certified Writer'},
+          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>', title:'100% Plagiarism Free', desc:'Turnitin Report Included'},
+          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title:'On-Time Delivery', desc:'Zero-Delay Commitment'},
+          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.1l4 4-4 4"/><path d="M3 12.6v-2a4 4 0 014-4h14"/><path d="M7 21.9l-4-4 4-4"/><path d="M21 11.4v2a4 4 0 01-4 4H3"/></svg>', title:'Unlimited Revisions', desc:'Until 100% Satisfied'},
+          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title:'Risk-Free Guarantee', desc:'Hassle-Free Refund'},
+        ].map(function(s){
+          return '<div class="mob-hero-feature"><div class="mob-hero-feature-icon">' + s.icon + '</div><div><div class="mob-hero-feature-title">' + s.title + '</div><div class="mob-hero-feature-desc">' + s.desc + '</div></div></div>';
+        }).join('') +
       '</div>' +
 
       /* ── STATS ── */
       '<div class="mob-stats">' +
-        '<div class="mob-stat"><div class="mob-stat-icon star">★</div><div class="mob-stat-val">4.9/5</div><div class="mob-stat-sub">(312 Reviews)</div></div>' +
-        '<div class="mob-stat"><div class="mob-stat-icon">🏆</div><div class="mob-stat-val">500+</div><div class="mob-stat-sub">Projects</div></div>' +
-        '<div class="mob-stat"><div class="mob-stat-icon">⏱</div><div class="mob-stat-val">98%</div><div class="mob-stat-sub">On-Time</div></div>' +
-        '<div class="mob-stat"><div class="mob-stat-icon">🔒</div><div class="mob-stat-val">100%</div><div class="mob-stat-sub">Confidential</div></div>' +
+        '<div class="mob-stat"><div class="mob-stat-icon star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.8-6.2 3.8 1.6-7L2 9.2l7.1-.6z"/></svg></div><div class="mob-stat-val">4.9/5</div><div class="mob-stat-sub">(312 Reviews)</div></div>' +
+        '<div class="mob-stat"><div class="mob-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.5 1.5 4 4 4.3M17 6h3a1 1 0 0 1 1 1c0 2.5-1.5 4-4 4.3"/></svg></div><div class="mob-stat-val">500+</div><div class="mob-stat-sub">Projects</div></div>' +
+        '<div class="mob-stat"><div class="mob-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div><div class="mob-stat-val">98%</div><div class="mob-stat-sub">On-Time</div></div>' +
+        '<div class="mob-stat"><div class="mob-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="mob-stat-val">100%</div><div class="mob-stat-sub">Confidential</div></div>' +
+      '</div>' +
+
+      /* ── ABOUT ── */
+      '<div class="mob-section">' +
+        '<h2 class="mob-sec-title mob-sec-title-accent">About This Thesis Writing Service</h2>' +
+        '<p class="mob-about-text">Writing a thesis is more than an academic requirement — it is a reflection of your research, dedication, and intellectual growth. Whether you are pursuing an <strong>Undergraduate, Master\'s, or PhD</strong> degree, every thesis deserves the highest standard of quality and professionalism.</p>' +
+        '<div class="mob-about-highlights">' +
+          [
+            {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>', title:'Expert-Led Team', desc:'Led by a Fiverr Level-2 Certified Writer and supported by experienced academic researchers.'},
+            {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', title:'Zero-Delay Commitment', desc:'Your project is completed well ahead of schedule — without sacrificing quality.'},
+            {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>', title:'Smart Client Dashboard', desc:'Monitor progress, review drafts, and communicate with your writer in real time.'},
+          ].map(function(h){
+            return '<div class="mob-about-hl"><div class="mob-about-hl-icon">' + h.icon + '</div><div><div class="mob-about-hl-title">' + h.title + '</div><div class="mob-about-hl-desc">' + h.desc + '</div></div></div>';
+          }).join('') +
+        '</div>' +
+        '<p class="mob-about-text">Every project strictly follows your university\'s <strong>formatting guidelines, citation style, and academic requirements</strong>, resulting in a well-structured, original, <strong>AI-free and plagiarism-free</strong> thesis.</p>' +
+        '<p class="mob-about-mission">At Opascript, we don\'t simply help you finish your thesis — we help you present your research with confidence.</p>' +
       '</div>' +
 
       /* ── WHAT'S INCLUDED ── */
