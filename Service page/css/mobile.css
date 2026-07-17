@@ -167,45 +167,6 @@ body {
   gap: 4px;
 }
 
-/* ── New: feature stats moved off the photo, own section ── */
-.mob-hero-features {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 16px 20px 4px;
-}
-.mob-hero-feature {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: var(--card2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 12px;
-}
-.mob-hero-feature-icon {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--purple-soft);
-}
-.mob-hero-feature-title {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.3;
-}
-.mob-hero-feature-desc {
-  font-size: 9.5px;
-  color: var(--muted);
-  line-height: 1.3;
-  margin-top: 2px;
-}
-
 /* ── New: Title + Subtitle heading (legacy, no longer used by hero) ── */
 .mob-hero-heading {
   margin-bottom: 16px;
@@ -311,7 +272,7 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
-  padding: 16px 20px 22px;
+  padding: 24px 20px 22px;
   border-bottom: 1px solid var(--border);
 }
 .mob-stat {

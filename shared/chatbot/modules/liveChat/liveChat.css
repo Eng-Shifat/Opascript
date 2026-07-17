@@ -1,0 +1,240 @@
+/* ================================================================
+   SAVE AT: shared/chatbot/modules/liveChat/liveChat.css
+   Live Chat module-only styles — "lc-" prefix, ai.css-er exact same
+   discipline: shell.css/tokens.css (Phase 2, frozen) kono touch na,
+   kono onno module-er CSS-er sathe collide na. Ei file
+   liveChat.module.js nijei <link> kore load korবে (ai.module.js
+   nijer ai.css jevabe kore, oi pattern mirror kora).
+
+   Notun kono variable declare kora hoyni — shudhu tokens.css-er
+   existing --sca-* variable-gulo reuse. Notun kono .ui-* class
+   redefine/override kora hoyni (shell.css-er "frozen" contract
+   respect kora) — shob selection-state (selected chip, ityadi)
+   .lc-* parent-er vitor scoped, tai .ui-chip-er nijer generic style
+   kokhono touch hoy na.
+   ================================================================ */
+
+/* ---------- 1. Pre-contact form ---------- */
+
+.lc-precontact-block {
+  display: flex;
+  flex-direction: column;
+  animation: lc-fade-up var(--sca-duration-base) var(--sca-ease-out);
+}
+
+.lc-dept-field { margin-bottom: var(--sca-space-4); }
+
+.lc-dept-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sca-space-2);
+}
+
+/* Selected department chip — scoped under .lc-dept-chips only, so the
+   shared .ui-chip primitive (shell.css) itself is never touched or
+   overridden globally. module.js toggles aria-pressed="true" on click. */
+.lc-dept-chips .ui-chip[aria-pressed="true"] {
+  background: var(--sca-accent-soft);
+  border-color: var(--sca-accent-border);
+  color: var(--sca-text);
+  box-shadow: var(--sca-focus-ring);
+}
+
+/* ---------- 2. Queue card + waiting screen ---------- */
+
+.lc-waiting-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sca-space-4);
+  padding: var(--sca-space-6) var(--sca-space-3);
+  text-align: center;
+}
+
+.lc-queue-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--sca-border);
+  border-radius: var(--sca-radius-xl);
+  padding: var(--sca-space-5) var(--sca-space-4);
+  box-shadow: var(--sca-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sca-space-2);
+  animation: lc-fade-up var(--sca-duration-base) var(--sca-ease-out);
+}
+
+.lc-queue-text {
+  color: var(--sca-text-2);
+  font-size: var(--sca-fs-base);
+  line-height: var(--sca-lh-base);
+  margin: 0;
+  max-width: 260px;
+}
+
+/* ---------- 3. Queue position ---------- */
+
+.lc-position-card {
+  display: flex;
+  justify-content: center;
+  animation: lc-fade-up var(--sca-duration-base) var(--sca-ease-out);
+}
+
+/* Brief highlight when the position number changes — module.js adds
+   this class for one animation cycle then removes it. Uses the
+   duration token so it's automatically inert under reduced-motion. */
+.lc-position-card.lc-position-flash .ui-badge {
+  animation: lc-position-pulse var(--sca-duration-slow) var(--sca-ease-out);
+}
+
+@keyframes lc-position-pulse {
+  0%   { box-shadow: 0 0 0 0 var(--sca-accent-soft); }
+  60%  { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* ---------- 4. Admin connected banner ---------- */
+
+.lc-assigned-banner {
+  background: var(--sca-success-soft);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--sca-radius-lg);
+  padding: var(--sca-space-3) var(--sca-space-4);
+  margin-bottom: var(--sca-space-4);
+  max-width: 92%;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: lc-fade-up var(--sca-duration-base) var(--sca-ease-out);
+}
+
+.lc-assigned-text {
+  color: var(--sca-text-2);
+  font-size: var(--sca-fs-sm);
+  line-height: var(--sca-lh-base);
+  margin: var(--sca-space-2) 0 0;
+}
+
+/* ---------- 5. Chat messages (thread scroll area) ---------- */
+
+/* #lc-messages is the id liveChat.templates.js's messageArea() passes
+   to Components.scrollArea() — scrollArea() itself only adds the
+   shared .ui-scroll-area class (no per-module class hook exists yet),
+   so this one id selector is the scoped, non-global way to size this
+   specific element without touching ui/components.js. */
+#lc-messages {
+  flex: 1;
+  min-height: 0;
+  padding-right: 2px;
+}
+
+/* ---------- 6. Admin typing ---------- */
+
+/* .ui-typing (shell.css) already carries the dot animation — this just
+   gives it breathing room consistent with the rest of the thread. */
+.lc-typing-wrap {
+  margin-top: var(--sca-space-1);
+}
+
+/* ---------- 7. Offline notice ---------- */
+
+.lc-offline-notice {
+  background: var(--sca-warning-soft);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--sca-radius-lg);
+  padding: var(--sca-space-3) var(--sca-space-4);
+  margin-bottom: var(--sca-space-4);
+  max-width: 92%;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: lc-fade-up var(--sca-duration-base) var(--sca-ease-out);
+}
+
+.lc-offline-text {
+  color: var(--sca-text-2);
+  font-size: var(--sca-fs-sm);
+  line-height: var(--sca-lh-base);
+  margin: var(--sca-space-2) 0 0;
+}
+
+/* ---------- 8. Chat closed screen ---------- */
+
+.lc-closed-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sca-space-2);
+  text-align: center;
+  padding: var(--sca-space-6) var(--sca-space-3);
+  animation: lc-fade-up var(--sca-duration-base) var(--sca-ease-out);
+}
+
+.lc-closed-text {
+  color: var(--sca-text-2);
+  font-size: var(--sca-fs-base);
+  line-height: var(--sca-lh-base);
+  margin: 0;
+  max-width: 260px;
+}
+
+/* ---------- 9. Feedback card ---------- */
+
+.lc-feedback-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--sca-border);
+  border-radius: var(--sca-radius-xl);
+  padding: var(--sca-space-5) var(--sca-space-4);
+  box-shadow: var(--sca-shadow-sm);
+  animation: lc-fade-up var(--sca-duration-base) var(--sca-ease-out);
+}
+
+.lc-rating-chips {
+  display: flex;
+  gap: var(--sca-space-2);
+  margin: var(--sca-space-3) 0 var(--sca-space-4);
+}
+
+.lc-rating-chips .ui-chip {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+}
+
+.lc-rating-chips .ui-chip[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--sca-accent), var(--sca-accent-2));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: var(--sca-shadow-accent);
+}
+
+/* ---------- 10. Return-to-AI button ---------- */
+
+/* returnToAiButton() renders a bare Components.button — this scoped
+   attribute selector (not a global .ui-btn override) just adds
+   placement spacing without touching shell.css's button styles. */
+[data-btn-id="lc-return-to-ai"] {
+  margin-top: var(--sca-space-4);
+  width: 100%;
+}
+
+/* ---------- Shared entrance animation (respects prefers-reduced-motion
+   automatically, since tokens.css zeroes these duration vars globally) ---------- */
+
+@keyframes lc-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 480px) {
+  .lc-dept-chips { gap: var(--sca-space-1); }
+  .lc-rating-chips { gap: var(--sca-space-1); }
+  .lc-queue-card,
+  .lc-feedback-card { padding: var(--sca-space-4) var(--sca-space-3); }
+  .lc-waiting-screen { padding: var(--sca-space-4) var(--sca-space-2); }
+}

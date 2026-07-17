@@ -33,19 +33,6 @@
         '</div>' +
       '</div>' +
 
-      /* ── HERO FEATURE STATS (moved off the photo, own section) ── */
-      '<div class="mob-hero-features">' +
-        [
-          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>', title:'Expert Writers', desc:'Led by Level-2 Certified Writer'},
-          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>', title:'100% Plagiarism Free', desc:'Turnitin Report Included'},
-          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title:'On-Time Delivery', desc:'Zero-Delay Commitment'},
-          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.1l4 4-4 4"/><path d="M3 12.6v-2a4 4 0 014-4h14"/><path d="M7 21.9l-4-4 4-4"/><path d="M21 11.4v2a4 4 0 01-4 4H3"/></svg>', title:'Unlimited Revisions', desc:'Until 100% Satisfied'},
-          {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title:'Risk-Free Guarantee', desc:'Hassle-Free Refund'},
-        ].map(function(s){
-          return '<div class="mob-hero-feature"><div class="mob-hero-feature-icon">' + s.icon + '</div><div><div class="mob-hero-feature-title">' + s.title + '</div><div class="mob-hero-feature-desc">' + s.desc + '</div></div></div>';
-        }).join('') +
-      '</div>' +
-
       /* ── STATS ── */
       '<div class="mob-stats">' +
         '<div class="mob-stat"><div class="mob-stat-icon star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.8-6.2 3.8 1.6-7L2 9.2l7.1-.6z"/></svg></div><div class="mob-stat-val">4.9/5</div><div class="mob-stat-sub">(312 Reviews)</div></div>' +
