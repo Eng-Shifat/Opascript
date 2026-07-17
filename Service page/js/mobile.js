@@ -24,7 +24,7 @@
               '<span>Professional Thesis Writing Service</span>' +
             '</div>' +
             '<h1 class="mob-hero-card-title">Writing a Thesis is Your Defining Milestone</h1>' +
-            '<p class="mob-hero-card-desc-short">Premium, AI-free &amp; plagiarism-free thesis support — delivered on time, every time.</p>' +
+            '<p class="mob-hero-card-desc-short">Led by a Fiverr Level-2 Certified Writer, we deliver 100% flawless, AI-free, and plagiarism-free thesis support tailored to 20+ local &amp; international university guidelines—delivered right on time.</p>' +
           '</div>' +
           '<div class="mob-hero-card-cta-row">' +
             '<button class="mob-cta-primary">Start Your Project <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
@@ -72,8 +72,8 @@
             {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>', label:'Formatting (APA, IEEE, etc.)'},
             {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', label:'Turnitin Report'},
             {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/></svg>', label:'Unlimited Revisions'},
-          ].map(function(item){
-            return '<div class="mob-inc-item"><div class="mob-inc-icon">' + item.icon + '</div><span class="mob-inc-label">' + item.label + '</span></div>';
+          ].map(function(item, i){
+            return '<div class="mob-inc-item"><div class="mob-inc-icon" style="animation-delay:' + (i * 0.15) + 's">' + item.icon + '</div><span class="mob-inc-label">' + item.label + '</span></div>';
           }).join('') +
         '</div>' +
         '<div class="mob-view-more"><a href="#">View All Details →</a></div>' +
