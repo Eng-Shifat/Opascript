@@ -25,10 +25,10 @@
             '</div>' +
             '<h1 class="mob-hero-card-title">Writing a Thesis is Your Defining Milestone</h1>' +
             '<p class="mob-hero-card-desc-short">Premium, AI-free &amp; plagiarism-free thesis support — delivered on time, every time.</p>' +
-            '<div class="mob-hero-card-cta">' +
-              '<button class="mob-cta-primary">Start Your Project <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
-              '<button class="mob-cta-outline" onclick="window.open(\'https://wa.me/8801XXXXXXXXX\',\'_blank\')">Talk to an Expert</button>' +
-            '</div>' +
+          '</div>' +
+          '<div class="mob-hero-card-cta-row">' +
+            '<button class="mob-cta-primary">Start Your Project <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
+            '<button class="mob-cta-outline" onclick="window.open(\'https://wa.me/8801XXXXXXXXX\',\'_blank\')">Talk to an Expert</button>' +
           '</div>' +
         '</div>' +
       '</div>' +
