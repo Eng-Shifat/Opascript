@@ -59,8 +59,7 @@ function registerModules() {
     Router.register('ai', () => import('./modules/ai/ai.module.js'), Config.modules.ai);
   }
   if (Config.modules.liveChat.enabled) {
-    // Reserved for Phase 4 — intentionally not registered yet.
-    // Router.register('liveChat', () => import('./modules/liveChat/liveChat.module.js'), Config.modules.liveChat);
+    Router.register('liveChat', () => import('./modules/liveChat/liveChat.module.js'), Config.modules.liveChat);
   }
 }
 
@@ -86,21 +85,37 @@ async function bootstrap() {
         only when Router.activate() is actually called for a key). */
   registerModules();
 
-  /* 4. Persistent input bar -> EventBus -> Router -> active module.
+  /* 4. Handoff bridge — the ONLY place 'handoff.request' is translated
+        into the generic 'router:activate' event that router.js already
+        understands. This line is the entire bridge:
+          - ai.module.js emits 'handoff.request' and has no idea what
+            handles it, or that LiveChat exists at all.
+          - router.js only ever understands 'router:activate' + a key —
+            it has no idea LiveChat exists either; it's still completely
+            generic, same as before Phase 4.
+        main.js is the one place allowed to know both event names, since
+        wiring independent pieces together is exactly what main.js is
+        for (see file header). Nothing here is business logic — it's a
+        one-line translation, not a decision. */
+  EventBus.on('handoff.request', (payload) => {
+    EventBus.emit('router:activate', { key: 'liveChat', payload });
+  });
+
+  /* 5. Persistent input bar -> EventBus -> Router -> active module.
         widgetShell.js emits 'shell:input'; router.js already
         subscribes to it internally, so this line just documents the
         connection point — no duplicate wiring needed here. */
   // (intentionally no additional EventBus.on('shell:input', ...) here —
   //  core/router.js already owns that subscription.)
 
-  /* 5. Decide + activate the initial module: resume the restored
+  /* 6. Decide + activate the initial module: resume the restored
         active module if it's registered/enabled, otherwise default
         to 'ai'. */
   const restoredKey = restored ? State.get().activeModule : null;
   const initialKey = (restoredKey && Router.isEnabled(restoredKey)) ? restoredKey : 'ai';
   await Router.activate(initialKey);
 
-  /* 6. Shared shell chrome that doesn't belong to any one module. */
+  /* 7. Shared shell chrome that doesn't belong to any one module. */
   WidgetShell.setStatus(isWithinBusinessHours());
 
   /* Session persistence itself needs no wiring here — session.js
