@@ -481,15 +481,18 @@ body {
   color: var(--label);
 }
 .mob-why-icon-wrap svg { width: 18px; height: 18px; }
+.mob-why-text { min-width: 0; flex: 1; }
 .mob-why-title {
   font-size: 14px;
   font-weight: 700;
   margin-bottom: 3px;
+  line-height: 1.3;
 }
 .mob-why-desc {
   font-size: 12.5px;
   color: var(--muted);
   line-height: 1.55;
+  word-break: break-word;
 }
 
 /* ── EXPERT ──────────────────────────────────────────── */
