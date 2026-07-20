@@ -5,6 +5,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Scriptora–Ghostwriting Service</title>
+
+  <!-- থিম বুটস্ট্র্যাপ: পেজ রেন্ডার হওয়ার আগেই সংরক্ষিত থিম বসিয়ে দেয়, যাতে রিলোডে রং ফ্ল্যাশ না করে -->
+  <script>
+    (function () {
+      if (localStorage.getItem('scriptora_theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
@@ -15,10 +25,12 @@
   <!-- SHARED NAVBAR -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../shared/supabaseClient.js"></script>
+  <script src="../shared/theme.js"></script>
   <script src="../shared/navbar.js"></script>
 
   <!-- LIVE CHAT WIDGET -->
   <script type="module" src="../shared/chatbot/main.js"></script>
+
 
   <!-- HERO -->
   <section class="hero">

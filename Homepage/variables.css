@@ -1,0 +1,116 @@
+/* =========================================================
+   SCRIPTORA — variables.css
+   সব রং এক জায়গায় — এখান থেকে বদলালেই পুরো সাইটে বদলে যাবে।
+   Dark Mode ডিফল্ট (:root) — Light Mode চালু হয় [data-theme="light"] দিয়ে
+   ========================================================= */
+
+:root {
+  /* ---------- ব্যাকগ্রাউন্ড (Dark Mode) ---------- */
+  --bg-main: #0f1b3d;          /* প্রধান পেজ ব্যাকগ্রাউন্ড (body, hero) */
+  --bg-main-rgb: 15, 27, 61;   /* উপরের রঙের RGB — opacity সহ ব্যবহারের জন্য (মোবাইল মেনু ব্লার ইত্যাদি) */
+  --bg-nav: #0a1428;           /* নেভবার ব্যাকগ্রাউন্ড */
+  --bg-card: #111e3f;          /* স্ট্যাটস কার্ডের ব্যাকগ্রাউন্ড */
+  --bg-card-alt: #0d1830;      /* সেকশন গ্রেডিয়েন্টের বিকল্প শেড (WCU/HIW/CTA সেকশন) */
+  --bg-dropdown: #0f1a33;      /* প্রোফাইল ড্রপডাউন মেনুর ব্যাকগ্রাউন্ড */
+  --bg-deep: #060d1f;          /* ফুটারের সবচেয়ে গাঢ় ব্যাকগ্রাউন্ড */
+  --bg-deep-2: #080f22;        /* বটম-স্ট্যাটস সেকশনের ব্যাকগ্রাউন্ড */
+  --bg-gradient-mid: #112244;  /* হিরো সেকশনের গ্রেডিয়েন্টের মাঝের স্টপ */
+  --bg-gradient-alt: #162458;  /* সার্ভিস সেকশনের গ্রেডিয়েন্টের শেষ স্টপ */
+
+  /* ---------- টেক্সট (Dark Mode) ---------- */
+  --text-main: #ffffff;        /* প্রধান লেখার রং (সাদা) */
+  --text-rgb: 255, 255, 255;   /* উপরের রঙের RGB — muted/faint টেক্সট ও বর্ডারের opacity-তে ব্যবহৃত */
+  --text-on-accent: #ffffff;   /* নীল/সবুজ বাটনের উপর লেখার রং — থিম বদলালেও এটা সবসময় সাদা থাকবে (কনট্রাস্টের জন্য) */
+
+  /* ---------- ছায়া (shadow) ---------- */
+  --shadow-rgb: 0, 0, 0;       /* বক্স-শ্যাডোর RGB বেস */
+
+  /* ---------- অ্যাকসেন্ট / ব্র্যান্ড রং (Primary) ---------- */
+  --accent-color: #2d6ef7;     /* মূল ব্র্যান্ড রং — বাটন, লিংক, হাইলাইট */
+  --accent-hover: #1d5de0;     /* অ্যাকসেন্ট বাটনের হোভার রং */
+  --accent-rgb: 45, 110, 247;  /* অ্যাকসেন্টের RGB — গ্লো/ব্যাজ ব্যাকগ্রাউন্ডে opacity সহ ব্যবহৃত */
+  --accent-light: #60a5fa;     /* হালকা নীল ভ্যারিয়েন্ট — "Ghost Writing" স্প্যান, আইকন গ্লো */
+  --accent-light-rgb: 96, 165, 250;
+
+  /* ---------- আইকন/ব্যাজ প্যালেট — উভয় থিমেই অপরিবর্তিত থাকে ----------
+     এই উজ্জ্বল রংগুলো (WCU আইকন, সার্ভিস কার্ড আইকন, ব্যাজ) নিজেদের
+     টিন্টেড ব্যাকগ্রাউন্ডের উপর বসে, তাই Light/Dark দুই থিমেই একই রাখা হয়েছে। */
+  --color-purple: #a78bfa;
+  --color-purple-rgb: 167, 139, 250;
+  --color-purple-deep: #7c3aed;
+  --color-purple-deep-rgb: 124, 58, 237;
+  --color-purple-deep2: #4f46e5;
+  --color-purple-pale: #c4b5fd;
+  --color-violet: #a855f7;
+  --color-violet2-rgb: 139, 92, 246;
+  --color-indigo: #6366f1;
+  --color-indigo-rgb: 99, 102, 241;
+  --color-indigo2: #818cf8;
+  --color-indigo2-rgb: 129, 140, 248;
+  --color-pink: #f472b6;
+  --color-pink-rgb: 244, 114, 182;
+  --color-pink-deep: #ec4899;
+  --color-pink-deep-rgb: 236, 72, 153;
+  --color-pink-deep2: #be185d;
+  --color-pink-deep2-rgb: 190, 24, 93;
+  --color-yellow: #fbbf24;
+  --color-yellow-rgb: 251, 191, 36;
+  --color-amber-deep: #f59e0b;
+  --color-amber-deep2: #d97706;
+  --color-green: #34d399;
+  --color-green-rgb: 52, 211, 153;
+  --color-success: #22c55e;      /* সবুজ — সফলতা, WhatsApp বাটন, চেক-আইকন */
+  --color-success-rgb: 34, 197, 94;
+  --color-success-hover: #16a34a;
+  --color-success-light: #4ade80;
+  --color-success-deep: #15803d;
+  --color-success-deep-rgb: 21, 128, 61;
+  --color-teal: #14b8a6;
+  --color-teal-deep: #0f766e;
+  --color-teal-light: #2dd4bf;
+  --color-cyan: #06b6d4;
+  --color-cyan-rgb: 6, 182, 212;
+  --color-cyan-deep: #0e7490;
+  --color-cyan-light: #22d3ee;
+  --color-blue2: #3b82f6;
+  --color-blue2-rgb: 59, 130, 246;
+  --color-blue2-deep: #1d4ed8;
+  --color-blue2-deep2-rgb: 37, 99, 235;
+  --color-lightblue-pale: #93c5fd;
+  --color-orange: #f97316;
+  --color-orange-rgb: 249, 115, 22;
+  --color-orange-light: #fb923c;
+  --color-red: #ef4444;          /* লাল — এরর, লগআউট, ডেঞ্জার */
+  --color-red-rgb: 239, 68, 68;
+  --color-red-light: #fca5a5;
+  --color-red-deep: #dc2626;
+}
+
+/* =========================================================
+   LIGHT MODE — প্রিমিয়াম হালকা থিম
+   <html data-theme="light"> বা <body data-theme="light"> হলে এটা চালু হবে
+   ========================================================= */
+[data-theme="light"] {
+  /* ---------- ব্যাকগ্রাউন্ড (Light Mode) ---------- */
+  --bg-main: #f6f8fc;          /* প্রধান পেজ ব্যাকগ্রাউন্ড — নরম অফ-হোয়াইট */
+  --bg-main-rgb: 246, 248, 252;
+  --bg-nav: #ffffff;           /* নেভবার ব্যাকগ্রাউন্ড — সাদা */
+  --bg-card: #ffffff;          /* স্ট্যাটস কার্ডের ব্যাকগ্রাউন্ড — সাদা */
+  --bg-card-alt: #eef1f8;      /* সেকশন গ্রেডিয়েন্টের বিকল্প শেড — হালকা ধূসর-নীল */
+  --bg-dropdown: #ffffff;      /* প্রোফাইল ড্রপডাউন — সাদা */
+  --bg-deep: #eef0f6;          /* ফুটার ব্যাকগ্রাউন্ড — হালকা ধূসর */
+  --bg-deep-2: #eef1f7;        /* বটম-স্ট্যাটস ব্যাকগ্রাউন্ড */
+  --bg-gradient-mid: #eef1f8;  /* হিরো গ্রেডিয়েন্টের মাঝের স্টপ */
+  --bg-gradient-alt: #e7ebf5;  /* সার্ভিস সেকশন গ্রেডিয়েন্টের শেষ স্টপ */
+
+  /* ---------- টেক্সট (Light Mode) ---------- */
+  --text-main: #10182b;        /* প্রধান লেখার রং — গাঢ় নেভি (কালো নয়, প্রিমিয়াম লুকের জন্য) */
+  --text-rgb: 16, 24, 43;      /* muted/faint টেক্সট ও বর্ডার এই থেকেই opacity বসিয়ে তৈরি হয় */
+  /* --text-on-accent অপরিবর্তিত থাকে — বাটনের উপর লেখা সবসময় সাদা */
+
+  /* ---------- ছায়া (shadow) — হালকা থিমে আরেকটু নরম ---------- */
+  --shadow-rgb: 15, 23, 42;
+
+  /* accent-color / accent-hover / আইকন প্যালেট ইচ্ছাকৃতভাবে redefine করা হয়নি —
+     ব্র্যান্ড রংগুলো দুই থিমেই একই থাকবে */
+}

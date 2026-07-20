@@ -62,6 +62,7 @@
       <a href="${homeLink('#contact')}">Contact</a>
     </div>
     <div class="nav-btns">
+      <button class="theme-toggle-btn" id="theme-toggle" title="থিম পরিবর্তন করুন" aria-label="থিম পরিবর্তন করুন">☀️</button>
       ${authButtons}
       <button class="hamburger" id="hamburgerBtn">☰</button>
     </div>
@@ -97,6 +98,8 @@
     .nav-avatar-wrap { position:relative; display:flex; }
     .nav-avatar-arrow { position:absolute; bottom:-4px; right:-4px; width:14px; height:14px; border-radius:50%; background:rgba(10,20,40,0.6); border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:9px; line-height:1; color:rgba(255,255,255,0.8); }
     .nav-dashboard-btn span { font-size:13.5px; font-weight:500; }
+    .theme-toggle-btn { width:34px; height:34px; border-radius:50%; border:0.5px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:white; font-size:15px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s, border-color 0.2s, transform 0.25s; flex-shrink:0; }
+    .theme-toggle-btn:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.3); transform:rotate(15deg); }
     .profile-wrap { position:relative; }
     .profile-dropdown { display:none; flex-direction:column; position:absolute; top:calc(100% + 8px); right:0; background:#0f1a33; border:0.5px solid rgba(255,255,255,0.1); border-radius:10px; min-width:150px; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:1001; }
     .profile-dropdown.open { display:flex; }
