@@ -133,3 +133,41 @@ function orderThesisPackage() {
   });
   window.location.href = '../Order page/order.html?' + params.toString();
 }
+
+/* ── Process Timeline — Hover Interaction ── */
+(function() {
+  var currentActive = 1;
+
+  function procSetActive(step) {
+    if (step === currentActive) return;
+    currentActive = step;
+
+    document.querySelectorAll('.proc-card').forEach(function(card) {
+      var isActive = parseInt(card.dataset.step) === step;
+      card.classList.toggle('proc-card--active', isActive);
+
+      var num      = card.querySelector('.proc-num');
+      var iconWrap = card.querySelector('.proc-icon-wrap');
+      var title    = card.querySelector('.proc-title');
+
+      if (num)      num.classList.toggle('proc-num--active', isActive);
+      if (iconWrap) iconWrap.classList.toggle('proc-icon-wrap--active', isActive);
+      if (title)    title.classList.toggle('proc-title--active', isActive);
+    });
+
+    document.querySelectorAll('.proc-mobile-dot').forEach(function(dot) {
+      dot.classList.toggle('proc-mobile-dot--active', parseInt(dot.dataset.dot) === step);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    /* set step 1 active on load */
+    procSetActive(1);
+
+    document.querySelectorAll('.proc-card').forEach(function(card) {
+      card.addEventListener('mouseenter', function() {
+        procSetActive(parseInt(card.dataset.step));
+      });
+    });
+  });
+})();

@@ -396,40 +396,126 @@
 
         </div>
 
-                <!-- WORKFLOW -->
-        <div class="svc-card">
-          <h2 class="svc-h2">How Your Thesis Will Be Completed</h2>
-          <div class="svc-timeline">
-            <div class="svc-tl-line"></div>
-            <div class="svc-tl-step">
-              <div class="svc-tl-dot">1</div>
-              <div class="svc-tl-title">Share Your Topic</div>
-              <div class="svc-tl-desc">আপনার Topic, Guidelines ও Requirements দিন</div>
+        <!-- WORKFLOW / PROCESS -->
+        <div class="proc-section">
+
+          <!-- Header: one row, no trust box -->
+          <div class="proc-header-simple">
+            <div class="proc-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>OUR PROCESS</span>
             </div>
-            <div class="svc-tl-step">
-              <div class="svc-tl-dot">2</div>
-              <div class="svc-tl-title">Planning &amp; Research</div>
-              <div class="svc-tl-desc">Project Planning, Research ও Outline Preparation</div>
-            </div>
-            <div class="svc-tl-step">
-              <div class="svc-tl-dot">3</div>
-              <div class="svc-tl-title">Writing</div>
-              <div class="svc-tl-desc">Professional Academic Writing শুরু হয়</div>
-            </div>
-            <div class="svc-tl-step">
-              <div class="svc-tl-dot">4</div>
-              <div class="svc-tl-title">Review &amp; Formatting</div>
-              <div class="svc-tl-desc">Grammar, Formatting, Citation ও Quality Check</div>
-            </div>
-            <div class="svc-tl-step">
-              <div class="svc-tl-dot">5</div>
-              <div class="svc-tl-title">Delivery</div>
-              <div class="svc-tl-desc">Dashboard Notification ও Final Delivery</div>
-            </div>
+            <h2 class="proc-heading">How Your Thesis Will Be <span class="grad">Completed</span></h2>
+            <p class="proc-sub-full">A transparent, research-focused workflow from idea to final submission.</p>
           </div>
+
+          <!-- Timeline: 5 cards, no connecting line -->
+          <div class="proc-timeline-grid" id="procTimeline">
+
+            <!-- Card 01 -->
+            <div class="proc-card proc-card--active" data-step="1">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num proc-num--active">01</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap proc-icon-wrap--active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </div>
+              <h3 class="proc-title proc-title--active">Share Your Topic</h3>
+              <p class="proc-desc">Submit your topic, university guidelines and all requirements.</p>
+              <div class="proc-tag proc-tag--default">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                2 min
+              </div>
+            </div>
+
+            <!-- Card 02 -->
+            <div class="proc-card" data-step="2">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num">02</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <h3 class="proc-title">Planning &amp; Research</h3>
+              <p class="proc-desc">We conduct in-depth research, literature review and create a solid outline.</p>
+              <div class="proc-tag proc-tag--blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                Research Phase
+              </div>
+            </div>
+
+            <!-- Card 03 -->
+            <div class="proc-card" data-step="3">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num">03</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+              </div>
+              <h3 class="proc-title">Professional Writing</h3>
+              <p class="proc-desc">Our expert writers craft original, well-researched content tailored to your needs.</p>
+              <div class="proc-tag proc-tag--green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                Progress Tracking Enabled
+              </div>
+            </div>
+
+            <!-- Card 04 -->
+            <div class="proc-card" data-step="4">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num">04</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg>
+              </div>
+              <h3 class="proc-title">Review &amp; Formatting</h3>
+              <p class="proc-desc">We review, edit and format your thesis with plagiarism check and proper citations.</p>
+              <div class="proc-tag proc-tag--purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg>
+                AI + Human Review
+              </div>
+            </div>
+
+            <!-- Card 05 — active by default -->
+            <div class="proc-card" data-step="5">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num">05</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              </div>
+              <h3 class="proc-title">Final Delivery</h3>
+              <p class="proc-desc">Get notified on your dashboard. Download final files and submit with confidence.</p>
+              <div class="proc-tag proc-tag--green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
+                Delivered
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Mobile dots -->
+          <div class="proc-mobile-dots" id="procMobileDots">
+            <button class="proc-mobile-dot proc-mobile-dot--active" data-dot="1"></button>
+            <button class="proc-mobile-dot" data-dot="2"></button>
+            <button class="proc-mobile-dot" data-dot="3"></button>
+            <button class="proc-mobile-dot" data-dot="4"></button>
+            <button class="proc-mobile-dot" data-dot="5"></button>
+          </div>
+
         </div>
 
-        <!-- SAMPLE PREVIEW -->
+                <!-- SAMPLE PREVIEW -->
         <div class="svc-card">
           <div class="svc-card-header">
             <h2 class="svc-h2">Sample Thesis Preview</h2>

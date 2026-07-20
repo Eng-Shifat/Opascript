@@ -975,41 +975,221 @@ body {
 }
 
 
-/* -------- TIMELINE -------- */
-.svc-timeline {
-  position: relative;
+
+/* -------- PROCESS / TIMELINE v2 -------- */
+.proc-section { padding: 0; }
+
+/* Header — simple one-row layout, no trust box */
+.proc-header-simple {
+  margin-bottom: 28px;
+}
+.proc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #6b7280;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.proc-heading {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+.proc-sub-full {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* 5-column grid — NO connecting line, NO dots */
+.proc-timeline-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--sp-2);
-}
-.svc-tl-line {
-  position: absolute;
-  top: 18px;
-  left: 9%;
-  right: 9%;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  z-index: 0;
-}
-.svc-tl-step {
+  gap: 10px;
   position: relative;
-  z-index: 1;
-  text-align: center;
 }
-.svc-tl-dot {
-  width: 36px;
-  height: 36px;
-  margin: 0 auto var(--sp-2);
+
+/* Base card */
+.proc-card {
+  background: rgba(13,19,38,0.3);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.5;
+  transform: scale(1);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out, border-color 0.5s ease-out, box-shadow 0.5s ease-out, background 0.5s ease-out;
+  z-index: 1;
+}
+.proc-card:hover:not(.proc-card--active) {
+  opacity: 0.75;
+}
+.proc-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139,92,246,0.15), transparent);
+}
+
+/* Active card */
+.proc-card--active {
+  border: 2px solid #a855f7;
+  background: linear-gradient(160deg, rgba(23,13,46,0.95), rgba(14,9,32,0.97));
+  box-shadow: 0 0 35px rgba(168,85,247,0.45), 0 0 70px rgba(168,85,247,0.12);
+  opacity: 1 !important;
+  transform: scale(1.03) !important;
+  z-index: 2;
+}
+
+/* Card glow (active only) */
+.proc-card-glow {
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 130px; height: 130px;
   border-radius: 50%;
-  background: var(--accent);
+  background: radial-gradient(circle, rgba(139,92,246,0.15), transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.proc-card--active .proc-card-glow { opacity: 1; }
+
+/* Top row */
+.proc-active-top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
+  justify-content: space-between;
+  margin-bottom: 14px;
 }
-.svc-tl-title { font-size: 13.5px; font-weight: 700; margin-bottom: 6px; }
-.svc-tl-desc { font-size: 11.5px; line-height: 1.6; color: var(--text-secondary); }
+.proc-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: #374151;
+  letter-spacing: 0.1em;
+}
+.proc-num--active { color: #7c3aed; }
+
+/* In Progress badge — hidden by default */
+.proc-in-progress {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #c4b5fd;
+  background: rgba(139,92,246,0.15);
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 20px;
+  padding: 4px 9px;
+}
+.proc-card--active .proc-in-progress { display: flex; }
+.proc-pulse-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #a855f7;
+  box-shadow: 0 0 6px rgba(168,85,247,1);
+  animation: proc-pulse 1.5s ease-in-out infinite;
+}
+@keyframes proc-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.65); }
+}
+
+/* Icon */
+.proc-icon-wrap {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: rgba(30,41,59,0.6);
+  border: 1px solid rgba(71,85,105,0.4);
+  display: flex; align-items: center; justify-content: center;
+  color: #94a3b8;
+  margin: 0 auto 14px;
+  position: relative; z-index: 1;
+  transition: all 0.4s ease;
+}
+.proc-icon-wrap svg { width: 24px; height: 24px; }
+.proc-icon-wrap--active {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, rgba(109,40,217,0.5), rgba(76,29,149,0.4));
+  border: 1px solid rgba(168,85,247,0.4);
+  color: #c4b5fd;
+  box-shadow: 0 0 24px rgba(139,92,246,0.4) inset, 0 0 14px rgba(139,92,246,0.25);
+}
+.proc-icon-wrap--active svg { width: 30px; height: 30px; }
+
+/* Text */
+.proc-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+.proc-title--active { font-size: 14.5px; color: #fff; }
+.proc-desc {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* Tags */
+.proc-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 600;
+  border-radius: 8px; padding: 5px 10px;
+  margin-top: 12px; width: fit-content;
+}
+.proc-tag--default { color: #94a3b8; border: 1px solid rgba(71,85,105,0.5); background: rgba(30,41,59,0.4); }
+.proc-tag--blue    { color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); background: rgba(30,58,138,0.2); }
+.proc-tag--purple  { color: #c4b5fd; border: 1px solid rgba(139,92,246,0.35); background: rgba(76,29,149,0.2); }
+.proc-tag--green   { color: #34d399; border: 1px solid rgba(16,185,129,0.35); background: rgba(6,78,59,0.2); }
+
+/* Mobile dots */
+.proc-mobile-dots {
+  display: none;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+.proc-mobile-dot {
+  width: 8px; height: 8px;
+  border-radius: 20px;
+  background: #374151;
+  border: none; cursor: pointer;
+  transition: all 0.3s ease; padding: 0;
+}
+.proc-mobile-dot--active {
+  width: 24px;
+  background: #a855f7;
+  box-shadow: 0 0 8px rgba(168,85,247,0.8);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .proc-timeline-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .proc-card { transform: scale(1) !important; }
+  .proc-card--active { transform: scale(1) !important; }
+  .proc-mobile-dots { display: flex; }
+  .proc-sub-full { white-space: normal; }
+}
+@media (max-width: 500px) {
+  .proc-timeline-grid { grid-template-columns: 1fr; }
+  .proc-heading { font-size: 22px; }
+}
 
 /* -------- SAMPLES -------- */
 .svc-samples-grid {
