@@ -2,7 +2,7 @@
    SCRIPTORA - style.css
    ===================== */
 
-@import 'variables.css';
+@import '../shared/variables.css';
 
 @font-face {
   font-family: 'Kalpurush';

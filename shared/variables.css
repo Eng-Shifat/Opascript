@@ -1,0 +1,230 @@
+/* =========================================================
+   SCRIPTORA — variables.css
+   সব রং এক জায়গায় — এখান থেকে বদলালেই পুরো সাইটে বদলে যাবে।
+   Dark Mode ডিফল্ট (:root) — Light Mode চালু হয় [data-theme="light"] দিয়ে
+   ========================================================= */
+
+:root {
+  /* ---------- ব্যাকগ্রাউন্ড (Dark Mode) ---------- */
+  --bg-main: #0f1b3d;          /* প্রধান পেজ ব্যাকগ্রাউন্ড (body, hero) */
+  --bg-main-rgb: 15, 27, 61;   /* উপরের রঙের RGB — opacity সহ ব্যবহারের জন্য (মোবাইল মেনু ব্লার ইত্যাদি) */
+  --bg-nav: #0a1428;           /* নেভবার ব্যাকগ্রাউন্ড */
+  --bg-nav-rgb: 10, 20, 40;    /* নেভবারের RGB — ব্লার/opacity ব্যাকগ্রাউন্ডের জন্য */
+  --bg-card: #111e3f;          /* স্ট্যাটস কার্ডের ব্যাকগ্রাউন্ড */
+  --bg-card-alt: #0d1830;      /* সেকশন গ্রেডিয়েন্টের বিকল্প শেড (WCU/HIW/CTA সেকশন) */
+  --bg-dropdown: #0f1a33;      /* প্রোফাইল ড্রপডাউন মেনুর ব্যাকগ্রাউন্ড */
+  --bg-deep: #060d1f;          /* ফুটারের সবচেয়ে গাঢ় ব্যাকগ্রাউন্ড */
+  --bg-deep-2: #080f22;        /* বটম-স্ট্যাটস সেকশনের ব্যাকগ্রাউন্ড */
+  --bg-gradient-mid: #112244;  /* হিরো সেকশনের গ্রেডিয়েন্টের মাঝের স্টপ */
+  --bg-gradient-alt: #162458;  /* সার্ভিস সেকশনের গ্রেডিয়েন্টের শেষ স্টপ */
+
+  /* ---------- টেক্সট (Dark Mode) ---------- */
+  --text-main: #ffffff;        /* প্রধান লেখার রং (সাদা) */
+  --text-rgb: 255, 255, 255;   /* উপরের রঙের RGB — muted/faint টেক্সট ও বর্ডারের opacity-তে ব্যবহৃত */
+  --text-on-accent: #ffffff;   /* নীল/সবুজ বাটনের উপর লেখার রং — থিম বদলালেও এটা সবসময় সাদা থাকবে (কনট্রাস্টের জন্য) */
+
+  /* ---------- ছায়া (shadow) ---------- */
+  --shadow-rgb: 0, 0, 0;       /* বক্স-শ্যাডোর RGB বেস */
+
+  /* ---------- অ্যাকসেন্ট / ব্র্যান্ড রং (Primary) ---------- */
+  --accent-color: #2d6ef7;     /* মূল ব্র্যান্ড রং — বাটন, লিংক, হাইলাইট */
+  --accent-hover: #1d5de0;     /* অ্যাকসেন্ট বাটনের হোভার রং */
+  --accent-rgb: 45, 110, 247;  /* অ্যাকসেন্টের RGB — গ্লো/ব্যাজ ব্যাকগ্রাউন্ডে opacity সহ ব্যবহৃত */
+  --accent-light: #60a5fa;     /* হালকা নীল ভ্যারিয়েন্ট — "Ghost Writing" স্প্যান, আইকন গ্লো */
+  --accent-light-rgb: 96, 165, 250;
+
+  /* ---------- আইকন/ব্যাজ প্যালেট — উভয় থিমেই অপরিবর্তিত থাকে ----------
+     এই উজ্জ্বল রংগুলো (WCU আইকন, সার্ভিস কার্ড আইকন, ব্যাজ) নিজেদের
+     টিন্টেড ব্যাকগ্রাউন্ডের উপর বসে, তাই Light/Dark দুই থিমেই একই রাখা হয়েছে। */
+  --color-purple: #a78bfa;
+  --color-purple-rgb: 167, 139, 250;
+  --color-purple-deep: #7c3aed;
+  --color-purple-deep-rgb: 124, 58, 237;
+  --color-purple-deep2: #4f46e5;
+  --color-purple-pale: #c4b5fd;
+  --color-violet: #a855f7;
+  --color-indigo: #6366f1;
+  --color-indigo-rgb: 99, 102, 241;
+  --color-indigo2: #818cf8;
+  --color-indigo2-rgb: 129, 140, 248;
+  --color-pink: #f472b6;
+  --color-pink-rgb: 244, 114, 182;
+  --color-pink-deep: #ec4899;
+  --color-pink-deep-rgb: 236, 72, 153;
+  --color-pink-deep2: #be185d;
+  --color-pink-deep2-rgb: 190, 24, 93;
+  --color-yellow: #fbbf24;
+  --color-yellow-rgb: 251, 191, 36;
+  --color-amber-deep: #f59e0b;
+  --color-amber-deep2: #d97706;
+  --color-green: #34d399;
+  --color-green-rgb: 52, 211, 153;
+  --color-success: #22c55e;      /* সবুজ — সফলতা, WhatsApp বাটন, চেক-আইকন */
+  --color-success-rgb: 34, 197, 94;
+  --color-success-hover: #16a34a;
+  --color-success-light: #4ade80;
+  --color-success-deep: #15803d;
+  --color-success-deep-rgb: 21, 128, 61;
+  --color-teal: #14b8a6;
+  --color-teal-deep: #0f766e;
+  --color-teal-light: #2dd4bf;
+  --color-cyan: #06b6d4;
+  --color-cyan-rgb: 6, 182, 212;
+  --color-cyan-deep: #0e7490;
+  --color-cyan-light: #22d3ee;
+  --color-blue2: #3b82f6;
+  --color-blue2-rgb: 59, 130, 246;
+  --color-blue2-deep: #1d4ed8;
+  --color-blue2-deep2-rgb: 37, 99, 235;
+  --color-lightblue-pale: #93c5fd;
+  --color-orange: #f97316;
+  --color-orange-rgb: 249, 115, 22;
+  --color-orange-light: #fb923c;
+  --color-red: #ef4444;          /* লাল — এরর, লগআউট, ডেঞ্জার */
+  --color-red-rgb: 239, 68, 68;
+  --color-red-light: #fca5a5;
+  --color-red-deep: #dc2626;
+  --color-red-mid: #f87171;      /* মাঝারি লাল — Pricing পেজের ওয়ার্নিং/আনঅ্যাভেইলেবল টেক্সট */
+  --color-violet2: #8b5cf6;
+  --color-violet2-rgb: 139, 92, 246;
+  --color-violet-rgb: 168, 85, 247;
+  --color-purple-deep2-rgb: 79, 70, 229;
+  --color-emerald: #10b981;      /* গাঢ় সবুজ — Service পেজের "emerald" ভ্যারিয়েন্ট */
+  --color-emerald-rgb: 16, 185, 129;
+  --color-blue-navy: #1e3a8a;    /* গাঢ় নেভি-নীল — ট্যাগ/ব্যাজ ব্যাকগ্রাউন্ডে ব্যবহৃত */
+  --color-blue-navy-rgb: 30, 58, 138;
+
+  /* ---------- Pricing পেজ-নির্দিষ্ট ব্যাকগ্রাউন্ড (Dark Mode) ---------- */
+  --bg-card-deep: #020d1e;    /* থিসিস কার্ডের সবচেয়ে গাঢ় ব্যাকগ্রাউন্ড */
+  --bg-modal: #0d1b2e;        /* মোবাইল/অর্ডার পপ-আপ মোডালের ব্যাকগ্রাউন্ড */
+
+  /* ---------- Pricing পেজ-নির্দিষ্ট সহায়ক রং — উভয় থিমেই অপরিবর্তিত ---------- */
+  --text-ink: #0a1628;              /* সাদা "active" চিপের উপর সবসময় গাঢ় লেখা (থিম নির্বিশেষে) */
+  --chip-invert-bg: #ffffff;        /* "active" চিপ — সবসময় সাদা ব্যাকগ্রাউন্ড */
+  --color-blue3: #4d8ef0;           /* মাঝারি নীল — "Expert Thesis" টাইটেল অ্যাকসেন্ট */
+  --color-blue3-light: #5b8fff;     /* হালকা নীল — হোভার/গ্রেডিয়েন্ট */
+  --color-blue3-light-rgb: 91, 143, 255;
+  --color-blue3-lighter: #7eb3ff;   /* আরও হালকা নীল — অ্যাক্টিভ সিলেক্টেড টেক্সট */
+  --color-gold: #f5b43c;            /* সোনালি — "MOST REQUESTED" ব্যাজ */
+  --color-gold-rgb: 245, 180, 60;
+  --color-indigo-deep: #1e1b4b;     /* গাঢ় ইন্ডিগো — ঘূর্ণায়মান বর্ডার গ্রেডিয়েন্টের একটা স্টপ */
+  --color-azure-rgb: 100, 160, 255; /* গ্লো ইফেক্টের জন্য নীল RGB (variant ১) */
+  --color-azure2-rgb: 120, 160, 255; /* গ্লো ইফেক্টের জন্য নীল RGB (variant ২) */
+  --bg-badge-rgb: 12, 20, 38;        /* "MOST REQUESTED" গোল ব্যাজের গাঢ় ব্যাকগ্রাউন্ড */
+
+  /* ---------- Service পেজ-নির্দিষ্ট ব্যাকগ্রাউন্ড (Dark Mode) ---------- */
+  --svc-bg: #070b17;            /* সার্ভিস পেজের ব্যাকগ্রাউন্ড (ডেস্কটপ) */
+  --svc-bg-rgb: 7, 11, 23;
+  --svc-bg-mobile: #0b0f1a;     /* সার্ভিস পেজের ব্যাকগ্রাউন্ড (মোবাইল) */
+  --svc-bg-mobile-rgb: 11, 15, 26;
+  --svc-card: #101826;          /* কার্ড ব্যাকগ্রাউন্ড (ডেস্কটপ) */
+  --svc-card-rgb: 16, 24, 38;
+  --svc-card-mobile: #131928;   /* কার্ড ব্যাকগ্রাউন্ড (মোবাইল) */
+  --svc-card2-mobile: #161d2e;  /* সেকেন্ডারি কার্ড ব্যাকগ্রাউন্ড (মোবাইল) */
+  --svc-border-deep: #0a0819;   /* কিছু কার্ডের গাঢ় বর্ডার রং */
+  --svc-surface-1: #0e1428;     /* এক-বার ব্যবহৃত সারফেস শেড ১ */
+  --svc-surface-2: #111830;     /* এক-বার ব্যবহৃত সারফেস শেড ২ */
+  --svc-surface-3-rgb: 30, 41, 59;   /* সারফেস শেড ৩ (rgba আকারে) */
+  --svc-surface-4-rgb: 13, 19, 38;   /* সারফেস শেড ৪ (rgba আকারে) */
+  --svc-gradient-a: #12093a;    /* ডিপ পার্পল গ্রেডিয়েন্ট স্টার্ট (আইকন ব্যানার) */
+  --svc-gradient-b: #0e0828;    /* ডিপ পার্পল গ্রেডিয়েন্ট এন্ড */
+  --svc-mobile-grad-a: #1a103a; /* মোবাইল গ্রেডিয়েন্ট স্টপ ১ */
+  --svc-mobile-grad-b: #0f1629; /* মোবাইল গ্রেডিয়েন্ট স্টপ ২ */
+  --svc-mobile-grad-c: #1a1040; /* মোবাইল অ্যাকসেন্ট গ্রেডিয়েন্ট এন্ড */
+
+  /* ---------- Service পেজ-নির্দিষ্ট অ্যাকসেন্ট ও টেক্সট (Dark Mode) ---------- */
+  --svc-accent-2: #6d5ef6;          /* সেকেন্ডারি অ্যাকসেন্ট (ডেস্কটপ গ্রেডিয়েন্ট) */
+  --svc-accent-2-rgb: 109, 94, 246;
+  --svc-accent2-mobile: #6d28d9;    /* সেকেন্ডারি অ্যাকসেন্ট (মোবাইল গ্রেডিয়েন্ট) */
+  --svc-accent2-mobile-rgb: 109, 40, 217;
+  --svc-text-secondary: #9ca3af;    /* সহায়ক/মিউটেড টেক্সট (ডেস্কটপ) */
+  --svc-muted-mobile: #8b93a7;      /* মিউটেড টেক্সট (মোবাইল) */
+
+  /* ---------- Service পেজ-নির্দিষ্ট নিরপেক্ষ ধূসর (Dark Mode) ---------- */
+  --svc-gray-1: #374151;   /* ট্যাগ/আইকন ব্যাকগ্রাউন্ড */
+  --svc-gray-2: #6b7280;   /* সেকেন্ডারি টেক্সট */
+  --svc-gray-3: #94a3b8;   /* ডিফল্ট ট্যাগ টেক্সট */
+  --svc-gray-4: #e2e8f0;   /* হালকা ধূসর টেক্সট */
+  --svc-gray-5-rgb: 71, 85, 105;
+
+  /* ---------- Service পেজ-নির্দিষ্ট ম্যাজেন্টা/বেগুনি — উভয় থিমেই অপরিবর্তিত ---------- */
+  --svc-magenta-1: #c026d3;
+  --svc-magenta-1-rgb: 192, 38, 211;
+  --svc-magenta-2: #c084fc;
+  --svc-magenta-3: #e879f9;
+  --svc-magenta-4: #f0abfc;
+  --svc-purple-mix: #8b3cf7;
+  --svc-deep-purple-1-rgb: 76, 29, 149;  /* গ্লো/শ্যাডো ইফেক্টে ব্যবহৃত গাঢ় বেগুনি */
+  --svc-deep-purple-2-rgb: 40, 10, 90;
+  --svc-deep-purple-3-rgb: 23, 13, 46;
+  --svc-deep-purple-4-rgb: 14, 9, 32;
+  --svc-emerald-deep-rgb: 6, 78, 59;     /* গাঢ় সবুজ — ইমারেল্ড ট্যাগ ব্যাকগ্রাউন্ড */
+}
+
+/* =========================================================
+   LIGHT MODE — প্রিমিয়াম হালকা থিম
+   <html data-theme="light"> বা <body data-theme="light"> হলে এটা চালু হবে
+   ========================================================= */
+[data-theme="light"] {
+  /* ---------- ব্যাকগ্রাউন্ড (Light Mode) ---------- */
+  --bg-main: #f6f8fc;          /* প্রধান পেজ ব্যাকগ্রাউন্ড — নরম অফ-হোয়াইট */
+  --bg-main-rgb: 246, 248, 252;
+  --bg-nav: #ffffff;           /* নেভবার ব্যাকগ্রাউন্ড — সাদা */
+  --bg-nav-rgb: 255, 255, 255;
+  --bg-card: #ffffff;          /* স্ট্যাটস কার্ডের ব্যাকগ্রাউন্ড — সাদা */
+  --bg-card-alt: #eef1f8;      /* সেকশন গ্রেডিয়েন্টের বিকল্প শেড — হালকা ধূসর-নীল */
+  --bg-dropdown: #ffffff;      /* প্রোফাইল ড্রপডাউন — সাদা */
+  --bg-deep: #eef0f6;          /* ফুটার ব্যাকগ্রাউন্ড — হালকা ধূসর */
+  --bg-deep-2: #eef1f7;        /* বটম-স্ট্যাটস ব্যাকগ্রাউন্ড */
+  --bg-gradient-mid: #eef1f8;  /* হিরো গ্রেডিয়েন্টের মাঝের স্টপ */
+  --bg-gradient-alt: #e7ebf5;  /* সার্ভিস সেকশন গ্রেডিয়েন্টের শেষ স্টপ */
+
+  /* ---------- টেক্সট (Light Mode) ---------- */
+  --text-main: #10182b;        /* প্রধান লেখার রং — গাঢ় নেভি (কালো নয়, প্রিমিয়াম লুকের জন্য) */
+  --text-rgb: 16, 24, 43;      /* muted/faint টেক্সট ও বর্ডার এই থেকেই opacity বসিয়ে তৈরি হয় */
+  /* --text-on-accent অপরিবর্তিত থাকে — বাটনের উপর লেখা সবসময় সাদা */
+
+  /* ---------- ছায়া (shadow) — হালকা থিমে আরেকটু নরম ---------- */
+  --shadow-rgb: 15, 23, 42;
+
+  /* ---------- Pricing পেজ-নির্দিষ্ট ব্যাকগ্রাউন্ড (Light Mode) ---------- */
+  --bg-card-deep: #ffffff;    /* থিসিস কার্ড — Light Mode-এ সাদা */
+  --bg-modal: #ffffff;        /* পপ-আপ মোডাল — Light Mode-এ সাদা */
+
+  /* ---------- Service পেজ-নির্দিষ্ট (Light Mode) ---------- */
+  --svc-bg: #f6f8fc;
+  --svc-bg-rgb: 246, 248, 252;
+  --svc-bg-mobile: #f6f8fc;
+  --svc-bg-mobile-rgb: 246, 248, 252;
+  --svc-card: #ffffff;
+  --svc-card-rgb: 255, 255, 255;
+  --svc-card-mobile: #ffffff;
+  --svc-card2-mobile: #eef1f8;
+  --svc-border-deep: #e5e7f0;
+  --svc-surface-1: #f1f4fa;
+  --svc-surface-2: #eef1f8;
+  --svc-surface-3-rgb: 226, 232, 240;
+  --svc-surface-4-rgb: 238, 241, 248;
+  --svc-gradient-a: #ede9ff;      /* হালকা ল্যাভেন্ডার — ডার্ক মোডের গাঢ় গ্রেডিয়েন্টের বদলে */
+  --svc-gradient-b: #f5f3ff;
+  --svc-mobile-grad-a: #ede9ff;
+  --svc-mobile-grad-b: #f5f3ff;
+  --svc-mobile-grad-c: #ede9ff;
+  --svc-text-secondary: #55607a;
+  --svc-muted-mobile: #5b6478;
+  --svc-gray-1: #cbd5e1;
+  --svc-gray-2: #64748b;
+  --svc-gray-3: #64748b;
+  --svc-gray-4: #334155;
+  --svc-gray-5-rgb: 100, 116, 139;
+  --svc-deep-purple-1-rgb: 221, 214, 254;  /* হালকা থিমে গ্লো হালকা ল্যাভেন্ডার */
+  --svc-deep-purple-2-rgb: 233, 224, 255;
+  --svc-deep-purple-3-rgb: 240, 235, 255;
+  --svc-deep-purple-4-rgb: 245, 241, 255;
+  --svc-emerald-deep-rgb: 209, 250, 229;
+  /* svc-accent-2 / svc-accent2-mobile / svc-magenta-* / svc-purple-mix ইচ্ছাকৃতভাবে redefine করা হয়নি —
+     ব্র্যান্ড অ্যাকসেন্ট রং দুই থিমেই একই থাকবে */
+
+  /* accent-color / accent-hover / আইকন প্যালেট / Pricing-এর সহায়ক রং (gold, blue3, ইত্যাদি)
+     ইচ্ছাকৃতভাবে redefine করা হয়নি — ব্র্যান্ড রংগুলো দুই থিমেই একই থাকবে */
+}

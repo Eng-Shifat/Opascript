@@ -7,7 +7,7 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(var(--shadow-rgb),0.65);
   z-index: 1200;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -19,7 +19,7 @@
   position: fixed;
   bottom: 0; left: 0; right: 0;
   z-index: 1201;
-  background: #0d1b2e;
+  background: var(--bg-modal);
   border-radius: 22px 22px 0 0;
   height: 92dvh;
   max-height: 100dvh;
@@ -34,7 +34,7 @@
 /* Drag handle */
 .op-drag-handle {
   width: 40px; height: 4px;
-  background: rgba(255,255,255,0.18);
+  background: rgba(var(--text-rgb),0.18);
   border-radius: 99px;
   margin: 10px auto 0;
   flex-shrink: 0;
@@ -51,20 +51,20 @@
 .op-header-title {
   font-size: 20px;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-main);
   line-height: 1.1;
 }
 .op-header-sub {
   font-size: 11px;
-  color: rgba(255,255,255,0.35);
+  color: rgba(var(--text-rgb),0.35);
   margin-top: 2px;
 }
 .op-close-btn {
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.08);
+  background: rgba(var(--text-rgb),0.08);
   border: none;
-  color: rgba(255,255,255,0.6);
+  color: rgba(var(--text-rgb),0.6);
   font-size: 14px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
@@ -89,8 +89,8 @@
 .op-step-num {
   width: 22px; height: 22px;
   border-radius: 50%;
-  background: #2d6ef7;
-  color: #fff;
+  background: var(--accent-color);
+  color: var(--text-on-accent);
   font-size: 11px;
   font-weight: 800;
   display: flex; align-items: center; justify-content: center;
@@ -99,17 +99,17 @@
 .op-step-title {
   font-size: 14px;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-main);
 }
 .op-step-bn {
   font-size: 10px;
-  color: rgba(255,255,255,0.35);
+  color: rgba(var(--text-rgb),0.35);
 }
 
 /* Summary card */
 .op-summary-card {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(var(--text-rgb),0.05);
+  border: 1px solid rgba(var(--text-rgb),0.09);
   border-radius: 14px;
   padding: 12px;
   margin-bottom: 4px;
@@ -130,16 +130,16 @@
 .op-s-title {
   font-size: 13px;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-main);
 }
 .op-s-sub {
   font-size: 10px;
-  color: rgba(255,255,255,0.4);
+  color: rgba(var(--text-rgb),0.4);
   margin-top: 1px;
 }
 .op-divider {
   height: 1px;
-  background: rgba(255,255,255,0.07);
+  background: rgba(var(--text-rgb),0.07);
   margin: 8px 0;
 }
 .op-row {
@@ -149,13 +149,13 @@
   padding: 4px 0;
   font-size: 12px;
 }
-.op-row span { color: rgba(255,255,255,0.45); }
-.op-row strong { color: #fff; font-weight: 700; }
+.op-row span { color: rgba(var(--text-rgb),0.45); }
+.op-row strong { color: var(--text-main); font-weight: 700; }
 .op-total-row { padding: 6px 0 0; }
 .op-total-price {
   font-size: 22px !important;
   font-weight: 900 !important;
-  color: #fff !important;
+  color: var(--text-main) !important;
 }
 
 /* Form fields */
@@ -163,25 +163,25 @@
 .op-field-label {
   font-size: 11.5px;
   font-weight: 700;
-  color: rgba(255,255,255,0.6);
+  color: rgba(var(--text-rgb),0.6);
   margin-bottom: 6px;
   display: block;
 }
 .op-optional {
   font-weight: 400;
-  color: rgba(255,255,255,0.3);
+  color: rgba(var(--text-rgb),0.3);
 }
 .op-input-wrap {
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,0.06);
-  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(var(--text-rgb),0.06);
+  border: 1.5px solid rgba(var(--text-rgb),0.1);
   border-radius: 12px;
   overflow: hidden;
   transition: border-color 0.2s;
 }
 .op-input-wrap:focus-within {
-  border-color: #2d6ef7;
+  border-color: var(--accent-color);
 }
 .op-textarea-wrap { align-items: flex-start; }
 .op-input-icon {
@@ -196,13 +196,13 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #fff;
+  color: var(--text-main);
   font-size: 13px;
   padding: 12px 12px 12px 0;
   font-family: inherit;
   width: 100%;
 }
-.op-input::placeholder { color: rgba(255,255,255,0.25); }
+.op-input::placeholder { color: rgba(var(--text-rgb),0.25); }
 .op-textarea {
   resize: none;
   line-height: 1.5;
@@ -214,32 +214,32 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: rgba(34,197,94,0.08);
-  border: 1px solid rgba(34,197,94,0.2);
+  background: rgba(var(--color-success-rgb),0.08);
+  border: 1px solid rgba(var(--color-success-rgb),0.2);
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 4px;
   font-size: 12px;
-  color: rgba(255,255,255,0.7);
+  color: rgba(var(--text-rgb),0.7);
   line-height: 1.4;
 }
 .op-privacy-icon { font-size: 18px; flex-shrink: 0; }
-.op-privacy-bn { font-size: 10.5px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.op-privacy-bn { font-size: 10.5px; color: rgba(var(--text-rgb),0.4); margin-top: 2px; }
 
 /* Footer */
 .op-footer {
   flex-shrink: 0;
   padding: 12px 16px 16px;
-  border-top: 1px solid rgba(255,255,255,0.07);
-  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(var(--text-rgb),0.07);
+  background: rgba(var(--text-rgb),0.02);
 }
 .op-confirm-btn {
   width: 100%;
   padding: 15px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #2d6ef7, #5b8fff);
+  background: linear-gradient(135deg, var(--accent-color), var(--color-blue3-light));
   border: none;
-  color: #fff;
+  color: var(--text-main);
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
@@ -254,11 +254,11 @@
 .op-terms {
   text-align: center;
   font-size: 10.5px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(var(--text-rgb),0.3);
   margin-top: 8px;
 }
 .op-terms-link {
-  color: #7eb3ff;
+  color: var(--color-blue3-lighter);
   text-decoration: none;
 }
 
@@ -269,27 +269,27 @@
 
 /* ── File Upload ── */
 .op-file-drop {
-  border: 1.5px dashed rgba(255,255,255,0.18);
+  border: 1.5px dashed rgba(var(--text-rgb),0.18);
   border-radius: 12px;
   padding: 18px;
   text-align: center;
   cursor: pointer;
-  background: rgba(255,255,255,0.03);
+  background: rgba(var(--text-rgb),0.03);
   transition: border-color 0.2s, background 0.2s;
 }
 .op-file-drop:active {
-  border-color: #2d6ef7;
-  background: rgba(45,110,247,0.07);
+  border-color: var(--accent-color);
+  background: rgba(var(--accent-rgb),0.07);
 }
 .op-file-icon { font-size: 24px; margin-bottom: 6px; }
 .op-file-text {
   font-size: 13px;
   font-weight: 700;
-  color: rgba(255,255,255,0.7);
+  color: rgba(var(--text-rgb),0.7);
 }
 .op-file-sub {
   font-size: 10.5px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(var(--text-rgb),0.3);
   margin-top: 3px;
 }
 
@@ -299,8 +299,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(var(--text-rgb),0.05);
+  border: 1px solid rgba(var(--text-rgb),0.09);
   border-radius: 10px;
   padding: 8px 10px;
 }
@@ -309,22 +309,22 @@
 .op-file-item-name {
   font-size: 12px;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .op-file-item-size {
   font-size: 10px;
-  color: rgba(255,255,255,0.35);
+  color: rgba(var(--text-rgb),0.35);
   margin-top: 1px;
 }
 .op-file-remove {
   width: 24px; height: 24px;
   border-radius: 50%;
-  background: rgba(239,68,68,0.15);
-  border: 1px solid rgba(239,68,68,0.3);
-  color: #ef4444;
+  background: rgba(var(--color-red-rgb),0.15);
+  border: 1px solid rgba(var(--color-red-rgb),0.3);
+  color: var(--color-red);
   font-size: 11px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
