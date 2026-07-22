@@ -10,6 +10,15 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600&display=swap"
     rel="stylesheet">
+  <!-- থিম বুটস্ট্র্যাপ: পেজ রেন্ডার হওয়ার আগেই সংরক্ষিত থিম বসিয়ে দেয়, যাতে রিলোডে রং ফ্ল্যাশ না করে -->
+  <script>
+    (function () {
+      if (localStorage.getItem('scriptora_theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
   <link rel="stylesheet" href="../Homepage/style.css" />
   <link rel="stylesheet" href="css/register.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -17,6 +26,7 @@
 
 <body class="register-body">
 
+  <script src="../shared/theme.js"></script>
   <script src="../shared/navbar.js"></script>
 
   <!-- PAGE -->

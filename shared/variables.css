@@ -94,6 +94,51 @@
   --color-blue-navy: #1e3a8a;    /* গাঢ় নেভি-নীল — ট্যাগ/ব্যাজ ব্যাকগ্রাউন্ডে ব্যবহৃত */
   --color-blue-navy-rgb: 30, 58, 138;
 
+  /* ---------- Login পেজ-নির্দিষ্ট — উভয় থিমেই অপরিবর্তিত (ব্র্যান্ড/ডেকোরেটিভ) ---------- */
+  --login-icon-a: #3b7af9;       /* লক-আইকন ব্যাজের গ্রেডিয়েন্ট স্টার্ট */
+  --login-icon-b: #1d4fbf;       /* লক-আইকন ব্যাজের গ্রেডিয়েন্ট এন্ড */
+  --login-glow-cyan-rgb: 56, 214, 240;  /* সাইন-ইন কার্ডের সায়ান গ্লো ইফেক্ট */
+  --brand-google-blue-rgb: 66, 133, 244; /* গুগল বাটনের অফিসিয়াল ব্র্যান্ড রং — থিম নির্বিশেষে অপরিবর্তিত */
+  --color-red-deep-rgb: 220, 38, 38;
+  --color-red-mid-rgb: 248, 113, 113;
+
+  /* ---------- Order পেজ-নির্দিষ্ট (Dark Mode) ---------- */
+  --order-deep: #080e24;          /* Order পেজের সবচেয়ে গাঢ় ব্যাকগ্রাউন্ড (nav/topbar) */
+  --order-bg: #0d1535;            /* Order পেজের প্রধান ব্যাকগ্রাউন্ড */
+  --order-surface: #111e45;       /* কার্ড/প্যানেলের ব্যাকগ্রাউন্ড */
+  --order-blue-mid: #378add;      /* প্যাকেজ কার্ড সিলেক্টেড বর্ডার/অ্যাকসেন্ট — উভয় থিমেই অপরিবর্তিত */
+  --order-blue-mid-rgb: 55, 138, 221;
+  --order-overlay-1-rgb: 8, 14, 36;    /* মোবাইল নেভ/মোডাল ব্যাকড্রপ ব্লার */
+  --order-overlay-2-rgb: 11, 18, 42;   /* ড্রপডাউন ব্যাকগ্রাউন্ড */
+  --order-overlay-3-rgb: 5, 10, 35;    /* ইনপুট ফিল্ড ব্যাকগ্রাউন্ড (ভ্যারিয়েন্ট ১) */
+  --order-overlay-4-rgb: 5, 10, 30;    /* ইনপুট ফিল্ড ব্যাকগ্রাউন্ড (ভ্যারিয়েন্ট ২) */
+  --order-surface2-rgb: 13, 21, 53;    /* ফর্ম সেকশনের ব্যাকগ্রাউন্ড */
+
+  /* ---------- Register পেজ-নির্দিষ্ট (Dark Mode) ---------- */
+  --reg-bg: #0a0c18;              /* Register পেজের কার্ড/ইনপুট ব্যাকগ্রাউন্ড */
+  --reg-accent-light: #5b9aff;    /* হালকা নীল — বাটন গ্রেডিয়েন্ট, রোটেটিং বর্ডার */
+  --reg-accent-light-rgb: 91, 154, 255;
+  --reg-pink-deep: #db2777;       /* ধাপ ৩ (স্টেপ আইকন) রং */
+  --reg-pink-deep-rgb: 219, 39, 119;
+  --reg-blue-deep: #2563eb;       /* ধাপ ২ (স্টেপ আইকন) রং */
+  --reg-blue-deep-rgb: 37, 99, 235;
+  --reg-green-deep: #059669;      /* ধাপ ৪ (স্টেপ আইকন) রং */
+  --reg-green-deep-rgb: 5, 150, 105;
+  --reg-text-secondary: #b0b5cc;  /* সহায়ক টেক্সট */
+  --reg-muted: #8a8fa8;           /* মিউটেড টেক্সট */
+  --reg-muted2: #6b7090;          /* আরেকটু গাঢ় মিউটেড টেক্সট */
+  --reg-faint: #4a4e66;           /* সবচেয়ে হালকা/ফিকে টেক্সট */
+  --reg-placeholder: #4a4e70;     /* ইনপুট প্লেসহোল্ডার টেক্সট */
+  --reg-text-light: #e2e4f0;      /* হালকা ধূসর টেক্সট (ডার্ক bg-তে প্রায়-সাদা) */
+  --reg-text-light2: #c8ccdf;
+  --reg-text-light3: #c0c5dd;
+  --reg-border: #2a2d45;          /* ইনপুট/কার্ডের বর্ডার */
+  --reg-border2: #2e3150;
+  --reg-border3: #22253a;
+  --reg-border4: #1e2035;
+  --reg-surface: #13152a;         /* সেকেন্ডারি সারফেস ব্যাকগ্রাউন্ড */
+  --reg-surface2: #0f1120;
+
   /* ---------- Pricing পেজ-নির্দিষ্ট ব্যাকগ্রাউন্ড (Dark Mode) ---------- */
   --bg-card-deep: #020d1e;    /* থিসিস কার্ডের সবচেয়ে গাঢ় ব্যাকগ্রাউন্ড */
   --bg-modal: #0d1b2e;        /* মোবাইল/অর্ডার পপ-আপ মোডালের ব্যাকগ্রাউন্ড */
@@ -224,6 +269,36 @@
   --svc-emerald-deep-rgb: 209, 250, 229;
   /* svc-accent-2 / svc-accent2-mobile / svc-magenta-* / svc-purple-mix ইচ্ছাকৃতভাবে redefine করা হয়নি —
      ব্র্যান্ড অ্যাকসেন্ট রং দুই থিমেই একই থাকবে */
+
+  /* ---------- Register পেজ-নির্দিষ্ট (Light Mode) ---------- */
+  --reg-bg: #ffffff;
+  --reg-text-secondary: #55607a;
+  --reg-muted: #6b7280;
+  --reg-muted2: #64748b;
+  --reg-faint: #94a3b8;
+  --reg-placeholder: #94a3b8;
+  --reg-text-light: #1e293b;
+  --reg-text-light2: #334155;
+  --reg-text-light3: #475569;
+  --reg-border: #dfe3ee;
+  --reg-border2: #e2e6f0;
+  --reg-border3: #e5e8f2;
+  --reg-border4: #e7eaf3;
+  --reg-surface: #f4f6fb;
+  --reg-surface2: #eef1f8;
+  /* reg-accent-light / reg-pink-deep / reg-blue-deep / reg-green-deep ইচ্ছাকৃতভাবে redefine করা হয়নি —
+     ব্র্যান্ড অ্যাকসেন্ট রং দুই থিমেই একই থাকবে */
+
+  /* ---------- Order পেজ-নির্দিষ্ট (Light Mode) ---------- */
+  --order-deep: #ffffff;
+  --order-bg: #f6f8fc;
+  --order-surface: #ffffff;
+  --order-overlay-1-rgb: 246, 248, 252;
+  --order-overlay-2-rgb: 255, 255, 255;
+  --order-overlay-3-rgb: 241, 244, 250;
+  --order-overlay-4-rgb: 238, 241, 248;
+  --order-surface2-rgb: 238, 241, 248;
+  /* order-blue-mid ইচ্ছাকৃতভাবে redefine করা হয়নি — ব্র্যান্ড অ্যাকসেন্ট রং দুই থিমেই একই থাকবে */
 
   /* accent-color / accent-hover / আইকন প্যালেট / Pricing-এর সহায়ক রং (gold, blue3, ইত্যাদি)
      ইচ্ছাকৃতভাবে redefine করা হয়নি — ব্র্যান্ড রংগুলো দুই থিমেই একই থাকবে */

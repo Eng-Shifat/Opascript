@@ -4,6 +4,16 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Place Order — Scriptora</title>
+
+  <!-- থিম বুটস্ট্র্যাপ: পেজ রেন্ডার হওয়ার আগেই সংরক্ষিত থিম বসিয়ে দেয়, যাতে রিলোডে রং ফ্ল্যাশ না করে -->
+  <script>
+    (function () {
+      if (localStorage.getItem('scriptora_theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/order.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -11,6 +21,8 @@
   <script src="../shared/authGuard.js"></script>
 </head>
 <body>
+
+  <script src="../shared/theme.js"></script>
 
 <div class="bg">
   <div class="bg-o bg-o1"></div>
