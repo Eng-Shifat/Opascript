@@ -9,7 +9,7 @@
    ৩. কমন — ছায়া (shadow)
    ৪. কমন — অ্যাকসেন্ট / ব্র্যান্ড রং
    ৫. কমন — আইকন/ব্যাজ প্যালেট (উভয় থিমেই অপরিবর্তিত)
-   ৫ক. Homepage HERO সেকশন অ্যাকসেন্ট (শুধু Light Mode-এ টিল/সায়ান — বাকি সব common)
+   ৫ক. Homepage HERO সেকশন অ্যাকসেন্ট (Light Mode-এ প্রিমিয়াম একাডেমিক থিম — Primary/Border/Badge/Success)
    ৬. Pricing পেজ
    ৭. Service পেজ
    ৮. Register পেজ
@@ -59,6 +59,8 @@
   --accent-rgb: 45, 110, 247;  /* অ্যাকসেন্টের RGB — গ্লো/ব্যাজ ব্যাকগ্রাউন্ডে opacity সহ ব্যবহৃত */
   --accent-light: #60a5fa;     /* হালকা নীল ভ্যারিয়েন্ট — "Ghost Writing" স্প্যান, আইকন গ্লো */
   --accent-light-rgb: 96, 165, 250;
+  --border-color: rgba(255, 255, 255, 0.11);   /* কার্ড/নেভ বর্ডারের কমন রং */
+  --text-secondary-rgb: var(--text-rgb);       /* প্যারাগ্রাফ টেক্সটের রং (RGB) — Dark Mode-এ text-rgb-ই ব্যবহৃত */
 
   /* =========================================================
      ৫ক. Homepage HERO সেকশন — অ্যাকসেন্ট (Dark Mode: আগের ব্লু-ই বহাল)
@@ -79,6 +81,10 @@
   --hero-stat-accent: var(--color-success-light);
   --hero-bg-1: var(--bg-main);
   --hero-bg-2: var(--bg-gradient-mid);
+  --hero-bg-image: linear-gradient(135deg, var(--hero-bg-1) 0%, var(--hero-bg-2) 50%, var(--hero-bg-1) 100%);
+  --badge-bg: transparent;
+  --badge-border: rgba(var(--hero-accent-rgb), 0.55);
+  --badge-text: rgba(var(--text-rgb), 0.82);
 
   /* =========================================================
      ৫. কমন — আইকন/ব্যাজ প্যালেট — উভয় থিমেই অপরিবর্তিত থাকে
@@ -274,23 +280,24 @@
   /* =========================================================
      ১. কমন — ব্যাকগ্রাউন্ড (Light Mode)
      ========================================================= */
-  --bg-main: #f6f8fc;          /* প্রধান পেজ ব্যাকগ্রাউন্ড — নরম অফ-হোয়াইট */
-  --bg-main-rgb: 246, 248, 252;
-  --bg-nav: #ffffff;           /* নেভবার ব্যাকগ্রাউন্ড — সাদা */
+  --bg-main: #f8fcff;          /* প্রধান পেজ ব্যাকগ্রাউন্ড */
+  --bg-main-rgb: 248, 252, 255;
+  --bg-nav: #ffffff;           /* নেভবার ব্যাকগ্রাউন্ড — সাদা কার্ড */
   --bg-nav-rgb: 255, 255, 255;
-  --bg-card: #ffffff;          /* স্ট্যাটস কার্ডের ব্যাকগ্রাউন্ড — সাদা */
-  --bg-card-alt: #eef1f8;      /* সেকশন গ্রেডিয়েন্টের বিকল্প শেড — হালকা ধূসর-নীল */
+  --bg-card: #ffffff;          /* কার্ডের ব্যাকগ্রাউন্ড — সাদা */
+  --bg-card-alt: #eef9ff;      /* সেকেন্ডারি ব্যাকগ্রাউন্ড — সেকশন গ্রেডিয়েন্টে ব্যবহৃত */
   --bg-dropdown: #ffffff;      /* প্রোফাইল ড্রপডাউন — সাদা */
-  --bg-deep: #eef0f6;          /* ফুটার ব্যাকগ্রাউন্ড — হালকা ধূসর */
-  --bg-deep-2: #eef1f7;        /* বটম-স্ট্যাটস ব্যাকগ্রাউন্ড */
-  --bg-gradient-mid: #eef1f8;  /* হিরো গ্রেডিয়েন্টের মাঝের স্টপ */
-  --bg-gradient-alt: #e7ebf5;  /* সার্ভিস সেকশন গ্রেডিয়েন্টের শেষ স্টপ */
+  --bg-deep: #eef9ff;          /* ফুটার ব্যাকগ্রাউন্ড */
+  --bg-deep-2: #ffffff;        /* বটম-স্ট্যাটস ব্যাকগ্রাউন্ড — সাদা, পরিষ্কার লুকের জন্য */
+  --bg-gradient-mid: #eef9ff;  /* সেকশন গ্রেডিয়েন্টের মাঝের স্টপ */
+  --bg-gradient-alt: #eef9ff;  /* সার্ভিস সেকশন গ্রেডিয়েন্টের শেষ স্টপ */
 
   /* =========================================================
      ২. কমন — টেক্সট (Light Mode)
      ========================================================= */
-  --text-main: #10182b;        /* প্রধান লেখার রং — গাঢ় নেভি (কালো নয়, প্রিমিয়াম লুকের জন্য) */
-  --text-rgb: 16, 24, 43;      /* muted/faint টেক্সট ও বর্ডার এই থেকেই opacity বসিয়ে তৈরি হয় */
+  --text-main: #0f172a;        /* Heading — গাঢ় স্লেট নেভি */
+  --text-rgb: 15, 23, 42;      /* muted/faint টেক্সট ও বর্ডার এই থেকেই opacity বসিয়ে তৈরি হয় */
+  --text-secondary-rgb: 71, 85, 105;  /* Paragraph রং (#475569) — মূল বডি-কপি টেক্সটে ব্যবহৃত */
   /* --text-on-accent অপরিবর্তিত থাকে — বাটনের উপর লেখা সবসময় সাদা */
 
   /* =========================================================
@@ -298,25 +305,44 @@
      ========================================================= */
   --shadow-rgb: 15, 23, 42;
 
-  /* ৪. অ্যাকসেন্ট/ব্র্যান্ড রং ও ৫. আইকন প্যালেট — ইচ্ছাকৃতভাবে redefine করা হয়নি,
-     দুই থিমেই একই থাকবে (উপরে :root ব্লকে দেখো) */
+  /* =========================================================
+     ৪. কমন — অ্যাকসেন্ট / ব্র্যান্ড রং (Light Mode) — প্রিমিয়াম একাডেমিক থিম
+     ========================================================= */
+  --accent-color: #11b5d9;     /* Primary */
+  --accent-hover: #0ea5c6;     /* Primary Hover */
+  --accent-rgb: 17, 181, 217;
+  --accent-light: #38bfe0;     /* হালকা সায়ান ভ্যারিয়েন্ট — আইকন গ্লো ইত্যাদি */
+  --accent-light-rgb: 56, 191, 224;
+  --border-color: rgba(17, 181, 217, 0.16);   /* Border — নরম, স্বচ্ছ (Primary রঙের ~16% opacity) */
+  --color-success: #16a34a;    /* Success */
+  --color-success-rgb: 22, 163, 74;
+
+  /* ৫. আইকন প্যালেট — ইচ্ছাকৃতভাবে redefine করা হয়নি, দুই থিমেই একই থাকবে */
 
   /* =========================================================
-     ৫ক. Homepage HERO সেকশন (Light Mode) — টিল/সায়ান অ্যাকসেন্ট
-     শুধু Hero সেকশনের জন্য — পুরো সাইটের --accent-color এখানে অপরিবর্তিত।
+     ৫ক. Homepage HERO সেকশন (Light Mode) — প্রিমিয়াম একাডেমিক থিম
+     শুধু Hero সেকশনের জন্য — পুরো সাইটের --accent-color-ই এখন এই একই
+     Primary রং ব্যবহার করে (STEP 1-এর পূর্ণাঙ্গ কালার সিস্টেম অনুযায়ী)।
      ========================================================= */
-  --hero-accent: #14b8a6;             /* টিল — badge বর্ডার/ডট, বাটন ব্যাকগ্রাউন্ড */
-  --hero-accent-rgb: 20, 184, 166;
-  --hero-accent-hover: #0f766e;       /* গাঢ় টিল — বাটন হোভার */
-  --hero-title-accent: #0d9488;       /* "Ghost Writing" টেক্সটের রং */
-  --hero-check-color: #14b8a6;        /* checkmark আইকনের রং */
-  --hero-check-rgb: 20, 184, 166;
-  --hero-icon-grad-1-rgb: 6, 182, 212;   /* Academic Excellence আইকনের গ্রেডিয়েন্ট (সায়ান) */
-  --hero-icon-grad-2-rgb: 20, 184, 166;  /* গ্রেডিয়েন্টের দ্বিতীয় স্টপ (টিল) */
-  --hero-icon-border-rgb: 45, 212, 191;
-  --hero-stat-accent: #0d9488;        /* "100%" / "50+ Clients" সংখ্যার রং */
-  --hero-bg-1: #fdf9f2;               /* ক্রিম/হালকা বেইজ — Hero ব্যাকগ্রাউন্ড গ্রেডিয়েন্টের শুরু */
-  --hero-bg-2: #f3ecdd;               /* একটু গাঢ় বেইজ — গ্রেডিয়েন্টের মাঝের স্টপ */
+  --hero-accent: #11b5d9;             /* Primary — badge ডট, বাটন ব্যাকগ্রাউন্ড */
+  --hero-accent-rgb: 17, 181, 217;
+  --hero-accent-hover: #0ea5c6;       /* Primary Hover */
+  --hero-title-accent: #11b5d9;       /* Accent word — "Ghost Writing" টেক্সটের রং */
+  --hero-check-color: #16a34a;        /* Success — checkmark আইকনের রং */
+  --hero-check-rgb: 22, 163, 74;
+  --hero-icon-grad-1-rgb: 17, 181, 217;  /* Academic Excellence আইকনের গ্রেডিয়েন্ট (Primary) */
+  --hero-icon-grad-2-rgb: 8, 145, 178;   /* গ্রেডিয়েন্টের দ্বিতীয় স্টপ (গাঢ় সায়ান) */
+  --hero-icon-border-rgb: 17, 181, 217;
+  --hero-stat-accent: #16a34a;        /* Success — "100%" / "50+ Clients" সংখ্যার রং */
+  --hero-bg-1: #f8fcff;
+  --hero-bg-2: #eef9ff;
+  --hero-bg-image:
+    radial-gradient(circle at top left, rgba(221, 248, 255, 0.4) 0%, transparent 35%),
+    radial-gradient(circle at bottom right, rgba(216, 247, 255, 0.35) 0%, transparent 32%),
+    linear-gradient(135deg, #f8fcff 0%, #fbfeff 100%);
+  --badge-bg: #e7faff;                /* Badge ব্যাকগ্রাউন্ড */
+  --badge-border: #c6f4ff;            /* Badge বর্ডার */
+  --badge-text: #0891b2;              /* Badge টেক্সট */
 
   /* =========================================================
      ৬. PRICING পেজ (Light Mode)
