@@ -140,7 +140,7 @@ nav {
 
 /* -------- HERO -------- */
 .hero {
-  background: linear-gradient(135deg, var(--bg-main) 0%, var(--bg-gradient-mid) 50%, var(--bg-main) 100%);
+  background: linear-gradient(135deg, var(--hero-bg-1) 0%, var(--hero-bg-2) 50%, var(--hero-bg-1) 100%);
   padding: 4rem 4rem 3.5rem;
   display: flex;
   align-items: center;
@@ -154,7 +154,7 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  border: 0.5px solid rgba(var(--accent-rgb),0.55);
+  border: 0.5px solid rgba(var(--hero-accent-rgb),0.55);
   border-radius: 20px;
   padding: 5px 15px;
   font-size: 12.5px;
@@ -163,7 +163,7 @@ nav {
 }
 .badge-dot {
   width: 7px; height: 7px;
-  background: var(--accent-color);
+  background: var(--hero-accent);
   border-radius: 50%;
 }
 .hero-title-bn {
@@ -179,7 +179,7 @@ nav {
   line-height: 1.3;
   margin-bottom: 1.1rem;
 }
-.hero-title-en span.blue { color: var(--accent-light); }
+.hero-title-en span.blue { color: var(--hero-title-accent); }
 .hero-desc {
   font-size: 14px;
   color: rgba(var(--text-rgb),0.62);
@@ -203,17 +203,17 @@ nav {
 .check-icon {
   width: 20px; height: 20px;
   border-radius: 50%;
-  background: rgba(var(--color-success-rgb),0.15);
-  border: 1px solid var(--color-success);
+  background: rgba(var(--hero-check-rgb),0.15);
+  border: 1px solid var(--hero-check-color);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   font-size: 12px;
-  color: var(--color-success);
+  color: var(--hero-check-color);
 }
 .hero-btns { display: flex; gap: 14px; flex-wrap: nowrap; }
 .btn-primary {
   padding: 11px 24px;
-  background: var(--accent-color);
+  background: var(--hero-accent);
   border: none;
   border-radius: 9px;
   color: var(--text-on-accent);
@@ -222,7 +222,7 @@ nav {
   cursor: pointer;
   transition: background 0.2s;
 }
-.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:hover { background: var(--hero-accent-hover); }
 .btn-secondary {
   padding: 11px 24px;
   background: transparent;
@@ -267,8 +267,8 @@ nav {
 .stats-icon {
   width: 48px; height: 48px;
   border-radius: 13px;
-  background: linear-gradient(135deg, rgba(var(--accent-rgb),0.35), rgba(var(--color-indigo-rgb),0.35));
-  border: 1px solid rgba(var(--accent-light-rgb),0.3);
+  background: linear-gradient(135deg, rgba(var(--hero-icon-grad-1-rgb),0.35), rgba(var(--hero-icon-grad-2-rgb),0.35));
+  border: 1px solid rgba(var(--hero-icon-border-rgb),0.3);
   display: flex; align-items: center; justify-content: center;
   font-size: 24px;
 
@@ -288,7 +288,7 @@ nav {
 }
 .stat-num { font-size: 27px; font-weight: 700; }
 .stat-num.white { color: var(--text-main); }
-.stat-num.green { color: var(--color-success-light); }
+.stat-num.green { color: var(--hero-stat-accent); }
 .stat-label {
   font-size: 10.5px;
   color: rgba(var(--text-rgb),0.42);
