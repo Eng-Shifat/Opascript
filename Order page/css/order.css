@@ -1,3 +1,17 @@
+/* ── Order page সবসময় dark — light theme এখানে apply হবে না ── */
+:root, [data-theme="light"] {
+  --order-deep:          #080e24;
+  --order-bg:            #0d1535;
+  --order-surface:       #111e45;
+  --order-overlay-1-rgb: 8, 14, 36;
+  --order-overlay-2-rgb: 11, 18, 42;
+  --order-overlay-3-rgb: 5, 10, 35;
+  --order-overlay-4-rgb: 5, 10, 30;
+  --order-surface2-rgb:  13, 21, 53;
+  --text-rgb:            255, 255, 255;
+  --text-main:           #ffffff;
+}
+
 :root {
 --navy:   var(--order-deep);
 --navy2:  var(--order-bg);

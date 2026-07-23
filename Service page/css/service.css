@@ -74,7 +74,9 @@ body {
   flex-direction: column;
   gap: var(--sp-3);
   position: sticky;
-  top: var(--sp-3);
+  top: 62px; /* navbar height (58px) + 4px gap — sits just below navbar */
+  z-index: 10;
+  align-self: start; /* critical: lets sticky work inside a grid/flex parent */
 }
 
 /* -------- CARD BASE -------- */
@@ -866,16 +868,7 @@ body {
   background: var(--svc-surface-2);
 }
 .exp2-check {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(var(--color-emerald-rgb),0.12);
-  border: 1.5px solid rgba(var(--color-emerald-rgb),0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-green);
-  flex-shrink: 0;
+  display: none;
 }
 .exp2-check svg { width: 11px; height: 11px; }
 
@@ -1032,7 +1025,7 @@ body {
   cursor: pointer;
   opacity: 0.5;
   transform: scale(1);
-  transition: opacity 0.5s ease-out, transform 0.5s ease-out, border-color 0.5s ease-out, box-shadow 0.5s ease-out, background 0.5s ease-out;
+  transition: opacity 0.25s cubic-bezier(.22,1,.36,1), transform 0.25s cubic-bezier(.22,1,.36,1), border-color 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s cubic-bezier(.22,1,.36,1), background 0.25s cubic-bezier(.22,1,.36,1);
   z-index: 1;
 }
 .proc-card:hover:not(.proc-card--active) {

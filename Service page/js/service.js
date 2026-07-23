@@ -134,12 +134,14 @@ function orderThesisPackage() {
   window.location.href = '../Order page/order.html?' + params.toString();
 }
 
-/* ── Process Timeline — Hover Interaction ── */
+/* ── Process Timeline — Hover + Auto-Cycle Interaction ── */
 (function() {
   var currentActive = 1;
+  var totalSteps = 5;
+  var cycleInterval = null;
+  var CYCLE_SPEED = 1800; /* ms per card */
 
   function procSetActive(step) {
-    if (step === currentActive) return;
     currentActive = step;
 
     document.querySelectorAll('.proc-card').forEach(function(card) {
@@ -160,13 +162,31 @@ function orderThesisPackage() {
     });
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    /* set step 1 active on load */
-    procSetActive(1);
+  function startCycle() {
+    if (cycleInterval) return;
+    cycleInterval = setInterval(function() {
+      var next = (currentActive % totalSteps) + 1;
+      procSetActive(next);
+    }, CYCLE_SPEED);
+  }
 
+  function stopCycle() {
+    clearInterval(cycleInterval);
+    cycleInterval = null;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    procSetActive(1);
+    startCycle();
+
+    /* Hover: pause cycle, highlight hovered card */
     document.querySelectorAll('.proc-card').forEach(function(card) {
       card.addEventListener('mouseenter', function() {
+        stopCycle();
         procSetActive(parseInt(card.dataset.step));
+      });
+      card.addEventListener('mouseleave', function() {
+        startCycle();
       });
     });
   });

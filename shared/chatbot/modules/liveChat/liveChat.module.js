@@ -146,6 +146,12 @@ function attachDelegatedListeners(bodyEl) {
     const chipEl = e.target.closest('[data-chip-id]');
     if (chipEl) { onChipClick(bodyEl, chipEl); return; }
 
+    // Components.inputArea() (used for the feedback comment box) renders
+    // its send button with a plain id, not data-btn-id — caught here
+    // explicitly since the generic [data-btn-id] selector below can't see it.
+    const feedbackSubmitEl = e.target.closest('#lc-feedback-submit');
+    if (feedbackSubmitEl) { onButtonClick(bodyEl, 'lc-feedback-submit'); return; }
+
     const btnEl = e.target.closest('[data-btn-id]');
     if (btnEl) { onButtonClick(bodyEl, btnEl.dataset.btnId); }
   });
@@ -279,10 +285,6 @@ function flashPosition() {
   window.setTimeout(() => el.classList.remove('lc-position-flash'), 700);
 }
 
-/* Visitor backgrounds/closes the tab while still waiting (unassigned) —
-   the only real-world "leave queue" trigger available without a new
-   Cancel button in liveChat.templates.js. Wires the previously-unused
-   LiveChatService.leaveQueue(). */
 /* Explicit queue-exit only (see deactivate() below) — no automatic
    background/hidden-tab trigger. A future Cancel Queue button in
    liveChat.templates.js would call cancelQueue(leadId, 'cancelled')
@@ -397,7 +399,7 @@ function isWithinBusinessHours() {
 
 function updateFeedbackSubmitState(bodyEl) {
   const commentEl = bodyEl.querySelector('#lc-feedback-comment');
-  const submitBtn = bodyEl.querySelector('[data-btn-id="lc-feedback-submit"]');
+  const submitBtn = bodyEl.querySelector('#lc-feedback-submit');
   if (!commentEl || !submitBtn) return;
   submitBtn.disabled = !(selectedRating || commentEl.value.trim());
 }
@@ -415,22 +417,37 @@ async function submitFeedback(bodyEl) {
 
   const commentEl = bodyEl.querySelector('#lc-feedback-comment');
   const comment = commentEl ? commentEl.value.trim() : '';
-  const submitBtn = bodyEl.querySelector('[data-btn-id="lc-feedback-submit"]');
+  const submitBtn = bodyEl.querySelector('#lc-feedback-submit');
   if (submitBtn) submitBtn.disabled = true;
 
   const { error } = await LiveChatService.submitFeedback(s.leadId, { rating: selectedRating, comment });
   if (error) {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      const labelEl = submitBtn.querySelector('span');
-      if (labelEl) labelEl.textContent = "Couldn't save — tap to retry";
-    }
+    if (submitBtn) submitBtn.disabled = false;
+    showFeedbackError(bodyEl);
     return; // stay on the feedback screen; do NOT return to AI on failure
   }
 
   LiveChatState.set({ feedbackSubmitted: true });
   EventBus.emit('livechat.feedback.submitted', { leadId: s.leadId, rating: selectedRating, comment });
   returnToAi();
+}
+
+/* Components.inputArea() (the feedback comment box) renders an
+   icon-only send button — no <span>, nowhere to write a retry label
+   onto the button itself. Reuses the existing Components.fieldError()
+   primitive instead (same one the pre-contact form already uses),
+   inserted right after the input row. Removes any previous instance
+   first so role="alert" re-announces on a repeated failure. */
+function showFeedbackError(bodyEl) {
+  const existing = bodyEl.querySelector('#lc-feedback-error');
+  if (existing) existing.remove();
+  const commentEl = bodyEl.querySelector('#lc-feedback-comment');
+  const inputArea = commentEl ? commentEl.closest('.ui-input-area') : null;
+  if (!inputArea) return;
+  inputArea.insertAdjacentHTML(
+    'afterend',
+    Components.fieldError({ id: 'lc-feedback-error', text: "Couldn't save — please try again." })
+  );
 }
 
 /* ---------- return to AI ---------- */

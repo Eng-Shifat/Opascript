@@ -470,6 +470,9 @@ nav {
 .sc-red .card-icon-box { background: linear-gradient(135deg, var(--color-orange), var(--color-red-deep)); }
 .sc-red .card-btn { color: var(--color-orange-light); }
 
+.sc-magenta .card-icon-box { background: linear-gradient(135deg, var(--color-pink-deep), var(--color-pink-deep2)); }
+.sc-magenta .card-btn { color: var(--color-pink); }
+
 .services-grid-2 .service-card:hover .card-btn {
   border-color: currentColor;
   background: rgba(var(--text-rgb),0.08);
@@ -1097,6 +1100,7 @@ nav {
 .service-card:nth-child(6) .anim-draw { animation-delay: 1.5s; }
 .service-card:nth-child(7) .anim-draw { animation-delay: 1.8s; }
 .service-card:nth-child(8) .anim-draw { animation-delay: 2.1s; }
+.service-card:nth-child(9) .anim-draw { animation-delay: 2.4s; }
 
 .service-card:nth-child(1) .anim-fade { animation-delay: 1.2s; }
 .service-card:nth-child(2) .anim-fade { animation-delay: 1.5s; }
@@ -1106,6 +1110,7 @@ nav {
 .service-card:nth-child(6) .anim-fade { animation-delay: 2.7s; }
 .service-card:nth-child(7) .anim-fade { animation-delay: 3.0s; }
 .service-card:nth-child(8) .anim-fade { animation-delay: 3.3s; }
+.service-card:nth-child(9) .anim-fade { animation-delay: 3.6s; }
 
 .wcu-card:nth-child(1) .anim-draw { animation-delay: 0s; }
 .wcu-card:nth-child(2) .anim-draw { animation-delay: 0.4s; }

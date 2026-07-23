@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Place Order — Scriptora</title>
 
-  <!-- থিম বুটস্ট্র্যাপ: পেজ রেন্ডার হওয়ার আগেই সংরক্ষিত থিম বসিয়ে দেয়, যাতে রিলোডে রং ফ্ল্যাশ না করে -->
+  <!-- Order পেজ সবসময় dark mode-এ থাকবে — theme override -->
   <script>
-    (function () {
-      if (localStorage.getItem('scriptora_theme') === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
-    })();
+    document.documentElement.removeAttribute('data-theme');
   </script>
 
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -22,7 +18,6 @@
 </head>
 <body>
 
-  <script src="../shared/theme.js"></script>
 
 <div class="bg">
   <div class="bg-o bg-o1"></div>
