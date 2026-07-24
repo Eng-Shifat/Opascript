@@ -37,7 +37,7 @@ body {
 }
 
 /* -------- PAGE / BREADCRUMB -------- */
-.svc-page { padding-bottom: var(--sp-6); }
+.svc-page { padding-bottom: var(--sp-6); isolation: auto; }
 
 .svc-breadcrumb {
   max-width: 1440px;

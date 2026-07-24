@@ -79,7 +79,8 @@
 
   const navCSS = `
   <style id="shared-nav-css">
-    #shared-nav { background:rgba(var(--bg-nav-rgb),0.35); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:0 2.5rem; height:58px; display:flex; align-items:center; justify-content:space-between; border-bottom:0.5px solid rgba(var(--text-rgb),0.08); position:sticky; top:0; z-index:1000; }
+    #shared-nav { background:rgba(120,120,140,0.08); backdrop-filter:blur(12px) saturate(180%); -webkit-backdrop-filter:blur(12px) saturate(180%); padding:0 2.5rem; height:58px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--text-rgb),0.10); position:sticky; top:0; z-index:1000; transition:background 0.3s; isolation:isolate; will-change:transform; }
+    [data-theme="light"] #shared-nav { background:rgba(255,255,255,0.12); border-bottom:1px solid rgba(0,0,0,0.08); }
     .logo { display:flex; align-items:center; gap:10px; font-weight:600; font-size:17px; color:var(--text-main); text-decoration:none; }
     .logo-icon { width:34px; height:34px; border-radius:8px; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; color:var(--text-on-accent); }
     .nav-links { display:flex; gap:1.75rem; align-items:center; }
