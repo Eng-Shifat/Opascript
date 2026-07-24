@@ -22,7 +22,7 @@ export const Config = {
      touch korte hobe na. */
   modules: {
     ai: { enabled: true },
-    liveChat: { enabled: false },   // Phase 4
+    liveChat: { enabled: true },   // Phase 4
     orders: { enabled: false },     // future
     pricing: { enabled: false },    // future
     packages: { enabled: false },   // future

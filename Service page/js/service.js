@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     svcTitleEl.textContent    = pkg.title;
     svcSubtitleEl.textContent = pkg.subtitle;
-    svcPriceEl.textContent    = pkg.price;
+    if (svcPriceEl) svcPriceEl.textContent = pkg.price;
     svcBestValueEl.innerHTML  = pkg.bestValue;
     svcOrderTextEl.textContent = 'Order ' + pkg.name + ' Package';
 

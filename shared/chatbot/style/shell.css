@@ -152,7 +152,7 @@
 .sca-header-close svg { width: 14px; height: 14px; }
 
 /* ---------- Body (module content mounts here) ---------- */
-.sca-body { flex: 1; overflow-y: auto; padding: var(--sca-space-5); overscroll-behavior: contain; }
+.sca-body { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sca-space-5); overscroll-behavior: contain; }
 .sca-body::-webkit-scrollbar { width: 5px; }
 .sca-body::-webkit-scrollbar-track { background: transparent; }
 .sca-body::-webkit-scrollbar-thumb { background: var(--sca-border-strong); border-radius: var(--sca-radius-pill); }
@@ -361,7 +361,7 @@
 .ui-footer { text-align: center; color: var(--sca-text-2); font-size: var(--sca-fs-xs); padding-top: var(--sca-space-3); }
 
 /* ---------- Scroll area ---------- */
-.ui-scroll-area { overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: var(--sca-space-3); }
+.ui-scroll-area { overflow-y: auto; display: flex; flex-direction: column; gap: var(--sca-space-3); }
 .ui-scroll-area::-webkit-scrollbar { width: 5px; }
 .ui-scroll-area::-webkit-scrollbar-track { background: transparent; }
 .ui-scroll-area::-webkit-scrollbar-thumb { background: var(--sca-border-strong); border-radius: var(--sca-radius-pill); }

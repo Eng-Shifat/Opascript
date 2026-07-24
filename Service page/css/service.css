@@ -144,6 +144,15 @@ body {
     0 0 0 1px rgba(var(--color-violet2-rgb),0.15);
 }
 
+/* Light theme — cyan glow around hero card */
+[data-theme="light"] .svc-hero-fb-card {
+  border: none;
+  box-shadow:
+    0 0 0 2px rgba(0,220,220,0.18),
+    0 0 32px 6px rgba(0,220,220,0.15),
+    0 0 64px 16px rgba(0,200,255,0.10);
+}
+
 .svc-hero-fb-card::after {
   content: '';
   position: absolute;
@@ -157,8 +166,8 @@ body {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(100deg, rgba(var(--svc-bg-rgb),0.97) 0%, rgba(var(--svc-bg-rgb),0.8) 45%, rgba(var(--svc-bg-rgb),0.2) 100%),
-    linear-gradient(to top, rgba(var(--svc-bg-rgb),1) 0%, rgba(var(--svc-bg-rgb),0.05) 40%, transparent 65%);
+    linear-gradient(100deg, rgba(var(--svc-bg-rgb),0.97) 0%, rgba(var(--svc-bg-rgb),0.92) 50%, rgba(var(--svc-bg-rgb),0.55) 100%),
+    linear-gradient(to top, rgba(var(--svc-bg-rgb),1) 0%, rgba(var(--svc-bg-rgb),0.2) 40%, transparent 65%);
 }
 
 .svc-hero-fb-inner {
@@ -185,6 +194,21 @@ body {
   letter-spacing: 0.6px;
   text-transform: uppercase;
   color: var(--color-purple-pale);
+}
+
+/* Light theme — cyan gradient badge */
+[data-theme="light"] .svc-hero-fb-badge {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(rgba(var(--svc-bg-rgb),0.85), rgba(var(--svc-bg-rgb),0.85)) padding-box,
+    linear-gradient(90deg, rgba(0,220,220,0.7), rgba(147,51,234,0.7)) border-box;
+  box-shadow: 0 0 12px rgba(0,220,220,0.18);
+}
+[data-theme="light"] .svc-hero-fb-badge span {
+  background: linear-gradient(90deg, rgb(0,180,180), var(--color-purple-pale));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .svc-hero-fb-title {
@@ -214,9 +238,12 @@ body {
 
 .svc-hero-fb-cta {
   display: flex;
-  gap: var(--sp-2);
+  gap: 0;
   margin-bottom: var(--sp-4);
   flex-wrap: wrap;
+}
+.svc-hero-fb-btn-outline {
+  margin-left: 3px;
 }
 .svc-hero-fb-btn-primary,
 .svc-hero-fb-btn-outline {
@@ -236,14 +263,30 @@ body {
   background: var(--accent);
   color: var(--text-on-accent);
 }
-.svc-hero-fb-btn-primary:hover { background: var(--accent-2); }
+.svc-hero-fb-btn-primary:hover { background: var(--accent-hover); }
 .svc-hero-fb-btn-outline {
   border: 1px solid rgba(var(--text-rgb),0.2);
   background: rgba(var(--text-rgb),0.05);
   backdrop-filter: blur(8px);
   color: var(--text);
+  margin-left: 3px;
 }
 .svc-hero-fb-btn-outline:hover { border-color: rgba(var(--text-rgb),0.4); }
+
+/* Light theme — cyan outline button */
+[data-theme="light"] .svc-hero-fb-btn-outline {
+  border: 1.5px solid rgba(0,210,210,0.5);
+  background: rgba(0,210,210,0.07);
+  color: rgb(0,150,150);
+}
+[data-theme="light"] .svc-hero-fb-btn-outline:hover { border-color: rgba(0,210,210,0.8); background: rgba(0,210,210,0.13); }
+
+/* Light theme — cyan primary button */
+[data-theme="light"] .svc-hero-fb-btn-primary {
+  background: linear-gradient(135deg, #00d4d4, #00a8cc);
+  color: #fff;
+}
+[data-theme="light"] .svc-hero-fb-btn-primary:hover { background: linear-gradient(135deg, #00e5e5, #00bcd4); }
 
 .svc-hero-fb-stats {
   display: grid;
@@ -1432,6 +1475,17 @@ body {
 .svc-btn-order-icon { width: 15px; height: 15px; flex-shrink: 0; }
 .svc-btn-order-arrow { font-size: 15px; }
 
+/* Light theme — cyan order button */
+[data-theme="light"] .svc-btn-order {
+  background: linear-gradient(135deg, #00c8c8, #0099bb);
+  animation: svc-order-glow-cyan 2.4s ease-in-out infinite;
+}
+@keyframes svc-order-glow-cyan {
+  0%, 100% { box-shadow: 0 4px 16px rgba(0,180,180,0.35), 0 0 0px rgba(0,200,200,0); }
+  50%      { box-shadow: 0 6px 28px rgba(0,180,180,0.6), 0 0 26px rgba(0,200,200,0.4); }
+}
+[data-theme="light"] .svc-btn-order:hover { background: linear-gradient(135deg, #00e0e0, #00aad4); }
+
 .svc-pkg-or {
   text-align: center;
   font-size: 11px;
@@ -1456,9 +1510,18 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
+  margin-top: 3px;
 }
 .svc-btn-talk:hover { border-color: rgba(var(--text-rgb),0.3); }
+
+/* Light theme — cyan talk button */
+[data-theme="light"] .svc-btn-talk {
+  border: 1.5px solid rgba(0,210,210,0.4);
+  background: rgba(0,210,210,0.06);
+  color: rgb(0,150,150);
+}
+[data-theme="light"] .svc-btn-talk:hover { border-color: rgba(0,210,210,0.7); background: rgba(0,210,210,0.12); }
 
 .svc-btn-primary {
   width: 100%;
