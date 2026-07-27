@@ -14,13 +14,13 @@
   --card:    var(--svc-card-mobile);
   --card2:   var(--svc-card2-mobile);
   --border:  rgba(var(--text-rgb),0.07);
-  --accent:  var(--color-purple-deep);
-  --accent2: var(--svc-accent2-mobile);
-  --purple-soft: rgba(var(--color-purple-deep-rgb),0.15);
+  --accent:  #11b5d9;
+  --accent2: #0fa3c7;
+  --purple-soft: rgba(17, 181, 217, 0.12);
   --green:   var(--color-success);
   --text:    var(--text-main);
   --muted:   var(--svc-muted-mobile);
-  --label:   var(--color-purple);
+  --label:   #11b5d9;
   --radius:  16px;
   --radius-sm: 10px;
 }

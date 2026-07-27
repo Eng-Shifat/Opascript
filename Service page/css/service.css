@@ -20,9 +20,9 @@
   --bg: var(--svc-bg);
   --card: var(--svc-card);
   --border: rgba(var(--text-rgb),0.08);
-  --accent: var(--color-violet2);
-  --accent-2: var(--svc-accent-2);
-  --highlight: var(--color-violet);
+  --accent: #11b5d9;
+  --accent-2: #0fa3c7;
+  --highlight: #11b5d9;
   --success: var(--color-success);
   --text: var(--text-main);
   --text-secondary: var(--svc-text-secondary);
@@ -144,13 +144,10 @@ body {
     0 0 0 1px rgba(var(--color-violet2-rgb),0.15);
 }
 
-/* Light theme — cyan glow around hero card */
+/* Light theme — hero card border + shadow removed */
 [data-theme="light"] .svc-hero-fb-card {
   border: none;
-  box-shadow:
-    0 0 0 2px rgba(0,220,220,0.18),
-    0 0 32px 6px rgba(0,220,220,0.15),
-    0 0 64px 16px rgba(0,200,255,0.10);
+  box-shadow: none;
 }
 
 .svc-hero-fb-card::after {
@@ -586,7 +583,7 @@ body {
 .svc-why-card:hover .svc-why-icon-wrap {
   transform: scale(1.06) rotate(-2deg);
 }
-.svc-why-card--violet  { --why-c: 139,92,246; }
+.svc-why-card--violet  { --why-c: 17,181,217; }
 .svc-why-card--blue    { --why-c: 59,130,246; }
 .svc-why-card--emerald { --why-c: 16,185,129; }
 .svc-why-card--amber   { --why-c: 245,158,11; }
@@ -602,6 +599,9 @@ body {
   line-height: 1;
   color: rgba(var(--text-rgb),0.028);
   user-select: none;
+}
+[data-theme="light"] .svc-why-num {
+  color: rgba(var(--text-rgb),0.09);
 }
 .svc-why-icon-wrap {
   position: relative;
@@ -726,11 +726,11 @@ body {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, rgba(var(--color-violet2-rgb),0.25), rgba(var(--svc-deep-purple-2-rgb),0.8));
-  border: 1.5px solid rgba(var(--color-violet2-rgb),0.4);
+  background: radial-gradient(circle at 35% 30%, rgba(17,181,217,0.2), rgba(15,163,199,0.6));
+  border: 1.5px solid rgba(17, 181, 217, 0.45);
   box-shadow:
-    0 0 0 6px rgba(var(--color-violet2-rgb),0.06),
-    0 0 30px rgba(var(--color-violet2-rgb),0.25);
+    0 0 0 6px rgba(17, 181, 217, 0.06),
+    0 0 30px rgba(17, 181, 217, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -739,7 +739,7 @@ body {
   width: 124px;
   height: 124px;
   border-radius: 50%;
-  background: linear-gradient(145deg, var(--svc-purple-mix), var(--color-violet), var(--color-purple-deep));
+  background: linear-gradient(145deg, #11b5d9, #0fa3c7, #0d8fab);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -747,7 +747,7 @@ body {
   font-weight: 800;
   color: var(--text-main);
   letter-spacing: 2px;
-  box-shadow: 0 0 40px rgba(var(--color-violet2-rgb),0.5) inset, 0 4px 20px rgba(var(--shadow-rgb),0.4);
+  box-shadow: 0 0 40px rgba(17,181,217,0.4) inset, 0 4px 20px rgba(var(--shadow-rgb),0.4);
 }
 /* Purple shield badge */
 .exp2-badge {
@@ -757,9 +757,9 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(145deg, var(--color-purple-deep), var(--svc-accent2-mobile));
-  border: 2.5px solid var(--svc-border-deep);
-  box-shadow: 0 0 16px rgba(var(--color-violet2-rgb),0.8);
+  background: linear-gradient(145deg, #11b5d9, #0d8fab);
+  border: 2.5px solid rgba(17,181,217,0.3);
+  box-shadow: 0 0 16px rgba(17,181,217,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -778,7 +778,7 @@ body {
 .exp2-title {
   font-size: 13px;
   font-weight: 500;
-  background: linear-gradient(90deg, var(--color-purple), var(--svc-magenta-2));
+  background: linear-gradient(90deg, #11b5d9, #0fa3c7);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -792,7 +792,7 @@ body {
   gap: 10px;
   width: 100%;
   margin-bottom: 18px;
-  color: rgba(var(--color-violet2-rgb),0.5);
+  color: rgba(17, 181, 217, 0.5);
   font-size: 12px;
 }
 .exp2-divider::before,
@@ -821,13 +821,13 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: rgba(var(--color-violet2-rgb),0.12);
-  border: 1px solid rgba(var(--color-violet2-rgb),0.2);
+  background: rgba(17, 181, 217, 0.1);
+  border: 1px solid rgba(17, 181, 217, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--color-purple);
+  color: #11b5d9;
 }
 .exp2-mini-icon svg { width: 18px; height: 18px; }
 .exp2-mini-val {
@@ -860,13 +860,13 @@ body {
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: rgba(var(--color-violet2-rgb),0.12);
-  border: 1px solid rgba(var(--color-violet2-rgb),0.2);
+  background: rgba(17, 181, 217, 0.1);
+  border: 1px solid rgba(17, 181, 217, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--color-purple);
+  color: #11b5d9;
 }
 .exp2-header-icon svg { width: 22px; height: 22px; }
 .exp2-header-text { flex: 1; }
@@ -1387,8 +1387,11 @@ body {
 }
 .svc-tab:hover { color: var(--text); }
 .svc-tab.active {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--color-purple-deep), var(--svc-magenta-1));
   color: white;
+}
+[data-theme="light"] .svc-tab.active {
+  background: linear-gradient(135deg, #11b5d9, #0fa3c7);
 }
 
 .svc-pkg-starting {
@@ -1441,12 +1444,12 @@ body {
   height: 28px;
   flex-shrink: 0;
   border-radius: 8px;
-  background: rgba(var(--color-violet2-rgb),0.15);
+  background: rgba(var(--color-cyan-light-rgb), 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.svc-pkg-feat-icon svg { width: 14px; height: 14px; color: var(--accent); }
+.svc-pkg-feat-icon svg { width: 14px; height: 14px; color: var(--color-cyan-deep); }
 .svc-pkg-feat-title { font-size: 12.5px; font-weight: 600; color: var(--text); }
 .svc-pkg-feat-desc { font-size: 10.5px; color: var(--text-secondary); margin-top: 1px; }
 
@@ -1702,6 +1705,14 @@ body {
   border-color: rgba(var(--color-violet2-rgb),0.28);
 }
 
+/* Light theme only */
+[data-theme="light"] .svc-about-hl {
+  background: #e1f7fc;
+}
+[data-theme="light"] .svc-about-hl:hover {
+  background: #cdeef6;
+}
+
 .svc-about-hl-icon {
   flex-shrink: 0;
   width: 44px;
@@ -1754,6 +1765,11 @@ body {
   border-left: 3px solid rgba(var(--color-purple-deep-rgb),0.6);
   border-radius: 12px;
   margin-top: var(--sp-2);
+}
+
+/* Light theme only */
+[data-theme="light"] .svc-about-mission {
+  background: #e1f7fc;
 }
 
 .svc-about-mission-icon {

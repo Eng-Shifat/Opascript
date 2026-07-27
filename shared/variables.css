@@ -124,7 +124,9 @@
   --color-cyan: #06b6d4;
   --color-cyan-rgb: 6, 182, 212;
   --color-cyan-deep: #0e7490;
+  --color-cyan-deep-rgb: 14, 116, 144;
   --color-cyan-light: #22d3ee;
+  --color-cyan-light-rgb: 34, 211, 238;
   --color-blue2: #3b82f6;
   --color-blue2-rgb: 59, 130, 246;
   --color-blue2-deep: #1d4ed8;
@@ -335,10 +337,10 @@
   /* =========================================================
      ৭. SERVICE পেজ (Light Mode)
      ========================================================= */
-  --svc-bg: #f6f8fc;
-  --svc-bg-rgb: 246, 248, 252;
-  --svc-bg-mobile: #f6f8fc;
-  --svc-bg-mobile-rgb: 246, 248, 252;
+  --svc-bg: #e6f3f9;
+  --svc-bg-rgb: 230, 243, 249;
+  --svc-bg-mobile: #e6f3f9;
+  --svc-bg-mobile-rgb: 230, 243, 249;
   --svc-card: #ffffff;
   --svc-card-rgb: 255, 255, 255;
   --svc-card-mobile: #ffffff;
