@@ -362,20 +362,20 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(var(--color-purple-deep-rgb),0.14);
-  border: 1px solid rgba(var(--color-purple-rgb),0.4);
+  background: rgba(17, 181, 217, 0.1);
+  border: 1px solid rgba(17, 181, 217, 0.45);
   border-radius: 20px;
   padding: 6px 16px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--color-purple-pale);
+  color: #11b5d9;
   margin-bottom: 1rem;
-  box-shadow: 0 0 16px rgba(var(--color-purple-deep-rgb),0.22);
+  box-shadow: 0 0 16px rgba(17, 181, 217, 0.15);
 }
 .section-badge .badge-icon {
-  color: var(--color-purple);
+  color: #11b5d9;
   font-size: 12px;
 }
 .section-title {
@@ -943,14 +943,14 @@ nav {
 .cta-content { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
 .cta-badge {
   display: inline-block;
-  background: rgba(var(--accent-rgb),0.18);
-  border: 0.5px solid rgba(var(--accent-rgb),0.45);
+  background: rgba(17, 181, 217, 0.1);
+  border: 1px solid rgba(17, 181, 217, 0.45);
   border-radius: 20px;
   padding: 5px 18px;
   font-size: 13px;
-  color: var(--color-lightblue-pale);
+  color: #11b5d9;
   margin-bottom: 1.2rem;
-  box-shadow: 0 2px 12px -4px rgba(var(--accent-rgb),0.3);
+  box-shadow: 0 2px 12px -4px rgba(17, 181, 217, 0.2);
 }
 .cta-title { font-size: 30px; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; line-height: 1.35; }
 .cta-desc { font-size: 14.5px; color: rgba(var(--text-rgb),0.58); line-height: 1.8; margin-bottom: 2rem; }
@@ -1260,4 +1260,20 @@ nav {
   border-color: #11b5d9;
   color: #11b5d9;
   background: rgba(17, 181, 217, 0.05);
+}
+
+/* ── Section Badge & CTA Badge — Cyan in both modes ── */
+[data-theme="light"] .section-badge {
+  background: rgba(17, 181, 217, 0.08);
+  border-color: rgba(17, 181, 217, 0.4);
+  color: #11b5d9;
+  box-shadow: 0 0 12px rgba(17, 181, 217, 0.12);
+}
+[data-theme="light"] .section-badge .badge-icon {
+  color: #11b5d9;
+}
+[data-theme="light"] .cta-badge {
+  background: rgba(17, 181, 217, 0.08);
+  border-color: rgba(17, 181, 217, 0.4);
+  color: #11b5d9;
 }
