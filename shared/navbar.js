@@ -84,7 +84,7 @@
     .mobile-menu { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     [data-theme="light"] #shared-nav { background:rgba(var(--bg-nav-rgb),1); border-bottom:1px solid rgba(0,0,0,0.08); }
     .logo { display:flex; align-items:center; gap:10px; font-weight:600; font-size:17px; color:var(--text-main); text-decoration:none; }
-    .logo-icon { width:34px; height:34px; border-radius:8px; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; color:var(--text-on-accent); }
+    .logo-icon { width:34px; height:34px; border-radius:8px; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; color:#ffffff; }
     .nav-links { display:flex; gap:1.6rem; align-items:center; }
     .nav-links a { color:rgba(var(--text-rgb),0.7); font-size:14px; text-decoration:none; transition:color 0.2s; }
     .nav-links a:hover { color:var(--text-main); }
