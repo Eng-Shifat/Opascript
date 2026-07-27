@@ -79,11 +79,13 @@
 
   const navCSS = `
   <style id="shared-nav-css">
-    #shared-nav { background:rgba(120,120,140,0.08); backdrop-filter:blur(12px) saturate(180%); -webkit-backdrop-filter:blur(12px) saturate(180%); padding:0 2.5rem; height:58px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--text-rgb),0.10); position:sticky; top:0; z-index:1000; transition:background 0.3s; isolation:isolate; will-change:transform; }
-    [data-theme="light"] #shared-nav { background:rgba(255,255,255,0.12); border-bottom:1px solid rgba(0,0,0,0.08); }
+    #shared-nav { background:rgba(var(--bg-nav-rgb),1); backdrop-filter:blur(12px) saturate(180%); -webkit-backdrop-filter:blur(12px) saturate(180%); padding:0 2.5rem; height:58px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--text-rgb),0.10); position:sticky; top:0; z-index:1000; transition:background 0.3s; isolation:isolate; will-change:transform; font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
+    #shared-nav, #shared-nav * { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
+    .mobile-menu { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
+    [data-theme="light"] #shared-nav { background:rgba(var(--bg-nav-rgb),1); border-bottom:1px solid rgba(0,0,0,0.08); }
     .logo { display:flex; align-items:center; gap:10px; font-weight:600; font-size:17px; color:var(--text-main); text-decoration:none; }
     .logo-icon { width:34px; height:34px; border-radius:8px; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; color:var(--text-on-accent); }
-    .nav-links { display:flex; gap:1.75rem; align-items:center; }
+    .nav-links { display:flex; gap:1.6rem; align-items:center; }
     .nav-links a { color:rgba(var(--text-rgb),0.7); font-size:14px; text-decoration:none; transition:color 0.2s; }
     .nav-links a:hover { color:var(--text-main); }
     .nav-btns { display:flex; gap:10px; align-items:center; }
@@ -93,11 +95,11 @@
     .btn-register:hover { background:var(--accent-hover); }
     .btn-logout { padding:7px 18px; border:0.5px solid rgba(var(--color-red-rgb),0.4); border-radius:7px; background:transparent; color:var(--color-red-light); font-size:13.5px; cursor:pointer; font-family:inherit; }
     .btn-logout:hover { background:rgba(var(--color-red-rgb),0.1); border-color:var(--color-red); color:var(--color-red); }
-    .nav-dashboard-btn { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--text-main); padding:5px 12px; border:0.5px solid rgba(var(--text-rgb),0.15); border-radius:20px; background:transparent; cursor:pointer; font-family:inherit; }
+    .nav-dashboard-btn { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--text-main); padding:5px 14px 5px 6px; border:0.5px solid rgba(var(--text-rgb),0.15); border-radius:20px; background:transparent; cursor:pointer; font-family:inherit; }
     .nav-dashboard-btn:hover { background:rgba(var(--text-rgb),0.08); }
     .nav-avatar { width:26px; height:26px; border-radius:50%; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text-on-accent); }
-    .nav-avatar-wrap { position:relative; display:flex; }
-    .nav-avatar-arrow { position:absolute; bottom:-4px; right:-4px; width:14px; height:14px; border-radius:50%; background:rgba(var(--bg-nav-rgb),0.6); border:1px solid rgba(var(--text-rgb),0.2); display:flex; align-items:center; justify-content:center; font-size:9px; line-height:1; color:rgba(var(--text-rgb),0.8); }
+    .nav-avatar-wrap { position:relative; display:flex; margin-right: 2px; }
+    .nav-avatar-arrow { position:absolute; bottom:-3px; right:-3px; width:13px; height:13px; border-radius:50%; background:var(--bg-nav); border:1px solid rgba(var(--text-rgb),0.2); display:flex; align-items:center; justify-content:center; font-size:8px; line-height:1; color:rgba(var(--text-rgb),0.8); }
     .nav-dashboard-btn span { font-size:13.5px; font-weight:500; }
     .theme-toggle-btn { width:34px; height:34px; border-radius:50%; border:0.5px solid rgba(var(--text-rgb),0.15); background:rgba(var(--text-rgb),0.05); color:var(--text-main); font-size:15px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s, border-color 0.2s, transform 0.25s; flex-shrink:0; }
     .theme-toggle-btn:hover { background:rgba(var(--text-rgb),0.1); border-color:rgba(var(--text-rgb),0.3); transform:rotate(15deg); }
@@ -122,8 +124,7 @@
     }
   </style>`;
 
-  if (!isHome) { document.write(navCSS + navHTML); }
-  else { document.write(navHTML); }
+  document.write(navCSS + navHTML);
 
   document.addEventListener('DOMContentLoaded', function () {
     const btn = document.getElementById('hamburgerBtn');

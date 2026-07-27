@@ -119,7 +119,7 @@
 }
 .sc-logo-icon {
   width: 32px; height: 32px; border-radius: 8px;
-  background: linear-gradient(135deg, #0eb6d7, #0891b2);
+  background: var(--accent-color);
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 16px; color: white;
 }
@@ -175,6 +175,7 @@
   border-top: 0.5px solid rgba(0,0,0,0.08);
 }
 [data-theme="light"] .sc-footer-logo { color: #0f172a; }
+[data-theme="light"] .sc-logo-icon { color: #ffffff !important; }
 [data-theme="light"] .sc-footer-tagline { color: rgba(15,23,42,0.5); }
 [data-theme="light"] .sc-social-btn {
   background: rgba(0,0,0,0.05);
@@ -202,13 +203,15 @@
   style.textContent = footerCSS;
   document.head.appendChild(style);
 
-  /* ── Inject Footer ── */
-  document.addEventListener('DOMContentLoaded', function () {
+  /* ── Inject Footer (once only) ── */
+  function injectFooter() {
+    if (document.querySelector('.sc-footer')) return;
     document.body.insertAdjacentHTML('beforeend', footerHTML);
-  });
+  }
 
-  /* If DOM already loaded */
-  if (document.readyState !== 'loading') {
-    document.body.insertAdjacentHTML('beforeend', footerHTML);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectFooter);
+  } else {
+    injectFooter();
   }
 })();

@@ -31,7 +31,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Inter', 'Segoe UI', 'Kalpurush', sans-serif;
+  font-family: 'Segoe UI', 'Kalpurush', sans-serif;
   background: var(--bg);
   color: var(--text);
 }
