@@ -621,25 +621,205 @@
           </button>
         </div>
 
-        <div class="svc-card svc-side-card">
-          <div class="svc-side-header">
-            <span class="svc-side-title">Your Project is 100% Safe</span>
+        <!-- ═══ SAFETY CARD — shared template across all service pages ═══ -->
+        <div class="svc-card svc-safety-card">
+
+          <!-- SVG defs: gradients shared across all icons in this card -->
+          <svg width="0" height="0" style="position:absolute">
+            <defs>
+              <linearGradient id="sf-purple-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#c4b5fd"/>
+                <stop offset="100%" stop-color="#7c3aed"/>
+              </linearGradient>
+              <linearGradient id="sf-shield-fill" x1="20%" y1="0%" x2="80%" y2="100%">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#6d28d9"/>
+              </linearGradient>
+              <linearGradient id="sf-green-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4ade80"/>
+                <stop offset="100%" stop-color="#16a34a"/>
+              </linearGradient>
+              <filter id="sf-glow-purple" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="sf-glow-green" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+          </svg>
+
+          <!-- Header -->
+          <div class="safety-header">
+            <div class="safety-shield-wrap">
+              <!-- Premium layered shield -->
+              <svg class="safety-shield-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <!-- Outer glow halo -->
+                <ellipse cx="32" cy="58" rx="16" ry="3.5" fill="rgba(167,139,250,0.2)"/>
+                <!-- Shadow layer -->
+                <path d="M32 6L9 16v15c0 13.5 10 25.5 23 29 13-3.5 23-15.5 23-29V16L32 6z"
+                      fill="rgba(109,40,217,0.25)" transform="translate(1,2)"/>
+                <!-- Main shield body -->
+                <path d="M32 6L9 16v15c0 13.5 10 25.5 23 29 13-3.5 23-15.5 23-29V16L32 6z"
+                      fill="url(#sf-shield-fill)" opacity="0.9"/>
+                <!-- Inner highlight -->
+                <path d="M32 10L13 19v12c0 10.5 7.8 20 19 23 11.2-3 19-12.5 19-23V19L32 10z"
+                      fill="rgba(255,255,255,0.08)"/>
+                <!-- Top shine -->
+                <path d="M20 14 Q32 8 44 14" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <!-- Checkmark with glow -->
+                <path d="M21 33l8 8 14-14" stroke="white" stroke-width="3.5" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round" filter="url(#sf-glow-purple)" opacity="0.5"/>
+                <path d="M21 33l8 8 14-14" stroke="white" stroke-width="3" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="safety-shield-ring"></div>
+            </div>
+            <div class="safety-title-block">
+              <div class="safety-title-highlight safety-title-oneline">Guaranteed 100% Privacy &amp; Safety</div>
+              <div class="safety-subtitle">Bank-grade security and strict non-disclosure protocols to protect your identity and research.</div>
+            </div>
           </div>
-          <ul class="svc-check-list">
-            <li>Complete Confidentiality</li>
-            <li>Secure File Delivery</li>
-            <li>Only You Can Access</li>
-            <li>Data Never Shared</li>
-          </ul>
-          <button class="svc-btn-secondary">View Our Privacy Policy</button>
+
+          <!-- Feature rows -->
+          <div class="safety-features">
+
+            <!-- 1. Complete Confidentiality — padlock -->
+            <div class="safety-feature-row">
+              <div class="safety-feat-icon">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Lock body -->
+                  <rect x="8" y="17" width="20" height="14" rx="3.5" fill="url(#sf-purple-grad)" opacity="0.95"/>
+                  <!-- Lock body inner shine -->
+                  <rect x="8" y="17" width="20" height="6" rx="3.5" fill="rgba(255,255,255,0.12)"/>
+                  <!-- Shackle -->
+                  <path d="M12 17v-5a6 6 0 0112 0v5" fill="none" stroke="url(#sf-purple-grad)" stroke-width="2.5" stroke-linecap="round"/>
+                  <!-- Keyhole circle -->
+                  <circle cx="18" cy="25" r="2.5" fill="rgba(255,255,255,0.6)"/>
+                  <!-- Keyhole stem -->
+                  <rect x="16.5" y="25" width="3" height="3.5" rx="1" fill="rgba(255,255,255,0.6)"/>
+                </svg>
+              </div>
+              <div class="safety-feat-text">
+                <div class="safety-feat-title">Strict NDA &amp; Confidentiality</div>
+                <div class="safety-feat-desc">Your name, identity, and academic details are never revealed—even to writers.</div>
+              </div>
+              <div class="safety-feat-check">
+                <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="10" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+                  <circle cx="11" cy="11" r="7" fill="rgba(34,197,94,0.2)"/>
+                  <path d="M7 11.5l3 3 5-6" stroke="url(#sf-green-grad)" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 2. Secure File Delivery — file with shield -->
+            <div class="safety-feature-row">
+              <div class="safety-feat-icon">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <!-- File body -->
+                  <rect x="7" y="4" width="16" height="20" rx="2.5" fill="url(#sf-purple-grad)" opacity="0.85"/>
+                  <!-- File corner fold -->
+                  <path d="M18 4l5 5h-4a1 1 0 01-1-1V4z" fill="rgba(255,255,255,0.25)"/>
+                  <!-- File lines -->
+                  <rect x="10" y="13" width="8" height="1.5" rx="0.75" fill="rgba(255,255,255,0.5)"/>
+                  <rect x="10" y="16.5" width="6" height="1.5" rx="0.75" fill="rgba(255,255,255,0.35)"/>
+                  <!-- Mini shield badge -->
+                  <path d="M22 22l-6 3-6-3v-4.5l6-2.5 6 2.5V22z" fill="rgba(167,139,250,0.3)" stroke="url(#sf-purple-grad)" stroke-width="1.2"/>
+                  <path d="M16 19.5l1.5 1.5 2.5-2.5" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="safety-feat-text">
+                <div class="safety-feat-title">Encrypted Vault Delivery</div>
+                <div class="safety-feat-desc">Files are shared through secure, end-to-end encrypted channels only.</div>
+              </div>
+              <div class="safety-feat-check">
+                <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="10" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+                  <circle cx="11" cy="11" r="7" fill="rgba(34,197,94,0.2)"/>
+                  <path d="M7 11.5l3 3 5-6" stroke="url(#sf-green-grad)" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 3. Only You Can Access — person + key -->
+            <div class="safety-feature-row">
+              <div class="safety-feat-icon">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Person head -->
+                  <circle cx="15" cy="10" r="5" fill="url(#sf-purple-grad)" opacity="0.9"/>
+                  <!-- Person body -->
+                  <path d="M6 28c0-5 4-8 9-8s9 3 9 8" fill="url(#sf-purple-grad)" opacity="0.75"/>
+                  <!-- Key badge -->
+                  <circle cx="27" cy="25" r="5" fill="rgba(124,58,237,0.3)" stroke="url(#sf-purple-grad)" stroke-width="1.2"/>
+                  <circle cx="25.5" cy="23.5" r="1.8" fill="none" stroke="#c4b5fd" stroke-width="1.2"/>
+                  <path d="M27 25l2.5 2.5M28 26.5l1 1" stroke="#c4b5fd" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="safety-feat-text">
+                <div class="safety-feat-title">Zero Repository / No Reselling</div>
+                <div class="safety-feat-desc">Your paper is 100% custom-written, never published online, and never resold to anyone else.</div>
+              </div>
+              <div class="safety-feat-check">
+                <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="10" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+                  <circle cx="11" cy="11" r="7" fill="rgba(34,197,94,0.2)"/>
+                  <path d="M7 11.5l3 3 5-6" stroke="url(#sf-green-grad)" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 4. Data Never Shared — shield with X block -->
+            <div class="safety-feature-row">
+              <div class="safety-feat-icon">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Main shield -->
+                  <path d="M18 3L5 9v9c0 8.5 5.5 16 13 18.5C25.5 34 31 26.5 31 18V9L18 3z"
+                        fill="url(#sf-purple-grad)" opacity="0.9"/>
+                  <!-- Inner shine -->
+                  <path d="M18 5L7 10.5V18c0 6.5 4.2 12.5 11 15 6.8-2.5 11-8.5 11-15V10.5L18 5z"
+                        fill="rgba(255,255,255,0.08)"/>
+                  <!-- Check mark -->
+                  <path d="M12 18.5l4.5 4.5 8-9" stroke="white" stroke-width="2.8" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Top shine -->
+                  <path d="M12 7.5 Q18 4.5 24 7.5" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="safety-feat-text">
+                <div class="safety-feat-title">100% Original &amp; Plagiarism-Free</div>
+                <div class="safety-feat-desc">Includes official Turnitin/AI-detector reports for complete peace of mind.</div>
+              </div>
+              <div class="safety-feat-check">
+                <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="10" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+                  <circle cx="11" cy="11" r="7" fill="rgba(34,197,94,0.2)"/>
+                  <path d="M7 11.5l3 3 5-6" stroke="url(#sf-green-grad)" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- NDA button -->
+          <button class="safety-nda-btn" onclick="window.location.href='#'">
+            <span class="safety-nda-label">Read Our Non-Disclosure Agreement (NDA)</span>
+            <span class="safety-arrow">→</span>
+          </button>
         </div>
+        <!-- ═══ /SAFETY CARD ═══ -->
 
         <div class="svc-card svc-side-card">
           <div class="svc-side-header">
             <span class="svc-side-title">Need Help Before Order?</span>
           </div>
           <p class="svc-side-text">Chat with our academic experts</p>
-          <button class="svc-btn-secondary">Start Live Chat</button>
+          <button class="svc-btn-secondary svc-btn-live-chat">Start Live Chat</button>
         </div>
 
         <div class="svc-card svc-side-card">
