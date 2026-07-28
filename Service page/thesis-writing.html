@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/service.css" />
-  <link rel="stylesheet" href="css/mobile.css" />
+  <link rel="stylesheet" href="css/mobile.css" media="(max-width: 768px)" />
 </head>
 
 <body>
@@ -822,15 +822,55 @@
           <button class="svc-btn-secondary svc-btn-live-chat">Start Live Chat</button>
         </div>
 
-        <div class="svc-card svc-side-card">
-          <div class="svc-side-header">
-            <span class="svc-side-title">Trusted by 500+ Students</span>
+        <div class="svc-card svc-trust-card">
+          <div class="svc-trust-header">
+            <div class="svc-trust-badge">
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="13" height="13">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" fill="currentColor"/>
+              </svg>
+              Trusted Platform
+            </div>
+            <h3 class="svc-trust-title">Trusted by <span>500+</span> Students</h3>
+            <p class="svc-trust-sub">Across Bangladesh & beyond</p>
           </div>
-          <div class="svc-side-stats">
-            <div class="svc-side-stat"><span>500+</span><span>Projects Completed</span></div>
-            <div class="svc-side-stat"><span>98%</span><span>On-Time Delivery</span></div>
-            <div class="svc-side-stat"><span>100%</span><span>Confidential Workflow</span></div>
-            <div class="svc-side-stat"><span>4.9/5</span><span>Client Satisfaction</span></div>
+          <div class="svc-trust-grid">
+            <div class="svc-trust-item">
+              <div class="svc-trust-icon svc-trust-icon--cyan">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" fill="currentColor"/>
+                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="svc-trust-num">500+</div>
+              <div class="svc-trust-label">Projects Completed</div>
+            </div>
+            <div class="svc-trust-item">
+              <div class="svc-trust-icon svc-trust-icon--green">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="svc-trust-num">98%</div>
+              <div class="svc-trust-label">On-Time Delivery</div>
+            </div>
+            <div class="svc-trust-item">
+              <div class="svc-trust-icon svc-trust-icon--purple">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="svc-trust-num">100%</div>
+              <div class="svc-trust-label">Confidential</div>
+            </div>
+            <div class="svc-trust-item">
+              <div class="svc-trust-icon svc-trust-icon--yellow">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="svc-trust-num">4.9<span class="svc-trust-unit">/5</span></div>
+              <div class="svc-trust-label">Client Satisfaction</div>
+            </div>
           </div>
         </div>
 
@@ -839,14 +879,16 @@
     </div>
 
     <!-- FINAL CTA -->
-    <div class="svc-cta">
-      <div class="svc-cta-text">
-        <h2>Ready to Start Your Thesis?</h2>
-        <p>Let our experts help you achieve academic success.</p>
-      </div>
-      <div class="svc-cta-buttons">
-        <button class="svc-btn-primary svc-btn-lg">Start Your Project Today →</button>
-        <button class="svc-btn-outline-lg">Talk to Expert</button>
+    <div class="svc-cta-wrap">
+      <div class="svc-cta">
+        <div class="svc-cta-text">
+          <h2>Ready to Start Your Thesis?</h2>
+          <p>Let our experts help you achieve academic success.</p>
+        </div>
+        <div class="svc-cta-buttons">
+          <button class="svc-btn-primary svc-btn-lg">Start Your Project Today →</button>
+          <button class="svc-btn-outline-lg">Talk to Expert</button>
+        </div>
       </div>
     </div>
 
