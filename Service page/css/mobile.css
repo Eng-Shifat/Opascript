@@ -99,7 +99,7 @@ body {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(var(--svc-bg-mobile-rgb),0.92) 0%, rgba(var(--svc-bg-mobile-rgb),0.72) 32%, rgba(var(--svc-bg-mobile-rgb),0.28) 55%, rgba(var(--svc-bg-mobile-rgb),0.55) 78%, rgba(var(--svc-bg-mobile-rgb),0.95) 100%);
+    linear-gradient(180deg, rgba(var(--svc-bg-mobile-rgb),0.96) 0%, rgba(var(--svc-bg-mobile-rgb),0.9) 30%, rgba(var(--svc-bg-mobile-rgb),0.82) 50%, rgba(var(--svc-bg-mobile-rgb),0.4) 68%, rgba(var(--svc-bg-mobile-rgb),0.9) 100%);
 }
 .mob-hero-card-inner {
   position: relative;
@@ -142,6 +142,18 @@ body {
   color: rgba(var(--text-rgb),0.85);
   margin-bottom: 0;
   max-width: 96%;
+}
+
+/* Light theme — swap the pale lavender/violet gradient stops (made for a dark
+   photo backdrop) for darker, saturated purple so the title stays readable
+   against the light overlay + photo. */
+[data-theme="light"] .mob-hero-card-title {
+  background: linear-gradient(90deg, var(--text-main) 30%, var(--color-purple-deep) 65%, var(--color-purple-deep2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+[data-theme="light"] .mob-hero-card-desc-short {
+  color: rgba(var(--text-rgb),0.92);
 }
 
 /* ── New: CTA buttons, absolute bottom of the photo card, side-by-side ── */
@@ -240,7 +252,7 @@ body {
   padding: 15px;
   border: none;
   border-radius: var(--radius);
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--color-purple-deep), var(--svc-magenta-1));
   color: var(--text-on-accent);
   font-family: inherit;
   font-size: 15px;
@@ -270,6 +282,17 @@ body {
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 4px;
+}
+
+/* Light theme — match desktop's cyan primary + cyan outline hero buttons */
+[data-theme="light"] .mob-cta-primary {
+  background: linear-gradient(135deg, #00d4d4, #00a8cc);
+  color: #fff;
+}
+[data-theme="light"] .mob-cta-outline {
+  border: 1.5px solid rgba(0,210,210,0.5);
+  background: rgba(0,210,210,0.07);
+  color: rgb(0,150,150);
 }
 
 /* ── STATS ROW ───────────────────────────────────────── */
@@ -509,48 +532,205 @@ body {
 }
 
 /* ── EXPERT ──────────────────────────────────────────── */
-.mob-expert {
+.mob-exp2-head {
   display: flex;
-  gap: 16px;
   align-items: flex-start;
+  gap: 12px;
   margin-bottom: 16px;
 }
-.mob-expert-photo {
-  width: 90px; height: 110px;
+.mob-exp2-head-icon {
+  width: 40px; height: 40px;
   flex-shrink: 0;
-  border-radius: var(--radius);
-  background: linear-gradient(160deg, var(--accent), var(--svc-mobile-grad-c));
-  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(var(--color-violet2-rgb),0.15);
+  border: 1.5px solid rgba(var(--color-violet2-rgb),0.4);
   display: flex; align-items: center; justify-content: center;
-  font-size: 28px; font-weight: 700; color: rgba(var(--text-rgb),0.5);
+  color: var(--color-violet2);
 }
-.mob-expert-photo img { width: 100%; height: 100%; object-fit: cover; }
-.mob-expert-points {
-  flex: 1;
-  list-style: none;
+.mob-exp2-head-icon svg { width: 20px; height: 20px; }
+.mob-exp2-head-text { flex: 1; min-width: 0; }
+.mob-exp2-heading {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+.mob-exp2-heading .grad {
+  background: linear-gradient(90deg, var(--color-blue2), var(--color-violet2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.mob-exp2-sub {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.mob-exp2-card {
+  background: var(--card2);
+  border: 1px solid rgba(var(--color-violet2-rgb),0.25);
+  border-radius: 18px;
+  padding: 16px 14px 16px;
+  box-shadow: 0 0 0 1px rgba(var(--color-violet2-rgb),0.06), 0 12px 30px -14px rgba(var(--shadow-rgb),0.5);
+}
+.mob-exp2-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.mob-exp2-left {
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding-top: 4px;
+  align-items: center;
+  text-align: center;
 }
-.mob-expert-points li {
+.mob-exp2-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.mob-exp2-right { flex: 1; min-width: 0; }
+.mob-exp2-avatar-wrap {
+  position: relative;
+  margin-bottom: 8px;
+}
+.mob-exp2-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--accent), var(--color-violet2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: #fff;
+  box-shadow: 0 6px 16px -6px rgba(var(--color-purple-deep-rgb),0.5);
+  border: 2px solid rgba(var(--color-violet2-rgb),0.5);
+}
+.mob-exp2-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.mob-exp2-online {
+  position: absolute;
+  right: 0; bottom: 0;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--color-success);
+  border: 2px solid var(--card2);
+}
+.mob-exp2-name {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 1px;
+}
+.mob-exp2-role {
+  font-size: 8.5px;
+  font-weight: 600;
+  color: var(--color-violet2);
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+.mob-exp2-ministats {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+.mob-exp2-ministat {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 3px;
+  text-align: center;
+}
+.mob-exp2-ministat-icon {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.mob-exp2-ministat--blue .mob-exp2-ministat-icon { background: rgba(var(--color-blue2-rgb),0.15); color: var(--color-blue2); }
+.mob-exp2-ministat--gold .mob-exp2-ministat-icon { background: rgba(var(--color-yellow-rgb),0.15); color: var(--color-yellow); }
+.mob-exp2-ministat-icon svg { width: 10px; height: 10px; }
+.mob-exp2-ministat-val { font-size: 10px; font-weight: 800; line-height: 1.2; }
+.mob-exp2-ministat-label { font-size: 7px; color: var(--muted); font-weight: 500; line-height: 1.2; }
+
+.mob-exp2-features {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.mob-exp2-feature {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 12.5px;
-  color: rgba(var(--text-rgb),0.85);
-  line-height: 1.4;
 }
-.mob-expert-points li svg {
-  width: 16px; height: 16px;
+.mob-exp2-feat-icon {
+  width: 28px; height: 28px;
   flex-shrink: 0;
-  margin-top: 1px;
-  color: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
 }
-.mob-expert-tagline {
-  font-size: 13px;
-  color: var(--muted);
+.mob-exp2-feat-icon svg { width: 14px; height: 14px; }
+.mob-exp2-feature--green .mob-exp2-feat-icon  { background: rgba(var(--color-success-rgb),0.15); color: var(--color-success); }
+.mob-exp2-feature--blue .mob-exp2-feat-icon   { background: rgba(var(--color-blue2-rgb),0.15); color: var(--color-blue2); }
+.mob-exp2-feature--purple .mob-exp2-feat-icon { background: rgba(var(--color-violet2-rgb),0.15); color: var(--color-violet2); }
+.mob-exp2-feature--orange .mob-exp2-feat-icon { background: rgba(var(--color-orange-rgb),0.15); color: var(--color-orange); }
+.mob-exp2-feat-title { font-size: 10.5px; font-weight: 700; margin-bottom: 1px; line-height: 1.3; }
+.mob-exp2-feat-desc { font-size: 9px; color: var(--muted); line-height: 1.35; }
+
+/* Below 360px: the two-column composition gets too cramped to read, so
+   this is the one place we fall back to a stacked layout (see media
+   query at the bottom of this file). */
+
+.mob-exp2-quote {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(var(--color-violet2-rgb),0.14);
+  border-radius: 14px;
+  padding: 14px;
+}
+.mob-exp2-quote p {
+  flex: 1;
+  font-size: 12px;
   font-style: italic;
+  color: rgba(var(--text-rgb),0.85);
+  line-height: 1.5;
+  margin: 0;
+}
+.mob-exp2-quote-badge {
+  position: relative;
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: linear-gradient(145deg, var(--color-purple-deep), var(--color-violet2));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.mob-exp2-quote-badge svg { width: 16px; height: 16px; }
+.mob-exp2-quote-badge::before,
+.mob-exp2-quote-badge::after {
+  content: '';
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--color-violet2);
+  box-shadow: 0 0 4px rgba(var(--color-violet2-rgb),0.9);
+}
+.mob-exp2-quote-badge::before { top: -6px; right: -5px; }
+.mob-exp2-quote-badge::after  { width: 3px; height: 3px; bottom: -4px; left: -6px; }
+
+/* Light theme — quote box needs a solid tint since --purple-soft is faint on light bg */
+[data-theme="light"] .mob-exp2-quote {
+  background: rgba(var(--color-violet2-rgb),0.08);
 }
 
 /* ── WORKFLOW ─────────────────────────────────────────── */
@@ -893,3 +1073,24 @@ body {
 /* ── PREVENT HORIZONTAL OVERFLOW ── */
 #mob-content { overflow-x: hidden; }
 #mob-content img { max-width: 100%; height: auto; }
+
+/* ── EXPERT CARD: stack only below 360px — the two-column layout above
+   is the default down to that width; this is the one exception. ── */
+@media (max-width: 359px) {
+  .mob-exp2-main { flex-direction: column; align-items: stretch; gap: 0; }
+  .mob-exp2-divider { display: none; }
+  .mob-exp2-left { flex: none; max-width: 100%; margin-bottom: 16px; }
+  .mob-exp2-avatar { width: 76px; height: 76px; font-size: 22px; }
+  .mob-exp2-name { font-size: 15px; }
+  .mob-exp2-role { font-size: 11.5px; margin-bottom: 12px; }
+  .mob-exp2-ministat { padding: 9px 6px; }
+  .mob-exp2-ministat-icon { width: 24px; height: 24px; }
+  .mob-exp2-ministat-icon svg { width: 12px; height: 12px; }
+  .mob-exp2-ministat-val { font-size: 12px; }
+  .mob-exp2-ministat-label { font-size: 9px; }
+  .mob-exp2-features { gap: 14px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .mob-exp2-feat-icon { width: 36px; height: 36px; }
+  .mob-exp2-feat-icon svg { width: 17px; height: 17px; }
+  .mob-exp2-feat-title { font-size: 12.5px; }
+  .mob-exp2-feat-desc { font-size: 11px; }
+}

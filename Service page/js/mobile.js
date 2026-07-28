@@ -76,16 +76,46 @@
 
       /* ── EXPERT ── */
       '<div class="mob-section">' +
-        '<h2 class="mob-sec-title">Meet Your Academic Expert</h2>' +
-        '<div class="mob-expert">' +
-          '<div class="mob-expert-photo">YK</div>' +
-          '<ul class="mob-expert-points">' +
-            ['Level 2 Seller in Fiverr', '100+ Successfully Delivered Projects', 'Extensive Experience in Academic Writing', 'Specialized in Thesis &amp; Research Documentation'].map(function(p){
-              return '<li>' + checkSVG + '<span>' + p + '</span></li>';
-            }).join('') +
-          '</ul>' +
+        '<div class="mob-exp2-head">' +
+          '<div class="mob-exp2-head-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m12 8 1.1 2.3 2.5.35-1.8 1.8.45 2.5L12 13.7l-2.25 1.25.45-2.5-1.8-1.8 2.5-.35L12 8Z"/></svg></div>' +
+          '<div class="mob-exp2-head-text">' +
+            '<h2 class="mob-exp2-heading">Meet Your <span class="grad">Academic Expert</span></h2>' +
+            '<p class="mob-exp2-sub">Your research is guided by experience, expertise, and a commitment to excellence.</p>' +
+          '</div>' +
         '</div>' +
-        '<p class="mob-expert-tagline">Your project is in expert hands.</p>' +
+        '<div class="mob-exp2-card">' +
+          '<div class="mob-exp2-main">' +
+            '<div class="mob-exp2-left">' +
+              '<div class="mob-exp2-avatar-wrap">' +
+                '<div class="mob-exp2-avatar">YK</div>' +
+                '<span class="mob-exp2-online"></span>' +
+              '</div>' +
+              '<div class="mob-exp2-name">Yeasin Kabir</div>' +
+              '<div class="mob-exp2-role">Academic Research Specialist</div>' +
+              '<div class="mob-exp2-ministats">' +
+                '<div class="mob-exp2-ministat mob-exp2-ministat--blue"><span class="mob-exp2-ministat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><div class="mob-exp2-ministat-val">500+</div><div class="mob-exp2-ministat-label">Projects</div></div></div>' +
+                '<div class="mob-exp2-ministat mob-exp2-ministat--gold"><span class="mob-exp2-ministat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg></span><div><div class="mob-exp2-ministat-val">5+</div><div class="mob-exp2-ministat-label">Years Exp.</div></div></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="mob-exp2-divider"></div>' +
+            '<div class="mob-exp2-right">' +
+              '<div class="mob-exp2-features">' +
+                [
+                  {cls:'green', svg:'<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>', title:'Fiverr Level 2 Seller', desc:'Verified &amp; trusted by Fiverr'},
+                  {cls:'blue', svg:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>', title:'500+ Delivered Projects', desc:'Successfully completed academic projects'},
+                  {cls:'purple', svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', title:'5+ Years Experience', desc:'Extensive experience in academic writing'},
+                  {cls:'orange', svg:'<path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/>', title:'Thesis &amp; Research Specialist', desc:'Expert in thesis writing &amp; research documentation'}
+                ].map(function(f){
+                  return '<div class="mob-exp2-feature mob-exp2-feature--' + f.cls + '"><span class="mob-exp2-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + f.svg + '</svg></span><div><div class="mob-exp2-feat-title">' + f.title + '</div><div class="mob-exp2-feat-desc">' + f.desc + '</div></div></div>';
+                }).join('') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="mob-exp2-quote">' +
+            '<p>&ldquo;I help students transform their ideas into well-researched, plagiarism-free academic work with clarity and precision.&rdquo;</p>' +
+            '<span class="mob-exp2-quote-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg></span>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
 
       /* ── WORKFLOW ── */
