@@ -181,6 +181,8 @@ function scrollArea({ id = '', html = '', ariaLive = 'polite' } = {}) {
 function mountScrollArea(el) {
   if (!el) return;
   el.addEventListener('wheel', (e) => {
+    const hasOwnOverflow = el.scrollHeight > el.clientHeight;
+    if (!hasOwnOverflow) return; // nothing for this element to contain — let the wheel event bubble/chain to whichever ancestor actually scrolls
     const atTop = el.scrollTop <= 0;
     const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
     if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) e.preventDefault();

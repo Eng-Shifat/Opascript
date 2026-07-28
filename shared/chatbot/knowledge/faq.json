@@ -1,61 +1,640 @@
 [
-  { "id": "gen-1", "category": "General", "question": "What is Scriptora?", "answer": "Scriptora is an academic writing service helping students with thesis writing, proposals, and full research support from Honours through PhD level.", "keywords": ["what is scriptora", "about", "who are you", "company"] },
-  { "id": "gen-2", "category": "General", "question": "What services do you offer?", "answer": "We offer thesis writing, research proposals, SPSS data analysis, plagiarism checks, grammar/proofreading, and citation formatting.", "keywords": ["services", "what do you offer", "help with"] },
-  { "id": "gen-3", "category": "General", "question": "How do I get started?", "answer": "Share your topic, academic level, and deadline with our team, and we'll put together a package and quote for you.", "keywords": ["get started", "how to start", "begin"] },
-  { "id": "gen-4", "category": "General", "question": "Do you work with all academic levels?", "answer": "Yes — we support Honours, Masters, and PhD level work.", "keywords": ["academic level", "honours", "masters", "phd", "undergraduate"] },
-  { "id": "gen-5", "category": "General", "question": "What subjects or fields do you cover?", "answer": "Tell us your subject or field and our team will confirm we have the right expertise for your topic.", "keywords": ["subjects", "field", "major", "department"] },
-
-  { "id": "price-1", "category": "Pricing", "question": "How much does a thesis cost?", "answer": "Pricing depends on your academic level, scope, and deadline — share these details and we'll give you an exact quote.", "keywords": ["price", "cost", "how much", "thesis cost", "taka", "৳"] },
-  { "id": "price-2", "category": "Pricing", "question": "Is pricing based on page count or word count?", "answer": "Pricing is generally based on scope and complexity, which includes length — we'll confirm the exact basis when quoting your project.", "keywords": ["page count", "word count", "pricing basis"] },
-  { "id": "price-3", "category": "Pricing", "question": "Do prices vary by academic level?", "answer": "Yes, Honours, Masters, and PhD level work are priced differently due to differing depth and requirements.", "keywords": ["price by level", "honours price", "masters price", "phd price"] },
-  { "id": "price-4", "category": "Pricing", "question": "Are there any hidden fees?", "answer": "No — your quote covers the agreed scope. Any additional work outside that scope would be discussed and agreed before proceeding.", "keywords": ["hidden fees", "extra charges", "additional cost"] },
-  { "id": "price-5", "category": "Pricing", "question": "Can I get a custom quote?", "answer": "Absolutely — share your topic, level, and deadline and we'll prepare a custom quote for you.", "keywords": ["custom quote", "get a quote", "quote"] },
-
-  { "id": "ord-1", "category": "Orders", "question": "How do I place an order?", "answer": "Start a conversation with us here, share your requirements, and our team will guide you through confirming the order.", "keywords": ["place order", "how to order", "start order"] },
-  { "id": "ord-2", "category": "Orders", "question": "Can I track my order progress?", "answer": "Yes — once your order is confirmed, you can track its progress from your client dashboard.", "keywords": ["track order", "order status", "progress"] },
-  { "id": "ord-3", "category": "Orders", "question": "Can I change the scope after placing an order?", "answer": "Yes, though scope changes may affect the price and timeline — reach out to our team to discuss any changes.", "keywords": ["change scope", "modify order", "update order"] },
-  { "id": "ord-4", "category": "Orders", "question": "What happens after I submit my order details?", "answer": "Our team reviews your requirements, confirms a package and price, and assigns a writer to begin work.", "keywords": ["after order", "next steps", "what happens next"] },
-  { "id": "ord-5", "category": "Orders", "question": "Can I request a specific writer?", "answer": "If you've worked with someone before and want them again, let our team know and we'll try to accommodate it.", "keywords": ["specific writer", "same writer", "choose writer"] },
-
-  { "id": "pay-1", "category": "Payment", "question": "What payment methods do you accept?", "answer": "We accept bKash, Nagad, card payments, and bank transfer.", "keywords": ["payment methods", "bkash", "nagad", "card", "bank transfer"] },
-  { "id": "pay-2", "category": "Payment", "question": "Can I pay in installments?", "answer": "Yes, payments can be split into installments — this is arranged when your order is confirmed.", "keywords": ["installment", "pay in parts", "split payment"] },
-  { "id": "pay-3", "category": "Payment", "question": "Is my payment information secure?", "answer": "Yes, payments are processed securely and your financial details are not stored by our team.", "keywords": ["payment security", "secure payment", "safe"] },
-  { "id": "pay-4", "category": "Payment", "question": "When is payment due?", "answer": "Payment terms are agreed at order confirmation — typically a portion upfront with the balance tied to delivery milestones.", "keywords": ["when to pay", "payment due", "payment schedule"] },
-  { "id": "pay-5", "category": "Payment", "question": "Do you provide payment receipts or invoices?", "answer": "Yes, a receipt/invoice is provided for every payment made.", "keywords": ["receipt", "invoice", "payment proof"] },
-
-  { "id": "del-1", "category": "Delivery", "question": "How long does delivery take?", "answer": "Turnaround depends on scope and academic level — deadlines are agreed with you at order time.", "keywords": ["how long", "delivery time", "turnaround"] },
-  { "id": "del-2", "category": "Delivery", "question": "Can you handle urgent or rush deadlines?", "answer": "Yes, express/urgent turnarounds can be discussed with our team based on availability.", "keywords": ["urgent", "rush", "fast delivery", "express"] },
-  { "id": "del-3", "category": "Delivery", "question": "What format will I receive my document in?", "answer": "Documents are typically delivered as Word files, formatted to your required style, with PDF available on request.", "keywords": ["file format", "word file", "pdf"] },
-  { "id": "del-4", "category": "Delivery", "question": "Do you deliver in stages or all at once?", "answer": "For larger projects like theses, work is usually delivered in stages/drafts so you can review progress along the way.", "keywords": ["stages", "drafts", "partial delivery"] },
-  { "id": "del-5", "category": "Delivery", "question": "What happens if delivery is delayed?", "answer": "If a delay is expected, our team will proactively let you know and discuss options — please reach out to support if this happens.", "keywords": ["delayed", "late delivery", "missed deadline"] },
-
-  { "id": "rev-1", "category": "Revision", "question": "How many revisions are included?", "answer": "Unlimited revisions are included within 30 days of delivery, as long as requests stay within the original scope.", "keywords": ["how many revisions", "revision limit", "unlimited revision"] },
-  { "id": "rev-2", "category": "Revision", "question": "What is the revision time window?", "answer": "You have 30 days from delivery to request revisions.", "keywords": ["revision window", "revision period", "30 days"] },
-  { "id": "rev-3", "category": "Revision", "question": "Are revisions free?", "answer": "Yes, revisions within the original scope and the 30-day window are free.", "keywords": ["free revision", "revision cost"] },
-  { "id": "rev-4", "category": "Revision", "question": "What if I need changes outside the original scope?", "answer": "Scope changes beyond the original agreement may involve an additional charge, which we'll discuss with you first.", "keywords": ["outside scope", "extra changes", "scope change cost"] },
-  { "id": "rev-5", "category": "Revision", "question": "How do I request a revision?", "answer": "Just message our team with the specific changes you'd like and we'll get it updated.", "keywords": ["request revision", "how to revise", "ask for changes"] },
-
-  { "id": "priv-1", "category": "Privacy", "question": "Is my personal information kept confidential?", "answer": "Yes, your personal information is kept strictly confidential and is only used to deliver your order.", "keywords": ["confidential", "privacy", "personal information"] },
-  { "id": "priv-2", "category": "Privacy", "question": "Will my work be shared with anyone else?", "answer": "No, your work is not shared with anyone outside the team handling your order.", "keywords": ["shared", "third party", "who sees my work"] },
-  { "id": "priv-3", "category": "Privacy", "question": "Do you keep a copy of my document after delivery?", "answer": "A copy may be retained briefly for support/revision purposes, then handled according to our data retention practices.", "keywords": ["keep copy", "document retention", "delete file"] },
-  { "id": "priv-4", "category": "Privacy", "question": "How is my data protected?", "answer": "We take reasonable technical and organizational measures to protect your data from unauthorized access.", "keywords": ["data protection", "how is data protected", "security"] },
-  { "id": "priv-5", "category": "Privacy", "question": "Can I request my data be deleted?", "answer": "Yes, you can request deletion of your data by contacting our support team.", "keywords": ["delete my data", "data deletion", "remove my info"] },
-
-  { "id": "plag-1", "category": "Plagiarism", "question": "Is my work checked for plagiarism?", "answer": "Yes, every document goes through an originality/similarity check before delivery.", "keywords": ["plagiarism check", "originality check", "checked for copying"] },
-  { "id": "plag-2", "category": "Plagiarism", "question": "Do you provide a Turnitin report?", "answer": "Yes, a Turnitin or similar similarity report can be provided with your delivery.", "keywords": ["turnitin", "similarity report", "plagiarism report"] },
-  { "id": "plag-3", "category": "Plagiarism", "question": "What is your originality guarantee?", "answer": "All work is written from scratch for your specific requirements, with an originality check before delivery.", "keywords": ["originality guarantee", "unique work", "written from scratch"] },
-  { "id": "plag-4", "category": "Plagiarism", "question": "What happens if similarity is found?", "answer": "If similarity is flagged, the section is revised and re-checked before final delivery, at no extra cost.", "keywords": ["similarity found", "high plagiarism", "flagged content"] },
-  { "id": "plag-5", "category": "Plagiarism", "question": "Can I request the plagiarism report separately?", "answer": "Yes, just ask our team and we'll share the report alongside your document.", "keywords": ["request plagiarism report", "separate report"] },
-
-  { "id": "fmt-1", "category": "Formatting", "question": "What citation styles do you support?", "answer": "We support APA, MLA, Chicago, Harvard, and other citation styles as required by your university.", "keywords": ["citation styles", "apa", "mla", "chicago", "harvard", "reference style"] },
-  { "id": "fmt-2", "category": "Formatting", "question": "Can you follow my university's specific formatting guide?", "answer": "Yes, share your university's formatting/style guide and we'll follow it exactly.", "keywords": ["university format", "specific guide", "formatting requirements"] },
-  { "id": "fmt-3", "category": "Formatting", "question": "Do you format tables, figures, and appendices?", "answer": "Yes, tables, figures, and appendices are formatted consistently with the rest of your document.", "keywords": ["tables", "figures", "appendices", "formatting"] },
-  { "id": "fmt-4", "category": "Formatting", "question": "Can you convert my document to a specific template?", "answer": "Yes, share your required template and we'll format your document to match it.", "keywords": ["template", "convert format", "specific template"] },
-  { "id": "fmt-5", "category": "Formatting", "question": "Do you check formatting consistency throughout?", "answer": "Yes, a formatting consistency check is part of our final review before delivery.", "keywords": ["formatting consistency", "consistent formatting", "final check"] },
-
-  { "id": "sup-1", "category": "Support", "question": "How do I contact support?", "answer": "You can message us right here in this chat, and our team will assist you.", "keywords": ["contact support", "how to contact", "reach support"] },
-  { "id": "sup-2", "category": "Support", "question": "What are your working hours?", "answer": "Our team is available from 10:00 AM to 10:00 PM (Asia/Dhaka time).", "keywords": ["working hours", "business hours", "office hours", "available"] },
-  { "id": "sup-3", "category": "Support", "question": "Can I talk to a human agent?", "answer": "Yes, just ask to speak with a human expert and I'll connect you with our team.", "keywords": ["human agent", "real person", "talk to someone", "representative"] },
-  { "id": "sup-4", "category": "Support", "question": "How quickly do you respond to messages?", "answer": "Our team usually responds within 15 minutes during working hours.", "keywords": ["response time", "how quickly", "reply time"] },
-  { "id": "sup-5", "category": "Support", "question": "What if I'm not satisfied with the service?", "answer": "Let our team know what's not working for you — we'll work with you through revisions to make it right.", "keywords": ["not satisfied", "unhappy", "complaint", "issue with service"] }
+    {
+        "id": "gen-1",
+        "category": "General",
+        "question": "What is Scriptora?",
+        "answer": "Scriptora is an academic writing service helping students with thesis writing, proposals, and full research support from Honours through PhD level.",
+        "keywords": [
+            "what is scriptora",
+            "about",
+            "who are you",
+            "company",
+            "স্ক্রিপ্টোরা",
+            "scriptora ki",
+            "তোমরা কে",
+            "apnara ke",
+            "ki",
+            "কি"
+        ]
+    },
+    {
+        "id": "gen-2",
+        "category": "General",
+        "question": "What services do you offer?",
+        "answer": "We offer thesis writing, research proposals, SPSS data analysis, plagiarism checks, grammar/proofreading, and citation formatting.",
+        "keywords": [
+            "services",
+            "what do you offer",
+            "help with",
+            "কি কি সেবা",
+            "ki ki",
+            "seva",
+            "সেবা",
+            "help",
+            "saহায্য",
+            "sahajjo"
+        ]
+    },
+    {
+        "id": "gen-3",
+        "category": "General",
+        "question": "How do I get started?",
+        "answer": "Share your topic, academic level, and deadline with our team, and we'll put together a package and quote for you.",
+        "keywords": [
+            "get started",
+            "how to start",
+            "begin",
+            "শুরু করবো",
+            "shuru",
+            "শুরু",
+            "kivabe",
+            "কিভাবে"
+        ]
+    },
+    {
+        "id": "gen-4",
+        "category": "General",
+        "question": "Do you work with all academic levels?",
+        "answer": "Yes — we support Honours, Masters, and PhD level work.",
+        "keywords": [
+            "academic level",
+            "honours",
+            "masters",
+            "phd",
+            "undergraduate",
+            "মাস্টার্স",
+            "পিএইচডি",
+            "level",
+            "student"
+        ]
+    },
+    {
+        "id": "gen-5",
+        "category": "General",
+        "question": "What subjects or fields do you cover?",
+        "answer": "Tell us your subject or field and our team will confirm we have the right expertise for your topic.",
+        "keywords": [
+            "subjects",
+            "field",
+            "major",
+            "department"
+        ]
+    },
+    {
+        "id": "price-1",
+        "category": "Pricing",
+        "question": "How much does a thesis cost?",
+        "answer": "Pricing depends on your academic level, scope, and deadline — share these details and we'll give you an exact quote.",
+        "keywords": [
+            "price",
+            "cost",
+            "how much",
+            "thesis cost",
+            "taka",
+            "৳",
+            "কতো টাকা",
+            "কত টাকা",
+            "daam",
+            "দাম",
+            "মূল্য",
+            "mulyo",
+            "koto",
+            "কতো",
+            "price koto",
+            "how much cost"
+        ]
+    },
+    {
+        "id": "price-2",
+        "category": "Pricing",
+        "question": "Is pricing based on page count or word count?",
+        "answer": "Pricing is generally based on scope and complexity, which includes length — we'll confirm the exact basis when quoting your project.",
+        "keywords": [
+            "page count",
+            "word count",
+            "pricing basis"
+        ]
+    },
+    {
+        "id": "price-3",
+        "category": "Pricing",
+        "question": "Do prices vary by academic level?",
+        "answer": "Yes, Honours, Masters, and PhD level work are priced differently due to differing depth and requirements.",
+        "keywords": [
+            "price by level",
+            "honours price",
+            "masters price",
+            "phd price"
+        ]
+    },
+    {
+        "id": "price-4",
+        "category": "Pricing",
+        "question": "Are there any hidden fees?",
+        "answer": "No — your quote covers the agreed scope. Any additional work outside that scope would be discussed and agreed before proceeding.",
+        "keywords": [
+            "hidden fees",
+            "extra charges",
+            "additional cost"
+        ]
+    },
+    {
+        "id": "price-5",
+        "category": "Pricing",
+        "question": "Can I get a custom quote?",
+        "answer": "Absolutely — share your topic, level, and deadline and we'll prepare a custom quote for you.",
+        "keywords": [
+            "custom quote",
+            "get a quote",
+            "quote",
+            "দাম জানতে চাই",
+            "estimate",
+            "অনুমান"
+        ]
+    },
+    {
+        "id": "ord-1",
+        "category": "Orders",
+        "question": "How do I place an order?",
+        "answer": "Start a conversation with us here, share your requirements, and our team will guide you through confirming the order.",
+        "keywords": [
+            "place order",
+            "how to order",
+            "start order",
+            "order debo",
+            "অর্ডার",
+            "order korbo",
+            "নিতে চাই",
+            "nite chai"
+        ]
+    },
+    {
+        "id": "ord-2",
+        "category": "Orders",
+        "question": "Can I track my order progress?",
+        "answer": "Yes — once your order is confirmed, you can track its progress from your client dashboard.",
+        "keywords": [
+            "track order",
+            "order status",
+            "progress"
+        ]
+    },
+    {
+        "id": "ord-3",
+        "category": "Orders",
+        "question": "Can I change the scope after placing an order?",
+        "answer": "Yes, though scope changes may affect the price and timeline — reach out to our team to discuss any changes.",
+        "keywords": [
+            "change scope",
+            "modify order",
+            "update order"
+        ]
+    },
+    {
+        "id": "ord-4",
+        "category": "Orders",
+        "question": "What happens after I submit my order details?",
+        "answer": "Our team reviews your requirements, confirms a package and price, and assigns a writer to begin work.",
+        "keywords": [
+            "after order",
+            "next steps",
+            "what happens next"
+        ]
+    },
+    {
+        "id": "ord-5",
+        "category": "Orders",
+        "question": "Can I request a specific writer?",
+        "answer": "If you've worked with someone before and want them again, let our team know and we'll try to accommodate it.",
+        "keywords": [
+            "specific writer",
+            "same writer",
+            "choose writer"
+        ]
+    },
+    {
+        "id": "pay-1",
+        "category": "Payment",
+        "question": "What payment methods do you accept?",
+        "answer": "We accept bKash, Nagad, card payments, and bank transfer.",
+        "keywords": [
+            "payment methods",
+            "bkash",
+            "nagad",
+            "card",
+            "bank transfer",
+            "বিকাশ",
+            "নগদ",
+            "payment",
+            "পেমেন্ট"
+        ]
+    },
+    {
+        "id": "pay-2",
+        "category": "Payment",
+        "question": "Can I pay in installments?",
+        "answer": "Yes, payments can be split into installments — this is arranged when your order is confirmed.",
+        "keywords": [
+            "installment",
+            "pay in parts",
+            "split payment"
+        ]
+    },
+    {
+        "id": "pay-3",
+        "category": "Payment",
+        "question": "Is my payment information secure?",
+        "answer": "Yes, payments are processed securely and your financial details are not stored by our team.",
+        "keywords": [
+            "payment security",
+            "secure payment",
+            "safe"
+        ]
+    },
+    {
+        "id": "pay-4",
+        "category": "Payment",
+        "question": "When is payment due?",
+        "answer": "Payment terms are agreed at order confirmation — typically a portion upfront with the balance tied to delivery milestones.",
+        "keywords": [
+            "when to pay",
+            "payment due",
+            "payment schedule"
+        ]
+    },
+    {
+        "id": "pay-5",
+        "category": "Payment",
+        "question": "Do you provide payment receipts or invoices?",
+        "answer": "Yes, a receipt/invoice is provided for every payment made.",
+        "keywords": [
+            "receipt",
+            "invoice",
+            "payment proof"
+        ]
+    },
+    {
+        "id": "del-1",
+        "category": "Delivery",
+        "question": "How long does delivery take?",
+        "answer": "Turnaround depends on scope and academic level — deadlines are agreed with you at order time.",
+        "keywords": [
+            "how long",
+            "delivery time",
+            "turnaround",
+            "কতদিন",
+            "kotdin",
+            "সময়",
+            "shomoy",
+            "time",
+            "koto time"
+        ]
+    },
+    {
+        "id": "del-2",
+        "category": "Delivery",
+        "question": "Can you handle urgent or rush deadlines?",
+        "answer": "Yes, express/urgent turnarounds can be discussed with our team based on availability.",
+        "keywords": [
+            "urgent",
+            "rush",
+            "fast delivery",
+            "express",
+            "জরুরি",
+            "joruri",
+            "আজকে",
+            "ajke",
+            "দ্রুত",
+            "druto"
+        ]
+    },
+    {
+        "id": "del-3",
+        "category": "Delivery",
+        "question": "What format will I receive my document in?",
+        "answer": "Documents are typically delivered as Word files, formatted to your required style, with PDF available on request.",
+        "keywords": [
+            "file format",
+            "word file",
+            "pdf"
+        ]
+    },
+    {
+        "id": "del-4",
+        "category": "Delivery",
+        "question": "Do you deliver in stages or all at once?",
+        "answer": "For larger projects like theses, work is usually delivered in stages/drafts so you can review progress along the way.",
+        "keywords": [
+            "stages",
+            "drafts",
+            "partial delivery"
+        ]
+    },
+    {
+        "id": "del-5",
+        "category": "Delivery",
+        "question": "What happens if delivery is delayed?",
+        "answer": "If a delay is expected, our team will proactively let you know and discuss options — please reach out to support if this happens.",
+        "keywords": [
+            "delayed",
+            "late delivery",
+            "missed deadline"
+        ]
+    },
+    {
+        "id": "rev-1",
+        "category": "Revision",
+        "question": "How many revisions are included?",
+        "answer": "Unlimited revisions are included within 30 days of delivery, as long as requests stay within the original scope.",
+        "keywords": [
+            "how many revisions",
+            "revision limit",
+            "unlimited revision",
+            "revision",
+            "পরিবর্তন",
+            "poriborton",
+            "change"
+        ]
+    },
+    {
+        "id": "rev-2",
+        "category": "Revision",
+        "question": "What is the revision time window?",
+        "answer": "You have 30 days from delivery to request revisions.",
+        "keywords": [
+            "revision window",
+            "revision period",
+            "30 days"
+        ]
+    },
+    {
+        "id": "rev-3",
+        "category": "Revision",
+        "question": "Are revisions free?",
+        "answer": "Yes, revisions within the original scope and the 30-day window are free.",
+        "keywords": [
+            "free revision",
+            "revision cost"
+        ]
+    },
+    {
+        "id": "rev-4",
+        "category": "Revision",
+        "question": "What if I need changes outside the original scope?",
+        "answer": "Scope changes beyond the original agreement may involve an additional charge, which we'll discuss with you first.",
+        "keywords": [
+            "outside scope",
+            "extra changes",
+            "scope change cost"
+        ]
+    },
+    {
+        "id": "rev-5",
+        "category": "Revision",
+        "question": "How do I request a revision?",
+        "answer": "Just message our team with the specific changes you'd like and we'll get it updated.",
+        "keywords": [
+            "request revision",
+            "how to revise",
+            "ask for changes"
+        ]
+    },
+    {
+        "id": "priv-1",
+        "category": "Privacy",
+        "question": "Is my personal information kept confidential?",
+        "answer": "Yes, your personal information is kept strictly confidential and is only used to deliver your order.",
+        "keywords": [
+            "confidential",
+            "privacy",
+            "personal information"
+        ]
+    },
+    {
+        "id": "priv-2",
+        "category": "Privacy",
+        "question": "Will my work be shared with anyone else?",
+        "answer": "No, your work is not shared with anyone outside the team handling your order.",
+        "keywords": [
+            "shared",
+            "third party",
+            "who sees my work"
+        ]
+    },
+    {
+        "id": "priv-3",
+        "category": "Privacy",
+        "question": "Do you keep a copy of my document after delivery?",
+        "answer": "A copy may be retained briefly for support/revision purposes, then handled according to our data retention practices.",
+        "keywords": [
+            "keep copy",
+            "document retention",
+            "delete file"
+        ]
+    },
+    {
+        "id": "priv-4",
+        "category": "Privacy",
+        "question": "How is my data protected?",
+        "answer": "We take reasonable technical and organizational measures to protect your data from unauthorized access.",
+        "keywords": [
+            "data protection",
+            "how is data protected",
+            "security"
+        ]
+    },
+    {
+        "id": "priv-5",
+        "category": "Privacy",
+        "question": "Can I request my data be deleted?",
+        "answer": "Yes, you can request deletion of your data by contacting our support team.",
+        "keywords": [
+            "delete my data",
+            "data deletion",
+            "remove my info"
+        ]
+    },
+    {
+        "id": "plag-1",
+        "category": "Plagiarism",
+        "question": "Is my work checked for plagiarism?",
+        "answer": "Yes, every document goes through an originality/similarity check before delivery.",
+        "keywords": [
+            "plagiarism check",
+            "originality check",
+            "checked for copying"
+        ]
+    },
+    {
+        "id": "plag-2",
+        "category": "Plagiarism",
+        "question": "Do you provide a Turnitin report?",
+        "answer": "Yes, a Turnitin or similar similarity report can be provided with your delivery.",
+        "keywords": [
+            "turnitin",
+            "similarity report",
+            "plagiarism report",
+            "টার্নিটিন"
+        ]
+    },
+    {
+        "id": "plag-3",
+        "category": "Plagiarism",
+        "question": "What is your originality guarantee?",
+        "answer": "All work is written from scratch for your specific requirements, with an originality check before delivery.",
+        "keywords": [
+            "originality guarantee",
+            "unique work",
+            "written from scratch",
+            "নিজের লেখা",
+            "original",
+            "unique",
+            "copied na"
+        ]
+    },
+    {
+        "id": "plag-4",
+        "category": "Plagiarism",
+        "question": "What happens if similarity is found?",
+        "answer": "If similarity is flagged, the section is revised and re-checked before final delivery, at no extra cost.",
+        "keywords": [
+            "similarity found",
+            "high plagiarism",
+            "flagged content"
+        ]
+    },
+    {
+        "id": "plag-5",
+        "category": "Plagiarism",
+        "question": "Can I request the plagiarism report separately?",
+        "answer": "Yes, just ask our team and we'll share the report alongside your document.",
+        "keywords": [
+            "request plagiarism report",
+            "separate report"
+        ]
+    },
+    {
+        "id": "fmt-1",
+        "category": "Formatting",
+        "question": "What citation styles do you support?",
+        "answer": "We support APA, MLA, Chicago, Harvard, and other citation styles as required by your university.",
+        "keywords": [
+            "citation styles",
+            "apa",
+            "mla",
+            "chicago",
+            "harvard",
+            "reference style"
+        ]
+    },
+    {
+        "id": "fmt-2",
+        "category": "Formatting",
+        "question": "Can you follow my university's specific formatting guide?",
+        "answer": "Yes, share your university's formatting/style guide and we'll follow it exactly.",
+        "keywords": [
+            "university format",
+            "specific guide",
+            "formatting requirements"
+        ]
+    },
+    {
+        "id": "fmt-3",
+        "category": "Formatting",
+        "question": "Do you format tables, figures, and appendices?",
+        "answer": "Yes, tables, figures, and appendices are formatted consistently with the rest of your document.",
+        "keywords": [
+            "tables",
+            "figures",
+            "appendices",
+            "formatting"
+        ]
+    },
+    {
+        "id": "fmt-4",
+        "category": "Formatting",
+        "question": "Can you convert my document to a specific template?",
+        "answer": "Yes, share your required template and we'll format your document to match it.",
+        "keywords": [
+            "template",
+            "convert format",
+            "specific template"
+        ]
+    },
+    {
+        "id": "fmt-5",
+        "category": "Formatting",
+        "question": "Do you check formatting consistency throughout?",
+        "answer": "Yes, a formatting consistency check is part of our final review before delivery.",
+        "keywords": [
+            "formatting consistency",
+            "consistent formatting",
+            "final check"
+        ]
+    },
+    {
+        "id": "sup-1",
+        "category": "Support",
+        "question": "How do I contact support?",
+        "answer": "You can message us right here in this chat, and our team will assist you.",
+        "keywords": [
+            "contact support",
+            "how to contact",
+            "reach support"
+        ]
+    },
+    {
+        "id": "sup-2",
+        "category": "Support",
+        "question": "What are your working hours?",
+        "answer": "Our team is available from 10:00 AM to 10:00 PM (Asia/Dhaka time).",
+        "keywords": [
+            "working hours",
+            "business hours",
+            "office hours",
+            "available"
+        ]
+    },
+    {
+        "id": "sup-3",
+        "category": "Support",
+        "question": "Can I talk to a human agent?",
+        "answer": "Yes, just ask to speak with a human expert and I'll connect you with our team.",
+        "keywords": [
+            "human agent",
+            "real person",
+            "talk to someone",
+            "representative",
+            "expert",
+            "মানুষ",
+            "manush",
+            "কারো সাথে",
+            "karo shathe",
+            "agent",
+            "support"
+        ]
+    },
+    {
+        "id": "sup-4",
+        "category": "Support",
+        "question": "How quickly do you respond to messages?",
+        "answer": "Our team usually responds within 15 minutes during working hours.",
+        "keywords": [
+            "response time",
+            "how quickly",
+            "reply time"
+        ]
+    },
+    {
+        "id": "sup-5",
+        "category": "Support",
+        "question": "What if I'm not satisfied with the service?",
+        "answer": "Let our team know what's not working for you — we'll work with you through revisions to make it right.",
+        "keywords": [
+            "not satisfied",
+            "unhappy",
+            "complaint",
+            "issue with service"
+        ]
+    }
 ]

@@ -382,4 +382,15 @@
   .sca-bubble { right: 14px; max-width: 190px; }
   #sca-root.sca-open .sca-toggle { display: none; }
   .ui-bubble { max-width: 90%; }
+
+  /* Compact form fields for mobile precontact — tighter spacing so the
+     submit button is visible without scrolling on iPhone 14 (430×932)
+     and similar. Desktop values (defined above this block) are untouched.
+     All touch targets remain ≥44px effective tap area. */
+  .sca-body { padding: var(--sca-space-3) var(--sca-space-4); }   /* 20px -> 12px top/bottom, 16px sides unchanged */
+  .ui-field { margin-bottom: var(--sca-space-1); }                 /* 8px -> 4px between fields */
+  .ui-field-label { margin-bottom: 4px; }                          /* 6px -> 4px, stays readable */
+  .ui-field-input { padding: 8px var(--sca-space-3); }             /* 10px -> 8px top/bottom, ≥36px tap height */
+  .ui-field-error { margin-bottom: var(--sca-space-1); }           /* 8px -> 4px */
+  .ui-btn { height: 44px; }                                        /* keep full 44px on mobile exactly per Apple HIG */
 }

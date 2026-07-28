@@ -416,8 +416,7 @@
   <section class="hiw-section">
     <div class="section-header">
       <div class="section-badge">How It Works</div>
-      <!-- <div class="section-title">কীভাবে কাজ করি?</div>
-    </div> -->
+    </div>
 
       <div class="hiw-track">
 
@@ -818,7 +817,7 @@
 
     // Fade-up animation for cards and sections
     const fadeEls = document.querySelectorAll(
-      '.service-card, .wcu-card, .stat-box, .bstat, .section-header, .hiw-step, .cta-content'
+      '.service-card, .wcu-card, .stat-box, .bstat, .section-header, .cta-content'
     );
     fadeEls.forEach((el, i) => {
       el.style.opacity = '0';
@@ -837,6 +836,15 @@
     }, { threshold: 0.15 });
 
     fadeEls.forEach(el => fadeObserver.observe(el));
+
+    // Safety net: IntersectionObserver kono karone miss korle 2.5s por force reveal
+    setTimeout(() => {
+      fadeEls.forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      });
+      fadeObserver.disconnect();
+    }, 2500);
 
     // Bottom stats count-up animation
     const statNums = document.querySelectorAll('.bstat-num');

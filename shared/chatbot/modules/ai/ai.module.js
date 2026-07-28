@@ -221,6 +221,7 @@ function render() {
   Render.mount(topEl, topHtml);
 
   const threadEl = bodyEl.querySelector('#ai-thread');
+  const wasAtBottom = bodyEl.scrollTop + bodyEl.clientHeight >= bodyEl.scrollHeight - 4;
   const items = State.get().messages
     .filter((m) => m.module === 'ai')
     .map((m) => ({
@@ -231,7 +232,7 @@ function render() {
   if (aiState.typing) items.push({ key: 'typing', hash: 'typing', html: Components.typingIndicator({ label: 'Scriptora AI is typing' }) });
 
   Render.renderKeyedList(threadEl, items, { emptyHtml: '' });
-  Render.scrollToBottom(threadEl);
+  if (wasAtBottom) Render.scrollToBottom(bodyEl);
 }
 
 function messageToHtml(m) {

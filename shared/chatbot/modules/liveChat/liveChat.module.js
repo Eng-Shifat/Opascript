@@ -528,6 +528,8 @@ function patchMessages(bodyEl, s) {
   const threadEl = bodyEl.querySelector('#lc-messages');
   if (!threadEl) return;
 
+  const wasAtBottom = bodyEl.scrollTop + bodyEl.clientHeight >= bodyEl.scrollHeight - 4;
+
   const items = State.get().messages
     .filter((m) => m.module === 'liveChat')
     .map((m) => ({
@@ -545,7 +547,7 @@ function patchMessages(bodyEl, s) {
   }
 
   Render.renderKeyedList(threadEl, items, { emptyHtml: '' });
-  Render.scrollToBottom(threadEl);
+  if (wasAtBottom) Render.scrollToBottom(bodyEl);
 }
 
 export default { init, activate, deactivate, handleInput };
