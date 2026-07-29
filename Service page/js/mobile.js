@@ -87,8 +87,9 @@
           '<div class="mob-exp2-main">' +
             '<div class="mob-exp2-left">' +
               '<div class="mob-exp2-avatar-wrap">' +
-                '<div class="mob-exp2-avatar">YK</div>' +
+                '<div class="mob-exp2-avatar"><img src="assets/expert-photo.jpg" alt="Yeasin Kabir"></div>' +
                 '<span class="mob-exp2-online"></span>' +
+                '<span class="mob-exp2-lvl-badge">Level 2</span>' +
               '</div>' +
               '<div class="mob-exp2-name">Yeasin Kabir</div>' +
               '<div class="mob-exp2-role">Academic Research Specialist</div>' +
@@ -174,20 +175,25 @@
         '<h2 class="mob-sec-title">Professional Dashboard</h2>' +
         '<p style="font-size:13px;color:var(--muted);margin-bottom:16px">Track your project progress in real time.</p>' +
         '<div class="mob-dash-card">' +
-          '<div class="mob-dash-label">Project Progress</div>' +
-          '<div class="mob-dash-pct">65%</div>' +
+          '<div class="mob-dash-head">' +
+            '<div>' +
+              '<div class="mob-dash-label">Project Progress</div>' +
+              '<div class="mob-dash-pct">65<span>%</span></div>' +
+            '</div>' +
+            '<span class="mob-dash-badge">In Progress</span>' +
+          '</div>' +
           '<div class="mob-progress-bar"><div class="mob-progress-fill"></div></div>' +
           '<div class="mob-dash-steps">' +
             [
-              {icon:'✍️', label:'Writing', val:'65%'},
-              {icon:'🔍', label:'Review', val:'20%'},
-              {icon:'📐', label:'Formatting', val:'10%'},
-              {icon:'📦', label:'Delivery', val:'Pending', cls:'pending'},
+              {cls:'blue', svg:'<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>', label:'Writing', val:'65%'},
+              {cls:'purple', svg:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>', label:'Review', val:'20%'},
+              {cls:'cyan', svg:'<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/>', label:'Formatting', val:'10%'},
+              {cls:'orange', svg:'<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/>', label:'Delivery', val:'Pending', cls2:'pending'},
             ].map(function(s){
               return '<div class="mob-dash-step">' +
-                '<div class="mob-dash-step-icon">' + s.icon + '</div>' +
+                '<div class="mob-dash-step-icon mob-dash-step-icon--' + s.cls + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + s.svg + '</svg></div>' +
                 '<span class="mob-dash-step-label">' + s.label + '</span>' +
-                '<span class="mob-dash-step-val' + (s.cls ? ' ' + s.cls : '') + '">' + s.val + '</span>' +
+                '<span class="mob-dash-step-val' + (s.cls2 ? ' ' + s.cls2 : '') + '">' + s.val + '</span>' +
               '</div>';
             }).join('') +
           '</div>' +
@@ -196,7 +202,7 @@
             '<div style="text-align:right"><div class="mob-dash-footer-label">Payment Status</div><div class="mob-dash-footer-val paid">Paid</div></div>' +
           '</div>' +
         '</div>' +
-        '<a class="mob-open-dash" href="../Client Dashboard/dashboard.html">Open Dashboard →</a>' +
+        '<a class="mob-open-dash" href="../Client Dashboard/dashboard.html">Open Dashboard<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>' +
       '</div>' +
 
       /* ── FAQ ── */
