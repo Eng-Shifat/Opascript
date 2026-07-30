@@ -9,12 +9,18 @@
             "about",
             "who are you",
             "company",
-            "স্ক্রিপ্টোরা",
-            "scriptora ki",
-            "তোমরা কে",
-            "apnara ke",
             "ki",
-            "কি"
+            "কি",
+            "scriptora ki",
+            "কে",
+            "ke",
+            "tumi ke",
+            "তুমি কে",
+            "apnara ke",
+            "আপনারা কে",
+            "eta ki",
+            "এটা কি",
+            "this is"
         ]
     },
     {
@@ -26,13 +32,17 @@
             "services",
             "what do you offer",
             "help with",
-            "কি কি সেবা",
+            "কি কি করো",
             "ki ki",
             "seva",
             "সেবা",
-            "help",
-            "saহায্য",
-            "sahajjo"
+            "সাহায্য",
+            "sahajjo",
+            "ki help",
+            "ki paben",
+            "কি পাবেন",
+            "what you do",
+            "what can you do"
         ]
     },
     {
@@ -44,11 +54,15 @@
             "get started",
             "how to start",
             "begin",
-            "শুরু করবো",
             "shuru",
             "শুরু",
-            "kivabe",
-            "কিভাবে"
+            "kivabe shuru",
+            "কিভাবে শুরু",
+            "how do i start",
+            "how to use",
+            "first step",
+            "ami ki korbo",
+            "আমি কি করবো"
         ]
     },
     {
@@ -62,10 +76,18 @@
             "masters",
             "phd",
             "undergraduate",
-            "মাস্টার্স",
-            "পিএইচডি",
+            "student",
             "level",
-            "student"
+            "hons",
+            "msc",
+            "বিএ",
+            "এমএ",
+            "ba",
+            "ma",
+            "kono level",
+            "সব level",
+            "sob level",
+            "sob student"
         ]
     },
     {
@@ -77,7 +99,17 @@
             "subjects",
             "field",
             "major",
-            "department"
+            "department",
+            "subject",
+            "বিষয়",
+            "bishoy",
+            "কোন বিষয়",
+            "kon bishoy",
+            "engineering",
+            "social science",
+            "business",
+            "medical",
+            "arts"
         ]
     },
     {
@@ -92,16 +124,24 @@
             "thesis cost",
             "taka",
             "৳",
-            "কতো টাকা",
-            "কত টাকা",
-            "daam",
-            "দাম",
-            "মূল্য",
-            "mulyo",
             "koto",
             "কতো",
-            "price koto",
-            "how much cost"
+            "কত",
+            "kat",
+            "daam",
+            "দাম",
+            "কত টাকা",
+            "koto taka",
+            "কতো টাকা",
+            "mulyo",
+            "মূল্য",
+            "thesis daam",
+            "thesis price",
+            "charge koto",
+            "charge",
+            "fees",
+            "khoroch",
+            "খরচ"
         ]
     },
     {
@@ -112,7 +152,15 @@
         "keywords": [
             "page count",
             "word count",
-            "pricing basis"
+            "pricing basis",
+            "page",
+            "word",
+            "পাতা",
+            "শব্দ",
+            "shobdo",
+            "how calculated",
+            "per page",
+            "per word"
         ]
     },
     {
@@ -124,7 +172,14 @@
             "price by level",
             "honours price",
             "masters price",
-            "phd price"
+            "phd price",
+            "honours daam",
+            "masters daam",
+            "phd daam",
+            "level onujayi",
+            "স্তর অনুযায়ী",
+            "vary kore",
+            "different price"
         ]
     },
     {
@@ -135,7 +190,15 @@
         "keywords": [
             "hidden fees",
             "extra charges",
-            "additional cost"
+            "additional cost",
+            "extra",
+            "লুকানো",
+            "lukano",
+            "hidden",
+            "additional",
+            "additional fee",
+            "onno charge",
+            "অন্য চার্জ"
         ]
     },
     {
@@ -147,9 +210,15 @@
             "custom quote",
             "get a quote",
             "quote",
-            "দাম জানতে চাই",
+            "quote dao",
+            "quote deben",
+            "custom",
             "estimate",
-            "অনুমান"
+            "approximation",
+            "rough price",
+            "price idea",
+            "koto hobe",
+            "কতো হবে"
         ]
     },
     {
@@ -161,11 +230,18 @@
             "place order",
             "how to order",
             "start order",
-            "order debo",
+            "order",
             "অর্ডার",
             "order korbo",
+            "order debo",
+            "kivabe order",
+            "nite chai",
             "নিতে চাই",
-            "nite chai"
+            "কাজ দিতে চাই",
+            "kaj dite chai",
+            "shuru korbo",
+            "শুরু করবো",
+            "how to buy"
         ]
     },
     {
@@ -176,7 +252,16 @@
         "keywords": [
             "track order",
             "order status",
-            "progress"
+            "progress",
+            "track",
+            "কোথায়",
+            "kothai",
+            "update",
+            "আপডেট",
+            "ki hocche",
+            "কি হচ্ছে",
+            "order dekhbo",
+            "কতটুকু হলো"
         ]
     },
     {
@@ -187,7 +272,15 @@
         "keywords": [
             "change scope",
             "modify order",
-            "update order"
+            "update order",
+            "change",
+            "bodol",
+            "বদল",
+            "modify",
+            "update",
+            "পরিবর্তন",
+            "poriborton",
+            "scope change"
         ]
     },
     {
@@ -198,7 +291,14 @@
         "keywords": [
             "after order",
             "next steps",
-            "what happens next"
+            "what happens next",
+            "then what",
+            "next",
+            "pore ki",
+            "পরে কি",
+            "ki hobe",
+            "কি হবে",
+            "after submit"
         ]
     },
     {
@@ -209,7 +309,11 @@
         "keywords": [
             "specific writer",
             "same writer",
-            "choose writer"
+            "choose writer",
+            "writer choose",
+            "writer select",
+            "amake writer",
+            "specific"
         ]
     },
     {
@@ -223,10 +327,19 @@
             "nagad",
             "card",
             "bank transfer",
+            "payment",
+            "পেমেন্ট",
+            "pay",
             "বিকাশ",
             "নগদ",
-            "payment",
-            "পেমেন্ট"
+            "rocket",
+            "cash",
+            "bank",
+            "payment method",
+            "taka debo",
+            "টাকা দেবো",
+            "pay korbo",
+            "kivabe pay"
         ]
     },
     {
@@ -237,7 +350,17 @@
         "keywords": [
             "installment",
             "pay in parts",
-            "split payment"
+            "split payment",
+            "kisti",
+            "কিস্তি",
+            "boro taka",
+            "half",
+            "aage",
+            "আগে",
+            "split",
+            "partial",
+            "duibar",
+            "দুইবার"
         ]
     },
     {
@@ -248,7 +371,13 @@
         "keywords": [
             "payment security",
             "secure payment",
-            "safe"
+            "safe",
+            "secure",
+            "nirapod",
+            "নিরাপদ",
+            "information safe",
+            "card safe",
+            "data safe"
         ]
     },
     {
@@ -259,7 +388,14 @@
         "keywords": [
             "when to pay",
             "payment due",
-            "payment schedule"
+            "payment schedule",
+            "kokhon pay",
+            "কখন pay",
+            "advance",
+            "আগে দিতে হবে",
+            "age dite hobe",
+            "full payment",
+            "when payment"
         ]
     },
     {
@@ -270,7 +406,12 @@
         "keywords": [
             "receipt",
             "invoice",
-            "payment proof"
+            "payment proof",
+            "proof",
+            "proman",
+            "প্রমাণ",
+            "bill",
+            "khaata"
         ]
     },
     {
@@ -282,12 +423,18 @@
             "how long",
             "delivery time",
             "turnaround",
-            "কতদিন",
             "kotdin",
-            "সময়",
-            "shomoy",
+            "কতদিন",
+            "koto shomoy",
+            "কতো সময়",
             "time",
-            "koto time"
+            "shomoy",
+            "কতদিন লাগবে",
+            "kotdin lagbe",
+            "deliver kokhon",
+            "complete kokhon",
+            "how many days",
+            "how soon"
         ]
     },
     {
@@ -302,10 +449,16 @@
             "express",
             "জরুরি",
             "joruri",
-            "আজকে",
-            "ajke",
+            "fast",
+            "druto",
             "দ্রুত",
-            "druto"
+            "jotoshigri",
+            "যত শিঘ্রি",
+            "asap",
+            "ekdin",
+            "একদিন",
+            "rat",
+            "রাত"
         ]
     },
     {
@@ -316,7 +469,14 @@
         "keywords": [
             "file format",
             "word file",
-            "pdf"
+            "pdf",
+            "format",
+            "docx",
+            "word",
+            "file type",
+            "ki format",
+            "কি ফরম্যাট",
+            "kon format"
         ]
     },
     {
@@ -327,7 +487,16 @@
         "keywords": [
             "stages",
             "drafts",
-            "partial delivery"
+            "partial delivery",
+            "draft",
+            "aage",
+            "chapter",
+            "partial",
+            "stage",
+            "ekbare",
+            "একবারে",
+            "aasteaste",
+            "আস্তে আস্তে"
         ]
     },
     {
@@ -338,7 +507,16 @@
         "keywords": [
             "delayed",
             "late delivery",
-            "missed deadline"
+            "missed deadline",
+            "late",
+            "দেরি",
+            "deri",
+            "delay",
+            "missed",
+            "hoyni",
+            "হয়নি",
+            "time hobe na",
+            "time nei"
         ]
     },
     {
@@ -351,9 +529,15 @@
             "revision limit",
             "unlimited revision",
             "revision",
-            "পরিবর্তন",
-            "poriborton",
-            "change"
+            "kotobar",
+            "কতোবার",
+            "how many times",
+            "again",
+            "aar",
+            "আরেকবার",
+            "arekbar",
+            "change korbe",
+            "fix korbe"
         ]
     },
     {
@@ -364,7 +548,13 @@
         "keywords": [
             "revision window",
             "revision period",
-            "30 days"
+            "30 days",
+            "kodin revision",
+            "window",
+            "period",
+            "deadline revision",
+            "revision time",
+            "kokhon porjonto revision"
         ]
     },
     {
@@ -374,7 +564,12 @@
         "answer": "Yes, revisions within the original scope and the 30-day window are free.",
         "keywords": [
             "free revision",
-            "revision cost"
+            "revision cost",
+            "free",
+            "taka lagbe na",
+            "টাকা লাগবে না",
+            "charge nebe na",
+            "extra pay"
         ]
     },
     {
@@ -385,7 +580,13 @@
         "keywords": [
             "outside scope",
             "extra changes",
-            "scope change cost"
+            "scope change cost",
+            "extra work",
+            "new scope",
+            "add korte chai",
+            "notun kisu",
+            "নতুন কিছু",
+            "outside"
         ]
     },
     {
@@ -396,7 +597,13 @@
         "keywords": [
             "request revision",
             "how to revise",
-            "ask for changes"
+            "ask for changes",
+            "revision dao",
+            "kivabe revision",
+            "revision janabo",
+            "revision bolbo",
+            "change chai",
+            "পরিবর্তন চাই"
         ]
     },
     {
@@ -407,7 +614,14 @@
         "keywords": [
             "confidential",
             "privacy",
-            "personal information"
+            "personal information",
+            "secret",
+            "gopo",
+            "গোপন",
+            "private",
+            "keu janbe na",
+            "কেউ জানবে না",
+            "safe thakbe"
         ]
     },
     {
@@ -418,7 +632,13 @@
         "keywords": [
             "shared",
             "third party",
-            "who sees my work"
+            "who sees my work",
+            "share korbe",
+            "share hobe",
+            "অন্যকে",
+            "onno ke",
+            "kon information",
+            "কে দেখবে"
         ]
     },
     {
@@ -429,7 +649,12 @@
         "keywords": [
             "keep copy",
             "document retention",
-            "delete file"
+            "delete file",
+            "copy rakhbe",
+            "delete",
+            "file rakhbe",
+            "file thakbe na",
+            "amr kaj rakhbe"
         ]
     },
     {
@@ -440,7 +665,11 @@
         "keywords": [
             "data protection",
             "how is data protected",
-            "security"
+            "security",
+            "data",
+            "information",
+            "protect",
+            "safe"
         ]
     },
     {
@@ -451,7 +680,12 @@
         "keywords": [
             "delete my data",
             "data deletion",
-            "remove my info"
+            "remove my info",
+            "delete",
+            "remove",
+            "data delete",
+            "amr data",
+            "forget me"
         ]
     },
     {
@@ -462,7 +696,20 @@
         "keywords": [
             "plagiarism check",
             "originality check",
-            "checked for copying"
+            "checked for copying",
+            "plagiarism",
+            "plagiarize",
+            "copy",
+            "copied",
+            "unique",
+            "original",
+            "turnitin check",
+            "similarity",
+            "copy check",
+            "নকল",
+            "nokal",
+            "চুরি",
+            "churi"
         ]
     },
     {
@@ -474,7 +721,11 @@
             "turnitin",
             "similarity report",
             "plagiarism report",
-            "টার্নিটিন"
+            "টার্নিটিন",
+            "report",
+            "turnitin report",
+            "turnitin deben",
+            "turnitin dao"
         ]
     },
     {
@@ -486,10 +737,17 @@
             "originality guarantee",
             "unique work",
             "written from scratch",
+            "plagiarism policy",
+            "originality",
+            "guarantee",
+            "scratch",
+            "fresh",
+            "copy na",
+            "নকল না",
+            "nokal na",
             "নিজের লেখা",
-            "original",
-            "unique",
-            "copied na"
+            "nijer lekha",
+            "original guarantee"
         ]
     },
     {
@@ -500,7 +758,11 @@
         "keywords": [
             "similarity found",
             "high plagiarism",
-            "flagged content"
+            "flagged content",
+            "high similarity",
+            "flagged",
+            "beshi similarity",
+            "ki hobe"
         ]
     },
     {
@@ -510,7 +772,11 @@
         "answer": "Yes, just ask our team and we'll share the report alongside your document.",
         "keywords": [
             "request plagiarism report",
-            "separate report"
+            "separate report",
+            "report chai",
+            "report deben",
+            "plagiarism result",
+            "amake report"
         ]
     },
     {
@@ -524,7 +790,14 @@
             "mla",
             "chicago",
             "harvard",
-            "reference style"
+            "reference style",
+            "citation",
+            "reference",
+            "cite",
+            "সাইটেশন",
+            "রেফারেন্স",
+            "bibliography",
+            "referencing"
         ]
     },
     {
@@ -535,7 +808,12 @@
         "keywords": [
             "university format",
             "specific guide",
-            "formatting requirements"
+            "formatting requirements",
+            "uni guideline",
+            "formatting guide",
+            "template follow",
+            "specific style",
+            "university requirement"
         ]
     },
     {
@@ -547,7 +825,15 @@
             "tables",
             "figures",
             "appendices",
-            "formatting"
+            "formatting",
+            "table",
+            "figure",
+            "chart",
+            "appendix",
+            "গ্রাফ",
+            "graph",
+            "diagram",
+            "image format"
         ]
     },
     {
@@ -558,7 +844,9 @@
         "keywords": [
             "template",
             "convert format",
-            "specific template"
+            "specific template",
+            "convert",
+            "university template"
         ]
     },
     {
@@ -569,7 +857,13 @@
         "keywords": [
             "formatting consistency",
             "consistent formatting",
-            "final check"
+            "final check",
+            "consistent",
+            "throughout",
+            "font",
+            "spacing",
+            "margin",
+            "proofreading"
         ]
     },
     {
@@ -580,7 +874,17 @@
         "keywords": [
             "contact support",
             "how to contact",
-            "reach support"
+            "reach support",
+            "contact",
+            "যোগাযোগ",
+            "jogajog",
+            "reach",
+            "phone",
+            "email",
+            "whatsapp",
+            "number dao",
+            "কিভাবে যোগাযোগ",
+            "connect"
         ]
     },
     {
@@ -592,7 +896,22 @@
             "working hours",
             "business hours",
             "office hours",
-            "available"
+            "available",
+            "time",
+            "hours",
+            "kokhon open",
+            "কখন খোলা",
+            "sokal",
+            "সকাল",
+            "rat",
+            "রাত",
+            "khola thake",
+            "kokhon reply",
+            "schedule",
+            "online kokhon",
+            "আপনারা কখন",
+            "apnara kokhon",
+            "kokhon available"
         ]
     },
     {
@@ -605,13 +924,19 @@
             "real person",
             "talk to someone",
             "representative",
-            "expert",
-            "মানুষ",
+            "human",
             "manush",
-            "কারো সাথে",
-            "karo shathe",
+            "মানুষ",
             "agent",
-            "support"
+            "expert",
+            "karo shathe",
+            "কারো সাথে",
+            "talk to",
+            "speak to",
+            "help chai",
+            "support chai",
+            "connect me",
+            "transfer"
         ]
     },
     {
@@ -622,7 +947,14 @@
         "keywords": [
             "response time",
             "how quickly",
-            "reply time"
+            "reply time",
+            "response",
+            "koto time lagbe",
+            "kokhon reply",
+            "কতক্ষণ",
+            "kotokkhon",
+            "fast reply",
+            "quick response"
         ]
     },
     {
@@ -634,7 +966,15 @@
             "not satisfied",
             "unhappy",
             "complaint",
-            "issue with service"
+            "issue with service",
+            "problem",
+            "issue",
+            "satisfied na",
+            "সন্তুষ্ট না",
+            "shontushto na",
+            "kharap",
+            "খারাপ",
+            "money back"
         ]
     }
 ]
