@@ -42,7 +42,10 @@
             "ki paben",
             "কি পাবেন",
             "what you do",
-            "what can you do"
+            "what can you do",
+            "spss",
+            "data analysis",
+            "statistical analysis"
         ]
     },
     {
@@ -110,6 +113,44 @@
             "business",
             "medical",
             "arts"
+        ]
+    },
+    {
+        "id": "spss-1",
+        "category": "services",
+        "question": "Do you offer SPSS or data analysis help?",
+        "answer": "Yes — we provide full SPSS data analysis support including hypothesis testing, regression analysis, descriptive statistics, ANOVA, and interpretation of results. Share your dataset and research questions and we will handle the rest.",
+        "keywords": [
+            "spss",
+            "SPSS",
+            "data analysis",
+            "statistical analysis",
+            "statistics",
+            "hypothesis testing",
+            "regression",
+            "anova",
+            "descriptive statistics",
+            "quantitative",
+            "data help",
+            "spss help",
+            "spss korben",
+            "spss dao",
+            "analysis help",
+            "data",
+            "dataset",
+            "ডেটা বিশ্লেষণ",
+            "এসপিএসএস",
+            "পরিসংখ্যান",
+            "data bishleshan",
+            "espisies",
+            "porishongkhan",
+            "statistics help",
+            "spss support",
+            "spss analysis",
+            "spss করবেন",
+            "statistical help",
+            "quantitative analysis",
+            "research data"
         ]
     },
     {
