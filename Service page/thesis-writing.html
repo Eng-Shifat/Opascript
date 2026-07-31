@@ -897,7 +897,70 @@
 
   <script src="js/service.js"></script>
   <script src="../shared/footer.js"></script>
+  <script src="js/thesis-data.js"></script>
   <script src="js/mobile.js"></script>
 
+  <script>
+    /* Disable auto-cycle completely. Hover highlight works normally. */
+    (function () {
+      /* Block the 1800ms cycle interval before service.js sets it */
+      var _orig = window.setInterval;
+      window.setInterval = function (fn, delay) {
+        if (delay === 1800) return -1;
+        return _orig.apply(this, arguments);
+      };
+
+      document.addEventListener('DOMContentLoaded', function () {
+        /* Restore setInterval for everything else */
+        window.setInterval = _orig;
+
+        /* Clear any active state set by service.js on load */
+        document.querySelectorAll('.proc-card').forEach(function (card) {
+          card.classList.remove('proc-card--active');
+          var num      = card.querySelector('.proc-num');
+          var iconWrap = card.querySelector('.proc-icon-wrap');
+          var title    = card.querySelector('.proc-title');
+          if (num)      num.classList.remove('proc-num--active');
+          if (iconWrap) iconWrap.classList.remove('proc-icon-wrap--active');
+          if (title)    title.classList.remove('proc-title--active');
+        });
+
+        /* Re-bind hover — highlight on enter, clear on leave */
+        document.querySelectorAll('.proc-card').forEach(function (card) {
+          card.addEventListener('mouseenter', function () {
+            /* Clear all first */
+            document.querySelectorAll('.proc-card').forEach(function (c) {
+              c.classList.remove('proc-card--active');
+              var n = c.querySelector('.proc-num');
+              var iw = c.querySelector('.proc-icon-wrap');
+              var t = c.querySelector('.proc-title');
+              if (n)  n.classList.remove('proc-num--active');
+              if (iw) iw.classList.remove('proc-icon-wrap--active');
+              if (t)  t.classList.remove('proc-title--active');
+            });
+            /* Highlight hovered card */
+            card.classList.add('proc-card--active');
+            var num      = card.querySelector('.proc-num');
+            var iconWrap = card.querySelector('.proc-icon-wrap');
+            var title    = card.querySelector('.proc-title');
+            if (num)      num.classList.add('proc-num--active');
+            if (iconWrap) iconWrap.classList.add('proc-icon-wrap--active');
+            if (title)    title.classList.add('proc-title--active');
+          });
+
+          card.addEventListener('mouseleave', function () {
+            /* Clear on leave — no cycle restart */
+            card.classList.remove('proc-card--active');
+            var num      = card.querySelector('.proc-num');
+            var iconWrap = card.querySelector('.proc-icon-wrap');
+            var title    = card.querySelector('.proc-title');
+            if (num)      num.classList.remove('proc-num--active');
+            if (iconWrap) iconWrap.classList.remove('proc-icon-wrap--active');
+            if (title)    title.classList.remove('proc-title--active');
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

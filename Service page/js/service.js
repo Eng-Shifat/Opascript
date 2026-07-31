@@ -138,8 +138,6 @@ function orderThesisPackage() {
 (function() {
   var currentActive = 1;
   var totalSteps = 5;
-  var cycleInterval = null;
-  var CYCLE_SPEED = 1800; /* ms per card */
 
   function procSetActive(step) {
     currentActive = step;
@@ -162,31 +160,13 @@ function orderThesisPackage() {
     });
   }
 
-  function startCycle() {
-    if (cycleInterval) return;
-    cycleInterval = setInterval(function() {
-      var next = (currentActive % totalSteps) + 1;
-      procSetActive(next);
-    }, CYCLE_SPEED);
-  }
-
-  function stopCycle() {
-    clearInterval(cycleInterval);
-    cycleInterval = null;
-  }
-
   document.addEventListener('DOMContentLoaded', function() {
     procSetActive(1);
-    startCycle();
 
-    /* Hover: pause cycle, highlight hovered card */
+    /* Hover: highlight hovered card (no auto-cycle) */
     document.querySelectorAll('.proc-card').forEach(function(card) {
       card.addEventListener('mouseenter', function() {
-        stopCycle();
         procSetActive(parseInt(card.dataset.step));
-      });
-      card.addEventListener('mouseleave', function() {
-        startCycle();
       });
     });
   });
