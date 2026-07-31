@@ -1,0 +1,342 @@
+/* =====================================================
+   handwritten-service.css
+   Phase 4 — Production Cleanup
+   ONLY new-section styles. Reuses all service.css tokens.
+   Do NOT import or copy from service.css.
+   ===================================================== */
+
+/* ══════════════════════════════════════════════
+   SECTION SHARED HEADER
+   ══════════════════════════════════════════════ */
+.hw-section-header {
+  text-align: center;
+  margin-bottom: var(--sp-3);
+}
+
+/* ══════════════════════════════════════════════
+   SECTION 1 — Handwriting Samples
+   ══════════════════════════════════════════════ */
+.hw-samples-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+}
+
+.hw-sample-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(var(--text-rgb), 0.02);
+  cursor: pointer;
+  /* GPU layer before hover fires — prevents sibling reflow flicker */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+  transition: border-color 0.3s ease, transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s ease;
+}
+.hw-sample-card:hover {
+  border-color: rgba(var(--color-purple-rgb), 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -16px rgba(var(--color-purple-rgb), 0.35);
+}
+
+.hw-sample-img-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(145deg, rgba(var(--color-purple-rgb), 0.08), rgba(var(--svc-accent-2-rgb), 0.06));
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.hw-sample-img-placeholder .hw-sample-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 62%;
+}
+.hw-sample-img-placeholder .hw-sample-lines span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(var(--color-purple-rgb), 0.3);
+}
+.hw-sample-img-placeholder .hw-sample-lines span:nth-child(odd)  { width: 100%; }
+.hw-sample-img-placeholder .hw-sample-lines span:nth-child(even) { width: 75%; }
+.hw-sample-img-placeholder .hw-sample-pen-icon {
+  color: rgba(var(--color-purple-rgb), 0.55);
+}
+
+.hw-sample-meta {
+  padding: 12px 14px 14px;
+}
+.hw-sample-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+.hw-sample-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.hw-sample-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(var(--color-purple-rgb), 0.1);
+  border: 1px solid rgba(var(--color-purple-rgb), 0.22);
+  color: var(--color-purple);
+}
+
+/* ══════════════════════════════════════════════
+   SECTION 2 — Notebook & Ink Options
+   ══════════════════════════════════════════════ */
+.hw-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+}
+
+.hw-option-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(var(--hw-opt-c), 0.18);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  background: rgba(var(--text-rgb), 0.025);
+  text-align: center;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+  transition: border-color 0.3s ease, transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s ease;
+}
+.hw-option-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90px 70px at 50% 0%, rgba(var(--hw-opt-c), 0.12), transparent 70%);
+  pointer-events: none;
+}
+.hw-option-card:hover {
+  border-color: rgba(var(--hw-opt-c), 0.45);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -12px rgba(var(--hw-opt-c), 0.38);
+}
+
+/* colour themes — mirrors svc-why-card pattern */
+.hw-option-card--blue    { --hw-opt-c: 59, 130, 246; }
+.hw-option-card--slate   { --hw-opt-c: 100, 116, 139; }
+.hw-option-card--amber   { --hw-opt-c: 245, 158, 11; }
+.hw-option-card--emerald { --hw-opt-c: 16, 185, 129; }
+.hw-option-card--violet  { --hw-opt-c: 167, 139, 250; }
+.hw-option-card--cyan    { --hw-opt-c: 34, 197, 238; }
+.hw-option-card--fuchsia { --hw-opt-c: 217, 70, 239; }
+
+.hw-option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  margin: 0 auto 12px;
+  background: linear-gradient(135deg, rgba(var(--hw-opt-c), 0.9), rgba(var(--hw-opt-c), 0.5));
+  box-shadow: 0 6px 16px -4px rgba(var(--hw-opt-c), 0.55);
+  color: #fff;
+}
+.hw-option-icon svg { width: 20px; height: 20px; }
+
+.hw-option-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+.hw-option-desc {
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════════════
+   SECTION 3 — Quality Guarantee
+   ══════════════════════════════════════════════ */
+.hw-guarantee-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+}
+
+.hw-guarantee-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(var(--color-success-rgb), 0.18);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  background: rgba(var(--text-rgb), 0.02);
+  text-align: center;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+  transition: border-color 0.3s ease, transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s ease;
+}
+.hw-guarantee-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(80px 60px at 50% 0%, rgba(var(--color-success-rgb), 0.08), transparent 70%);
+  pointer-events: none;
+}
+.hw-guarantee-card:hover {
+  border-color: rgba(var(--color-success-rgb), 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 30px -12px rgba(var(--color-success-rgb), 0.3);
+}
+
+.hw-guarantee-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  margin: 0 auto 10px;
+  background: rgba(var(--color-success-rgb), 0.12);
+  border: 1px solid rgba(var(--color-success-rgb), 0.25);
+  color: var(--color-success);
+}
+.hw-guarantee-icon svg { width: 19px; height: 19px; }
+
+.hw-guarantee-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.35;
+}
+
+/* ══════════════════════════════════════════════
+   SECTION 4 — Delivery Options
+   ══════════════════════════════════════════════ */
+.hw-delivery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+}
+
+.hw-delivery-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(var(--hw-del-c), 0.2);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  background: rgba(var(--text-rgb), 0.025);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+  transition: border-color 0.3s ease, transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s ease;
+}
+.hw-delivery-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(100px 70px at 0% 50%, rgba(var(--hw-del-c), 0.1), transparent 70%);
+  pointer-events: none;
+}
+.hw-delivery-card:hover {
+  border-color: rgba(var(--hw-del-c), 0.45);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -12px rgba(var(--hw-del-c), 0.35);
+}
+
+.hw-delivery-card--cyan    { --hw-del-c: 34, 197, 238; }
+.hw-delivery-card--violet  { --hw-del-c: 167, 139, 250; }
+.hw-delivery-card--amber   { --hw-del-c: 245, 158, 11; }
+.hw-delivery-card--emerald { --hw-del-c: 16, 185, 129; }
+.hw-delivery-card--blue    { --hw-del-c: 59, 130, 246; }
+
+.hw-delivery-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(var(--hw-del-c), 0.9), rgba(var(--hw-del-c), 0.5));
+  box-shadow: 0 6px 16px -4px rgba(var(--hw-del-c), 0.5);
+  color: #fff;
+}
+.hw-delivery-icon svg { width: 20px; height: 20px; }
+
+.hw-delivery-body { min-width: 0; }
+.hw-delivery-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 5px;
+}
+.hw-delivery-desc {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE — Tablet (≤ 1024px)
+   ══════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .hw-samples-grid   { grid-template-columns: repeat(2, 1fr); }
+  .hw-options-grid   { grid-template-columns: repeat(2, 1fr); }
+  .hw-guarantee-grid { grid-template-columns: repeat(2, 1fr); }
+  .hw-delivery-grid  { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE — Mobile (≤ 768px)
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hw-samples-grid   { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hw-options-grid   { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hw-guarantee-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hw-delivery-grid  { grid-template-columns: 1fr; gap: 10px; }
+
+  .hw-option-card,
+  .hw-guarantee-card { padding: 16px 14px; }
+  .hw-delivery-card  { padding: 18px 16px; }
+}
+
+/* ══════════════════════════════════════════════
+   REDUCED MOTION — respect user preference
+   ══════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .hw-sample-card,
+  .hw-option-card,
+  .hw-guarantee-card,
+  .hw-delivery-card {
+    transition: border-color 0.15s ease;
+    will-change: auto;
+  }
+  .hw-sample-card:hover,
+  .hw-option-card:hover,
+  .hw-guarantee-card:hover,
+  .hw-delivery-card:hover {
+    transform: none;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   LIGHT THEME OVERRIDES
+   ══════════════════════════════════════════════ */
+[data-theme="light"] .hw-sample-img-placeholder {
+  background: linear-gradient(145deg, rgba(var(--color-purple-rgb), 0.06), rgba(var(--svc-accent-2-rgb), 0.04));
+}
