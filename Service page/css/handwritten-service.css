@@ -9,11 +9,12 @@
   background-image: url('../assets/Handwritten-assignment-writing-service.png') !important;
   background-size: cover !important;
   background-position: center center !important;
-  border-right: none !important;
+  border: none !important;
   box-shadow:
     inset 0 1px 0 rgba(var(--text-rgb),0.25),
     inset 0 -1px 0 rgba(var(--shadow-rgb),0.5),
     inset 1px 0 0 rgba(var(--text-rgb),0.08),
+    inset -1px 0 0 rgba(var(--shadow-rgb),0.35),
     0 24px 60px -12px rgba(var(--shadow-rgb),0.65),
     0 0 0 1px rgba(var(--color-violet2-rgb),0.15) !important;
 }
@@ -928,5 +929,13 @@
     font-size: 11.5px;
     color: var(--muted);
     line-height: 1.5;
+  }
+}
+
+/* ── Mobile hero: handwritten page specific background image ── */
+@media (max-width: 768px) {
+  .mob-hero-card {
+    background-image: url('../assets/Handwritten-assignment-writing-service.png') !important;
+    background-position: center center !important;
   }
 }

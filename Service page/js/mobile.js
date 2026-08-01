@@ -92,6 +92,7 @@
       '</div>' +
 
       /* ── EXPERT ── */
+      (D.expert ?
       '<div class="mob-section">' +
         '<div class="mob-exp2-head">' +
           '<div class="mob-exp2-head-icon">' + D.expert.headIcon + '</div>' +
@@ -143,6 +144,7 @@
           '</div>' +
         '</div>' +
       '</div>' +
+      '' : '') +
 
       /* ── WORKFLOW ── */
       '<div class="mob-section">' +

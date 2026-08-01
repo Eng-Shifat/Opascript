@@ -7,12 +7,12 @@
 window.PAGE_DATA = {
 
   hero: {
-    badge:            'University-Standard Handwritten Documents',
-    title:            'Professional Handwritten Academic Documents',
-    desc:             'Need handwritten assignments, lab reports, practical notebooks, record books, or project copies? Our handwriting specialists prepare every page with neat handwriting, proper formatting, consistent presentation, and university-standard quality.',
-    primaryBtn:       'Start Your Handwritten Project',
+    badge:            'Human Written Service',
+    title:            'Handwritten Assignments<br>Done Right, On Time',
+    desc:             'Deadline কাল, সময় নেই? চিন্তা নেই — আমরা আছি। Assignment থেকে lab report, সব কিছু সুন্দর হাতের লেখায়, university format মেনে তৈরি করে দিই।',
+    primaryBtn:       'এখনই শুরু করো',
     primaryOnClick:   '',
-    secondaryBtn:     'Discuss Your Requirements',
+    secondaryBtn:     'আগে কথা বলি',
     secondaryOnClick: "window.open('https://wa.me/8801XXXXXXXXX','_blank')",
   },
 
@@ -50,26 +50,7 @@ window.PAGE_DATA = {
     ],
   },
 
-  expert: {
-    headIcon:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m12 8 1.1 2.3 2.5.35-1.8 1.8.45 2.5L12 13.7l-2.25 1.25.45-2.5-1.8-1.8 2.5-.35L12 8Z"/></svg>',
-    heading:    'Meet Your <span class="grad">Handwriting Expert</span>',
-    subheading: 'Your documents are prepared with experience, precision, and a commitment to neat presentation.',
-    photo:      'assets/expert-photo.jpg',
-    name:       'Yeasin Kabir',
-    badge:      'Level 2',
-    role:       'Handwriting &amp; Presentation Specialist',
-    ministats: [
-      { cls: 'blue', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', val: '500+', label: 'Projects' },
-      { cls: 'gold', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg>', val: '5+', label: 'Years Exp.' },
-    ],
-    features: [
-      { cls: 'green',  svg: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',                                                                              title: 'Fiverr Level 2 Seller',     desc: 'Verified &amp; trusted by Fiverr' },
-      { cls: 'blue',   svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/>',                         title: '500+ Delivered Projects',   desc: 'Successfully completed academic documents' },
-      { cls: 'purple', svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',                                                                                  title: '5+ Years Experience',       desc: 'Specialized in university-standard handwriting' },
-      { cls: 'orange', svg: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>',                                                                         title: '100% Human Written',        desc: 'No printing, no tracing, no digital shortcuts' },
-    ],
-    quote: 'My goal is to deliver perfectly handwritten academic documents — neat, professional, and ready for submission.',
-  },
+  expert: null,
 
   workflow: {
     title: 'How Your Handwritten Work Gets Delivered',
