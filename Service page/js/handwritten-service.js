@@ -151,21 +151,30 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!hwTrack || !hwDots) return;
 
   /* Identical across every slide — built once, not per slide */
+  var MINI_STAT_ICONS = {
+    human:  '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    doc:    '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+    cap:    '<path d="M22 10L12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/>',
+    scan:   '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v4M17 3v4M7 17v4M17 17v4M3 7h4M17 7h4M3 17h4M17 17h4"/>',
+  };
+  function miniStatIcon(key) {
+    return '<span class="ts-mini-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + MINI_STAT_ICONS[key] + '</svg></span>';
+  }
   var MINI_STATS_HTML =
     '<div class="ts-mini-stats">' +
-      '<div class="ts-mini-stat"><span class="ts-mini-val">100%</span><span class="ts-mini-label">Human Written</span></div>' +
+      '<div class="ts-mini-stat">' + miniStatIcon('human') + '<span class="ts-mini-val">100%</span><span class="ts-mini-label">Human Written</span></div>' +
       '<div class="ts-mini-divider"></div>' +
-      '<div class="ts-mini-stat"><span class="ts-mini-val">Original</span><span class="ts-mini-label">Formatting</span></div>' +
+      '<div class="ts-mini-stat">' + miniStatIcon('doc') + '<span class="ts-mini-val">Original</span><span class="ts-mini-label">Formatting</span></div>' +
       '<div class="ts-mini-divider"></div>' +
-      '<div class="ts-mini-stat"><span class="ts-mini-val">Exam</span><span class="ts-mini-label">Friendly</span></div>' +
+      '<div class="ts-mini-stat">' + miniStatIcon('cap') + '<span class="ts-mini-val">Exam</span><span class="ts-mini-label">Friendly</span></div>' +
       '<div class="ts-mini-divider"></div>' +
-      '<div class="ts-mini-stat"><span class="ts-mini-val">HD</span><span class="ts-mini-label">Scanned</span></div>' +
+      '<div class="ts-mini-stat">' + miniStatIcon('scan') + '<span class="ts-mini-val">HD</span><span class="ts-mini-label">Scanned</span></div>' +
     '</div>';
 
-  var ACTIONS_HTML =
-    '<div class="ts-actions">' +
-      '<button class="ts-btn-primary">' +
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+  function actionsHtml(imgSrc) {
+    return '<div class="ts-actions">' +
+      '<button class="ts-btn-primary" onclick="hwOpenPreview(\'' + imgSrc + '\')">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>' +
         'Preview Full Sample' +
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>' +
       '</button>' +
@@ -175,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>' +
       '</button>' +
     '</div>';
+  }
 
   function featureChipHtml(key) {
     var f = featureMap && featureMap[key];
@@ -192,19 +202,26 @@ document.addEventListener('DOMContentLoaded', function () {
       '</div>' +
       '<div class="hw-carousel-info">' +
         '<div class="hw-carousel-label">' +
-          '<span class="hw-carousel-badge">' + s.badge + '</span>' +
-          '<span class="hw-carousel-badge ' + s.badgeCls + '">' + s.type + '</span>' +
+          '<span class="hw-carousel-badge ' + s.badgeCls + '">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + s.badgeIcon + '</svg>' +
+            s.badge +
+          '</span>' +
+          '<span class="hw-carousel-badge">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+            s.type +
+          '</span>' +
+          '<span class="hw-carousel-badge orange">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+            'Handwritten' +
+          '</span>' +
         '</div>' +
         '<h3 class="hw-carousel-title">' + s.title + '</h3>' +
         '<p class="hw-carousel-desc">' + s.desc + '</p>' +
-        '<div class="hw-carousel-tags">' +
-          s.tags.map(function (t) { return '<span>' + t + '</span>'; }).join('') +
-        '</div>' +
         '<div class="ts-feature-grid">' +
           s.features.map(featureChipHtml).join('') +
         '</div>' +
         MINI_STATS_HTML +
-        ACTIONS_HTML +
+        actionsHtml(s.img) +
       '</div>' +
     '</div>';
   }
@@ -256,6 +273,53 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   renderHwCarousel();
+
+  /* Create nav arrows and append to hwCarousel (position absolute, overlays img-wrap) */
+  var btnPrev = document.createElement('button');
+  btnPrev.className = 'hw-carousel-btn hw-carousel-prev';
+  btnPrev.id = 'hwPrev';
+  btnPrev.setAttribute('aria-label', 'Previous');
+  btnPrev.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+  var btnNext = document.createElement('button');
+  btnNext.className = 'hw-carousel-btn hw-carousel-next';
+  btnNext.id = 'hwNext';
+  btnNext.setAttribute('aria-label', 'Next');
+  btnNext.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  hwCarousel.appendChild(btnPrev);
+  hwCarousel.appendChild(btnNext);
+  hwPrev = btnPrev;
+  hwNext = btnNext;
+
   initHwCarouselBehavior();
 
+});
+
+/* =====================================================
+   SAMPLE IMAGE PREVIEW POPUP
+   ===================================================== */
+function hwOpenPreview(imgSrc) {
+  var overlay = document.getElementById('hwPreviewOverlay');
+  if (!overlay) return;
+  var img = overlay.querySelector('.hw-preview-img');
+  img.src = imgSrc;
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function hwClosePreview() {
+  var overlay = document.getElementById('hwPreviewOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var overlay = document.getElementById('hwPreviewOverlay');
+  if (!overlay) return;
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) hwClosePreview();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hwClosePreview();
+  });
 });
