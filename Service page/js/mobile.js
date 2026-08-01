@@ -172,35 +172,44 @@
         '</div>' +
       '</div>' +
 
-      /* ── SAMPLE PREVIEW (optional) ── */
+      /* ── SAMPLE PREVIEW — Carousel ── */
       (D.samples ? (
         '<div class="mob-section">' +
           '<div class="mob-sec-header" style="margin-bottom:14px">' +
             '<h2 class="mob-sec-title" style="margin-bottom:0">' + D.samples.title + '</h2>' +
             '<a class="mob-sec-link" href="#">Free Sample →</a>' +
           '</div>' +
-          /* Real photo */
-          (D.samples.photo ? (
-            '<div class="mob-showcase-img-wrap">' +
-              '<img src="' + D.samples.photo + '" alt="' + (D.samples.photoAlt || 'Handwriting sample') + '" class="mob-showcase-img" loading="lazy">' +
-              '<div class="mob-showcase-badge">' +
-                '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>' +
-                ' 100% Human Handwritten' +
+          (D.samples.slides ? (
+            '<div class="mob-sample-carousel" id="mobSampleCarousel">' +
+              '<div class="mob-sample-track" id="mobSampleTrack">' +
+                D.samples.slides.map(function (s, i) {
+                  return '<div class="mob-sample-slide' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
+                    '<div class="mob-sample-img-wrap">' +
+                      '<img src="' + s.img + '" alt="' + s.alt + '" loading="lazy">' +
+                    '</div>' +
+                    '<div class="mob-sample-info">' +
+                      '<div class="mob-sample-badges">' +
+                        '<span class="mob-sample-badge">' + s.badge + '</span>' +
+                        '<span class="mob-sample-badge ' + s.badgeCls + '">' + s.type + '</span>' +
+                      '</div>' +
+                      '<div class="mob-sample-title">' + s.title + '</div>' +
+                      '<div class="mob-sample-desc">' + s.desc + '</div>' +
+                      '<div class="mob-sample-tags">' +
+                        s.tags.map(function(t){ return '<span>' + t + '</span>'; }).join('') +
+                      '</div>' +
+                    '</div>' +
+                  '</div>';
+                }).join('') +
               '</div>' +
-            '</div>'
-          ) : '') +
-          /* Items list */
-          (D.samples.items ? (
-            '<div class="mob-showcase-items">' +
-              D.samples.items.map(function (item) {
-                return '<div class="mob-showcase-item">' +
-                  '<span class="mob-showcase-dot mob-showcase-dot--' + item.dot + '"></span>' +
-                  '<div>' +
-                    '<div class="mob-showcase-item-title">' + item.title + '</div>' +
-                    '<div class="mob-showcase-item-desc">' + item.desc + '</div>' +
-                  '</div>' +
-                '</div>';
-              }).join('') +
+              '<div class="mob-sample-nav">' +
+                '<button class="mob-sample-btn mob-sample-prev" id="mobSamplePrev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+                '<div class="mob-sample-dots" id="mobSampleDots">' +
+                  D.samples.slides.map(function (s, i) {
+                    return '<button class="mob-sdot' + (i === 0 ? ' active' : '') + '" data-sidx="' + i + '"></button>';
+                  }).join('') +
+                '</div>' +
+                '<button class="mob-sample-btn mob-sample-next" id="mobSampleNext"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+              '</div>' +
             '</div>'
           ) : '') +
         '</div>'
@@ -281,9 +290,38 @@
     });
   }
 
+  /* ── Mobile Sample Carousel ── */
+  function initMobSampleCarousel() {
+    var slides = document.querySelectorAll('.mob-sample-slide');
+    var dots   = document.querySelectorAll('.mob-sdot');
+    var prev   = document.getElementById('mobSamplePrev');
+    var next   = document.getElementById('mobSampleNext');
+    if (!slides.length) return;
+    var cur = 0, total = slides.length;
+
+    function goTo(idx) {
+      slides[cur].classList.remove('active');
+      dots[cur].classList.remove('active');
+      cur = (idx + total) % total;
+      slides[cur].classList.add('active');
+      dots[cur].classList.add('active');
+    }
+    if (prev) prev.addEventListener('click', function(){ goTo(cur - 1); });
+    if (next) next.addEventListener('click', function(){ goTo(cur + 1); });
+    dots.forEach(function(d){
+      d.addEventListener('click', function(){ goTo(parseInt(d.getAttribute('data-sidx'))); });
+    });
+    /* swipe */
+    var sx = 0, el = document.getElementById('mobSampleCarousel');
+    if (el) {
+      el.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; }, {passive:true});
+      el.addEventListener('touchend',   function(e){ var d = sx - e.changedTouches[0].clientX; if(Math.abs(d)>40) goTo(d>0?cur+1:cur-1); }, {passive:true});
+    }
+  }
+
   /* ── INIT ── */
   function init() {
-    if (window.innerWidth <= 768) buildMobileContent();
+    if (window.innerWidth <= 768) { buildMobileContent(); initMobSampleCarousel(); }
     initFAQ();
   }
 
