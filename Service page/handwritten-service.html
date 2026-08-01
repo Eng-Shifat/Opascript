@@ -435,92 +435,11 @@
           <div class="hw-carousel" id="hwCarousel">
             <!-- Slides -->
             <div class="hw-carousel-track" id="hwTrack">
-
-              <div class="hw-carousel-slide active" data-index="0">
-                <div class="hw-carousel-img-wrap">
-                  <img src="assets/Handwritten/HSS-chemistry-lab.png" alt="Chemistry Lab Report Sample" loading="eager">
-                </div>
-                <div class="hw-carousel-info">
-                  <div class="hw-carousel-label">
-                    <span class="hw-carousel-badge">Chemistry</span>
-                    <span class="hw-carousel-badge blue">Lab Report</span>
-                  </div>
-                  <h3 class="hw-carousel-title">Chemistry Lab Report</h3>
-                  <p class="hw-carousel-desc">
-                    Aspirin synthesis experiment — aim, apparatus, chemicals, procedure, observation table আর chemical equation সহ সম্পূর্ণ lab report লেখা হয়েছে। University format মেনে প্রতিটা section properly heading দিয়ে সাজানো, table neat আর handwriting consistent।
-                  </p>
-                  <div class="hw-carousel-tags">
-                    <span>Blue Ink</span><span>Lab Notebook</span><span>Table + Diagram</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="hw-carousel-slide" data-index="1">
-                <div class="hw-carousel-img-wrap">
-                  <img src="assets/Handwritten/HSS-Assignment.png" alt="Physics Assignment Sample" loading="lazy">
-                </div>
-                <div class="hw-carousel-info">
-                  <div class="hw-carousel-label">
-                    <span class="hw-carousel-badge">Physics</span>
-                    <span class="hw-carousel-badge purple">Assignment</span>
-                  </div>
-                  <h3 class="hw-carousel-title">Physics Assignment</h3>
-                  <p class="hw-carousel-desc">
-                    Projectile Motion এর উপর পুরো assignment — theory, formula, diagram সহ লেখা হয়েছে। Aim থেকে শুরু করে mathematical derivation পর্যন্ত প্রতিটা অংশ clear handwriting এ, proper margin মেনে। Diagram hand-drawn, neat আর labeled।
-                  </p>
-                  <div class="hw-carousel-tags">
-                    <span>Blue Ink</span><span>Ruled Notebook</span><span>Hand-drawn Diagram</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="hw-carousel-slide" data-index="2">
-                <div class="hw-carousel-img-wrap">
-                  <img src="assets/Handwritten/HSS-Circuit-diagram.png" alt="EEE Circuit Diagram Sample" loading="lazy">
-                </div>
-                <div class="hw-carousel-info">
-                  <div class="hw-carousel-label">
-                    <span class="hw-carousel-badge">EEE</span>
-                    <span class="hw-carousel-badge cyan">Practical</span>
-                  </div>
-                  <h3 class="hw-carousel-title">EEE Circuit Diagram & Practical</h3>
-                  <p class="hw-carousel-desc">
-                    Half Wave Rectifier experiment — objective, circuit diagram, observation table আর result সহ সম্পূর্ণ practical লেখা হয়েছে। Circuit diagram হাতে আঁকা, প্রতিটা component clearly labeled। Observation table neat, data সঠিকভাবে fill করা।
-                  </p>
-                  <div class="hw-carousel-tags">
-                    <span>Blue Ink</span><span>Practical Notebook</span><span>Circuit Diagram</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="hw-carousel-slide" data-index="3">
-                <div class="hw-carousel-img-wrap">
-                  <img src="assets/Handwritten/HSS-lab-report.png" alt="Chemistry Lab Report Rate of Reaction" loading="lazy">
-                </div>
-                <div class="hw-carousel-info">
-                  <div class="hw-carousel-label">
-                    <span class="hw-carousel-badge">Chemistry</span>
-                    <span class="hw-carousel-badge green">Lab Report</span>
-                  </div>
-                  <h3 class="hw-carousel-title">Rate of Reaction — Lab Report</h3>
-                  <p class="hw-carousel-desc">
-                    HCl আর Sodium Thiosulfate এর reaction rate নিয়ে experiment — objective, materials, procedure আর chemical equation সহ পুরো report। Grid paper এ neat formatting, proper spacing আর organized structure দিয়ে লেখা। দেখতে professional, submit করতে ready।
-                  </p>
-                  <div class="hw-carousel-tags">
-                    <span>Blue Ink</span><span>Grid Notebook</span><span>Chemical Equation</span>
-                  </div>
-                </div>
-              </div>
-
             </div><!-- end track -->
 
             <!-- Arrows on image sides, dots below -->
             <div class="hw-carousel-nav">
               <div class="hw-carousel-dots" id="hwDots">
-                <button class="hw-dot active" data-idx="0"></button>
-                <button class="hw-dot" data-idx="1"></button>
-                <button class="hw-dot" data-idx="2"></button>
-                <button class="hw-dot" data-idx="3"></button>
               </div>
             </div>
             <button class="hw-carousel-btn hw-carousel-prev" id="hwPrev" aria-label="Previous">
@@ -1128,9 +1047,9 @@
   </section>
 
   <script src="js/service.js"></script>
+  <script src="js/handwritten-data.js"></script>
   <script src="js/handwritten-service.js"></script>
   <script src="../shared/footer.js"></script>
-  <script src="js/handwritten-data.js"></script>
   <script src="js/mobile.js"></script>
 
   <script>
@@ -1196,46 +1115,5 @@
     })();
   </script>
 
-<script>
-/* ── Handwriting Samples Carousel ── */
-(function () {
-  var slides = document.querySelectorAll('.hw-carousel-slide');
-  var dots   = document.querySelectorAll('.hw-dot');
-  var prev   = document.getElementById('hwPrev');
-  var next   = document.getElementById('hwNext');
-  var current = 0;
-  var total   = slides.length;
-
-  function goTo(idx, dir) {
-    slides[current].classList.remove('active', 'slide-left');
-    dots[current].classList.remove('active');
-    current = (idx + total) % total;
-    slides[current].classList.remove('slide-left');
-    if (dir === 'left') slides[current].classList.add('slide-left');
-    slides[current].classList.add('active');
-    dots[current].classList.add('active');
-  }
-
-  if (prev) prev.addEventListener('click', function () { goTo(current - 1, 'left'); });
-  if (next) next.addEventListener('click', function () { goTo(current + 1, 'right'); });
-  dots.forEach(function (d) {
-    d.addEventListener('click', function () {
-      var idx = parseInt(d.getAttribute('data-idx'));
-      goTo(idx, idx > current ? 'right' : 'left');
-    });
-  });
-
-  /* Touch / swipe support */
-  var startX = 0;
-  var carousel = document.getElementById('hwCarousel');
-  if (carousel) {
-    carousel.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
-    carousel.addEventListener('touchend', function (e) {
-      var diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1, diff > 0 ? 'right' : 'left');
-    }, { passive: true });
-  }
-})();
-</script>
 </body>
 </html>

@@ -20,6 +20,55 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/service.css" />
   <link rel="stylesheet" href="css/mobile.css" media="(max-width: 768px)" />
+  <style>
+/* ── Thesis Sample Carousel ── */
+.ts-card { overflow: visible; }
+.ts-carousel { position: relative; width: 100%; overflow: hidden; border-radius: 14px; }
+.ts-track { width: 100%; }
+.ts-slide { visibility: hidden; position: absolute; pointer-events: none; width: 100%; display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; align-items: flex-start; }
+.ts-slide.active { visibility: visible; position: relative; pointer-events: auto; animation: tsFadeIn 0.35s ease; }
+.ts-slide.ts-slide-left.active { animation: tsFadeLeft 0.35s ease; }
+@keyframes tsFadeIn  { from { opacity:0; transform:translateX(16px);  } to { opacity:1; transform:translateX(0); } }
+@keyframes tsFadeLeft { from { opacity:0; transform:translateX(-16px); } to { opacity:1; transform:translateX(0); } }
+.ts-img-wrap { width:100%; border-radius:14px; overflow:hidden; aspect-ratio:3/4; background:rgba(var(--svc-card-rgb),.5); border:1px solid rgba(var(--text-rgb),.08); }
+.ts-img-wrap img { width:100%; height:100%; object-fit:cover; object-position:top center; display:block; }
+.ts-img-placeholder { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:rgba(var(--text-rgb),.25); font-size:13px; }
+.ts-img-placeholder svg { opacity:.3; }
+.ts-info { display:flex; flex-direction:column; gap:16px; padding-top:4px; }
+.ts-badges { display:flex; gap:8px; flex-wrap:wrap; }
+.ts-badge { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:4px 12px; border-radius:999px; background:rgba(var(--color-violet2-rgb),.15); color:var(--color-violet2); border:1px solid rgba(var(--color-violet2-rgb),.25); }
+.ts-badge.blue   { background:rgba(96,165,250,.12);  color:#60a5fa; border-color:rgba(96,165,250,.25); }
+.ts-badge.purple { background:rgba(167,139,250,.12); color:#a78bfa; border-color:rgba(167,139,250,.25); }
+.ts-badge.cyan   { background:rgba(34,211,238,.12);  color:#22d3ee; border-color:rgba(34,211,238,.25); }
+.ts-badge.green  { background:rgba(52,211,153,.12);  color:#34d399; border-color:rgba(52,211,153,.25); }
+.ts-title { font-size:22px; font-weight:700; color:var(--text-main); line-height:1.3; margin:0; }
+.ts-desc  { font-size:14px; line-height:1.8; color:rgba(var(--text-rgb),.6); margin:0; }
+.ts-feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.ts-feat { display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:10px; background:rgba(var(--text-rgb),.04); border:1px solid rgba(var(--text-rgb),.08); font-size:13px; font-weight:500; color:rgba(var(--text-rgb),.75); transition:background .2s,border-color .2s; }
+.ts-feat svg { flex-shrink:0; opacity:.6; }
+.ts-feat:hover { background:rgba(var(--text-rgb),.07); border-color:rgba(var(--text-rgb),.15); }
+.ts-mini-stats { display:flex; align-items:center; padding:14px 18px; border-radius:12px; background:rgba(var(--text-rgb),.04); border:1px solid rgba(var(--text-rgb),.08); }
+.ts-mini-stat { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center; }
+.ts-mini-val   { font-size:14px; font-weight:700; color:var(--text-main); }
+.ts-mini-label { font-size:11px; color:rgba(var(--text-rgb),.45); }
+.ts-mini-divider { width:1px; height:32px; background:rgba(var(--text-rgb),.1); flex-shrink:0; }
+.ts-actions { display:flex; gap:12px; flex-wrap:wrap; }
+.ts-btn-primary { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--color-purple-deep),var(--color-purple-deep2)); color:#fff; font-size:14px; font-weight:600; cursor:pointer; transition:opacity .2s,transform .2s; white-space:nowrap; }
+.ts-btn-primary:hover  { opacity:.88; transform:translateY(-1px); }
+.ts-btn-primary:active { transform:scale(.97); }
+.ts-btn-secondary { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:12px; border:1px solid rgba(var(--text-rgb),.18); background:rgba(var(--text-rgb),.04); color:var(--text-main); font-size:14px; font-weight:600; cursor:pointer; transition:background .2s,border-color .2s,transform .2s; white-space:nowrap; }
+.ts-btn-secondary:hover  { background:rgba(var(--text-rgb),.09); border-color:rgba(var(--text-rgb),.3); transform:translateY(-1px); }
+.ts-btn-secondary:active { transform:scale(.97); }
+.ts-nav-btn { position:absolute; top:38%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:1px solid rgba(var(--text-rgb),.15); background:rgba(var(--svc-card-rgb),.85); backdrop-filter:blur(8px); color:var(--text-main); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s,border-color .2s; z-index:10; }
+.ts-nav-btn:hover { background:rgba(var(--color-purple-deep-rgb),.25); border-color:rgba(var(--color-purple-deep-rgb),.4); }
+.ts-prev { left:-18px; }
+.ts-next { left:calc(40% + 32px - 19px); }
+.ts-dots-wrap { display:flex; justify-content:center; gap:8px; margin-top:20px; }
+.ts-dot { width:8px; height:8px; border-radius:50%; border:none; background:rgba(var(--text-rgb),.2); cursor:pointer; transition:background .2s,width .2s; padding:0; }
+.ts-dot.active { background:var(--color-purple-deep); width:24px; border-radius:4px; }
+@media (max-width:900px) { .ts-slide { grid-template-columns:1fr 1fr; gap:20px; } .ts-feature-grid { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:640px) { .ts-slide { grid-template-columns:1fr; gap:16px; } .ts-img-wrap { aspect-ratio:4/3; } .ts-feature-grid { grid-template-columns:repeat(2,1fr); gap:8px; } .ts-feat { font-size:12px; padding:8px 10px; } .ts-title { font-size:18px; } .ts-actions { flex-direction:column; } .ts-btn-primary,.ts-btn-secondary { flex:unset; width:100%; } .ts-prev { left:8px; } .ts-next { left:unset; right:8px; } }
+  </style>
 </head>
 
 <body>
@@ -507,18 +556,201 @@
         </div>
 
                 <!-- SAMPLE PREVIEW -->
-        <div class="svc-card">
+        <!-- ══════════════════════════════════════
+             THESIS SAMPLE CAROUSEL
+             ══════════════════════════════════════ -->
+        <div class="svc-card ts-card">
           <div class="svc-card-header">
-            <h2 class="svc-h2">Sample Thesis Preview</h2>
-            <a href="#" class="svc-link">View Full Samples →</a>
+            <h2 class="svc-h2">Thesis Sample Preview</h2>
+            <a href="#" class="svc-link">Request a Free Sample →</a>
           </div>
-          <div class="svc-samples-grid">
-            <div class="svc-sample-thumb">📄<span>Sample 1</span></div>
-            <div class="svc-sample-thumb">📄<span>Sample 2</span></div>
-            <div class="svc-sample-thumb">📄<span>Sample 3</span></div>
-            <div class="svc-sample-thumb">📄<span>Sample 4</span></div>
-            <div class="svc-sample-thumb">📄<span>Sample 5</span></div>
-          </div>
+
+          <div class="ts-carousel" id="tsCarousel">
+            <div class="ts-track" id="tsTrack">
+
+              <!-- Slide 1 -->
+              <div class="ts-slide active" data-index="0">
+                <div class="ts-img-wrap">
+                  <div class="ts-img-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                    <span>Thesis Sample Image</span>
+                  </div>
+                </div>
+                <div class="ts-info">
+                  <div class="ts-badges">
+                    <span class="ts-badge">BBA</span>
+                    <span class="ts-badge purple">Marketing</span>
+                    <span class="ts-badge blue">Chapter 1–5</span>
+                  </div>
+                  <h3 class="ts-title">Marketing Strategy Thesis</h3>
+                  <p class="ts-desc">
+                    সম্পূর্ণ BBA thesis — Introduction থেকে Conclusion পর্যন্ত সব chapter। Literature Review, Methodology, Data Analysis এবং Recommendation সহ university guideline অনুযায়ী structured। APA format, proper citation এবং plagiarism-free content।
+                  </p>
+
+                  <div class="ts-feature-grid">
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      <span>APA Format</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      <span>University Format</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Plagiarism Free</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      <span>Data Table</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <span>Full References</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/></svg>
+                      <span>Original Work</span>
+                    </div>
+                  </div>
+
+                  <div class="ts-mini-stats">
+                    <div class="ts-mini-stat">
+                      <span class="ts-mini-val">100%</span>
+                      <span class="ts-mini-label">Human Written</span>
+                    </div>
+                    <div class="ts-mini-divider"></div>
+                    <div class="ts-mini-stat">
+                      <span class="ts-mini-val">Original</span>
+                      <span class="ts-mini-label">Formatting</span>
+                    </div>
+                    <div class="ts-mini-divider"></div>
+                    <div class="ts-mini-stat">
+                      <span class="ts-mini-val">Turnitin</span>
+                      <span class="ts-mini-label">Report Included</span>
+                    </div>
+                    <div class="ts-mini-divider"></div>
+                    <div class="ts-mini-stat">
+                      <span class="ts-mini-val">HD</span>
+                      <span class="ts-mini-label">PDF Delivery</span>
+                    </div>
+                  </div>
+
+                  <div class="ts-actions">
+                    <button class="ts-btn-primary">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      Preview Full Sample
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    <button class="ts-btn-secondary" onclick="window.location.href='../Order page/order.html'">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      Order This Style
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 2 -->
+              <div class="ts-slide" data-index="1">
+                <div class="ts-img-wrap">
+                  <div class="ts-img-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                    <span>Thesis Sample Image</span>
+                  </div>
+                </div>
+                <div class="ts-info">
+                  <div class="ts-badges">
+                    <span class="ts-badge">CSE</span>
+                    <span class="ts-badge cyan">Technical</span>
+                    <span class="ts-badge blue">Full Thesis</span>
+                  </div>
+                  <h3 class="ts-title">CSE Final Year Thesis</h3>
+                  <p class="ts-desc">
+                    Machine Learning based project thesis — Problem Statement, Related Work, System Design, Implementation এবং Results সহ সম্পূর্ণ। IEEE format, figure এবং algorithm সহ properly structured। Code documentation এবং performance analysis included।
+                  </p>
+
+                  <div class="ts-feature-grid">
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                      <span>IEEE Format</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                      <span>Code Included</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                      <span>Data Analysis</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      <span>Figures & Tables</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Plagiarism Free</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/></svg>
+                      <span>Original Work</span>
+                    </div>
+                  </div>
+
+                  <div class="ts-mini-stats">
+                    <div class="ts-mini-stat">
+                      <span class="ts-mini-val">100%</span>
+                      <span class="ts-mini-label">Human Written</span>
+                    </div>
+                    <div class="ts-mini-divider"></div>
+                    <div class="ts-mini-stat">
+                      <span class="ts-mini-val">Original</span>
+                      <span class="ts-mini-label">Formatting</span>
+                    </div>
+                    <div class="ts-mini-divider"></div>
+                    <div class="ts-mini-stat">
+                      <span class="ts-mini-val">Turnitin</span>
+                      <span class="ts-mini-label">Report Included</span>
+                    </div>
+                    <div class="ts-mini-divider"></div>
+                    <div class="ts-mini-stat">
+                      <span class="ts-mini-val">HD</span>
+                      <span class="ts-mini-label">PDF Delivery</span>
+                    </div>
+                  </div>
+
+                  <div class="ts-actions">
+                    <button class="ts-btn-primary">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      Preview Full Sample
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    <button class="ts-btn-secondary" onclick="window.location.href='../Order page/order.html'">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      Order This Style
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- end ts-track -->
+
+            <!-- Arrows -->
+            <button class="ts-nav-btn ts-prev" id="tsPrev" aria-label="Previous">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="ts-nav-btn ts-next" id="tsNext" aria-label="Next">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+
+            <!-- Dots -->
+            <div class="ts-dots-wrap">
+              <button class="ts-dot active" data-idx="0"></button>
+              <button class="ts-dot" data-idx="1"></button>
+            </div>
+
+          </div><!-- end ts-carousel -->
         </div>
 
         <!-- FAQ -->
@@ -962,5 +1194,45 @@
       });
     })();
   </script>
+<script>
+/* ── Thesis Sample Carousel ── */
+(function () {
+  var slides  = document.querySelectorAll('.ts-slide');
+  var dots    = document.querySelectorAll('.ts-dot');
+  var prev    = document.getElementById('tsPrev');
+  var next    = document.getElementById('tsNext');
+  var current = 0;
+  var total   = slides.length;
+
+  function goTo(idx, dir) {
+    slides[current].classList.remove('active', 'ts-slide-left');
+    dots[current].classList.remove('active');
+    current = (idx + total) % total;
+    slides[current].classList.remove('ts-slide-left');
+    if (dir === 'left') slides[current].classList.add('ts-slide-left');
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+
+  if (prev) prev.addEventListener('click', function () { goTo(current - 1, 'left'); });
+  if (next) next.addEventListener('click', function () { goTo(current + 1, 'right'); });
+  dots.forEach(function (d) {
+    d.addEventListener('click', function () {
+      var idx = parseInt(d.getAttribute('data-idx'));
+      goTo(idx, idx > current ? 'right' : 'left');
+    });
+  });
+
+  var startX = 0;
+  var carousel = document.getElementById('tsCarousel');
+  if (carousel) {
+    carousel.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
+    carousel.addEventListener('touchend', function (e) {
+      var diff = startX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1, diff > 0 ? 'right' : 'left');
+    }, { passive: true });
+  }
+})();
+</script>
 </body>
 </html>

@@ -4,6 +4,24 @@
    Only change THIS file for handwritten page content.
    ===================================================== */
 
+/* Shared feature-chip lookup used by the samples carousel.
+   Slide objects only list feature KEYS (see samples.slides
+   below) — label + icon live here once, so adding a slide
+   never means re-pasting icon markup. */
+window.HW_FEATURE_MAP = {
+  blueInk:          { label: 'Blue Ink',            icon: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>' },
+  universityFormat: { label: 'University Format',   icon: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>' },
+  neatHandwriting:  { label: 'Neat Handwriting',    icon: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/><path d="M15 5l3 3"/>' },
+  tablesIncluded:   { label: 'Tables Included',     icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>' },
+  diagramIncluded:  { label: 'Diagram Included',    icon: '<circle cx="11" cy="11" r="3"/><path d="M11 11l2 2"/><rect x="2" y="2" width="20" height="20" rx="2"/>' },
+  originalWork:     { label: 'Original Work',       icon: '<path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/>' },
+  ruledNotebook:    { label: 'Ruled Notebook',      icon: '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/>' },
+  handDrawnDiagram: { label: 'Hand-drawn Diagram',  icon: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>' },
+  circuitDiagram:   { label: 'Circuit Diagram',     icon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
+  gridNotebook:     { label: 'Grid Notebook',       icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>' },
+  chemicalEquation: { label: 'Chemical Equation',   icon: '<line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8a6 6 0 0 0-6-6 6 6 0 0 0-6 6 4.65 4.65 0 0 0 1.5 3.5c.76.76 1.23 1.52 1.41 2.5"/>' },
+};
+
 window.PAGE_DATA = {
 
   hero: {
@@ -82,6 +100,7 @@ window.PAGE_DATA = {
         title: 'Chemistry Lab Report',
         desc: 'Aspirin synthesis experiment — aim, procedure, observation table আর chemical equation সহ সম্পূর্ণ lab report। University format মেনে neat handwriting এ লেখা।',
         tags: ['Blue Ink', 'Lab Notebook', 'Table + Diagram'],
+        features: ['blueInk', 'universityFormat', 'neatHandwriting', 'tablesIncluded', 'diagramIncluded', 'originalWork'],
       },
       {
         img: 'assets/Handwritten/HSS-Assignment.png',
@@ -92,6 +111,7 @@ window.PAGE_DATA = {
         title: 'Physics Assignment',
         desc: 'Projectile Motion — theory, formula, hand-drawn diagram সহ পুরো assignment। Proper margin, clear handwriting, neat diagram।',
         tags: ['Blue Ink', 'Ruled Notebook', 'Hand-drawn Diagram'],
+        features: ['blueInk', 'universityFormat', 'neatHandwriting', 'ruledNotebook', 'handDrawnDiagram', 'originalWork'],
       },
       {
         img: 'assets/Handwritten/HSS-Circuit-diagram.png',
@@ -102,6 +122,7 @@ window.PAGE_DATA = {
         title: 'EEE Circuit Diagram & Practical',
         desc: 'Half Wave Rectifier practical — circuit diagram, observation table আর result সহ complete practical। Circuit hand-drawn, সব component labeled।',
         tags: ['Blue Ink', 'Practical Notebook', 'Circuit Diagram'],
+        features: ['blueInk', 'universityFormat', 'neatHandwriting', 'tablesIncluded', 'circuitDiagram', 'originalWork'],
       },
       {
         img: 'assets/Handwritten/HSS-lab-report.png',
@@ -112,6 +133,7 @@ window.PAGE_DATA = {
         title: 'Rate of Reaction — Lab Report',
         desc: 'HCl reaction rate experiment — objective, materials, procedure আর chemical equation সহ। Grid paper এ neat formatting, submit করতে ready।',
         tags: ['Blue Ink', 'Grid Notebook', 'Chemical Equation'],
+        features: ['blueInk', 'universityFormat', 'neatHandwriting', 'gridNotebook', 'chemicalEquation', 'originalWork'],
       },
     ],
     items: [

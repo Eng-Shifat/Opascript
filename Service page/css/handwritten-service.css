@@ -1085,3 +1085,23 @@
 @media (max-width: 900px) {
   .hw-carousel-slide { grid-template-columns: 1fr 1fr; gap: 16px; }
 }
+
+/* ── Sample Carousel Enhancement (ts-* classes) ── */
+.ts-feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:4px; }
+.ts-feat { display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:10px; background:rgba(var(--text-rgb),.04); border:1px solid rgba(var(--text-rgb),.08); font-size:13px; font-weight:500; color:rgba(var(--text-rgb),.75); transition:background .2s,border-color .2s; }
+.ts-feat svg { flex-shrink:0; opacity:.6; }
+.ts-feat:hover { background:rgba(var(--text-rgb),.07); border-color:rgba(var(--text-rgb),.15); }
+.ts-mini-stats { display:flex; align-items:center; padding:14px 18px; border-radius:12px; background:rgba(var(--text-rgb),.04); border:1px solid rgba(var(--text-rgb),.08); margin-top:4px; }
+.ts-mini-stat { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center; }
+.ts-mini-val   { font-size:14px; font-weight:700; color:var(--text-main); }
+.ts-mini-label { font-size:11px; color:rgba(var(--text-rgb),.45); }
+.ts-mini-divider { width:1px; height:32px; background:rgba(var(--text-rgb),.1); flex-shrink:0; }
+.ts-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:4px; }
+.ts-btn-primary { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--color-purple-deep),var(--color-purple-deep2)); color:#fff; font-size:14px; font-weight:600; cursor:pointer; transition:opacity .2s,transform .2s; white-space:nowrap; }
+.ts-btn-primary:hover  { opacity:.88; transform:translateY(-1px); }
+.ts-btn-primary:active { transform:scale(.97); }
+.ts-btn-secondary { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:12px; border:1px solid rgba(var(--text-rgb),.18); background:rgba(var(--text-rgb),.04); color:var(--text-main); font-size:14px; font-weight:600; cursor:pointer; transition:background .2s,border-color .2s,transform .2s; white-space:nowrap; }
+.ts-btn-secondary:hover  { background:rgba(var(--text-rgb),.09); border-color:rgba(var(--text-rgb),.3); transform:translateY(-1px); }
+.ts-btn-secondary:active { transform:scale(.97); }
+@media (max-width:900px) { .ts-feature-grid { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:640px) { .ts-feature-grid { grid-template-columns:repeat(2,1fr); gap:8px; } .ts-feat { font-size:12px; padding:8px 10px; } .ts-actions { flex-direction:column; } .ts-btn-primary,.ts-btn-secondary { flex:unset; width:100%; } }

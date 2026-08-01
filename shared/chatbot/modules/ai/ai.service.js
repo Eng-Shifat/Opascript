@@ -71,6 +71,10 @@ function checkRateLimit() {
   return { allowed: true };
 }
 
+/* Remembers the last FAQ entry that produced a real answer, so
+   knowledgeFallback can re-use it for follow-up messages. */
+let lastFaqEntry = null;
+
 async function getReply(history, message, context = {}) {
   await loadKnowledge();
   checkRateLimit();
@@ -103,16 +107,41 @@ async function getReply(history, message, context = {}) {
     } catch (err) {
       clearTimeout(timer);
       console.error('[ai.service] backend request failed, falling back to knowledge base:', err);
-      return knowledgeFallback(message);
+      return knowledgeFallback(message, lastFaqEntry);
     }
   }
 
-  return knowledgeFallback(message);
+  return knowledgeFallback(message, lastFaqEntry);
 }
 
-function knowledgeFallback(message) {
+/* Follow-up phrases that signal the user wants to continue the last
+   topic rather than asking something new. Checked before FAQ search. */
+const FOLLOWUP_PHRASES = [
+  'details', 'detail', 'details bolo', 'details dao', 'ektu details',
+  'aro bolo', 'aro kichu', 'explain', 'explain more', 'tell me more',
+  'more info', 'more details', 'bolo', 'bolun', 'janao', 'janate chai',
+  'continue', 'then', 'then?', 'so?', 'go on', 'and?', 'ok then',
+  'what else', 'ki aro', 'aro', 'bistarito', 'bistar', 'বিস্তারিত',
+  'বলো', 'বলুন', 'জানাও', 'আরো বলো', 'আরো', 'তারপর', 'তাহলে',
+];
+
+function isFollowUp(message) {
+  const m = message.trim().toLowerCase().replace(/[?।!]+$/, '').trim();
+  return FOLLOWUP_PHRASES.some((p) => m === p || m === p + ' bolo' || m === p + ' dao');
+}
+
+function knowledgeFallback(message, lastFaqEntry) {
+  /* If the message is a follow-up phrase AND we have a previous match,
+     return that same answer so the conversation stays on topic. */
+  if (lastFaqEntry && isFollowUp(message)) {
+    return { text: lastFaqEntry.answer, handoff: false, source: 'faq' };
+  }
+
   const matches = searchFaq(message, { limit: 1 });
-  if (matches.length) return { text: matches[0].answer, handoff: false, source: 'faq' };
+  if (matches.length) {
+    lastFaqEntry = matches[0];
+    return { text: matches[0].answer, handoff: false, source: 'faq' };
+  }
   return { text: Prompts.fallback, handoff: false, source: 'fallback' };
 }
 

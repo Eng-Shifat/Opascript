@@ -129,3 +129,133 @@ function orderHandwrittenPackage() {
   });
   window.location.href = '../Order page/order.html?' + params.toString();
 }
+
+/* =====================================================
+   HANDWRITING SAMPLES CAROUSEL
+   Data-driven — reads window.PAGE_DATA.samples.slides
+   and window.HW_FEATURE_MAP (both from handwritten-data.js).
+   Must load after handwritten-data.js.
+   ===================================================== */
+document.addEventListener('DOMContentLoaded', function () {
+
+  var samples = window.PAGE_DATA && window.PAGE_DATA.samples;
+  var slides   = samples && samples.slides;
+  var featureMap = window.HW_FEATURE_MAP;
+  if (!slides || !slides.length) return;
+
+  var hwTrack     = document.getElementById('hwTrack');
+  var hwDots      = document.getElementById('hwDots');
+  var hwPrev      = document.getElementById('hwPrev');
+  var hwNext      = document.getElementById('hwNext');
+  var hwCarousel  = document.getElementById('hwCarousel');
+  if (!hwTrack || !hwDots) return;
+
+  /* Identical across every slide — built once, not per slide */
+  var MINI_STATS_HTML =
+    '<div class="ts-mini-stats">' +
+      '<div class="ts-mini-stat"><span class="ts-mini-val">100%</span><span class="ts-mini-label">Human Written</span></div>' +
+      '<div class="ts-mini-divider"></div>' +
+      '<div class="ts-mini-stat"><span class="ts-mini-val">Original</span><span class="ts-mini-label">Formatting</span></div>' +
+      '<div class="ts-mini-divider"></div>' +
+      '<div class="ts-mini-stat"><span class="ts-mini-val">Exam</span><span class="ts-mini-label">Friendly</span></div>' +
+      '<div class="ts-mini-divider"></div>' +
+      '<div class="ts-mini-stat"><span class="ts-mini-val">HD</span><span class="ts-mini-label">Scanned</span></div>' +
+    '</div>';
+
+  var ACTIONS_HTML =
+    '<div class="ts-actions">' +
+      '<button class="ts-btn-primary">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+        'Preview Full Sample' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>' +
+      '</button>' +
+      '<button class="ts-btn-secondary" onclick="window.location.href=\'../Order page/order.html\'">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+        'Order This Style' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>' +
+      '</button>' +
+    '</div>';
+
+  function featureChipHtml(key) {
+    var f = featureMap && featureMap[key];
+    if (!f) return '';
+    return '<div class="ts-feat">' +
+             '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + f.icon + '</svg>' +
+             '<span>' + f.label + '</span>' +
+           '</div>';
+  }
+
+  function slideHtml(s, i) {
+    return '<div class="hw-carousel-slide' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
+      '<div class="hw-carousel-img-wrap">' +
+        '<img src="' + s.img + '" alt="' + s.alt + '" loading="' + (i === 0 ? 'eager' : 'lazy') + '">' +
+      '</div>' +
+      '<div class="hw-carousel-info">' +
+        '<div class="hw-carousel-label">' +
+          '<span class="hw-carousel-badge">' + s.badge + '</span>' +
+          '<span class="hw-carousel-badge ' + s.badgeCls + '">' + s.type + '</span>' +
+        '</div>' +
+        '<h3 class="hw-carousel-title">' + s.title + '</h3>' +
+        '<p class="hw-carousel-desc">' + s.desc + '</p>' +
+        '<div class="hw-carousel-tags">' +
+          s.tags.map(function (t) { return '<span>' + t + '</span>'; }).join('') +
+        '</div>' +
+        '<div class="ts-feature-grid">' +
+          s.features.map(featureChipHtml).join('') +
+        '</div>' +
+        MINI_STATS_HTML +
+        ACTIONS_HTML +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderHwCarousel() {
+    hwTrack.innerHTML = slides.map(slideHtml).join('');
+    hwDots.innerHTML  = slides.map(function (s, i) {
+      return '<button class="hw-dot' + (i === 0 ? ' active' : '') + '" data-idx="' + i + '"></button>';
+    }).join('');
+  }
+
+  function initHwCarouselBehavior() {
+    var slideEls = hwTrack.querySelectorAll('.hw-carousel-slide');
+    var dotEls   = hwDots.querySelectorAll('.hw-dot');
+    var current  = 0;
+    var total    = slideEls.length;
+    if (!total) return;
+
+    function goTo(idx, dir) {
+      slideEls[current].classList.remove('active', 'slide-left');
+      dotEls[current].classList.remove('active');
+      current = (idx + total) % total;
+      slideEls[current].classList.remove('slide-left');
+      if (dir === 'left') slideEls[current].classList.add('slide-left');
+      slideEls[current].classList.add('active');
+      dotEls[current].classList.add('active');
+    }
+
+    if (hwPrev) hwPrev.addEventListener('click', function () { goTo(current - 1, 'left'); });
+    if (hwNext) hwNext.addEventListener('click', function () { goTo(current + 1, 'right'); });
+
+    /* Event delegation — one listener for all dots instead of one per dot */
+    hwDots.addEventListener('click', function (e) {
+      var dot = e.target.closest('.hw-dot');
+      if (!dot) return;
+      var idx = parseInt(dot.getAttribute('data-idx'), 10);
+      goTo(idx, idx > current ? 'right' : 'left');
+    });
+
+    /* Touch / swipe support */
+    var startX = 0;
+    if (hwCarousel) {
+      hwCarousel.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
+      hwCarousel.addEventListener('touchend', function (e) {
+        var diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1, diff > 0 ? 'right' : 'left');
+      }, { passive: true });
+    }
+  }
+
+  renderHwCarousel();
+  initHwCarouselBehavior();
+
+});
