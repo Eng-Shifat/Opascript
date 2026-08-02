@@ -971,6 +971,21 @@ const SERVICE_CONFIG = {
   // uploadHint   : shown in the file upload zone (Step 4)
   // citationAuto : citation style to pre-select (optional)
 
+  "handwritten": {
+    navLabel:    "✍️ Handwritten Assignment",
+    step1Heading:"Handwritten Assignment Details",
+    step1Desc:   "Subject, page count, ink preference ও university guideline জানান",
+    step2Desc:   "Formatting rules, margin স্পেক ও heading structure বিস্তারিত দিন",
+    uploadHint:  "Assignment brief, university guideline, বা reference sample আপলোড করুন"
+  },
+  "thesis": {
+    navLabel:    "📘 Thesis / Research Writing",
+    step1Heading:"Thesis Details",
+    step1Desc:   "আপনার thesis topic, department ও university জানান",
+    step2Desc:   "Chapters, methodology ও supervisor-এর requirements বিস্তারিত দিন",
+    uploadHint:  "Supervisor guideline, reference thesis, বা proposal আপলোড করুন (optional)"
+  },
+
   "assignment-writing": {
     navLabel:    "📝 Assignment Writing",
     step1Heading:"Assignment Details",
