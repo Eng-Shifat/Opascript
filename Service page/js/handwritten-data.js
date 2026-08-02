@@ -27,7 +27,7 @@ window.PAGE_DATA = {
   hero: {
     badge:            'Human Written Service',
     title:            'Handwritten Assignments<br>Done Right, On Time',
-    desc:             'Deadline কাল, সময় নেই? চিন্তা নেই — আমরা আছি। Assignment থেকে lab report, সব কিছু সুন্দর হাতের লেখায়, university format মেনে তৈরি করে দিই।',
+    desc:             'সময় বাঁচান, presentation আরও professional করুন। আমাদের professionally trained handwriting specialists আপনার assignment, lab report ও practical notebook সুন্দর, পরিষ্কার হাতের লেখায় এবং university-standard format অনুসরণ করে প্রস্তুত করেন। আপনার নির্ধারিত সময়ের মধ্যেই আমরা Scan PDF অথবা Physical Delivery—যেভাবে প্রয়োজন, সেভাবেই কাজ পৌঁছে দিই।',
     primaryBtn:       'এখনই শুরু করো',
     primaryOnClick:   '',
     secondaryBtn:     'আগে কথা বলি',
@@ -44,7 +44,7 @@ window.PAGE_DATA = {
   about: {
     title: 'Why Students Trust Scriptora for Handwritten Academic Work',
     paras: [
-      'Handwritten academic work represents more than neatly written pages — it reflects your dedication, professionalism, and attention to detail. At Scriptora, we prepare assignments, lab reports, practical notebooks, record books, and project copies with <strong>clear handwriting, consistent presentation, and university-standard formatting</strong>, helping you submit every document with confidence.',
+      'সময় বাঁচান, presentation আরও professional করুন। আমাদের professionally trained handwriting specialists আপনার assignment, lab report ও practical notebook সুন্দর, পরিষ্কার হাতের লেখায় এবং university-standard format অনুসরণ করে প্রস্তুত করেন। আপনার নির্ধারিত সময়ের মধ্যেই আমরা Scan PDF অথবা Physical Delivery—যেভাবে প্রয়োজন, সেভাবেই কাজ পৌঁছে দিই।',
     ],
     highlights: [
       { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>', title: 'Professional Handwriting Specialists', desc: 'Experienced in university-standard academic documents with consistent handwriting and clean margins.' },
@@ -52,7 +52,7 @@ window.PAGE_DATA = {
       { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>', title: 'Smart Client Dashboard', desc: 'Track progress, review scanned previews, and receive your final files securely.' },
     ],
     parasAfter: [
-      'Every document is completed according to your university\'s requirements and remains <strong>completely confidential</strong>. Track your project through your <strong>Scriptora dashboard</strong>, review scanned previews, and receive your handwritten work within your requested deadline.',
+      'আমাদের trained writer-রা কাজ করেন সম্পূর্ণ <strong>confidential</strong>-ভাবে — কেউ জানবে না, কোথাও leak হবে না। কাজ শুরু হলে <strong>dashboard</strong> থেকে live progress দেখতে পারবেন, scan preview চেক করতে পারবেন, আর deadline-এর আগেই হাতে পেয়ে যাবেন।',
     ],
     mission: null,
   },
@@ -99,7 +99,7 @@ window.PAGE_DATA = {
         badgeIcon: '<path d="M9 2v6.34a2 2 0 0 1-.4 1.2L4.3 15.7A2 2 0 0 0 6 19h12a2 2 0 0 0 1.7-3.3l-4.3-6.16a2 2 0 0 1-.4-1.2V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
         type: 'Lab Report',
         title: 'Chemistry Lab Report',
-        desc: 'Aspirin synthesis experiment — aim, procedure, observation table আর chemical equation সহ সম্পূর্ণ lab report। University format মেনে neat handwriting এ লেখা।',
+        desc: 'University guideline আর client এর requirement অনুযায়ী পুরো Aspirin synthesis lab report — aim, procedure, observation table, chemical equation সহ — সুন্দর হাতের লেখা আর professional formatting এ ফুটিয়ে তোলা হয়েছে।',
         features: ['blueInk', 'universityFormat', 'neatHandwriting', 'tablesIncluded', 'diagramIncluded', 'originalWork'],
       },
       {
@@ -110,7 +110,7 @@ window.PAGE_DATA = {
         badgeIcon: '<circle cx="12" cy="12" r="1"/><ellipse cx="12" cy="12" rx="10" ry="4.5"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(120 12 12)"/>',
         type: 'Assignment',
         title: 'Physics Assignment',
-        desc: 'Projectile Motion — theory, formula, hand-drawn diagram সহ পুরো assignment। Proper margin, clear handwriting, neat diagram।',
+        desc: 'University format আর client এর instruction মেনে পুরো Projectile Motion assignment — theory, formula, hand-drawn diagram সহ — পরিষ্কার হাতের লেখা আর গোছানো formatting এ তৈরি করা হয়েছে।',
         features: ['blueInk', 'universityFormat', 'neatHandwriting', 'ruledNotebook', 'handDrawnDiagram', 'originalWork'],
       },
       {
@@ -121,7 +121,7 @@ window.PAGE_DATA = {
         badgeIcon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
         type: 'Practical',
         title: 'EEE Circuit Diagram & Practical',
-        desc: 'Half Wave Rectifier practical — circuit diagram, observation table আর result সহ complete practical। Circuit hand-drawn, সব component labeled।',
+        desc: 'University rule আর client এর চাহিদা অনুযায়ী পুরো Half Wave Rectifier practical — circuit diagram, observation table, result সহ — neat হাতের লেখা আর professional presentation এ লেখা হয়েছে।',
         features: ['blueInk', 'universityFormat', 'neatHandwriting', 'tablesIncluded', 'circuitDiagram', 'originalWork'],
       },
       {
@@ -132,7 +132,7 @@ window.PAGE_DATA = {
         badgeIcon: '<path d="M9 2v6.34a2 2 0 0 1-.4 1.2L4.3 15.7A2 2 0 0 0 6 19h12a2 2 0 0 0 1.7-3.3l-4.3-6.16a2 2 0 0 1-.4-1.2V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
         type: 'Lab Report',
         title: 'Rate of Reaction — Lab Report',
-        desc: 'HCl reaction rate experiment — objective, materials, procedure আর chemical equation সহ। Grid paper এ neat formatting, submit করতে ready।',
+        desc: 'University standard আর client এর requirement মেনে HCl reaction rate lab report — objective, materials, procedure, equation সহ — সুন্দর হাতের লেখা আর পরিষ্কার formatting এ তৈরি করা হয়েছে।',
         features: ['blueInk', 'universityFormat', 'neatHandwriting', 'gridNotebook', 'chemicalEquation', 'originalWork'],
       },
     ],

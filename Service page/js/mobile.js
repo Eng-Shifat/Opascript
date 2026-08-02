@@ -195,12 +195,10 @@
                       '<div class="mob-sample-title">' + s.title + '</div>' +
                       '<div class="mob-sample-desc">' + s.desc + '</div>' +
                       '<div class="mob-sample-tags">' +
-                        (s.tags ? s.tags : (s.features || [])).map(function(t){
-                          var label = (typeof t === 'string' && window.HW_FEATURE_MAP && window.HW_FEATURE_MAP[t])
-                            ? window.HW_FEATURE_MAP[t].label
-                            : t;
-                          return '<span>' + label + '</span>';
-                        }).join('') +
+                        (s.tags ? s.tags : (s.features || [])).slice(0, 3).map(function(t){
+                          var isKey = typeof t === 'string' && window.HW_FEATURE_MAP && window.HW_FEATURE_MAP[t];
+                          return isKey ? window.HW_FEATURE_MAP[t].label : t;
+                        }).join(' &nbsp;·&nbsp; ') +
                       '</div>' +
                     '</div>' +
                   '</div>';
