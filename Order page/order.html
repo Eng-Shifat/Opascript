@@ -12,6 +12,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/variables.css">
   <link rel="stylesheet" href="css/order.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../shared/supabaseClient.js"></script>
@@ -25,19 +26,32 @@
   <div class="bg-o bg-o2"></div>
 </div>
 
-<!-- NAV -->
-<nav>
-  <a class="logo" href="../Homepage/index.html">
-    <div class="logo-icon">S</div>
-    Scriptora
-  </a>
-  <div style="display:flex;align-items:center;gap:10px;">
-    <div id="navPkg" style="background:rgba(45,110,247,0.12);border:1px solid rgba(45,110,247,0.3);border-radius:20px;padding:5px 14px;font-size:12.5px;color:#60a5fa;font-weight:500;">
-      📚 BBA/MBA
-    </div>
-    <button class="nav-close" onclick="window.history.back()">✕</button>
-  </div>
-</nav>
+<!-- NAV — shared site navbar, with the package badge + close button injected in -->
+<script src="../shared/navbar.js"></script>
+<script>
+  (function () {
+    var navBtns = document.querySelector('#shared-nav .nav-btns');
+    if (!navBtns) return;
+
+    // Order page is always dark by design — the shared theme toggle would fight that, so hide it
+    var themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) themeToggle.style.display = 'none';
+
+    // Selected package badge — same #navPkg id order.js already updates via selectHwTier()
+    var pkgBadge = document.createElement('div');
+    pkgBadge.id = 'navPkg';
+    pkgBadge.style.cssText = 'background:rgba(45,110,247,0.12);border:1px solid rgba(45,110,247,0.3);border-radius:20px;padding:5px 14px;font-size:12.5px;color:#60a5fa;font-weight:500;';
+    pkgBadge.textContent = '📚 BBA/MBA';
+    navBtns.insertBefore(pkgBadge, navBtns.firstChild);
+
+    // Close button — exits the order flow
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'nav-close';
+    closeBtn.innerHTML = '✕';
+    closeBtn.onclick = function () { window.history.back(); };
+    navBtns.appendChild(closeBtn);
+  })();
+</script>
 
 <!-- PAGE -->
 <div class="page">
@@ -163,6 +177,15 @@
 
         <!-- ══ Handwritten mode ══ -->
         <div id="step1Handwritten" style="display:none">
+
+          <div class="fg" style="margin-bottom:14px;">
+            <label>Package <span>*</span></label>
+            <div class="dept-tabs" id="hwTierTabs">
+              <button type="button" class="dept-tab" data-tier="Standard" onclick="selectHwTier('Standard')">Standard<br><span style="opacity:0.75;font-weight:400;font-size:11px;">৳25/পাতা</span></button>
+              <button type="button" class="dept-tab" data-tier="Recommended" onclick="selectHwTier('Recommended')">Recommended<br><span style="opacity:0.75;font-weight:400;font-size:11px;">৳27.5/পাতা</span></button>
+              <button type="button" class="dept-tab" data-tier="Premium" onclick="selectHwTier('Premium')">Premium<br><span style="opacity:0.75;font-weight:400;font-size:11px;">৳30/পাতা</span></button>
+            </div>
+          </div>
 
           <div class="row2">
             <div class="fg">

@@ -125,6 +125,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--sp-2);
+  margin-top: 12px;
 }
 
 .hw-option-card {
@@ -195,6 +196,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--sp-2);
+  margin-top: 12px;
 }
 
 .hw-guarantee-card {
@@ -251,6 +253,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--sp-2);
+  margin-top: 12px;
 }
 
 .hw-delivery-card {

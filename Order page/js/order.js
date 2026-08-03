@@ -1,3 +1,35 @@
+// ── Handwritten: per-page rate by tier, and tier switcher ──
+const HW_PAGE_RATE = { Standard: 25, Recommended: 27.5, Premium: 30 };
+
+function selectHwTier(tier) {
+  window._hwRate = HW_PAGE_RATE[tier];
+  window._hwSelectedTier = tier;
+
+  document.querySelectorAll('#hwTierTabs .dept-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tier === tier);
+  });
+
+  const tierColor = { Standard: '#60a5fa', Recommended: '#a78bfa', Premium: '#fbbf24' }[tier] || '#60a5fa';
+
+  const navPkg = document.getElementById('navPkg');
+  if (navPkg) {
+    navPkg.innerHTML = '✍️ Handwritten — <strong>' + tier + '</strong> Package';
+    navPkg.style.background = tierColor + '1f';
+    navPkg.style.borderColor = tierColor + '4d';
+    navPkg.style.color = tierColor;
+  }
+
+  const pkgBadge = document.getElementById('pkgBadge');
+  if (pkgBadge) {
+    pkgBadge.style.display = 'inline-flex';
+    pkgBadge.style.cssText += `align-items:center;gap:8px;background:${tierColor}1a;border:1px solid ${tierColor}4d;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:600;color:${tierColor};`;
+    pkgBadge.innerHTML = '📦 আপনি অর্ডার করছেন: <span style="color:#fff">' + tier + ' Package</span>'
+      + '<span style="opacity:0.7;font-weight:500;">— ৳' + HW_PAGE_RATE[tier] + '/পাতা</span>';
+  }
+
+  if (typeof updateCalc === 'function') updateCalc();
+}
+
 // ── Custom Word Count toggle ──
 function toggleCustomWordCount(wrapId, val) {
   const wrap = document.getElementById(wrapId);
@@ -1237,7 +1269,6 @@ function initServiceAware() {
   const tier      = params.get("tier")      || "";
 
   // Handwritten per-page rate by tier — shared by the package badge and the price calculator
-  const HW_PAGE_RATE = { Standard: 25, Recommended: 27.5, Premium: 30 };
 
   const cfg = serviceId ? SERVICE_CONFIG[serviceId] : null;
 
@@ -1285,25 +1316,14 @@ function initServiceAware() {
   // ── 1. Nav pill label ──
   if (cfg) {
     const navPkg = document.getElementById("navPkg");
-    if (navPkg) {
-      if (serviceId === 'handwritten' && tier) {
-        navPkg.innerHTML = '✍️ Handwritten — <strong>' + tier + '</strong> Package';
-      } else {
-        navPkg.textContent = cfg.navLabel;
-      }
+    if (navPkg && !(serviceId === 'handwritten' && tier)) {
+      navPkg.textContent = cfg.navLabel;
     }
   }
 
-  // ── 1b. Prominent package badge (Step 1, under the heading) ──
-  if (serviceId === 'handwritten' && tier) {
-    const pkgBadge = document.getElementById('pkgBadge');
-    if (pkgBadge) {
-      const tierColor = { Standard: '#60a5fa', Recommended: '#a78bfa', Premium: '#fbbf24' }[tier] || '#60a5fa';
-      pkgBadge.style.display = 'inline-flex';
-      pkgBadge.style.cssText += `align-items:center;gap:8px;background:${tierColor}1a;border:1px solid ${tierColor}4d;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:600;color:${tierColor};`;
-      pkgBadge.innerHTML = '📦 আপনি অর্ডার করছেন: <span style="color:#fff">' + tier + ' Package</span>'
-        + '<span style="opacity:0.7;font-weight:500;">— ৳' + (HW_PAGE_RATE[tier] || '') + '/পাতা</span>';
-    }
+  // ── 1b. Handwritten: select the tier passed from the service page (also highlights the tab) ──
+  if (serviceId === 'handwritten') {
+    selectHwTier(tier && HW_PAGE_RATE[tier] ? tier : 'Standard');
   }
 
   // ── 2. Step 1 heading + subtitle ──
@@ -1337,19 +1357,17 @@ function initServiceAware() {
   }
 
   // ── 6. Pre-fill price from pricing calculator ──
-  if (price > 0) {
+  if (price > 0 || serviceId === 'handwritten') {
     // override pkgData pricing with the exact price from the card
     // store in a global so updateCalc() can use it
     window._svcBasePrice = price;
 
     // ── Handwritten: price is calculated live from Page Count × per-page rate,
-    //    not the flat package price. The tier chosen on the service page (Standard/
-    //    Recommended/Premium) sets the RATE (quality/speed level), while the actual
-    //    total scales with how many pages the client needs written.
+    //    not the flat package price. The tier chosen on the service page — or
+    //    changed later via the in-form Package tabs (selectHwTier) — sets the
+    //    RATE, while the total scales with how many pages the client needs written.
     //    ⚠️ These rates are placeholders — adjust to your real per-page cost.
-    if (serviceId === 'handwritten') {
-      window._hwRate = HW_PAGE_RATE[tier] || Math.round(price / 20); // fallback: assume ~20 pages if tier unknown
-    }
+    // (window._hwRate is already set by selectHwTier() above)
 
     // Make calcBase() itself honor the fixed/rate-based price too — buildReview()'s
     // price receipt and nextStep()'s final-submit total both call calcBase() directly.
