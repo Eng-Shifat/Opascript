@@ -160,17 +160,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function miniStatIcon(key) {
     return '<span class="ts-mini-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + MINI_STAT_ICONS[key] + '</svg></span>';
   }
-  var MINI_STATS_HTML =
-    '<div class="ts-mini-stats">' +
-      '<div class="ts-mini-stat">' + miniStatIcon('human') + '<span class="ts-mini-val">100%</span><span class="ts-mini-label">Human Written</span></div>' +
-      '<div class="ts-mini-divider"></div>' +
-      '<div class="ts-mini-stat">' + miniStatIcon('doc') + '<span class="ts-mini-val">Original</span><span class="ts-mini-label">Formatting</span></div>' +
-      '<div class="ts-mini-divider"></div>' +
-      '<div class="ts-mini-stat">' + miniStatIcon('cap') + '<span class="ts-mini-val">Exam</span><span class="ts-mini-label">Friendly</span></div>' +
-      '<div class="ts-mini-divider"></div>' +
-      '<div class="ts-mini-stat">' + miniStatIcon('scan') + '<span class="ts-mini-val">HD</span><span class="ts-mini-label">Scanned</span></div>' +
-    '</div>';
-
   function actionsHtml(imgSrc) {
     return '<div class="ts-actions">' +
       '<button class="ts-btn-primary" onclick="hwOpenPreview(\'' + imgSrc + '\')">' +
@@ -220,7 +209,6 @@ document.addEventListener('DOMContentLoaded', function () {
         '<div class="ts-feature-grid">' +
           s.features.map(featureChipHtml).join('') +
         '</div>' +
-        MINI_STATS_HTML +
         actionsHtml(s.img) +
       '</div>' +
     '</div>';

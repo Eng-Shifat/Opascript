@@ -81,6 +81,12 @@
           <p>আপনার thesis বা academic project সম্পর্কে মূল তথ্য দিন</p>
         </div>
 
+        <!-- Selected package indicator — shown for handwritten (and any tier-based) order -->
+        <div id="pkgBadge" style="display:none;margin:-6px 0 16px;"></div>
+
+        <!-- ══ Thesis / Academic mode ══ -->
+        <div id="step1Thesis">
+
         <!-- Dept Tabs -->
         <div class="dept-tabs" id="deptTabs">
           <button class="dept-tab active" data-dept="bba" onclick="switchDept('bba')">📚 Honours & Masters</button>
@@ -151,6 +157,97 @@
         <!-- Research Type — dynamic by dept -->
         <div class="sec-div">Research Type</div>
         <div id="researchTypeCards" style="display:grid;gap:8px;"></div>
+
+        </div>
+        <!-- ══ /step1Thesis ══ -->
+
+        <!-- ══ Handwritten mode ══ -->
+        <div id="step1Handwritten" style="display:none">
+
+          <div class="row2">
+            <div class="fg">
+              <label>Document Type <span>*</span></label>
+              <div class="sw">
+                <select id="hwAssignmentType">
+                  <option value="" disabled selected>বেছে নিন</option>
+                  <option>Assignment</option>
+                  <option>Lab Report</option>
+                  <option>Practical Notebook</option>
+                  <option>Record Book</option>
+                  <option>Project / Thesis Copy</option>
+                  <option>Class Notes</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="field-err" id="err-hwAssignmentType"></div>
+            </div>
+            <div class="fg">
+              <label>Subject / Course Name <span>*</span></label>
+              <input type="text" id="hwSubject" placeholder="Chemistry, Physics, Accounting…">
+              <div class="field-err" id="err-hwSubject"></div>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="fg">
+              <label>বিভাগ <span>*</span></label>
+              <input type="text" id="hwDepartment" placeholder="আপনার বিভাগ লিখুন…">
+              <div class="field-err" id="err-hwDepartment"></div>
+            </div>
+            <div class="fg">
+              <label>বিশ্ববিদ্যালয় / প্রতিষ্ঠান <span>*</span></label>
+              <input type="text" id="hwUniversity" placeholder="BUET, DU, NSU, BRACU… বা School/College">
+              <div class="field-err" id="err-hwUniversity"></div>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="fg">
+              <label>Page Count <span>*</span></label>
+              <input type="number" id="hwPageCount" min="1" placeholder="যেমন: ১৫">
+              <div class="field-err" id="err-hwPageCount"></div>
+            </div>
+            <div class="fg">
+              <label>Ink Preference</label>
+              <div class="sw">
+                <select id="hwInkPref">
+                  <option value="Blue Ink" selected>Blue Ink</option>
+                  <option value="Black Ink">Black Ink</option>
+                  <option value="Blue + Black (body blue, heading black)">Blue + Black (body blue, heading black)</option>
+                  <option value="Black + Red (body black, highlight red)">Black + Red (body black, highlight red)</option>
+                  <option value="As per guideline">University guideline অনুযায়ী</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label>Paper / Notebook</label>
+            <div class="sw">
+              <select id="hwPaperType" onchange="toggleNotebookType(this.value)">
+                <option value="We provide notebook" selected>Scriptora থেকে notebook দেওয়া হবে</option>
+                <option value="Client will provide">আমি নিজের notebook/pages দেব</option>
+                <option value="Loose sheets">Loose ruled sheets এ লেখা হবে</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Shown only when Scriptora provides the notebook — affects extra cost -->
+          <div class="fg" id="hwNotebookTypeWrap" style="margin-top:10px;">
+            <label>Notebook Type <span style="color:rgba(255,255,255,0.4);font-weight:400;">(extra cost হতে পারে)</span></label>
+            <div class="sw">
+              <select id="hwNotebookType">
+                <option value="Normal exercise book (80 pages)" selected>Normal Exercise Book (৮০ পাতা)</option>
+                <option value="Thick record book (200 pages)">Thick Record Book / Practical Copy (২০০ পাতা)</option>
+                <option value="Lab notebook (spiral bound)">Lab Notebook (spiral bound)</option>
+                <option value="Custom / university specific">Custom / University-specific — Special Instructions এ লিখুন</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+        <!-- ══ /step1Handwritten ══ -->
+
       </div>
 
       <!-- ══ STEP 2: Research Scope — Dynamic ══ -->
@@ -273,6 +370,36 @@
           </div>
 
         </div>
+
+        <!-- ── Handwritten fields ── -->
+        <div id="scopeHandwritten" style="display:none">
+
+          <div class="fg">
+            <label>Content কী ফরম্যাটে পাঠাবেন? <span>*</span></label>
+            <div class="sw">
+              <select id="hwContentSource">
+                <option value="" disabled selected>বেছে নিন</option>
+                <option value="pdf">PDF Document</option>
+                <option value="doc">Word / Google Doc</option>
+                <option value="photo">Photo / Scanned Image</option>
+                <option value="draft">হাতে লেখা draft (ছবি তুলে পাঠাবো)</option>
+              </select>
+            </div>
+            <div class="field-err" id="err-hwContentSource"></div>
+            <div style="font-size:11.5px;color:rgba(255,255,255,0.4);margin-top:5px;">যা পাঠাবেন সেটাই আমরা সুন্দর হাতের লেখায় copy করে দেব — নতুন কিছু লিখে/research করে দেওয়া এই service-এর অংশ না।</div>
+          </div>
+
+          <label class="terms-row" style="margin-top:6px;">
+            <input type="checkbox" id="hwDiagrams">
+            <span>এই assignment-এ diagram, table বা chemical/math equation আছে</span>
+          </label>
+
+          <div class="fg" style="margin-top:14px">
+            <label>Special Instructions</label>
+            <textarea id="specialInstructionsHW" placeholder="Margin, heading style, university format guideline, ইত্যাদি…"></textarea>
+          </div>
+
+        </div>
       </div>
 
       <!-- ══ STEP 3: Timeline ══ -->
@@ -316,6 +443,7 @@
         </div>
 
         <!-- Word Count + Citation — moved here from Step 2 -->
+        <div id="wcCitationBlock">
         <div class="sec-div" style="margin-top:1.2rem">Word Count & Citation</div>
 
         <div class="fg">
@@ -349,8 +477,11 @@
             <div class="field-err" id="err-citationStyle"></div>
           </div>
         </div>
+        </div>
+        <!-- /wcCitationBlock -->
 
-        <!-- ADDITIONAL SERVICES -->
+        <!-- ADDITIONAL SERVICES — thesis/research oriented, hidden for handwritten mode -->
+        <div id="addonsBlock">
         <div class="sec-div" style="margin-top:1.5rem">Additional Services</div>
         <div class="addon-list">
           <div class="addon-item addon-free">
@@ -394,6 +525,8 @@
             <div class="addon-price">+৳৩০০</div>
           </div>
         </div>
+        </div>
+        <!-- /addonsBlock -->
 
         <!-- PRICING CALCULATOR -->
         <div class="sec-div" style="margin-top:1.5rem;">Pricing Calculator</div>
@@ -447,8 +580,8 @@
       <!-- ══ STEP 4: Materials ══ -->
       <div class="panel" id="p4">
         <div class="panel-head">
-          <h2>Supporting Materials</h2>
-          <p>Thesis সংক্রান্ত কোনো file থাকলে upload করুন (optional)</p>
+          <h2 id="p4Heading">Supporting Materials</h2>
+          <p id="p4Desc">Thesis সংক্রান্ত কোনো file থাকলে upload করুন (optional)</p>
         </div>
 
         <div class="upload-zone" id="uploadZone"
@@ -460,14 +593,15 @@
           <div class="upload-hint" id="uploadDeptHint" style="margin-top:6px;color:rgba(255,255,255,0.4);font-size:12px"></div>
           <input type="file" id="fileInp" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style="display:none" onchange="fileSelect(event)">
         </div>
+        <div class="field-err" id="err-fileInp"></div>
         <div class="file-list" id="fileList"></div>
 
-        <div class="fg" style="margin-top:14px">
+        <div class="fg" id="refReqWrap" style="margin-top:14px">
           <label>Reference Requirement</label>
           <input type="text" id="refReq" placeholder="e.g. Scopus indexed only, last 5 years, minimum 30 references…">
         </div>
 
-        <div class="info-box">
+        <div class="info-box" id="uploadInfoBox">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           File upload optional — কোনো file না থাকলেও পরবর্তী step এ যেতে পারবেন।
         </div>

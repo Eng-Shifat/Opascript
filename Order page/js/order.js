@@ -166,6 +166,12 @@ const addonData = {
 const urgencyMul = { standard:1, urgent:1.2, express:1.5 };
 
 // ── Dept switch ──
+// ── Handwritten: show/hide Notebook Type based on Paper/Notebook choice ──
+function toggleNotebookType(val) {
+  const wrap = document.getElementById('hwNotebookTypeWrap');
+  if (wrap) wrap.style.display = (val === 'We provide notebook') ? 'block' : 'none';
+}
+
 function switchDept(d) {
   selectedDept = d;
   document.querySelectorAll('.dept-tab').forEach(t => t.classList.toggle('active', t.dataset.dept === d));
@@ -562,6 +568,12 @@ function ce(id) {
 function validate(s) {
   let ok=true;
   if (s===1) {
+    if (window._isHandwritten) {
+      [['hwAssignmentType','Document type বেছে নিন'],['hwSubject','Subject/Course name দিন'],
+       ['hwDepartment','বিভাগ লিখুন'],['hwUniversity','বিশ্ববিদ্যালয়/প্রতিষ্ঠানের নাম দিন'],
+       ['hwPageCount','Page count দিন']].forEach(([id,msg]) => { ce(id); if(!gv(id)){se(id,msg); ok=false;} });
+      return ok;
+    }
     ['thesisTitle','university'].forEach(id => { ce(id); if(!gv(id)){se(id, id==='thesisTitle'?'Thesis শিরোনাম দিন':'বিশ্ববিদ্যালয়ের নাম দিন'); ok=false; }});
 
     // Department validation
@@ -583,6 +595,11 @@ function validate(s) {
     }
   }
   if (s===2) {
+    if (window._isHandwritten) {
+      ce('hwContentSource');
+      if (!gv('hwContentSource')) { se('hwContentSource','একটি option বেছে নিন'); ok=false; }
+      return ok;
+    }
     if (selectedDept === 'bba') {
       // Variable fields only required if survey or mixed method selected
       const method = document.querySelector('#methodCards .rc.active')?.dataset.m;
@@ -597,6 +614,7 @@ function validate(s) {
   }
   if (s===3) {
     ce('deadlineDate'); if(!gv('deadlineDate')){se('deadlineDate','Deadline date নির্বাচন করুন');ok=false;}
+    if (window._isHandwritten) return ok; // word count + citation not applicable
     // Word Count + Citation now in Step 3
     ce('wordCount');
     const wcVal = document.getElementById('wordCount')?.value;
@@ -610,6 +628,16 @@ function validate(s) {
       alert('ফাইল upload হচ্ছে, একটু অপেক্ষা করুন…');
       ok = false;
     }
+    // Handwritten: at least one file (PDF/Photo of the content) is required
+    if (window._isHandwritten && !stillUploading) {
+      const errEl = document.getElementById('err-fileInp');
+      if (!uploadedFiles.length) {
+        if (errEl) errEl.textContent = 'কমপক্ষে একটি PDF/Photo আপলোড করুন — এটা ছাড়া এগোনো যাবে না';
+        ok = false;
+      } else if (errEl) {
+        errEl.textContent = '';
+      }
+    }
   }
   if (s===5) {
     const te=document.getElementById('err-terms');
@@ -621,6 +649,8 @@ function validate(s) {
 
 // ── Build Review ──
 function buildReview() {
+  if (window._isHandwritten) { buildReviewHandwritten(); return; }
+
   const chSel = document.getElementById('chapterSelect');
   const chapterVal = chSel.value === 'custom' ? (gv('chapterCustom') || 'Custom') : (chSel.options[chSel.selectedIndex]?.text || '—');
   const method = document.querySelector('#methodCards .rc.active')?.dataset.m || document.querySelector('#engMethodCards .rc.active')?.dataset.et || '—';
@@ -687,6 +717,79 @@ function buildReview() {
     + '<span style="margin-left:auto;font-size:11px;color:var(--muted)">অনুমানিত</span>'
     + '</div>'
     + '<div class="pr-row"><span class="pr-row-label">Base Price — ' + pkgData[selectedDept].label.replace(/[📚⚙✨]\s?/g,'') + '</span><span class="pr-row-val">' + (base ? '৳' + base.toLocaleString() : '—') + '</span></div>'
+    + (selectedUrgencyVal !== 'standard' && after && base ? '<div class="pr-row"><span class="pr-row-label">Urgency — ' + urgLabel + '</span><span class="pr-row-val clr-amber">+৳' + (after - base).toLocaleString() + '</span></div>' : '')
+    + '<div class="pr-row free"><span class="pr-row-label">Plagiarism Check</span><span class="pr-row-val clr-green">FREE</span></div>'
+    + addonLines
+    + (discountAmount > 0 ? '<div class="pr-row"><span class="pr-row-label">🎟️ Coupon (' + appliedCoupon + ')</span><span class="pr-row-val clr-green">−৳' + discountAmount.toLocaleString() + '</span></div>' : '')
+    + '<div class="pr-total"><span class="pr-total-label">মোট অনুমানিত মূল্য</span><span class="pr-total-val">' + (finalTotal ? '৳' + finalTotal.toLocaleString() + '+' : 'আলোচনা সাপেক্ষে') + '</span></div>';
+}
+
+// ── Build Review — Handwritten mode ──
+function buildReviewHandwritten() {
+  const urgBadge = { standard:'Standard', urgent:'Urgent +২০%', express:'Express +৫০%' }[selectedUrgencyVal];
+  const urgColor = { standard:'green', urgent:'amber', express:'red' }[selectedUrgencyVal];
+  const diagrams = document.getElementById('hwDiagrams')?.checked ? 'হ্যাঁ' : 'না';
+
+  const row = (label, val, colorClass) =>
+    '<div class="rv-row">'
+    + '<span class="rv-label">' + label + '</span>'
+    + '<span class="rv-val' + (colorClass ? ' ' + colorClass : '') + '">' + (val || '—') + '</span>'
+    + '</div>';
+
+  const section = (icon, title, rows) =>
+    '<div class="rv-section">'
+    + '<div class="rv-sec-head"><i class="ti ti-' + icon + '" aria-hidden="true"></i><span>' + title + '</span></div>'
+    + rows
+    + '</div>';
+
+  document.getElementById('reviewGrid').innerHTML =
+    section('file-text', 'Assignment Information',
+      row('Document Type', gv('hwAssignmentType') || document.getElementById('hwAssignmentType')?.value)
+      + row('Subject / Course', gv('hwSubject'))
+      + row('বিভাগ', gv('hwDepartment'))
+      + row('বিশ্ববিদ্যালয়/প্রতিষ্ঠান', gv('hwUniversity'))
+    )
+    + section('pencil', 'Writing Preferences',
+      row('Page Count', gv('hwPageCount') ? gv('hwPageCount') + ' পাতা' : '—')
+      + row('Ink Preference', document.getElementById('hwInkPref')?.value)
+      + row('Paper / Notebook', document.getElementById('hwPaperType')?.selectedOptions?.[0]?.textContent)
+      + (document.getElementById('hwPaperType')?.value === 'We provide notebook'
+          ? row('Notebook Type', document.getElementById('hwNotebookType')?.selectedOptions?.[0]?.textContent)
+          : '')
+    )
+    + section('microscope', 'Requirements',
+      row('Content Source', document.getElementById('hwContentSource')?.selectedOptions?.[0]?.textContent)
+      + row('Diagram/Table/Equation', diagrams)
+      + (gv('specialInstructionsHW') ? row('Special Instructions', gv('specialInstructionsHW')) : '')
+    )
+    + section('calendar-time', 'Timeline',
+      row('Submission Deadline', gv('deadlineDate'))
+      + row('Urgency Level', '<span class="rv-badge ' + urgColor + '">' + urgBadge + '</span>')
+    )
+    + (uploadedFiles.length ? section('paperclip', 'Uploaded Files', row('Files', uploadedFiles.map(f => f.name).join(', '))) : '');
+
+  // Price Receipt — fixed package price (calcBase is patched to return window._svcBasePrice)
+  const base  = calcBase();
+  const mul   = urgMul[selectedUrgencyVal] || 1;
+  const after = base ? Math.round(base * mul) : null;
+  let addonTotal = 0, addonLines = '';
+  Object.entries(addonPrices).forEach(([key, price]) => {
+    if (activeAddons[key]) {
+      addonTotal += price;
+      addonLines += '<div class="pr-row addon"><span class="pr-row-label">' + (addonData[key]?.label || key) + '</span><span class="pr-row-val">+৳' + price.toLocaleString() + '</span></div>';
+    }
+  });
+  const grand = after ? after + addonTotal : null;
+  discountAmount = calcDiscount(grand);
+  const finalTotal = grand ? grand - discountAmount : null;
+  const urgLabel = { standard:'Standard', urgent:'Urgent (+২০%)', express:'Express (+৫০%)' }[selectedUrgencyVal];
+
+  document.getElementById('priceBox').innerHTML =
+    '<div class="rv-sec-head" style="padding:10px 16px;background:var(--glass2);border-bottom:0.5px solid var(--border)">'
+    + '<i class="ti ti-receipt" aria-hidden="true"></i><span>মূল্য বিবরণী</span>'
+    + '<span style="margin-left:auto;font-size:11px;color:var(--muted)">অনুমানিত</span>'
+    + '</div>'
+    + '<div class="pr-row"><span class="pr-row-label">Writing Cost — ৳' + (window._hwRate || 0).toLocaleString() + '/পাতা × ' + (gv('hwPageCount') || 0) + ' পাতা</span><span class="pr-row-val">' + (base ? '৳' + base.toLocaleString() : '—') + '</span></div>'
     + (selectedUrgencyVal !== 'standard' && after && base ? '<div class="pr-row"><span class="pr-row-label">Urgency — ' + urgLabel + '</span><span class="pr-row-val clr-amber">+৳' + (after - base).toLocaleString() + '</span></div>' : '')
     + '<div class="pr-row free"><span class="pr-row-label">Plagiarism Check</span><span class="pr-row-val clr-green">FREE</span></div>'
     + addonLines
@@ -784,25 +887,44 @@ async function nextStep() {
       .filter(([k, v]) => v && addonData[k])
       .map(([k]) => addonData[k].label);
 
+    // ── Handwritten-specific field collection ──
+    const hwAssignmentTypeVal = document.getElementById('hwAssignmentType')?.value || null;
+    const hwSubjectVal        = document.getElementById('hwSubject')?.value.trim() || null;
+    const hwPageCountVal      = parseInt(document.getElementById('hwPageCount')?.value) || null;
+    const hwInkPrefVal        = document.getElementById('hwInkPref')?.value || null;
+    const hwPaperTypeVal      = document.getElementById('hwPaperType')?.value || null;
+    const hwNotebookTypeVal   = (hwPaperTypeVal === 'We provide notebook')
+      ? (document.getElementById('hwNotebookType')?.value || null) : null;
+    const hwContentSourceVal  = document.getElementById('hwContentSource')?.value || null;
+    const hwDiagramsVal       = document.getElementById('hwDiagrams')?.checked || false;
+
     // Research area
-    const researchArea = selectedDept === 'premium'
+    const researchArea = window._isHandwritten ? null : (selectedDept === 'premium'
       ? (document.getElementById('researchAreaText')?.value.trim() || '—')
-      : (document.getElementById('thesisTopic')?.options?.[document.getElementById('thesisTopic')?.selectedIndex]?.text || document.getElementById('thesisTopic')?.value || '—');
+      : (document.getElementById('thesisTopic')?.options?.[document.getElementById('thesisTopic')?.selectedIndex]?.text || document.getElementById('thesisTopic')?.value || '—'));
 
-    const dept = selectedDept === 'premium'
-      ? (document.getElementById('departmentText')?.value.trim() || '—')
-      : (document.getElementById('department')?.value || '—');
+    const dept = window._isHandwritten
+      ? (document.getElementById('hwDepartment')?.value.trim() || '—')
+      : (selectedDept === 'premium'
+          ? (document.getElementById('departmentText')?.value.trim() || '—')
+          : (document.getElementById('department')?.value || '—'));
 
-    const titleVal      = document.getElementById('thesisTitle')?.value.trim() || '';
-    const universityVal = document.getElementById('university')?.value.trim() || '';
+    const titleVal      = window._isHandwritten
+      ? [hwAssignmentTypeVal, hwSubjectVal].filter(Boolean).join(' — ')
+      : (document.getElementById('thesisTitle')?.value.trim() || '');
+    const universityVal = window._isHandwritten
+      ? (document.getElementById('hwUniversity')?.value.trim() || '')
+      : (document.getElementById('university')?.value.trim() || '');
     const packageVal    = pkgData[selectedDept]?.label || '';
-    const citationVal   = document.getElementById('citationStyle')?.value || '—';
+    const citationVal   = window._isHandwritten ? '—' : (document.getElementById('citationStyle')?.value || '—');
     const urgencyLabel  = { standard:'Standard', urgent:'Urgent +২০%', express:'Express +৫০%' }[selectedUrgencyVal];
     const deadlineVal   = document.getElementById('deadlineDate')?.value || null;
     const totalVal      = finalTotal || grand || 0;
     const advanceVal    = Math.round(totalVal / 2);
     const dueVal        = totalVal - advanceVal;
-    const pagesVal      = pages ? pages + ' পাতা (~' + wc + ' words)' : '—';
+    const pagesVal      = window._isHandwritten
+      ? (hwPageCountVal ? hwPageCountVal + ' পাতা (handwritten)' : '—')
+      : (pages ? pages + ' পাতা (~' + wc + ' words)' : '—');
     const orderNumber   = 'SCR-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
 
     if (!deadlineVal) { se('deadlineDate','Deadline date নির্বাচন করুন'); return; }
@@ -821,6 +943,7 @@ async function nextStep() {
     const chaptersVal   = chSel2 ? (chSel2.value === 'custom' ? (document.getElementById('chapterCustom')?.value.trim() || 'Custom') : (chSel2.options[chSel2.selectedIndex]?.text || null)) : null;
     const specialInstVal= document.getElementById('specialInstructions')?.value.trim()
                        || document.getElementById('specialInstructionsPremium')?.value.trim()
+                       || document.getElementById('specialInstructionsHW')?.value.trim()
                        || null;
     const languageVal   = document.getElementById('language')?.value || null;
     const addonKeys     = Object.entries(activeAddons).filter(([,v])=>v).map(([k])=>k);
@@ -854,7 +977,17 @@ async function nextStep() {
         addons:                addonKeys.length ? addonKeys : null,
         coupon:                appliedCoupon || null,
         discount:              discountAmount || 0,
-        service_type:          new URLSearchParams(window.location.search).get('service') || null
+        service_type:          new URLSearchParams(window.location.search).get('service') || null,
+        // ── Handwritten-only columns (see SQL migration) — omitted entirely for other services ──
+        ...(window._isHandwritten ? {
+          assignment_type:  hwAssignmentTypeVal,
+          page_count:       hwPageCountVal,
+          ink_preference:   hwInkPrefVal,
+          paper_type:       hwPaperTypeVal,
+          notebook_type:    hwNotebookTypeVal,
+          content_source:   hwContentSourceVal,
+          diagrams_required: hwDiagramsVal,
+        } : {})
       })
       .select()
       .single();
@@ -1103,12 +1236,74 @@ function initServiceAware() {
   const unit      = params.get("unit")      || "";
   const tier      = params.get("tier")      || "";
 
+  // Handwritten per-page rate by tier — shared by the package badge and the price calculator
+  const HW_PAGE_RATE = { Standard: 25, Recommended: 27.5, Premium: 30 };
+
   const cfg = serviceId ? SERVICE_CONFIG[serviceId] : null;
+
+  // ── 0. Handwritten mode: swap Step 1 / Step 2 field sets, hide Word Count & Citation ──
+  window._isHandwritten = (serviceId === 'handwritten');
+  if (window._isHandwritten) {
+    const t1 = document.getElementById('step1Thesis');
+    const h1 = document.getElementById('step1Handwritten');
+    if (t1) t1.style.display = 'none';
+    if (h1) h1.style.display = 'block';
+
+    ['scopeBBA', 'scopeCSE', 'scopePremium'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    const hwScope = document.getElementById('scopeHandwritten');
+    if (hwScope) hwScope.style.display = 'block';
+
+    const wcBlock = document.getElementById('wcCitationBlock');
+    if (wcBlock) wcBlock.style.display = 'none';
+
+    // Additional Services (thesis-oriented addons) not relevant to handwritten
+    const addonsBlock = document.getElementById('addonsBlock');
+    if (addonsBlock) addonsBlock.style.display = 'none';
+
+    // Reference Requirement (academic citation field) not relevant
+    const refReqWrap = document.getElementById('refReqWrap');
+    if (refReqWrap) refReqWrap.style.display = 'none';
+
+    // Step 4 copy — file upload is required, not optional, for handwritten
+    const p4h = document.getElementById('p4Heading');
+    const p4d = document.getElementById('p4Desc');
+    if (p4h) p4h.textContent = 'Assignment Content';
+    if (p4d) p4d.textContent = 'যেই content হাতে লিখে দিতে হবে, তার PDF/Photo আপলোড করুন (required)';
+    const uploadInfo = document.getElementById('uploadInfoBox');
+    if (uploadInfo) uploadInfo.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+      'কমপক্ষে একটি PDF বা Photo আপলোড করা <strong>বাধ্যতামূলক</strong> — এটা ছাড়া পরবর্তী step এ যাওয়া যাবে না।';
+
+    // Notebook Type visibility follows the current Paper/Notebook selection
+    const paperSel = document.getElementById('hwPaperType');
+    if (paperSel) toggleNotebookType(paperSel.value);
+  }
 
   // ── 1. Nav pill label ──
   if (cfg) {
     const navPkg = document.getElementById("navPkg");
-    if (navPkg) navPkg.textContent = cfg.navLabel;
+    if (navPkg) {
+      if (serviceId === 'handwritten' && tier) {
+        navPkg.innerHTML = '✍️ Handwritten — <strong>' + tier + '</strong> Package';
+      } else {
+        navPkg.textContent = cfg.navLabel;
+      }
+    }
+  }
+
+  // ── 1b. Prominent package badge (Step 1, under the heading) ──
+  if (serviceId === 'handwritten' && tier) {
+    const pkgBadge = document.getElementById('pkgBadge');
+    if (pkgBadge) {
+      const tierColor = { Standard: '#60a5fa', Recommended: '#a78bfa', Premium: '#fbbf24' }[tier] || '#60a5fa';
+      pkgBadge.style.display = 'inline-flex';
+      pkgBadge.style.cssText += `align-items:center;gap:8px;background:${tierColor}1a;border:1px solid ${tierColor}4d;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:600;color:${tierColor};`;
+      pkgBadge.innerHTML = '📦 আপনি অর্ডার করছেন: <span style="color:#fff">' + tier + ' Package</span>'
+        + '<span style="opacity:0.7;font-weight:500;">— ৳' + (HW_PAGE_RATE[tier] || '') + '/পাতা</span>';
+    }
   }
 
   // ── 2. Step 1 heading + subtitle ──
@@ -1147,17 +1342,39 @@ function initServiceAware() {
     // store in a global so updateCalc() can use it
     window._svcBasePrice = price;
 
+    // ── Handwritten: price is calculated live from Page Count × per-page rate,
+    //    not the flat package price. The tier chosen on the service page (Standard/
+    //    Recommended/Premium) sets the RATE (quality/speed level), while the actual
+    //    total scales with how many pages the client needs written.
+    //    ⚠️ These rates are placeholders — adjust to your real per-page cost.
+    if (serviceId === 'handwritten') {
+      window._hwRate = HW_PAGE_RATE[tier] || Math.round(price / 20); // fallback: assume ~20 pages if tier unknown
+    }
+
+    // Make calcBase() itself honor the fixed/rate-based price too — buildReview()'s
+    // price receipt and nextStep()'s final-submit total both call calcBase() directly.
+    window.calcBase = function () {
+      if (window._isHandwritten) {
+        const pc = parseInt(document.getElementById('hwPageCount')?.value) || 0;
+        return Math.round(pc * (window._hwRate || 0));
+      }
+      return window._svcBasePrice;
+    };
+
     // show qty/tier info in the calc note
     let qtyNote = "";
     if (qty && unit) qtyNote = ` · ${qty.toLocaleString("en-US")} ${unit}`;
     else if (tier)   qtyNote = ` · ${tier} tier`;
     const note = document.getElementById("calc-note");
-    if (note) note.textContent = `Pricing Calculator থেকে নির্বাচিত মূল্য${qtyNote}`;
+    if (note) note.textContent = window._isHandwritten
+      ? `৳${window._hwRate}/পাতা × page count${qtyNote}`
+      : `Pricing Calculator থেকে নির্বাচিত মূল্য${qtyNote}`;
 
     // patch updateCalc to use service price
     const _origUpdateCalc = window.updateCalc;
     window.updateCalc = function() {
       if (window._svcBasePrice) {
+        const base = window.calcBase();
         const urgencyMap   = { standard: 1, urgent: 1.2, express: 1.5 };
         const addOnTotal   = Object.entries(activeAddons)
           .filter(([,v]) => v)
@@ -1166,15 +1383,22 @@ function initServiceAware() {
             return sum + (priceMap[k] || 0);
           }, 0);
         const multiplier   = urgencyMap[selectedUrgencyVal] || 1;
-        const total        = Math.round(window._svcBasePrice * multiplier) + addOnTotal;
+        const total        = Math.round(base * multiplier) + addOnTotal;
 
         const baseEl   = document.getElementById("calc-base");
         const totalEl  = document.getElementById("calc-total");
         const pagesEl  = document.getElementById("calc-pages");
         const urgEl    = document.getElementById("calc-urgency-val");
 
-        if (baseEl)  baseEl.textContent  = "৳" + window._svcBasePrice.toLocaleString("en-US");
-        if (pagesEl) pagesEl.textContent = qty ? `${Math.ceil(qty / 250)} পাতা (আনুমানিক)` : "—";
+        if (baseEl)  baseEl.textContent  = "৳" + base.toLocaleString("en-US");
+        if (pagesEl) {
+          if (window._isHandwritten) {
+            const pc = parseInt(document.getElementById('hwPageCount')?.value) || 0;
+            pagesEl.textContent = pc ? `${pc} পাতা (৳${window._hwRate}/পাতা)` : "Page count দিন";
+          } else {
+            pagesEl.textContent = qty ? `${Math.ceil(qty / 250)} পাতা (আনুমানিক)` : "—";
+          }
+        }
         if (urgEl)   urgEl.textContent   = selectedUrgencyVal.charAt(0).toUpperCase() + selectedUrgencyVal.slice(1);
         if (totalEl) totalEl.textContent = "৳" + total.toLocaleString("en-US");
 
@@ -1193,6 +1417,10 @@ function initServiceAware() {
         _origUpdateCalc && _origUpdateCalc();
       }
     };
+
+    // Recalculate live whenever Page Count changes (handwritten mode)
+    const pcInput = document.getElementById('hwPageCount');
+    if (pcInput) pcInput.addEventListener('input', () => window.updateCalc());
   }
 
   // ── 7. Pre-select urgency from card selection ──
