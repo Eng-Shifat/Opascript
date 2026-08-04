@@ -1125,3 +1125,207 @@ body {
   border-color: rgba(17, 181, 217, 0.4);
   color: #11b5d9;
 }
+
+/* ══════════════════════════════════════════════
+   UNIVERSITY TRUST SECTION
+══════════════════════════════════════════════ */
+.uni-trust-section {
+  background: var(--bg-main);
+  padding: 5rem 1.5rem 4rem;
+}
+.uni-trust-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* ── Header ── */
+.uni-trust-header { text-align: center; max-width: 700px; }
+.uni-trust-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  color: var(--accent);
+  border: 1px solid rgba(var(--accent-rgb),0.35);
+  background: rgba(var(--accent-rgb),0.07);
+  padding: 6px 14px; border-radius: 99px;
+  margin-bottom: 1.2rem;
+}
+.uni-trust-title {
+  font-size: clamp(22px, 3.5vw, 36px);
+  font-weight: 800; line-height: 1.25;
+  color: var(--text-main); margin-bottom: 1rem;
+}
+.uni-trust-highlight { color: #11b5d9; }
+.uni-trust-sub {
+  font-size: 14px; color: rgba(var(--text-rgb),.55); line-height: 1.75;
+}
+.uni-trust-link { color: #11b5d9; }
+
+/* ── Grid wrap ── */
+.uni-grid-wrap {
+  width: 100%;
+  background: rgba(var(--text-rgb),.03);
+  border: 1px solid rgba(var(--text-rgb),.08);
+  border-radius: 18px;
+  padding: 16px;
+}
+.uni-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.uni-card {
+  display: flex; flex-direction: row;
+  align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--text-rgb),.08);
+  background: rgba(var(--text-rgb),.02);
+  transition: background .2s, border-color .2s, transform .15s;
+  cursor: default;
+  min-width: 0;
+}
+.uni-card:hover {
+  background: rgba(var(--text-rgb),.06);
+  border-color: rgba(var(--accent-rgb),.25);
+  transform: translateY(-2px);
+}
+.uni-logo-wrap {
+  width: 42px; height: 42px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  background: #fff;
+  overflow: hidden;
+  border: 1px solid rgba(var(--text-rgb),.1);
+}
+.uni-logo-wrap img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+.uni-initial {
+  font-size: 10px; font-weight: 800;
+  color: #fff; letter-spacing: -0.02em;
+  text-align: center; line-height: 1;
+}
+.uni-name {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.35;
+  min-width: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.more-card { justify-content: center; }
+.more-card .uni-logo-wrap { background: rgba(var(--text-rgb),.05); border: 1px dashed rgba(var(--text-rgb),.2); }
+.uni-more-plus {
+  font-size: 16px; font-weight: 800;
+  color: rgba(var(--text-rgb),.6);
+}
+
+/* ── Serving badge ── */
+.uni-serving-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12.5px; color: rgba(var(--text-rgb),.55);
+  border: 1px solid rgba(var(--text-rgb),.1);
+  background: rgba(var(--text-rgb),.03);
+  padding: 8px 16px; border-radius: 99px;
+}
+.uni-serving-badge svg { color: var(--accent); flex-shrink: 0; }
+.uni-serving-badge strong { color: var(--text-main); }
+
+/* ── Marquee ── */
+.uni-marquee-wrap {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(var(--text-rgb),.03);
+  border: 1px solid rgba(var(--text-rgb),.08);
+  border-radius: 10px;
+  padding: 11px 16px;
+  overflow: hidden;
+}
+.uni-marquee-icon { color: var(--accent); flex-shrink: 0; }
+.uni-marquee-track-wrap { overflow: hidden; flex: 1; }
+.uni-marquee-track {
+  display: flex; align-items: center; gap: 0;
+  white-space: nowrap;
+  animation: uni-scroll 30s linear infinite;
+  width: max-content;
+}
+.uni-marquee-track span {
+  font-size: 12.5px; font-weight: 500;
+  color: rgba(var(--text-rgb),.65);
+  padding: 0 10px;
+}
+.uni-marquee-track .uni-dot {
+  color: rgba(var(--text-rgb),.25);
+  padding: 0;
+}
+@keyframes uni-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.uni-marquee-wrap:hover .uni-marquee-track { animation-play-state: paused; }
+
+/* ── Stats bar ── */
+.uni-stats-bar {
+  width: 100%;
+  display: flex; align-items: center;
+  background: rgba(var(--text-rgb),.03);
+  border: 1px solid rgba(var(--text-rgb),.08);
+  border-radius: 16px;
+  padding: 22px 28px;
+  gap: 0;
+}
+.uni-stat {
+  flex: 1; display: flex;
+  align-items: center; gap: 14px;
+  justify-content: center;
+}
+.uni-stat-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.uni-stat-val { font-size: 22px; font-weight: 800; color: var(--text-main); line-height: 1; }
+.uni-stat-label { font-size: 13px; font-weight: 600; color: var(--text-main); margin-top: 3px; }
+.uni-stat-sub { font-size: 11px; color: rgba(var(--text-rgb),.45); margin-top: 2px; }
+.uni-stat-divider { width: 1px; height: 52px; background: rgba(var(--text-rgb),.08); flex-shrink: 0; }
+
+/* ── CTA buttons ── */
+.uni-cta-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+
+/* ── Light theme ── */
+[data-theme="light"] .uni-grid-wrap,
+[data-theme="light"] .uni-marquee-wrap,
+[data-theme="light"] .uni-stats-bar {
+  background: #fff;
+  border-color: rgba(0,0,0,.08);
+}
+[data-theme="light"] .uni-card { background: #f8fafc; border-color: rgba(0,0,0,.07); }
+[data-theme="light"] .uni-card:hover { background: #f0f4f8; }
+[data-theme="light"] .uni-trust-badge { color: #11b5d9; border-color: rgba(17,181,217,.35); background: rgba(17,181,217,.06); }
+[data-theme="light"] .uni-serving-badge { background: #f8fafc; border-color: rgba(0,0,0,.1); }
+
+/* ── Mobile ── */
+@media (max-width: 900px) {
+  .uni-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  .uni-trust-section { padding: 3.5rem 1rem 2.5rem; }
+  .uni-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .uni-card { padding: 8px 10px; gap: 8px; }
+  .uni-logo-wrap { width: 34px; height: 34px; border-radius: 6px; }
+  .uni-name { font-size: 11px; }
+  .uni-stats-bar { flex-direction: column; gap: 16px; padding: 18px; }
+  .uni-stat { justify-content: flex-start; width: 100%; }
+  .uni-stat-divider { width: 100%; height: 1px; }
+  .uni-cta-btns { flex-direction: column; align-items: center; width: 100%; }
+  .uni-cta-btns .cta-btn-whatsapp,
+  .uni-cta-btns .cta-btn-hire { width: 100%; max-width: 320px; justify-content: center; }
+}

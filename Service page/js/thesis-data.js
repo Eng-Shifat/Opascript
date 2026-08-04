@@ -87,19 +87,10 @@ window.PAGE_DATA = {
     items: ['Research-based Writing', 'Professional Formatting', 'Proper Citation', 'AI + Human Quality Review', 'Editable Source Files', 'Progress Dashboard', 'Revision Support', 'Secure File Delivery', 'Turnitin Report'],
   },
 
-  samples: {
-    title: 'Sample Thesis Preview',
-  },
+  samples: null,
 
-  dashboard: {
-    deadline: '10 Days Left',
-    steps: [
-      { cls: 'blue',   svg: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>',                                                                                                                                                                       label: 'Writing',    val: '65%' },
-      { cls: 'purple', svg: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',                                                                                                                                                                                             label: 'Review',     val: '20%' },
-      { cls: 'cyan',   svg: '<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/>',                                 label: 'Formatting', val: '10%' },
-      { cls: 'orange', svg: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/>', label: 'Delivery',   val: 'Pending', pending: true },
-    ],
-  },
+  dashboard: null,
+
 
   faq: [
     { q: 'Is the content 100% original?',              a: 'হ্যাঁ, প্রতিটি থিসিস সম্পূর্ণ Original ও Plagiarism-free — Turnitin Report সহ Deliver করা হয়।' },

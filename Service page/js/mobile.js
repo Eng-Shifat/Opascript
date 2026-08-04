@@ -75,22 +75,6 @@
         (D.about.mission ? '<p class="mob-about-mission">' + D.about.mission + '</p>' : '') +
       '</div>' +
 
-      /* ── WHY ── */
-      '<div class="mob-section">' +
-        '<h2 class="mob-sec-title">' + D.why.title + '</h2>' +
-        '<ul class="mob-why-list">' +
-          D.why.items.map(function (w) {
-            return '<li class="mob-why-item">' +
-              '<div class="mob-why-icon-wrap">' + w.svg + '</div>' +
-              '<div class="mob-why-text">' +
-                '<div class="mob-why-title">' + w.title + '</div>' +
-                '<div class="mob-why-desc">' + w.desc + '</div>' +
-              '</div>' +
-            '</li>';
-          }).join('') +
-        '</ul>' +
-      '</div>' +
-
       /* ── EXPERT ── */
       (D.expert ?
       '<div class="mob-section">' +
@@ -145,6 +129,22 @@
         '</div>' +
       '</div>' +
       '' : '') +
+
+      /* ── WHY ── */
+      '<div class="mob-section">' +
+        '<h2 class="mob-sec-title">' + D.why.title + '</h2>' +
+        '<ul class="mob-why-list">' +
+          D.why.items.map(function (w) {
+            return '<li class="mob-why-item">' +
+              '<div class="mob-why-icon-wrap">' + w.svg + '</div>' +
+              '<div class="mob-why-text">' +
+                '<div class="mob-why-title">' + w.title + '</div>' +
+                '<div class="mob-why-desc">' + w.desc + '</div>' +
+              '</div>' +
+            '</li>';
+          }).join('') +
+        '</ul>' +
+      '</div>' +
 
       /* ── WORKFLOW ── */
       '<div class="mob-section">' +
@@ -259,7 +259,7 @@
           D.faq.map(function (f) {
             return '<div class="mob-faq-item">' +
               '<button class="mob-faq-q">' + f.q + '<span class="mob-faq-plus">+</span></button>' +
-              '<div class="mob-faq-a"><div class="mob-faq-a-inner">' + f.a + '</div></div>' +
+              '<div class="mob-faq-a">' + f.a + '</div>' +
             '</div>';
           }).join('') +
         '</div>' +

@@ -41,7 +41,8 @@
 .ts-badge.purple { background:rgba(167,139,250,.12); color:#a78bfa; border-color:rgba(167,139,250,.25); }
 .ts-badge.cyan   { background:rgba(34,211,238,.12);  color:#22d3ee; border-color:rgba(34,211,238,.25); }
 .ts-badge.green  { background:rgba(52,211,153,.12);  color:#34d399; border-color:rgba(52,211,153,.25); }
-.ts-title { font-size:22px; font-weight:700; color:var(--text-main); line-height:1.3; margin:0; }
+.ts-title { font-size:22px; font-weight:700; color:var(--text-main); line-height:1.3; margin:0; position:relative; }
+.ts-title::after { content:''; display:block; width:40px; height:3px; margin-top:10px; border-radius:2px; background:linear-gradient(90deg, var(--color-violet2, #a78bfa), transparent); }
 .ts-desc  { font-size:14px; line-height:1.8; color:rgba(var(--text-rgb),.6); margin:0; }
 .ts-feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
 .ts-feat { display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:10px; background:rgba(var(--text-rgb),.04); border:1px solid rgba(var(--text-rgb),.08); font-size:13px; font-weight:500; color:rgba(var(--text-rgb),.75); transition:background .2s,border-color .2s; }
@@ -59,15 +60,46 @@
 .ts-btn-secondary { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:12px; border:1px solid rgba(var(--text-rgb),.18); background:rgba(var(--text-rgb),.04); color:var(--text-main); font-size:14px; font-weight:600; cursor:pointer; transition:background .2s,border-color .2s,transform .2s; white-space:nowrap; }
 .ts-btn-secondary:hover  { background:rgba(var(--text-rgb),.09); border-color:rgba(var(--text-rgb),.3); transform:translateY(-1px); }
 .ts-btn-secondary:active { transform:scale(.97); }
-.ts-nav-btn { position:absolute; top:38%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:1px solid rgba(var(--text-rgb),.15); background:rgba(var(--svc-card-rgb),.85); backdrop-filter:blur(8px); color:var(--text-main); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s,border-color .2s; z-index:10; }
+.ts-nav-btn { position:absolute; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:1px solid rgba(var(--text-rgb),.15); background:rgba(var(--svc-card-rgb),.85); backdrop-filter:blur(8px); color:var(--text-main); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s,border-color .2s; z-index:10; }
 .ts-nav-btn:hover { background:rgba(var(--color-purple-deep-rgb),.25); border-color:rgba(var(--color-purple-deep-rgb),.4); }
-.ts-prev { left:-18px; }
-.ts-next { left:calc(40% + 32px - 19px); }
+.ts-prev { left:10px; }
+.ts-next { left:calc(40% - 48px); }
 .ts-dots-wrap { display:flex; justify-content:center; gap:8px; margin-top:20px; }
 .ts-dot { width:8px; height:8px; border-radius:50%; border:none; background:rgba(var(--text-rgb),.2); cursor:pointer; transition:background .2s,width .2s; padding:0; }
 .ts-dot.active { background:var(--color-purple-deep); width:24px; border-radius:4px; }
 @media (max-width:900px) { .ts-slide { grid-template-columns:1fr 1fr; gap:20px; } .ts-feature-grid { grid-template-columns:repeat(2,1fr); } }
 @media (max-width:640px) { .ts-slide { grid-template-columns:1fr; gap:16px; } .ts-img-wrap { aspect-ratio:4/3; } .ts-feature-grid { grid-template-columns:repeat(2,1fr); gap:8px; } .ts-feat { font-size:12px; padding:8px 10px; } .ts-title { font-size:18px; } .ts-actions { flex-direction:column; } .ts-btn-primary,.ts-btn-secondary { flex:unset; width:100%; } .ts-prev { left:8px; } .ts-next { left:unset; right:8px; } }
+/* ── Shared Sample Header (matches handwritten page) ── */
+.hw-samples-heading { display: flex; align-items: center; gap: 12px; }
+.hw-samples-icon {
+  width: 40px; height: 40px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  background: rgba(var(--color-violet2-rgb), 0.14);
+  border: 1px solid rgba(var(--color-violet2-rgb), 0.28);
+  color: var(--color-violet2);
+}
+.hw-samples-header .svc-h2 { margin-bottom: 2px; }
+.hw-samples-sub { font-size: 12.5px; color: rgba(var(--text-rgb), 0.55); margin: 0; }
+.hw-samples-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 11px;
+  border: 1px solid rgba(var(--text-rgb), 0.16);
+  background: rgba(var(--text-rgb), 0.04);
+  color: var(--text); font-size: 13px; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.hw-samples-cta:hover {
+  background: rgba(var(--color-violet2-rgb), 0.1);
+  border-color: rgba(var(--color-violet2-rgb), 0.3);
+  transform: translateY(-1px);
+}
+[data-theme="light"] .hw-samples-icon { background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.25); color: #7c3aed; }
+[data-theme="light"] .hw-samples-sub  { color: rgba(0,0,0,0.55); }
+[data-theme="light"] .hw-samples-cta  { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.14); color: #1a1a2e; }
+[data-theme="light"] .hw-samples-cta:hover { background: rgba(124,58,237,0.07); border-color: rgba(124,58,237,0.25); }
+@media (max-width: 560px) { .hw-samples-header { flex-wrap: wrap; gap: 12px; } .hw-samples-cta { width: 100%; justify-content: center; } }
   </style>
 </head>
 
@@ -560,9 +592,20 @@
              THESIS SAMPLE CAROUSEL
              ══════════════════════════════════════ -->
         <div class="svc-card ts-card">
-          <div class="svc-card-header">
-            <h2 class="svc-h2">Thesis Sample Preview</h2>
-            <a href="#" class="svc-link">Request a Free Sample →</a>
+          <div class="svc-card-header hw-samples-header">
+            <div class="hw-samples-heading">
+              <div class="hw-samples-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+              </div>
+              <div>
+                <h2 class="svc-h2">Thesis Samples</h2>
+                <p class="hw-samples-sub">Real thesis work by our expert writers</p>
+              </div>
+            </div>
+            <button class="hw-samples-cta" onclick="window.location.href='../Order page/order.html'">
+              Request a Free Sample
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
           </div>
 
           <div class="ts-carousel" id="tsCarousel">
@@ -614,27 +657,6 @@
                     </div>
                   </div>
 
-                  <div class="ts-mini-stats">
-                    <div class="ts-mini-stat">
-                      <span class="ts-mini-val">100%</span>
-                      <span class="ts-mini-label">Human Written</span>
-                    </div>
-                    <div class="ts-mini-divider"></div>
-                    <div class="ts-mini-stat">
-                      <span class="ts-mini-val">Original</span>
-                      <span class="ts-mini-label">Formatting</span>
-                    </div>
-                    <div class="ts-mini-divider"></div>
-                    <div class="ts-mini-stat">
-                      <span class="ts-mini-val">Turnitin</span>
-                      <span class="ts-mini-label">Report Included</span>
-                    </div>
-                    <div class="ts-mini-divider"></div>
-                    <div class="ts-mini-stat">
-                      <span class="ts-mini-val">HD</span>
-                      <span class="ts-mini-label">PDF Delivery</span>
-                    </div>
-                  </div>
 
                   <div class="ts-actions">
                     <button class="ts-btn-primary">
@@ -697,27 +719,6 @@
                     </div>
                   </div>
 
-                  <div class="ts-mini-stats">
-                    <div class="ts-mini-stat">
-                      <span class="ts-mini-val">100%</span>
-                      <span class="ts-mini-label">Human Written</span>
-                    </div>
-                    <div class="ts-mini-divider"></div>
-                    <div class="ts-mini-stat">
-                      <span class="ts-mini-val">Original</span>
-                      <span class="ts-mini-label">Formatting</span>
-                    </div>
-                    <div class="ts-mini-divider"></div>
-                    <div class="ts-mini-stat">
-                      <span class="ts-mini-val">Turnitin</span>
-                      <span class="ts-mini-label">Report Included</span>
-                    </div>
-                    <div class="ts-mini-divider"></div>
-                    <div class="ts-mini-stat">
-                      <span class="ts-mini-val">HD</span>
-                      <span class="ts-mini-label">PDF Delivery</span>
-                    </div>
-                  </div>
 
                   <div class="ts-actions">
                     <button class="ts-btn-primary">
