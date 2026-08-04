@@ -17,56 +17,73 @@ document.addEventListener('DOMContentLoaded', function () {
     shield:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
     edit:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
     pen:        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>',
+    truck:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h5l2 2v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+    ink:        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10"/><path d="M12 2c2.5 2.5 4 6 4 10"/><path d="M12 2C9.5 4.5 8 8 8 12"/></svg>',
+    star:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    pen2:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
   };
 
+  /* ── COMMON features present in ALL packages ── */
+  var COMMON_FEATURES = [
+    { icon: ICON.pen,       title: 'University-Standard Handwriting',       desc: 'Clean &amp; consistent presentation throughout' },
+    { icon: ICON.fileCheck, title: 'Proper Margins &amp; Formatting',        desc: 'Follows your university guidelines' },
+    { icon: ICON.ink,       title: 'Blue / Black Ink Option',                desc: 'Choose your preferred ink colour' },
+    { icon: ICON.barChart,  title: 'Dashboard Live Progress',                desc: 'Track your order in real-time' },
+    { icon: ICON.eye,       title: 'Scan Preview Before Final Delivery',     desc: 'Review scanned pages before handover' },
+    { icon: ICON.truck,     title: 'Physical Delivery Option',               desc: 'Delivered safely to your address' },
+    { icon: ICON.pen2,      title: 'Human-Written Academic Work',            desc: '100% handwritten — no printed text' },
+    { icon: ICON.shield,    title: '100% Confidential Service',              desc: 'Your work stays completely private' },
+  ];
+
+  /* ── BASE delivery days (pages ≤ 20); extra days added per page beyond base ── */
+  var HW_DELIVERY = {
+    standard:    { baseDays: 13, basePages: 20, extraPer10: 2 },
+    recommended: { baseDays: 10, basePages: 20, extraPer10: 2 },
+    premium:     { baseDays:  8, basePages: 20, extraPer10: 1 },
+  };
+
+  /* ── Calculate estimated delivery days from page count ── */
+  function calcDeliveryDays(tierKey, pageCount) {
+    var cfg = HW_DELIVERY[tierKey];
+    var pages = parseInt(pageCount) || 0;
+    var extra = pages > cfg.basePages
+      ? Math.ceil((pages - cfg.basePages) / 10) * cfg.extraPer10
+      : 0;
+    return cfg.baseDays + extra;
+  }
+
+  /* ── Package definitions (DIFFERENTIATING items only; common features appended by renderHwPackage) ── */
   var hwPackages = {
     standard: {
-      name: 'Standard',
-      title: 'Standard Handwritten Package',
-      subtitle: 'Neat, university-standard handwriting for everyday assignments and lab reports.',
-      price: '৳1,500',
-      bestValue: 'Great fit for assignments &amp; lab reports',
-      features: [
-        { icon: ICON.pen,       title: 'University-Standard Handwriting',   desc: 'Clean, consistent style throughout' },
-        { icon: ICON.fileCheck, title: 'Proper Margins &amp; Formatting',   desc: 'Follows your university guidelines' },
-        { icon: ICON.clock,     title: 'Delivery in 5 Days',                desc: 'Standard delivery timeline' },
-        { icon: ICON.infinity,  title: 'Free Revisions',                    desc: 'Until requirements are met' },
-        { icon: ICON.shield,    title: 'Secure &amp; Confidential',         desc: 'Your work stays private' },
-      ],
+      name:      'Standard',
+      title:     'Standard Handwritten Package',
+      subtitle:  'Perfect for everyday assignments, lab reports and academic work with reliable delivery.',
+      price:     '৳1,500',
+      bestValue: 'Great fit for everyday assignments &amp; lab reports',
+      revision:  '1 Revision',
+      priority:  'Standard Queue',
+      delivery:  { tierKey: 'standard' },
     },
     recommended: {
-      name: 'Recommended',
-      title: 'Recommended Handwritten Package',
-      subtitle: 'Complete handwritten documents with quality ink options and progress tracking.',
-      price: '৳2,500',
+      name:      'Recommended',
+      title:     'Recommended Handwritten Package',
+      subtitle:  'The best balance of delivery speed, revisions and value for most handwritten academic work.',
+      price:     '৳2,500',
       bestValue: 'Best value for practical notebooks &amp; project copies',
-      features: [
-        { icon: ICON.pen,       title: 'University-Standard Handwriting',   desc: 'Neat &amp; consistent presentation' },
-        { icon: ICON.fileCheck, title: 'Proper Margins &amp; Formatting',   desc: 'Follows your university guidelines' },
-        { icon: ICON.edit,      title: 'High-Quality Ink &amp; Notebook',   desc: 'Premium ink and paper options' },
-        { icon: ICON.clock,     title: 'Delivery in 3 Days',                desc: 'Faster turnaround' },
-        { icon: ICON.barChart,  title: 'Live Progress Dashboard',           desc: 'Track progress in real-time' },
-        { icon: ICON.eye,       title: 'Scanned Preview Before Delivery',   desc: 'Review before final handover' },
-        { icon: ICON.infinity,  title: 'Free Revisions',                    desc: 'Until you are satisfied' },
-        { icon: ICON.shield,    title: 'Secure &amp; Confidential',         desc: 'Your work stays private' },
-      ],
+      revision:  '3 Revisions',
+      priority:  'High Priority Queue',
+      delivery:  { tierKey: 'recommended' },
     },
     premium: {
-      name: 'Premium',
-      title: 'Professional Handwritten Package',
-      subtitle: 'Everything you need for a complete handwritten document — neat, formatted, and ready for submission.',
-      price: '৳4,000',
-      bestValue: 'Best value for record books &amp; complete academic documents',
-      features: [
-        { icon: ICON.pen,       title: 'University-Standard Handwriting',   desc: 'Neat &amp; consistent presentation' },
-        { icon: ICON.fileCheck, title: 'Proper Margins &amp; Formatting',   desc: 'Follows your university guidelines' },
-        { icon: ICON.edit,      title: 'High-Quality Ink &amp; Notebook',   desc: 'Premium ink and paper options' },
-        { icon: ICON.clock,     title: 'Priority Delivery',                 desc: 'Guaranteed on-time delivery' },
-        { icon: ICON.barChart,  title: 'Live Progress Dashboard',           desc: 'Track progress in real-time' },
-        { icon: ICON.eye,       title: 'Scanned Preview Before Delivery',   desc: 'Review before final handover' },
-        { icon: ICON.infinity,  title: 'Free Revisions',                    desc: 'Until you are 100% satisfied' },
-        { icon: ICON.shield,    title: 'Secure &amp; Confidential Service', desc: 'Your academic work stays private' },
-      ],
+      name:      'Premium',
+      title:     'Premium Handwritten Package',
+      subtitle:  'Designed for urgent, large and high-priority handwritten academic projects.',
+      price:     '৳4,000',
+      bestValue: 'Best for urgent, large &amp; high-priority academic projects',
+      revision:  'Unlimited Revisions',
+      priority:  'Highest Priority Queue',
+      dedicated: true,
+      delivery:  { tierKey: 'premium' },
     },
   };
 
@@ -78,11 +95,39 @@ document.addEventListener('DOMContentLoaded', function () {
   var svcFeaturesEl = document.getElementById('svc-pkg-features');
   var svcOrderTxtEl = document.getElementById('svc-pkg-order-text');
 
-  function renderHwPackage(key) {
+  /* ── Store current tier key for re-render on page-count change ── */
+  window._hwCurrentTierKey = 'premium';
+
+  function buildFeatureList(pkg, pageCount) {
+    var days = calcDeliveryDays(pkg.delivery.tierKey, pageCount);
+    var pageLabel = (parseInt(pageCount) || 0) > 0
+      ? ' (' + (parseInt(pageCount)) + ' পাতার জন্য)'
+      : ' (Base)';
+
+    var differentiatingFeatures = [
+      { icon: ICON.clock, title: 'Delivery Priority',
+        desc: pkg.priority },
+      { icon: ICON.clock, title: 'Estimated Delivery',
+        desc: days + ' Days' + pageLabel },
+      { icon: ICON.infinity, title: 'Free Revision',
+        desc: pkg.revision },
+    ];
+
+    if (pkg.dedicated) {
+      differentiatingFeatures.push(
+        { icon: ICON.star, title: 'Dedicated Project Handling', desc: 'Personal writer assigned to your project' }
+      );
+    }
+
+    return differentiatingFeatures.concat(COMMON_FEATURES);
+  }
+
+  function renderHwPackage(key, pageCount) {
     var pkg = hwPackages[key];
     if (!pkg) return;
 
     window._opascriptSelectedPkg = pkg;
+    window._hwCurrentTierKey = key;
 
     svcTitleEl.textContent    = pkg.title;
     svcSubtitleEl.textContent = pkg.subtitle;
@@ -90,7 +135,8 @@ document.addEventListener('DOMContentLoaded', function () {
     svcBestValEl.innerHTML    = pkg.bestValue;
     svcOrderTxtEl.textContent = 'Order ' + pkg.name + ' Handwritten Package';
 
-    svcFeaturesEl.innerHTML = pkg.features.map(function (f) {
+    var features = buildFeatureList(pkg, pageCount || 0);
+    svcFeaturesEl.innerHTML = features.map(function (f) {
       return '<li class="svc-pkg-feat">' +
                '<span class="svc-pkg-feat-icon">' + f.icon + '</span>' +
                '<div>' +
@@ -106,13 +152,18 @@ document.addEventListener('DOMContentLoaded', function () {
     tab.addEventListener('click', function () {
       svcTabs.forEach(function (t) { t.classList.remove('active'); });
       tab.classList.add('active');
-      renderHwPackage(tab.getAttribute('data-pkg'));
+      renderHwPackage(tab.getAttribute('data-pkg'), window._hwCurrentPageCount);
     });
   });
 
   /* Render default active tab on load (overrides service.js render) */
   var activeTab = document.querySelector('.svc-tab.active');
-  renderHwPackage(activeTab ? activeTab.getAttribute('data-pkg') : 'premium');
+  renderHwPackage(activeTab ? activeTab.getAttribute('data-pkg') : 'premium', 0);
+
+  /* Listen for page-count changes from updateHwDelivery() */
+  document.addEventListener('hw:pagecount', function (e) {
+    renderHwPackage(e.detail.key, e.detail.pages);
+  });
 
 });
 
@@ -128,6 +179,17 @@ function orderHandwrittenPackage() {
     tier:    pkg.name,
   });
   window.location.href = '../Order page/order.html?' + params.toString();
+}
+
+/* -------- LIVE DELIVERY ESTIMATE — call this from a page-count input -------- */
+/* Usage: <input oninput="updateHwDelivery(this.value)"> anywhere on the page   */
+function updateHwDelivery(pageCount) {
+  window._hwCurrentPageCount = parseInt(pageCount) || 0;
+  var activeTab = document.querySelector('.svc-tab.active');
+  var key = activeTab ? activeTab.getAttribute('data-pkg') : (window._hwCurrentTierKey || 'premium');
+  /* renderHwPackage is scoped inside the DOMContentLoaded closure;
+     dispatch a custom event so the inner function can handle it */
+  document.dispatchEvent(new CustomEvent('hw:pagecount', { detail: { key: key, pages: window._hwCurrentPageCount } }));
 }
 
 /* =====================================================

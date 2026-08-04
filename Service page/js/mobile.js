@@ -188,12 +188,14 @@
                       '<img src="' + s.img + '" alt="' + s.alt + '" loading="lazy">' +
                     '</div>' +
                     '<div class="mob-sample-info">' +
-                      '<div class="mob-sample-badges">' +
-                        '<span class="mob-sample-badge">' + s.badge + '</span>' +
-                        '<span class="mob-sample-badge ' + s.badgeCls + '">' + s.type + '</span>' +
+                      '<div class="mob-sample-info-top">' +
+                        '<div class="mob-sample-badges">' +
+                          '<span class="mob-sample-badge">' + s.badge + '</span>' +
+                          '<span class="mob-sample-badge ' + s.badgeCls + '">' + s.type + '</span>' +
+                        '</div>' +
+                        '<div class="mob-sample-title">' + s.title + '</div>' +
+                        '<div class="mob-sample-desc">' + s.desc + '</div>' +
                       '</div>' +
-                      '<div class="mob-sample-title">' + s.title + '</div>' +
-                      '<div class="mob-sample-desc">' + s.desc + '</div>' +
                       '<div class="mob-sample-tags">' +
                         (s.tags ? s.tags : (s.features || [])).slice(0, 3).map(function(t){
                           var isKey = typeof t === 'string' && window.HW_FEATURE_MAP && window.HW_FEATURE_MAP[t];
