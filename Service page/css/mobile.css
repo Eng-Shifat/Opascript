@@ -1011,19 +1011,32 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 16px;
   color: var(--label);
-  transition: transform 0.2s;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
 }
-.mob-faq-item.open .mob-faq-plus { transform: rotate(45deg); }
+.mob-faq-item.open .mob-faq-plus {
+  transform: rotate(45deg);
+  border-color: var(--accent, #6366f1);
+}
 .mob-faq-a {
-  max-height: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mob-faq-a-inner {
   overflow: hidden;
   font-size: 13.5px;
   color: var(--muted);
-  line-height: 1.7;
-  transition: max-height 0.25s ease, padding 0.25s;
+  line-height: 1.75;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s ease 0.05s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.05s, padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .mob-faq-item.open .mob-faq-a {
-  max-height: 200px;
+  grid-template-rows: 1fr;
+}
+.mob-faq-item.open .mob-faq-a-inner {
+  opacity: 1;
+  transform: translateY(0);
   padding-bottom: 16px;
 }
 
@@ -1155,7 +1168,7 @@ body {
 .mob-sample-slide.active {
   display: grid;
   grid-template-columns: 42% 1fr;
-  grid-template-rows: 1fr;        /* single row — both cells same height */
+  grid-template-rows: 1fr;
   gap: 12px;
   align-items: stretch;
   background: rgba(var(--svc-card-rgb), 0.45);
@@ -1171,8 +1184,9 @@ body {
 
 /* ── Image column — aspect-ratio controls the row height ── */
 .mob-sample-img-wrap {
+  position: relative;              /* so overlay arrows can position against it */
   width: 100%;
-  aspect-ratio: 3 / 4;            /* portrait notebook shape */
+  aspect-ratio: 3 / 4;
   border-radius: 8px;
   overflow: hidden;
   background: rgba(var(--svc-card-rgb), 0.8);
@@ -1186,12 +1200,32 @@ body {
   display: block;
 }
 
+/* ── Overlay arrow buttons — centred vertically on the image ── */
+.mob-sample-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid rgba(var(--text-rgb),0.18);
+  background: rgba(10,12,30,0.65);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  z-index: 2;
+}
+.mob-sample-btn:hover { background: rgba(var(--color-violet2-rgb),0.55); }
+.mob-sample-prev { left:  -12px; }   /* half-out on the left edge of the image */
+.mob-sample-next { right: -12px; }   /* half-out on the right edge of the image */
+
 /* ── Info column — top-anchored title, bottom-anchored tags ── */
 .mob-sample-info {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;  /* title group at top, tags at bottom */
-  min-height: 0;                   /* let grid control height */
+  justify-content: space-between;
+  min-height: 0;
   padding: 2px 0;
   gap: 0;
 }
@@ -1226,7 +1260,6 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-/* Tags — pinned to bottom of info column */
 .mob-sample-tags {
   font-size: 10px; font-weight: 600;
   color: rgba(var(--text-rgb), 0.45);
@@ -1236,25 +1269,13 @@ body {
   margin-top: 8px;
 }
 
-/* ── Nav: arrows + dots ── */
+/* ── Nav: dots centred below the slide ── */
 .mob-sample-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;   /* only dots now, centred */
   margin-top: 12px;
 }
-.mob-sample-btn {
-  width: 32px; height: 32px; border-radius: 50%;
-  border: 1px solid rgba(var(--text-rgb),0.15);
-  background: rgba(var(--svc-card-rgb),0.7);
-  color: var(--text); display: flex; align-items: center;
-  justify-content: center; cursor: pointer;
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-.mob-sample-btn:hover { background: rgba(var(--color-violet2-rgb),0.2); }
-
-/* Dots */
 .mob-sample-dots { display: flex; gap: 6px; align-items: center; }
 .mob-sdot {
   width: 7px; height: 7px; border-radius: 50%;

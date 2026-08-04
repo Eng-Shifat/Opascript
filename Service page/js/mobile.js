@@ -186,6 +186,8 @@
                   return '<div class="mob-sample-slide' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
                     '<div class="mob-sample-img-wrap">' +
                       '<img src="' + s.img + '" alt="' + s.alt + '" loading="lazy">' +
+                      '<button class="mob-sample-btn mob-sample-prev" id="mobSamplePrev' + i + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+                      '<button class="mob-sample-btn mob-sample-next" id="mobSampleNext' + i + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
                     '</div>' +
                     '<div class="mob-sample-info">' +
                       '<div class="mob-sample-info-top">' +
@@ -207,13 +209,11 @@
                 }).join('') +
               '</div>' +
               '<div class="mob-sample-nav">' +
-                '<button class="mob-sample-btn mob-sample-prev" id="mobSamplePrev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
                 '<div class="mob-sample-dots" id="mobSampleDots">' +
                   D.samples.slides.map(function (s, i) {
                     return '<button class="mob-sdot' + (i === 0 ? ' active' : '') + '" data-sidx="' + i + '"></button>';
                   }).join('') +
                 '</div>' +
-                '<button class="mob-sample-btn mob-sample-next" id="mobSampleNext"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
               '</div>' +
             '</div>'
           ) : '') +
@@ -259,7 +259,7 @@
           D.faq.map(function (f) {
             return '<div class="mob-faq-item">' +
               '<button class="mob-faq-q">' + f.q + '<span class="mob-faq-plus">+</span></button>' +
-              '<div class="mob-faq-a">' + f.a + '</div>' +
+              '<div class="mob-faq-a"><div class="mob-faq-a-inner">' + f.a + '</div></div>' +
             '</div>';
           }).join('') +
         '</div>' +
@@ -297,10 +297,9 @@
 
   /* ── Mobile Sample Carousel ── */
   function initMobSampleCarousel() {
-    var slides = document.querySelectorAll('.mob-sample-slide');
-    var dots   = document.querySelectorAll('.mob-sdot');
-    var prev   = document.getElementById('mobSamplePrev');
-    var next   = document.getElementById('mobSampleNext');
+    var slides  = document.querySelectorAll('.mob-sample-slide');
+    var dots    = document.querySelectorAll('.mob-sdot');
+    var carousel = document.getElementById('mobSampleCarousel');
     if (!slides.length) return;
     var cur = 0, total = slides.length;
 
@@ -311,8 +310,17 @@
       slides[cur].classList.add('active');
       dots[cur].classList.add('active');
     }
-    if (prev) prev.addEventListener('click', function(){ goTo(cur - 1); });
-    if (next) next.addEventListener('click', function(){ goTo(cur + 1); });
+
+    /* Arrow buttons are inside each slide — use event delegation */
+    if (carousel) {
+      carousel.addEventListener('click', function(e) {
+        var btn = e.target.closest('.mob-sample-btn');
+        if (!btn) return;
+        if (btn.classList.contains('mob-sample-prev')) goTo(cur - 1);
+        if (btn.classList.contains('mob-sample-next')) goTo(cur + 1);
+      });
+    }
+
     dots.forEach(function(d){
       d.addEventListener('click', function(){ goTo(parseInt(d.getAttribute('data-sidx'))); });
     });

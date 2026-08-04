@@ -1347,6 +1347,14 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.svc-faq-item:hover {
+  border-color: rgba(var(--accent-rgb, 99, 102, 241), 0.35);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.svc-faq-item.open {
+  border-color: rgba(var(--accent-rgb, 99, 102, 241), 0.4);
 }
 .svc-faq-q {
   width: 100%;
@@ -1357,26 +1365,47 @@ body {
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
-  padding: 16px var(--sp-2);
+  padding: 17px var(--sp-2);
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+  transition: background 0.2s ease;
+  gap: 12px;
 }
-.svc-faq-plus { color: var(--accent); font-size: 16px; transition: transform 0.2s; }
+.svc-faq-q:hover { background: rgba(var(--text-rgb),0.04); }
+.svc-faq-item.open .svc-faq-q { background: rgba(var(--text-rgb),0.03); }
+.svc-faq-plus {
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 .svc-faq-item.open .svc-faq-plus { transform: rotate(45deg); }
 .svc-faq-a {
-  max-height: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.svc-faq-a-inner {
   overflow: hidden;
   font-size: 13.5px;
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.75;
   padding: 0 var(--sp-2);
-  transition: all 0.25s ease;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s ease 0.05s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.05s, padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .svc-faq-item.open .svc-faq-a {
-  max-height: 200px;
-  padding: 0 var(--sp-2) 16px;
+  grid-template-rows: 1fr;
+}
+.svc-faq-item.open .svc-faq-a-inner {
+  opacity: 1;
+  transform: translateY(0);
+  padding: 2px var(--sp-2) 17px;
 }
 
 /* -------- REVIEWS -------- */
@@ -1903,6 +1932,8 @@ body {
 
   /* FAQ */
   .svc-faq-q { font-size: 13px; padding: 14px 12px; }
+  .svc-faq-a-inner { font-size: 13px; }
+  .svc-faq-item.open .svc-faq-a-inner { padding: 2px 12px 14px; }
 
   /* Trust card grid */
   .svc-trust-grid { grid-template-columns: 1fr 1fr; gap: 8px; }

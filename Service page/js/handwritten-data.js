@@ -146,11 +146,12 @@ window.PAGE_DATA = {
   dashboard: null,
 
   faq: [
-    { q: 'Can you follow my university\'s exact format and margin rules?',  a: 'হ্যাঁ, আপনার University-র নির্দিষ্ট Margin, Heading Format, এবং Page Structure অনুযায়ী Document তৈরি করা হয়।' },
-    { q: 'Which ink color do you use — blue or black?',                      a: 'আপনার পছন্দ অনুযায়ী Blue বা Black উভয় Ink-ই Available। Order-এর সময় উল্লেখ করুন।' },
-    { q: 'What type of notebook or paper do you write on?',                  a: 'Standard A4 Lined Paper, Lab Notebook, Practical Copy এবং আপনার University-র Specific Format-এ লিখি।' },
-    { q: 'How long does delivery take?',                                      a: 'সাধারণত ২৪ থেকে ৭২ ঘণ্টার মধ্যে Deliver করা হয়। Urgent Delivery-ও Available।' },
-    { q: 'Is my assignment kept confidential?',                              a: 'হ্যাঁ, আপনার Assignment এবং Personal Details সম্পূর্ণ গোপনীয় রাখা হয়।' },
+    { q: 'Can you follow my university\'s formatting requirements?',         a: 'Yes. Every handwritten document is prepared according to your university\'s guidelines, including margins, headings, spacing, page layout, and any specific instructions you provide. Our goal is to ensure your work is ready for submission without formatting concerns.' },
+    { q: 'What types of handwritten academic work do you provide?',          a: 'We prepare handwritten assignments, lab reports, practical notebooks, record books, project copies, class notes, engineering drawing copies, and other university coursework. If you have custom requirements, simply share them while placing your order.' },
+    { q: 'What handwriting style and materials do you use?',                 a: 'Our professionally trained handwriting specialists write with neat, consistent handwriting using your preferred blue or black ink. We use quality notebooks and paper to ensure every page looks clean, professional, and university-ready.' },
+    { q: 'How does the delivery process work?',                              a: 'Delivery time depends on your selected package and total page count. You can track live progress from your dashboard, review scanned previews before final delivery, and receive your work as a Scan PDF or through Physical Delivery, depending on your preference.' },
+    { q: 'Is my work kept confidential?',                                    a: 'Absolutely. Every order is handled with complete confidentiality. Your personal information, files, and academic documents are never shared with anyone.' },
+    { q: 'What if I need revisions or corrections?',                         a: 'If any corrections are required, we\'ll revise your handwritten document according to your selected package. Our goal is to ensure the final work matches your instructions and university requirements.' },
   ],
 
   cta: {
