@@ -259,7 +259,7 @@
           D.faq.map(function (f) {
             return '<div class="mob-faq-item">' +
               '<button class="mob-faq-q">' + f.q + '<span class="mob-faq-plus">+</span></button>' +
-              '<div class="mob-faq-a">' + f.a + '</div>' +
+              '<div class="mob-faq-a"><div class="mob-faq-a-inner">' + f.a + '</div></div>' +
             '</div>';
           }).join('') +
         '</div>' +

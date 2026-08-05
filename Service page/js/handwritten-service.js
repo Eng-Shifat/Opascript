@@ -290,14 +290,55 @@ document.addEventListener('DOMContentLoaded', function () {
     var total    = slideEls.length;
     if (!total) return;
 
+    var isAnimating = false;
+
     function goTo(idx, dir) {
-      slideEls[current].classList.remove('active', 'slide-left');
-      dotEls[current].classList.remove('active');
-      current = (idx + total) % total;
-      slideEls[current].classList.remove('slide-left');
-      if (dir === 'left') slideEls[current].classList.add('slide-left');
-      slideEls[current].classList.add('active');
-      dotEls[current].classList.add('active');
+      if (isAnimating) return;
+      isAnimating = true;
+
+      var next = (idx + total) % total;
+      if (next === current) { isAnimating = false; return; }
+
+      var outSlide   = slideEls[current];
+      var inSlide    = slideEls[next];
+      var outImgWrap = outSlide.querySelector('.hw-carousel-img-wrap');
+      var inImgWrap  = inSlide.querySelector('.hw-carousel-img-wrap');
+      var outInfo    = outSlide.querySelector('.hw-carousel-info');
+      var inInfo     = inSlide.querySelector('.hw-carousel-info');
+
+      var curlOutClass   = dir === 'left' ? 'curl-out-left' : 'curl-out';
+      var curlInClass    = dir === 'left' ? 'curl-in-left'  : 'curl-in';
+      var contentInClass = dir === 'left' ? 'content-in-left' : 'content-in';
+
+      /* 1. Content fades out */
+      outInfo.classList.add('content-out');
+
+      /* 2. Image curls out — shadow overlay appears */
+      outImgWrap.classList.add('curling', curlOutClass);
+
+      /* 3. Midpoint — swap slides */
+      setTimeout(function () {
+        outSlide.classList.remove('active');
+        outImgWrap.classList.remove('curling', curlOutClass);
+        outInfo.classList.remove('content-out');
+        dotEls[current].classList.remove('active');
+
+        current = next;
+        inSlide.classList.add('active');
+        dotEls[current].classList.add('active');
+
+        /* 4. New image curls in, content fades in */
+        inImgWrap.classList.add('curling', curlInClass);
+        inInfo.classList.add(contentInClass);
+
+        /* 5. Cleanup */
+        setTimeout(function () {
+          inImgWrap.classList.remove('curling', curlInClass);
+          inInfo.classList.remove('content-in', 'content-in-left');
+          isAnimating = false;
+        }, 550);
+
+      }, 300);
     }
 
     if (hwPrev) hwPrev.addEventListener('click', function () { goTo(current - 1, 'left'); });

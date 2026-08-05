@@ -958,7 +958,13 @@
 
 .hw-carousel-track { width: 100%; }
 
-/* Slide — two column: image left, info right */
+/* ══════════════════════════════════════════════
+   REALISTIC PAGE CURL — image curls like a real
+   book page being turned by hand.
+   Content changes normally (existing fade/slide).
+══════════════════════════════════════════════ */
+
+/* Slide layout */
 .hw-carousel-slide {
   visibility: hidden;
   position: absolute;
@@ -973,20 +979,9 @@
   visibility: visible;
   position: relative;
   pointer-events: auto;
-  animation: hwFadeIn 0.35s ease;
-}
-.hw-carousel-slide.slide-left.active { animation: hwFadeLeft 0.35s ease; }
-
-@keyframes hwFadeIn {
-  from { opacity: 0; transform: translateX(16px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes hwFadeLeft {
-  from { opacity: 0; transform: translateX(-16px); }
-  to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Image — left column, portrait */
+/* Image wrap — perspective + clip so curl stays within bounds */
 .hw-carousel-img-wrap {
   position: relative;
   width: 100%;
@@ -994,22 +989,186 @@
   overflow: hidden;
   aspect-ratio: 3/4;
   background: rgba(var(--svc-card-rgb), 0.5);
+  perspective: 1200px;
+  transform-style: preserve-3d;
 }
+
+/* Image is the page being curled */
 .hw-carousel-img-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top center;
   display: block;
+  border-radius: 14px;
+  transform-origin: left center;
+  will-change: transform, opacity;
+  position: relative;
+  z-index: 1;
 }
 
-/* Info — right column */
-/* ── Info Panel — Premium Redesign ── */
+/* Dark curl shadow overlay — sits on top, shows the page fold shadow */
+.hw-carousel-img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.0) 60%,
+    rgba(0,0,0,0.22) 80%,
+    rgba(0,0,0,0.45) 95%,
+    rgba(0,0,0,0.15) 100%
+  );
+  transition: opacity 0.15s ease;
+}
+.hw-carousel-img-wrap.curling::after {
+  opacity: 1;
+}
+
+/* ── CURL OUT: page curls away (next →) — right edge folds left ── */
+.hw-carousel-img-wrap.curl-out img {
+  animation: hwCurlOut 0.5s cubic-bezier(0.4, 0.0, 0.6, 1) forwards;
+  transform-origin: right center;
+}
+
+/* ── CURL OUT LEFT: page curls away (prev ←) — left edge folds right ── */
+.hw-carousel-img-wrap.curl-out-left img {
+  animation: hwCurlOutLeft 0.5s cubic-bezier(0.4, 0.0, 0.6, 1) forwards;
+  transform-origin: left center;
+}
+
+/* ── CURL IN: new page unrolls in (next →) — comes from right ── */
+.hw-carousel-img-wrap.curl-in img {
+  animation: hwCurlIn 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  transform-origin: right center;
+}
+
+/* ── CURL IN LEFT: new page unrolls in (prev ←) — comes from left ── */
+.hw-carousel-img-wrap.curl-in-left img {
+  animation: hwCurlInLeft 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  transform-origin: left center;
+}
+
+/* Page curls away — right edge folds inward (next →) */
+@keyframes hwCurlOut {
+  0%   {
+    transform: perspective(1200px) rotateY(0deg) scaleX(1);
+    opacity: 1;
+  }
+  30%  {
+    transform: perspective(1200px) rotateY(-25deg) scaleX(0.97);
+    opacity: 1;
+  }
+  70%  {
+    transform: perspective(1200px) rotateY(-70deg) scaleX(0.88);
+    opacity: 0.6;
+  }
+  100% {
+    transform: perspective(1200px) rotateY(-90deg) scaleX(0.8);
+    opacity: 0;
+  }
+}
+
+/* Page curls away — left edge folds inward (prev ←) */
+@keyframes hwCurlOutLeft {
+  0%   {
+    transform: perspective(1200px) rotateY(0deg) scaleX(1);
+    opacity: 1;
+  }
+  30%  {
+    transform: perspective(1200px) rotateY(25deg) scaleX(0.97);
+    opacity: 1;
+  }
+  70%  {
+    transform: perspective(1200px) rotateY(70deg) scaleX(0.88);
+    opacity: 0.6;
+  }
+  100% {
+    transform: perspective(1200px) rotateY(90deg) scaleX(0.8);
+    opacity: 0;
+  }
+}
+
+/* New page uncurls from right (next →) */
+@keyframes hwCurlIn {
+  0%   {
+    transform: perspective(1200px) rotateY(90deg) scaleX(0.8);
+    opacity: 0;
+  }
+  30%  {
+    transform: perspective(1200px) rotateY(55deg) scaleX(0.88);
+    opacity: 0.5;
+  }
+  70%  {
+    transform: perspective(1200px) rotateY(12deg) scaleX(0.98);
+    opacity: 1;
+  }
+  88%  {
+    transform: perspective(1200px) rotateY(-3deg) scaleX(1.005);
+  }
+  100% {
+    transform: perspective(1200px) rotateY(0deg) scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* New page uncurls from left (prev ←) */
+@keyframes hwCurlInLeft {
+  0%   {
+    transform: perspective(1200px) rotateY(-90deg) scaleX(0.8);
+    opacity: 0;
+  }
+  30%  {
+    transform: perspective(1200px) rotateY(-55deg) scaleX(0.88);
+    opacity: 0.5;
+  }
+  70%  {
+    transform: perspective(1200px) rotateY(-12deg) scaleX(0.98);
+    opacity: 1;
+  }
+  88%  {
+    transform: perspective(1200px) rotateY(3deg) scaleX(1.005);
+  }
+  100% {
+    transform: perspective(1200px) rotateY(0deg) scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* ── Info panel — normal fade+slide (as usual) ── */
 .hw-carousel-info {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 4px 2px 0;
+  will-change: opacity, transform;
+}
+
+.hw-carousel-info.content-out {
+  animation: hwContentOut 0.22s ease forwards;
+}
+.hw-carousel-info.content-in {
+  animation: hwContentIn 0.4s cubic-bezier(0.2, 0.8, 0.4, 1) 0.18s both;
+}
+.hw-carousel-info.content-in-left {
+  animation: hwContentInLeft 0.4s cubic-bezier(0.2, 0.8, 0.4, 1) 0.18s both;
+}
+
+@keyframes hwContentOut {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes hwContentIn {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes hwContentInLeft {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* Badge row */
