@@ -52,7 +52,7 @@ let revenueChart, donutChart;
 /* ═══════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   animateCounter('stat-revenue', 84320, '৳', true);
   animateCounter('stat-orders',  47);
   animateCounter('stat-clients', 138);
@@ -65,16 +65,17 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clients-inactive').textContent  = '26 Inactive';
   document.getElementById('clients-retention').textContent = '94% Retention';
 
-  renderOrders(orders);
   renderActivity();
   renderDonutLegend();
   initRevenueChart('monthly');
   initDonutChart();
 
-  // Default deadline to today
   document.getElementById('m-deadline').value = new Date().toISOString().split('T')[0];
 
   loadAdminMessages();
+
+  /* ── Load real orders from Supabase ── */
+  await loadOrdersFromSupabase();
 });
 
 /* ═══════════════════════════════════════════
@@ -96,6 +97,76 @@ function animateCounter(id, target, prefix = '', comma = false) {
 /* ═══════════════════════════════════════════
    ORDERS TABLE
 ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   LOAD REAL ORDERS FROM SUPABASE
+═══════════════════════════════════════════ */
+async function loadOrdersFromSupabase() {
+  try {
+    const db = window.scriptoraSupabase;
+    if (!db) { renderOrders(orders); return; }
+
+    const { data, error } = await db
+      .from('orders')
+      .select('*')
+      .order('order_date', { ascending: false })
+      .limit(50);
+
+    if (error || !data || data.length === 0) {
+      renderOrders(orders); /* fallback to mock data */
+      return;
+    }
+
+    /* Map Supabase columns → renderOrders format */
+    const colors = ['#6c63ff','#34d399','#f59e0b','#a78bfa','#f87171','#11b5d9','#fb923c'];
+    const mapped = data.map((o, i) => {
+      /* Extract name from special_instructions */
+      const lines    = (o.special_instructions || '').split('\n');
+      const nameLine = lines.find(l => l.startsWith('Name:'));
+      const client   = nameLine ? nameLine.replace('Name:', '').trim() : (o.title || 'Client');
+      const initials = client.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      const color    = colors[i % colors.length];
+
+      /* Status map */
+      const statusMap = { pending:'pending', in_progress:'progress', completed:'done', overdue:'overdue' };
+
+      /* Deadline format */
+      const dl = o.deadline
+        ? new Date(o.deadline).toLocaleDateString('en-GB', { day:'2-digit', month:'short' })
+        : '—';
+
+      return {
+        id:       o.order_number || `#${o.id?.slice(0,8)}`,
+        client:   client,
+        avatar:   initials || 'CL',
+        color:    color,
+        service:  o.title || o.service_type || 'Academic Service',
+        dept:     o.department || o.service_type || '—',
+        status:   statusMap[o.status] || o.status || 'pending',
+        amount:   o.total_price || 0,
+        deadline: dl,
+      };
+    });
+
+    /* Update stat counters with real data */
+    const pending    = data.filter(o => o.status === 'pending').length;
+    const inProgress = data.filter(o => o.status === 'in_progress').length;
+    const overdue    = data.filter(o => o.status === 'overdue').length;
+    const totalRev   = data.reduce((sum, o) => sum + (o.total_price || 0), 0);
+
+    animateCounter('stat-orders',  data.length);
+    animateCounter('stat-revenue', totalRev, '৳', true);
+    document.getElementById('orders-inprogress').textContent = `${inProgress} In Progress`;
+    document.getElementById('orders-pending').textContent    = `${pending} Pending`;
+    document.getElementById('orders-overdue').textContent    = `${overdue} Overdue`;
+
+    renderOrders(mapped);
+
+  } catch (err) {
+    console.error('[Admin] Orders load failed:', err);
+    renderOrders(orders); /* fallback */
+  }
+}
+
 function renderOrders(data) {
   document.getElementById('ordersBody').innerHTML = data.map(o => `
     <tr>

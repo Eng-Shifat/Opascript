@@ -239,7 +239,7 @@ function renderGrid() {
   }, 150);
 }
 
-/* ── Order Now — auth check + pricing data সহ Order page এ যাও ── */
+/* ── Order Now — auth check + open order popup ── */
 window.orderFromCard = async function(id) {
   const s  = SERVICES.find(x => x.id === id);
   if (!s) return;
@@ -255,23 +255,34 @@ window.orderFromCard = async function(id) {
     }
   }
 
-  const st    = state[id];
-  const price = calcPrice(s, st.urgency);
+  const st           = state[id];
+  const price        = calcPrice(s, st.urgency);
+  const urgencyLabel = URGENCY[st.urgency]?.label || st.urgency;
 
-  const params = new URLSearchParams({
-    service: id,
-    price:   price,
-    urgency: st.urgency,
-  });
-
-  if (s.unitType === 'tier') {
-    params.set('tier', s.tiers[st.tierIndex].name);
-  } else if (s.unitType !== 'fixed') {
-    params.set('qty',  st.qty);
-    params.set('unit', s.unitLabel || s.unitType);
+  /* Open order popup */
+  if (typeof window.opOpen === 'function') {
+    window._popupState = {
+      qty:       st.qty,
+      tierIndex: st.tierIndex,
+      urgency:   st.urgency,
+    };
+    window.opOpen({
+      serviceId:    id,
+      title:        s.title,
+      titleBn:      s.titleBn,
+      icon:         s.icon,
+      iconBg:       s.iconBg,
+      unitType:     s.unitType,
+      qty:          st.qty,
+      unitLabel:    s.unitLabel || '',
+      urgencyLabel: urgencyLabel,
+      rate:         s.rate,
+      perUnit:      s.perUnit,
+      tiers:        s.tiers,
+      tierIndex:    st.tierIndex,
+      price:        price,
+    });
   }
-
-  window.location.href = '../Order page/order.html?' + params.toString();
 };
 
 /* Thesis hero card এর জন্য */
@@ -295,15 +306,35 @@ window.orderThesis = async function() {
 
   const urgMap = { standard:'normal', express:'urgent', rush:'critical' };
 
-  const params = new URLSearchParams({
-    service: 'thesis',
-    price:   price,
-    urgency: urgMap[dl] || 'normal',
-    qty:     words,
-    unit:    'words',
-    tier:    type,
-  });
-  window.location.href = '../Order page/order.html?' + params.toString();
+  const urgLabel = { standard: 'Standard (10–15 Days)', express: 'Express (5–7 Days)', rush: 'Rush (2–3 Days)' };
+  const typeLabel = { full: 'Full Thesis', chapter: 'Single Chapter', proposal: 'Proposal Only' };
+
+  window._popupState = {
+    qty:       words,
+    tierIndex: 0,
+    urgency:   urgMap[dl] || 'normal',
+    thesisType: type,
+  };
+
+  if (typeof window.opOpen === 'function') {
+    window.opOpen({
+      serviceId:    'thesis-writing',
+      title:        'Thesis Writing',
+      titleBn:      'থিসিস রাইটিং',
+      icon:         '🎓',
+      iconBg:       'rgba(99,102,241,0.2)',
+      unitType:     'words',
+      qty:          words,
+      unitLabel:    'words',
+      urgencyLabel: urgLabel[dl] || dl,
+      rate:         THC.pricePerWord[type] * 1000,
+      perUnit:      1000,
+      tiers:        null,
+      tierIndex:    0,
+      price:        price,
+      thesisType:   type,
+    });
+  }
 };
 
 /* ── Init ── */

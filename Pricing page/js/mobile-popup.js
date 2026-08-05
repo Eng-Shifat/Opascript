@@ -377,8 +377,9 @@
   window.mpOrder = async function(id) {
     const s  = window._mpService;
     const st = window._popupState;
-    if (!s||!st) return;
+    if (!s || !st) return;
 
+    /* Auth check */
     const sb = window.scriptoraSupabase;
     if (sb) {
       const { data: { session } } = await sb.auth.getSession();
@@ -389,13 +390,32 @@
       }
     }
 
-    const price  = calcPrice(s, st.urgency, st);
-    const params = new URLSearchParams({ service: id, price, urgency: st.urgency });
+    const price        = calcPrice(s, st.urgency, st);
+    const urgencyLabel = URGENCY[st.urgency]?.label || st.urgency;
 
-    if (s.unitType==='tier')  params.set('tier', s.tiers[st.tierIndex].name);
-    else if (s.unitType!=='fixed') { params.set('qty', st.qty); params.set('unit', s.unitLabel||s.unitType); }
+    /* Close mobile sheet first, then open order popup */
+    mpClose();
 
-    window.location.href = '../Order page/order.html?' + params.toString();
+    setTimeout(() => {
+      if (typeof window.opOpen === 'function') {
+        window.opOpen({
+          serviceId:    id,
+          title:        s.title,
+          titleBn:      s.titleBn,
+          icon:         s.icon,
+          iconBg:       s.iconBg,
+          unitType:     s.unitType,
+          qty:          st.qty,
+          unitLabel:    s.unitLabel || '',
+          urgencyLabel: urgencyLabel,
+          rate:         s.rate,
+          perUnit:      s.perUnit,
+          tiers:        s.tiers,
+          tierIndex:    st.tierIndex,
+          price:        price,
+        });
+      }
+    }, 360); /* sheet close animation শেষ হওয়ার পর */
   };
 
   /* ────────────────────────────────

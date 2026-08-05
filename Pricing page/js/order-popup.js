@@ -362,107 +362,118 @@
     if (!topic) { highlight('opTopic', 'Topic লিখুন'); return; }
 
     const btn = document.querySelector('.op-confirm-btn');
-    if (btn) { btn.textContent = '⏳ Submitting...'; btn.disabled = true; }
+    if (btn) { btn.innerHTML = '⏳ Processing...'; btn.disabled = true; }
 
     try {
       const db   = window.scriptoraSupabase;
       const opts = window._opOpts || {};
 
-      /* ── Logged-in user (optional) ── */
+      /* ── Logged-in user ── */
       let clientId = null;
       try {
-        const { data: { user } } = await db.auth.getUser();
-        if (user) clientId = user.id;
+        const { data } = await db.auth.getUser();
+        if (data?.user) clientId = data.user.id;
       } catch (_) {}
 
-      /* ── Order number: SCR-YYYYMMDD-XXXX ── */
-      const now     = new Date();
-      const datePart = now.toISOString().slice(0,10).replace(/-/g,'');
-      const rand     = Math.floor(1000 + Math.random() * 9000);
+      /* ── Order number ── */
+      const now         = new Date();
+      const datePart    = now.toISOString().slice(0,10).replace(/-/g,'');
+      const rand        = Math.floor(1000 + Math.random() * 9000);
       const orderNumber = `SCR-${datePart}-${rand}`;
 
-      /* ── Map service fields to table columns ── */
-      const serviceId = opts.serviceId || '';
-      const unitType  = opts.unitType  || '';
+      /* ── Deadline ── */
+      const urgencyDays = { normal:15, urgent:7, critical:3, standard:15, express:7, rush:3 };
+      const daysAhead   = urgencyDays[(opts.urgency||'normal').toLowerCase()] || 15;
+      const deadline    = new Date(now.getTime() + daysAhead * 86400000).toISOString().slice(0,10);
 
-      /* service_type: thesis / handwritten / other */
+      /* ── service_type ── */
+      const sid = opts.serviceId || '';
       let serviceType = 'other';
-      if (serviceId === 'thesis-writing' || unitType === 'words' && opts.title?.toLowerCase().includes('thesis')) {
-        serviceType = 'thesis';
-      } else if (serviceId === 'handwritten-assignment') {
-        serviceType = 'handwritten';
-      }
+      if (sid.includes('thesis'))       serviceType = 'thesis';
+      else if (sid.includes('handwritten')) serviceType = 'handwritten';
+      else if (sid.includes('assignment'))  serviceType = 'writing';
 
-      /* package — thesis type or tier name */
+      /* ── Package ── */
       let pkg = '';
-      if (unitType === 'tier' && opts.tiers && opts.tiers[opts.tierIndex]) {
+      if (opts.unitType === 'tier' && opts.tiers?.[opts.tierIndex]) {
         pkg = opts.tiers[opts.tierIndex].name;
-      } else if (serviceId === 'thesis-writing') {
-        pkg = opts.thesisType || 'full';
+      } else if (opts.thesisType) {
+        pkg = opts.thesisType;
       }
 
-      /* pages / page_count from words */
-      const pageCount = unitType === 'words' && opts.qty
+      const pageCount = opts.unitType === 'words' && opts.qty
         ? Math.ceil(opts.qty / 250) : null;
 
-      /* deadline date from urgency */
-      const urgencyDays = { standard: 15, express: 7, rush: 3 };
-      const daysAhead   = urgencyDays[opts.urgency] || 15;
-      const deadline    = new Date(now.getTime() + daysAhead * 86400000)
-        .toISOString().slice(0,10);
+      const advance = Math.round((opts.price || 0) / 2);
 
+      /* ── Insert order (pending payment) ── */
       const row = {
-        order_number:        orderNumber,
-        client_id:           clientId,
-        title:               opts.title          || '',
-        service_type:        serviceType,
-        package:             pkg,
-        urgency:             opts.urgencyLabel    || opts.urgency || '',
-        total_price:         opts.price           || 0,
-        advance_paid:        0,
-        due_amount:          opts.price           || 0,
-        status:              'pending',
-        payment_status:      'unpaid',
-        progress:            0,
-        deadline:            deadline,
-        research_area:       topic,
-        special_instructions: notes || '',
-        /* contact stored in special_instructions prefix */
-        /* name & phone go into special_instructions since no dedicated column */
-        pages:               pageCount ? String(pageCount) : null,
-        page_count:          pageCount,
+        order_number:         orderNumber,
+        client_id:            clientId,
+        title:                opts.title || '',
+        service_type:         serviceType,
+        package:              pkg,
+        urgency:              opts.urgencyLabel || '',
+        total_price:          opts.price || 0,
+        advance_paid:         0,
+        status:               'pending',
+        payment_status:       'unpaid',
+        progress:             0,
+        deadline:             deadline,
+        research_area:        topic,
+        page_count:           pageCount,
+        pages:                pageCount ? String(pageCount) : null,
+        special_instructions: `Name: ${name}\nPhone: ${phone}` + (notes ? `\n\n${notes}` : ''),
       };
 
-      /* Prepend name+phone to special_instructions */
-      row.special_instructions =
-        `Name: ${name}\nPhone: ${phone}` +
-        (notes ? `\n\n${notes}` : '');
-
-      const { error } = await db.from('orders').insert(row);
-
+      const { data: insertData, error } = await db.from('orders').insert(row).select('id').single();
       if (error) throw error;
 
-      /* ── Success ── */
-      if (btn) {
-        btn.textContent = '✅ Order Confirmed!';
-        btn.style.background = 'linear-gradient(135deg,#16a34a,#22c55e)';
+      const orderId = insertData.id;
+
+      /* ── Upload attached files ── */
+      if (orderId && window._opFiles?.length > 0) {
+        for (const file of window._opFiles) {
+          try {
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const path     = `orders/${orderId}/${Date.now()}_${safeName}`;
+            await db.storage.from('order-files').upload(path, file, { upsert: false });
+          } catch (e) { console.warn('[Scriptora] File upload skipped:', file.name); }
+        }
+        window._opFiles = [];
       }
+
+      /* ── Save to sessionStorage for payment page ── */
+      sessionStorage.setItem('scriptora_order', JSON.stringify({
+        orderId:    orderId,
+        orderNumber: orderNumber,
+        title:      opts.title || '',
+        pkg:        pkg,
+        urgency:    opts.urgencyLabel || '',
+        deadline:   deadline,
+        total:      opts.price || 0,
+        advance:    advance,
+        clientId:   clientId,
+        name:       name,
+        phone:      phone,
+      }));
+
+      if (btn) { btn.innerHTML = '✅ Order Created!'; btn.style.background = 'linear-gradient(135deg,#16a34a,#22c55e)'; }
+
+      /* ── Redirect to payment page ── */
       setTimeout(() => {
         opClose();
-        /* Redirect to client dashboard if logged in */
-        if (clientId) {
-          window.location.href = '../Client Dashboard/client-dashboard.html';
-        }
-      }, 1600);
+        window.location.href = '../Payment page/payment.html';
+      }, 900);
 
     } catch (err) {
-      console.error('[Scriptora] Order insert failed:', err);
+      console.error('[Scriptora] Order error:', err);
       if (btn) {
-        btn.textContent = '❌ Error — Try Again';
+        btn.innerHTML = '❌ Error — আবার চেষ্টা করুন';
         btn.style.background = 'linear-gradient(135deg,#dc2626,#ef4444)';
         btn.disabled = false;
         setTimeout(() => {
-          btn.textContent = '📱 Confirm Order / অর্ডার নিশ্চিত করুন';
+          btn.innerHTML = '📱 Confirm Order / অর্ডার নিশ্চিত করুন';
           btn.style.background = '';
         }, 2500);
       }
@@ -478,44 +489,6 @@
     setTimeout(() => { el.style.borderColor = ''; }, 2000);
   }
 
-  /* ────────────────────────────────
-     PATCH mpOrder to open order popup
-  ──────────────────────────────── */
-  window.mpOrder = async function(id) {
-    const CFG      = window.SCRIPTORA_CONFIG;
-    const URGENCY  = CFG.urgency;
-    const SERVICES = CFG.services;
-
-    const s  = SERVICES.find(x => x.id === id);
-    const st = window._popupState;
-    if (!s || !st) return;
-
-    function calcPrice(s, urgency, st) {
-      const mult = URGENCY[urgency].multiplier;
-      if (s.unitType === 'fixed') return Math.round(s.rate * mult);
-      if (s.unitType === 'tier')  return Math.round(s.tiers[st.tierIndex].price * mult);
-      return Math.round((st.qty / s.perUnit) * s.rate * mult);
-    }
-
-    const price        = calcPrice(s, st.urgency, st);
-    const urgencyLabel = URGENCY[st.urgency]?.label || st.urgency;
-
-    opOpen({
-        serviceId:    id,
-        title:        s.title,
-        titleBn:      s.titleBn,
-        icon:         s.icon,
-        iconBg:       s.iconBg,
-        unitType:     s.unitType,
-        qty:          st.qty,
-        unitLabel:    s.unitLabel || '',
-        urgencyLabel: urgencyLabel,
-        rate:         s.rate,
-        perUnit:      s.perUnit,
-        tiers:        s.tiers,
-        tierIndex:    st.tierIndex,
-        price:        price,
-    });
-  };
+  /* mpOrder is defined in mobile-popup.js */
 
 })();
