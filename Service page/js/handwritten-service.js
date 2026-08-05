@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
     { icon: ICON.barChart,  title: 'Dashboard Live Progress',                desc: 'Track your order in real-time' },
     { icon: ICON.eye,       title: 'Scan Preview Before Final Delivery',     desc: 'Review scanned pages before handover' },
     { icon: ICON.truck,     title: 'Physical Delivery Option',               desc: 'Delivered safely to your address' },
-
+    { icon: ICON.pen2,      title: 'Human-Written Academic Work',            desc: '100% handwritten — no printed text' },
     { icon: ICON.shield,    title: '100% Confidential Service',              desc: 'Your work stays completely private' },
   ];
 
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
     svcSubtitleEl.textContent = pkg.subtitle;
     if (svcPriceEl) svcPriceEl.textContent = pkg.price;
     svcBestValEl.innerHTML    = pkg.bestValue;
-    svcOrderTxtEl.textContent = 'Order ' + pkg.name + ' Package';
+    svcOrderTxtEl.textContent = 'Order ' + pkg.name + ' Handwritten Package';
 
     var features = buildFeatureList(pkg, pageCount || 0);
     svcFeaturesEl.innerHTML = features.map(function (f) {
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function slideHtml(s, i) {
     return '<div class="hw-carousel-slide' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
       '<div class="hw-carousel-img-wrap">' +
-        '<img src="' + s.img + '" alt="' + s.alt + '" loading="' + (i === 0 ? 'eager' : 'lazy') + '">' +
+        '<img src="' + s.img + '" alt="' + s.alt + '" loading="' + (i === 0 ? 'eager' : 'lazy') + '" onclick="hwOpenPreview(\'' + s.img + '\')" style="cursor:zoom-in;">' +
       '</div>' +
       '<div class="hw-carousel-info">' +
         '<div class="hw-carousel-label">' +
@@ -290,55 +290,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var total    = slideEls.length;
     if (!total) return;
 
-    var isAnimating = false;
-
     function goTo(idx, dir) {
-      if (isAnimating) return;
-      isAnimating = true;
-
-      var next = (idx + total) % total;
-      if (next === current) { isAnimating = false; return; }
-
-      var outSlide   = slideEls[current];
-      var inSlide    = slideEls[next];
-      var outImgWrap = outSlide.querySelector('.hw-carousel-img-wrap');
-      var inImgWrap  = inSlide.querySelector('.hw-carousel-img-wrap');
-      var outInfo    = outSlide.querySelector('.hw-carousel-info');
-      var inInfo     = inSlide.querySelector('.hw-carousel-info');
-
-      var curlOutClass   = dir === 'left' ? 'curl-out-left' : 'curl-out';
-      var curlInClass    = dir === 'left' ? 'curl-in-left'  : 'curl-in';
-      var contentInClass = dir === 'left' ? 'content-in-left' : 'content-in';
-
-      /* 1. Content fades out */
-      outInfo.classList.add('content-out');
-
-      /* 2. Image curls out — shadow overlay appears */
-      outImgWrap.classList.add('curling', curlOutClass);
-
-      /* 3. Midpoint — swap slides */
-      setTimeout(function () {
-        outSlide.classList.remove('active');
-        outImgWrap.classList.remove('curling', curlOutClass);
-        outInfo.classList.remove('content-out');
-        dotEls[current].classList.remove('active');
-
-        current = next;
-        inSlide.classList.add('active');
-        dotEls[current].classList.add('active');
-
-        /* 4. New image curls in, content fades in */
-        inImgWrap.classList.add('curling', curlInClass);
-        inInfo.classList.add(contentInClass);
-
-        /* 5. Cleanup */
-        setTimeout(function () {
-          inImgWrap.classList.remove('curling', curlInClass);
-          inInfo.classList.remove('content-in', 'content-in-left');
-          isAnimating = false;
-        }, 550);
-
-      }, 300);
+      slideEls[current].classList.remove('active', 'slide-left');
+      dotEls[current].classList.remove('active');
+      current = (idx + total) % total;
+      slideEls[current].classList.remove('slide-left');
+      if (dir === 'left') slideEls[current].classList.add('slide-left');
+      slideEls[current].classList.add('active');
+      dotEls[current].classList.add('active');
     }
 
     if (hwPrev) hwPrev.addEventListener('click', function () { goTo(current - 1, 'left'); });

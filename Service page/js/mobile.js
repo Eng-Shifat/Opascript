@@ -185,7 +185,7 @@
                 D.samples.slides.map(function (s, i) {
                   return '<div class="mob-sample-slide' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
                     '<div class="mob-sample-img-wrap">' +
-                      '<img src="' + s.img + '" alt="' + s.alt + '" loading="lazy">' +
+                      '<img src="' + s.img + '" alt="' + s.alt + '" loading="lazy" onclick="hwOpenPreview(\'' + s.img + '\')" style="cursor:zoom-in;">' +
                       '<button class="mob-sample-btn mob-sample-prev" id="mobSamplePrev' + i + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
                       '<button class="mob-sample-btn mob-sample-next" id="mobSampleNext' + i + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
                     '</div>' +
