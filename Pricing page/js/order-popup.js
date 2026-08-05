@@ -351,23 +351,122 @@
   }
 
   /* ── Validation + Confirm ── */
-  window.opConfirm = function() {
+  window.opConfirm = async function() {
     const name  = document.getElementById('opName')?.value.trim();
     const phone = document.getElementById('opPhone')?.value.trim();
     const topic = document.getElementById('opTopic')?.value.trim();
+    const notes = document.getElementById('opNotes')?.value.trim();
 
     if (!name)  { highlight('opName',  'Name লিখুন'); return; }
     if (!phone) { highlight('opPhone', 'WhatsApp নম্বর লিখুন'); return; }
     if (!topic) { highlight('opTopic', 'Topic লিখুন'); return; }
 
-    /* TODO: backend integration here */
     const btn = document.querySelector('.op-confirm-btn');
-    if (btn) {
-      btn.textContent = '✅ Order Confirmed!';
-      btn.style.background = 'linear-gradient(135deg,#16a34a,#22c55e)';
-      btn.disabled = true;
+    if (btn) { btn.textContent = '⏳ Submitting...'; btn.disabled = true; }
+
+    try {
+      const db   = window.scriptoraSupabase;
+      const opts = window._opOpts || {};
+
+      /* ── Logged-in user (optional) ── */
+      let clientId = null;
+      try {
+        const { data: { user } } = await db.auth.getUser();
+        if (user) clientId = user.id;
+      } catch (_) {}
+
+      /* ── Order number: SCR-YYYYMMDD-XXXX ── */
+      const now     = new Date();
+      const datePart = now.toISOString().slice(0,10).replace(/-/g,'');
+      const rand     = Math.floor(1000 + Math.random() * 9000);
+      const orderNumber = `SCR-${datePart}-${rand}`;
+
+      /* ── Map service fields to table columns ── */
+      const serviceId = opts.serviceId || '';
+      const unitType  = opts.unitType  || '';
+
+      /* service_type: thesis / handwritten / other */
+      let serviceType = 'other';
+      if (serviceId === 'thesis-writing' || unitType === 'words' && opts.title?.toLowerCase().includes('thesis')) {
+        serviceType = 'thesis';
+      } else if (serviceId === 'handwritten-assignment') {
+        serviceType = 'handwritten';
+      }
+
+      /* package — thesis type or tier name */
+      let pkg = '';
+      if (unitType === 'tier' && opts.tiers && opts.tiers[opts.tierIndex]) {
+        pkg = opts.tiers[opts.tierIndex].name;
+      } else if (serviceId === 'thesis-writing') {
+        pkg = opts.thesisType || 'full';
+      }
+
+      /* pages / page_count from words */
+      const pageCount = unitType === 'words' && opts.qty
+        ? Math.ceil(opts.qty / 250) : null;
+
+      /* deadline date from urgency */
+      const urgencyDays = { standard: 15, express: 7, rush: 3 };
+      const daysAhead   = urgencyDays[opts.urgency] || 15;
+      const deadline    = new Date(now.getTime() + daysAhead * 86400000)
+        .toISOString().slice(0,10);
+
+      const row = {
+        order_number:        orderNumber,
+        client_id:           clientId,
+        title:               opts.title          || '',
+        service_type:        serviceType,
+        package:             pkg,
+        urgency:             opts.urgencyLabel    || opts.urgency || '',
+        total_price:         opts.price           || 0,
+        advance_paid:        0,
+        due_amount:          opts.price           || 0,
+        status:              'pending',
+        payment_status:      'unpaid',
+        progress:            0,
+        deadline:            deadline,
+        research_area:       topic,
+        special_instructions: notes || '',
+        /* contact stored in special_instructions prefix */
+        /* name & phone go into special_instructions since no dedicated column */
+        pages:               pageCount ? String(pageCount) : null,
+        page_count:          pageCount,
+      };
+
+      /* Prepend name+phone to special_instructions */
+      row.special_instructions =
+        `Name: ${name}\nPhone: ${phone}` +
+        (notes ? `\n\n${notes}` : '');
+
+      const { error } = await db.from('orders').insert(row);
+
+      if (error) throw error;
+
+      /* ── Success ── */
+      if (btn) {
+        btn.textContent = '✅ Order Confirmed!';
+        btn.style.background = 'linear-gradient(135deg,#16a34a,#22c55e)';
+      }
+      setTimeout(() => {
+        opClose();
+        /* Redirect to client dashboard if logged in */
+        if (clientId) {
+          window.location.href = '../Client Dashboard/client-dashboard.html';
+        }
+      }, 1600);
+
+    } catch (err) {
+      console.error('[Scriptora] Order insert failed:', err);
+      if (btn) {
+        btn.textContent = '❌ Error — Try Again';
+        btn.style.background = 'linear-gradient(135deg,#dc2626,#ef4444)';
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.textContent = '📱 Confirm Order / অর্ডার নিশ্চিত করুন';
+          btn.style.background = '';
+        }, 2500);
+      }
     }
-    setTimeout(opClose, 1800);
   };
 
   function highlight(id, msg) {
