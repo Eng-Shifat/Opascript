@@ -1,0 +1,68 @@
+[
+  {
+    "id": "contact-info",
+    "topic": "Contact Information",
+    "answer": "Scriptora-র contact:\n• Email: hello@scriptora.com\n• Telegram: (Scriptora official channel)\n• Facebook Page: available\n• Dashboard Messages: logged-in clients\n• Chatbot: এখানেই message করুন (fastest)\n\nWorking hours: সকাল ১০:০০ — রাত ১০:০০ (Bangladesh Time)।",
+    "keywords": [
+      "contact",
+      "reach",
+      "email",
+      "whatsapp",
+      "telegram",
+      "facebook",
+      "how to contact",
+      "contact info",
+      "get in touch",
+      "phone"
+    ],
+    "bangla_keywords": [
+      "যোগাযোগ",
+      "সংযোগ",
+      "ইমেইল",
+      "টেলিগ্রাম",
+      "ফেসবুক"
+    ],
+    "banglish_keywords": [
+      "contact korbo kivabe",
+      "number dao",
+      "email ki",
+      "telegram ache",
+      "facebook ache",
+      "whatsapp ache",
+      "kivabe jogajog korbo",
+      "hello@scriptora.com"
+    ]
+  },
+  {
+    "id": "contact-hours",
+    "topic": "Working Hours",
+    "answer": "Scriptora team available: সকাল ১০:০০ — রাত ১০:০০ (Bangladesh Standard Time)। এই সময়ের বাইরে message করলে পরদিন সকালে reply পাবেন।",
+    "keywords": [
+      "working hours",
+      "office hours",
+      "available",
+      "when open",
+      "when online",
+      "support hours",
+      "response time",
+      "business hours",
+      "10am",
+      "10pm"
+    ],
+    "bangla_keywords": [
+      "কখন খোলা",
+      "কাজের সময়",
+      "অনলাইন কখন",
+      "উপলব্ধ"
+    ],
+    "banglish_keywords": [
+      "kokhon open",
+      "working hours ki",
+      "reply kokhon pabo",
+      "online achen",
+      "office time ki",
+      "10ta theke 10ta",
+      "sakal theke raat"
+    ]
+  }
+]

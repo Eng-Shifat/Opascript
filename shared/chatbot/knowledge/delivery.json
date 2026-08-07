@@ -1,0 +1,123 @@
+[
+  {
+    "id": "del-timeline",
+    "topic": "Delivery Timeline",
+    "answer": "তিনটি delivery option (order page থেকে confirm):\n• Standard — ৭-১৪ দিন (base price)\n• Urgent — ৩-৭ দিন (+২০%)\n• Express — ১-৩ দিন (+৫০%)\n\nHandwritten service: সাধারণত ২৪-৭২ ঘণ্টা, express ১২-২৪ ঘণ্টা।",
+    "keywords": [
+      "delivery",
+      "timeline",
+      "how long",
+      "turnaround",
+      "days",
+      "when",
+      "deadline",
+      "delivery time",
+      "how many days",
+      "standard delivery",
+      "urgent delivery",
+      "express delivery"
+    ],
+    "bangla_keywords": [
+      "কতদিন",
+      "সময়",
+      "ডেলিভারি সময়",
+      "কখন পাবো"
+    ],
+    "banglish_keywords": [
+      "kotdin lagbe",
+      "koto din e pabo",
+      "delivery kobe",
+      "koto time lagbe",
+      "kokhon deben",
+      "standard kotdin",
+      "urgent kotdin",
+      "express kotdin"
+    ]
+  },
+  {
+    "id": "del-format",
+    "topic": "File Delivery Format",
+    "answer": "Final delivery DOCX (editable) এবং PDF format-এ, Client Dashboard-এর Files section থেকে download করা যাবে। Files available for 60 days from order date। Handwritten: high-resolution scanned PDF dashboard-এ, বা physical courier delivery।",
+    "keywords": [
+      "file format",
+      "docx",
+      "pdf",
+      "word file",
+      "download",
+      "file type",
+      "delivery format",
+      "files available"
+    ],
+    "bangla_keywords": [
+      "ফাইল ফরম্যাট",
+      "ডাউনলোড",
+      "ওয়ার্ড ফাইল"
+    ],
+    "banglish_keywords": [
+      "ki format e deben",
+      "docx deben",
+      "pdf deben",
+      "file ki format e pabo",
+      "word file deben",
+      "download korbo kivabe",
+      "60 days"
+    ]
+  },
+  {
+    "id": "del-track",
+    "topic": "Track Order Progress",
+    "answer": "Client Dashboard-এ real-time tracking:\n✓ Order Confirmed → ✓ Payment Received → ✍ Writing শুরু → Draft Delivery → Final Delivery\n\nLive countdown চলে, Messages section-এ admin-এর সাথে communicate করা যায়।",
+    "keywords": [
+      "track",
+      "progress",
+      "dashboard",
+      "status",
+      "update",
+      "check progress",
+      "order status",
+      "where is my order",
+      "live countdown",
+      "progress tracking"
+    ],
+    "bangla_keywords": [
+      "ট্র্যাক",
+      "অগ্রগতি",
+      "স্ট্যাটাস",
+      "অর্ডার কোথায়"
+    ],
+    "banglish_keywords": [
+      "progress koi",
+      "track korbo kivabe",
+      "order status koi",
+      "dashboard e ki dekhbo",
+      "update dao",
+      "kaz kototuku holo",
+      "countdown dekhbo"
+    ]
+  },
+  {
+    "id": "del-late",
+    "topic": "Late Delivery",
+    "answer": "Deadline miss হলে দুটি option:\n① সম্পূর্ণ refund\n② Free revision\nআপনার পছন্দ অনুযায়ী। Scriptora-র policy: Late Delivery কোনো option নয়।",
+    "keywords": [
+      "late",
+      "delay",
+      "deadline miss",
+      "overdue",
+      "not on time",
+      "delayed"
+    ],
+    "bangla_keywords": [
+      "দেরি",
+      "সময়মতো না পাওয়া",
+      "ডেডলাইন মিস"
+    ],
+    "banglish_keywords": [
+      "late hobe",
+      "deadline miss hole ki hobe",
+      "deri hobe",
+      "time moto na pele ki korbo",
+      "late delivery"
+    ]
+  }
+]

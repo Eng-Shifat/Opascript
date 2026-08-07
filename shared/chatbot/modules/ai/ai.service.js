@@ -13,9 +13,13 @@ let businessData = null;
 let faqData = null;
 let knowledgeLoadPromise = null;
 
+const KNOWLEDGE_FILES = [
+  'faq.json', 'services.json', 'pricing.json', 'payment.json',
+  'delivery.json', 'policies.json', 'workflow.json', 'writers.json',
+  'contact.json', 'guarantees.json', 'statistics.json', 'handwritten.json',
+];
+
 function resolveKnowledgeUrl(file) {
-  // ai.service.js nijer URL-er upor relative — deployment-e file
-  // jekhane hok move hole o path thik thake
   return new URL(`../../knowledge/${file}`, import.meta.url).href;
 }
 
@@ -23,12 +27,25 @@ async function loadKnowledge() {
   if (knowledgeLoadPromise) return knowledgeLoadPromise;
   knowledgeLoadPromise = (async () => {
     try {
-      const [bizRes, faqRes] = await Promise.all([
+      const results = await Promise.allSettled([
         fetch(resolveKnowledgeUrl('business.json')),
-        fetch(resolveKnowledgeUrl('faq.json')),
+        ...KNOWLEDGE_FILES.map((f) => fetch(resolveKnowledgeUrl(f))),
       ]);
-      businessData = await bizRes.json();
-      faqData = await faqRes.json();
+
+      if (results[0].status === 'fulfilled') {
+        businessData = await results[0].value.json();
+      }
+
+      const merged = [];
+      for (let i = 1; i < results.length; i++) {
+        if (results[i].status === 'fulfilled') {
+          try {
+            const data = await results[i].value.json();
+            if (Array.isArray(data)) merged.push(...data);
+          } catch (_) {}
+        }
+      }
+      faqData = merged.length ? merged : [];
     } catch (err) {
       console.error('[ai.service] failed to load knowledge base:', err);
       businessData = businessData || {};
@@ -42,7 +59,7 @@ function getBusiness() {
   return businessData || {};
 }
 
-/* Simple weighted keyword search over faq.json — no AI SDK. */
+/* Weighted keyword search across all loaded knowledge files. */
 function searchFaq(query, { limit = 1, minScore = 1 } = {}) {
   if (!faqData || !query) return [];
   const q = query.toLowerCase();
@@ -50,11 +67,23 @@ function searchFaq(query, { limit = 1, minScore = 1 } = {}) {
   const scored = faqData
     .map((entry) => {
       let score = 0;
-      (entry.keywords || []).forEach((kw) => { if (q.includes(kw.toLowerCase())) score += 2; });
-      entry.question.toLowerCase().split(/\s+/).forEach((word) => {
+      const allKeywords = [
+        ...(entry.keywords || []),
+        ...(entry.bangla_keywords || []),
+        ...(entry.banglish_keywords || []),
+      ];
+      allKeywords.forEach((kw) => { if (q.includes(kw.toLowerCase())) score += 2; });
+
+      // Match question, topic, service name, description
+      const textFields = [entry.question, entry.topic, entry.service, entry.description]
+        .filter(Boolean).join(' ').toLowerCase();
+      textFields.split(/\s+/).forEach((word) => {
         if (word.length > 3 && q.includes(word)) score += 0.5;
       });
-      return { entry, score };
+
+      // Prefer entries that have an answer field
+      const answerText = entry.answer || entry.description || '';
+      return { entry: { ...entry, answer: answerText }, score };
     })
     .filter((s) => s.score >= minScore)
     .sort((a, b) => b.score - a.score);

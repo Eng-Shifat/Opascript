@@ -1,0 +1,402 @@
+[
+  {
+    "id": "svc-thesis",
+    "service": "Thesis Writing",
+    "description": "Full thesis support from topic selection to final submission. Covers Honours, Masters, PhD. Includes literature review, methodology, SPSS analysis, formatting, Turnitin report, unlimited revision.",
+    "includes": [
+      "Topic Selection & Proposal",
+      "Literature Review",
+      "Research Methodology",
+      "SPSS Analysis",
+      "Data Collection",
+      "Results & Discussion",
+      "Conclusion & Recommendations",
+      "References & Citations",
+      "Professional Formatting (APA/IEEE/Harvard/MLA/Chicago)",
+      "Turnitin Report",
+      "Unlimited Revision"
+    ],
+    "levels": [
+      "Honours",
+      "Masters",
+      "PhD"
+    ],
+    "starting_price": "৳45,000 (Premium Package)",
+    "pricing_note": "Pricing page-এ live calculator আছে — 5,000 words থেকে শুরু হয় ৳5,000 (Standard)",
+    "keywords": [
+      "thesis",
+      "thesis writing",
+      "research",
+      "dissertation",
+      "honours thesis",
+      "masters thesis",
+      "phd thesis",
+      "undergraduate thesis",
+      "graduate thesis",
+      "full thesis",
+      "single chapter",
+      "proposal only",
+      "analysis only"
+    ],
+    "bangla_keywords": [
+      "থিসিস",
+      "গবেষণা",
+      "থিসিস লেখা",
+      "থিসিস সাহায্য",
+      "থিসিস রাইটিং"
+    ],
+    "banglish_keywords": [
+      "thesis koro",
+      "thesis dao",
+      "thesis help",
+      "thesis likhte chai",
+      "thesis lagbe",
+      "research help",
+      "thesis writing service",
+      "full thesis koro",
+      "chapter koro",
+      "proposal dao"
+    ]
+  },
+  {
+    "id": "svc-assignment",
+    "service": "Assignment Writing",
+    "description": "University-guideline-compliant assignment writing for BBA, MBA, NFE, CSE, SWE and all departments. Plagiarism-free, formatted and on time.",
+    "keywords": [
+      "assignment",
+      "assignment writing",
+      "homework",
+      "coursework",
+      "project",
+      "bba",
+      "mba",
+      "nfe",
+      "cse",
+      "swe"
+    ],
+    "bangla_keywords": [
+      "অ্যাসাইনমেন্ট",
+      "অ্যাসাইনমেন্ট লেখা",
+      "অ্যাসাইনমেন্ট সাহায্য",
+      "হোমওয়ার্ক"
+    ],
+    "banglish_keywords": [
+      "assignment koro",
+      "assignment dao",
+      "assignment help",
+      "assignment likhte chai",
+      "assignment lagbe",
+      "bba assignment",
+      "mba assignment",
+      "cse project help"
+    ]
+  },
+  {
+    "id": "svc-research",
+    "service": "Research Paper & Proposal",
+    "description": "Research proposals, journal papers and conference papers. Includes problem statement, literature review, methodology and complete academic formatting.",
+    "keywords": [
+      "research paper",
+      "research proposal",
+      "proposal",
+      "journal paper",
+      "conference paper",
+      "publication",
+      "academic paper",
+      "research writing",
+      "research proposal only"
+    ],
+    "bangla_keywords": [
+      "রিসার্চ প্রপোজাল",
+      "গবেষণা প্রস্তাব",
+      "জার্নাল পেপার",
+      "কনফারেন্স পেপার"
+    ],
+    "banglish_keywords": [
+      "research proposal dao",
+      "proposal help",
+      "research paper help",
+      "journal paper help",
+      "conference paper dao",
+      "publication help"
+    ]
+  },
+  {
+    "id": "svc-spss",
+    "service": "SPSS Analysis",
+    "description": "Full SPSS data analysis: Descriptive Statistics, Regression, Correlation, ANOVA, Hypothesis Testing, Reliability (Cronbach Alpha), Factor Analysis, Chi-Square, Crosstab, Data Cleaning, Result Interpretation, Report Writing. Results formatted per university requirements.",
+    "includes": [
+      "Descriptive Statistics",
+      "Regression Analysis (Linear, Multiple, Logistic)",
+      "Correlation Analysis (Pearson, Spearman)",
+      "ANOVA (One-way, Two-way)",
+      "Hypothesis Testing (t-test, z-test)",
+      "Reliability Analysis (Cronbach's Alpha)",
+      "Factor Analysis (EFA, CFA)",
+      "Chi-Square Test",
+      "Cross-Tabulation",
+      "Data Cleaning & Coding",
+      "Result Interpretation",
+      "SPSS Output Report Writing"
+    ],
+    "keywords": [
+      "spss",
+      "data analysis",
+      "statistical analysis",
+      "statistics",
+      "hypothesis testing",
+      "regression",
+      "anova",
+      "descriptive statistics",
+      "quantitative",
+      "correlation",
+      "factor analysis",
+      "cronbach",
+      "chi square",
+      "reliability",
+      "crosstab",
+      "spss analysis",
+      "spss help",
+      "spss support"
+    ],
+    "bangla_keywords": [
+      "ডেটা বিশ্লেষণ",
+      "এসপিএসএস",
+      "পরিসংখ্যান",
+      "তথ্য বিশ্লেষণ"
+    ],
+    "banglish_keywords": [
+      "spss korben",
+      "spss dao",
+      "spss help",
+      "spss lagbe",
+      "data analysis koro",
+      "statistics help",
+      "spss support",
+      "quantitative analysis",
+      "spss korba",
+      "spss analysis dao",
+      "regression help",
+      "anova help",
+      "hypothesis help"
+    ]
+  },
+  {
+    "id": "svc-editing",
+    "service": "Proofreading & Editing",
+    "description": "Academic grammar, language, spelling and formatting review. Makes your draft professional and submission-ready without changing content or meaning.",
+    "keywords": [
+      "proofreading",
+      "editing",
+      "grammar check",
+      "language check",
+      "spelling",
+      "proofread",
+      "edit",
+      "grammar",
+      "language editing",
+      "academic editing",
+      "english correction"
+    ],
+    "bangla_keywords": [
+      "প্রুফরিডিং",
+      "সম্পাদনা",
+      "ভুল সংশোধন",
+      "ভাষা ঠিক করা",
+      "গ্রামার"
+    ],
+    "banglish_keywords": [
+      "proofreading dao",
+      "editing koro",
+      "grammar check koro",
+      "english thik koro",
+      "bhul thik koro",
+      "editing help",
+      "grammar fix"
+    ]
+  },
+  {
+    "id": "svc-formatting",
+    "service": "Formatting",
+    "description": "Professional formatting in APA, IEEE, Harvard, MLA, Chicago, Vancouver, ACM or university-specific styles. Includes title page, TOC, headers, margins, font, spacing and citation formatting.",
+    "keywords": [
+      "formatting",
+      "document formatting",
+      "apa",
+      "ieee",
+      "harvard",
+      "mla",
+      "chicago",
+      "vancouver",
+      "acm",
+      "format",
+      "layout",
+      "margin",
+      "font",
+      "spacing",
+      "citation formatting"
+    ],
+    "bangla_keywords": [
+      "ফরম্যাটিং",
+      "ডকুমেন্ট ফরম্যাট",
+      "সাজানো"
+    ],
+    "banglish_keywords": [
+      "formatting dao",
+      "format koro",
+      "apa format",
+      "ieee format",
+      "harvard format",
+      "formatting lagbe",
+      "document format koro",
+      "mla format",
+      "chicago format"
+    ]
+  },
+  {
+    "id": "svc-turnitin",
+    "service": "Turnitin / Plagiarism Check",
+    "description": "Turnitin similarity check with official report. FREE with every order. Verifies originality before submission.",
+    "price": "FREE — included in every order",
+    "keywords": [
+      "turnitin",
+      "plagiarism check",
+      "similarity report",
+      "originality check",
+      "plagiarism",
+      "similarity",
+      "turnitin report"
+    ],
+    "bangla_keywords": [
+      "টার্নিটিন",
+      "প্লেজিয়ারিজম চেক",
+      "কপি চেক",
+      "নকল চেক"
+    ],
+    "banglish_keywords": [
+      "turnitin dao",
+      "turnitin check",
+      "plagiarism check koro",
+      "similarity report dao",
+      "turnitin report lagbe",
+      "turnitin free?"
+    ]
+  },
+  {
+    "id": "svc-presentation",
+    "service": "Presentation Slides",
+    "description": "Professional PowerPoint presentation for thesis defence, viva or submission. Price: +৳500 add-on.",
+    "price": "+৳500",
+    "keywords": [
+      "presentation",
+      "powerpoint",
+      "slides",
+      "ppt",
+      "thesis defence",
+      "viva presentation",
+      "slide deck"
+    ],
+    "bangla_keywords": [
+      "প্রেজেন্টেশন",
+      "স্লাইড",
+      "পাওয়ারপয়েন্ট"
+    ],
+    "banglish_keywords": [
+      "presentation dao",
+      "ppt banao",
+      "slide banao",
+      "viva presentation",
+      "defence presentation",
+      "presentation price koto"
+    ]
+  },
+  {
+    "id": "svc-handwritten",
+    "service": "Handwritten Service",
+    "description": "Professional handwritten academic documents by trained specialists. Assignment, Lab Report, Practical Notebook, Record Book, Engineering Drawing Copy, Project Copy. Blue or black ink. University margin & format. Scanned PDF or physical courier delivery. Express 12-24hr available.",
+    "delivery_time": "24-72 hours standard. Express 12-24 hours available.",
+    "keywords": [
+      "handwritten",
+      "hand written",
+      "handwriting",
+      "lab report",
+      "practical notebook",
+      "record book",
+      "physical copy",
+      "blue ink",
+      "black ink",
+      "handwritten assignment",
+      "engineering drawing"
+    ],
+    "bangla_keywords": [
+      "হাতের লেখা",
+      "হাতে লেখা",
+      "ল্যাব রিপোর্ট",
+      "প্র্যাকটিক্যাল নোটবুক",
+      "রেকর্ড বুক"
+    ],
+    "banglish_keywords": [
+      "hater lekha",
+      "handwritten assignment lagbe",
+      "lab report likhte dao",
+      "practical notebook lagbe",
+      "record book dao",
+      "hate lekha service",
+      "engineering drawing copy"
+    ]
+  },
+  {
+    "id": "svc-cse",
+    "service": "CSE/SWE Technical Support",
+    "description": "Technical support for CSE and SWE thesis and projects: architecture design, code documentation, system design, technical report writing.",
+    "keywords": [
+      "cse",
+      "swe",
+      "software engineering",
+      "computer science",
+      "technical thesis",
+      "engineering thesis",
+      "project documentation",
+      "code documentation",
+      "system design"
+    ],
+    "bangla_keywords": [
+      "সিএসই",
+      "সফটওয়্যার ইঞ্জিনিয়ারিং",
+      "প্রযুক্তি"
+    ],
+    "banglish_keywords": [
+      "cse thesis help",
+      "swe thesis dao",
+      "technical project help",
+      "code documentation help",
+      "system design help"
+    ]
+  },
+  {
+    "id": "svc-data-collection",
+    "service": "Data Collection",
+    "description": "Primary data collection — survey distribution, response collection and raw data delivery. Add-on price: +৳1,000.",
+    "price": "+৳1,000",
+    "keywords": [
+      "data collection",
+      "survey",
+      "questionnaire",
+      "primary data",
+      "sample collection",
+      "survey distribution"
+    ],
+    "bangla_keywords": [
+      "ডেটা সংগ্রহ",
+      "সার্ভে",
+      "প্রশ্নমালা"
+    ],
+    "banglish_keywords": [
+      "data collection lagbe",
+      "survey help",
+      "questionnaire distribute",
+      "primary data collection",
+      "data collection price koto"
+    ]
+  }
+]

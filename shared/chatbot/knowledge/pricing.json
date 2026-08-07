@@ -1,0 +1,158 @@
+[
+  {
+    "id": "price-model",
+    "topic": "How Pricing Works",
+    "answer": "Scriptora-র pricing automatically calculate হয় word count, deadline এবং urgency level অনুযায়ী। Order page-এ live calculator ব্যবহার করে real-time estimate দেখতে পারবেন। Final pricing order-এর ২৪ ঘণ্টার মধ্যে team confirm করে।",
+    "keywords": [
+      "price",
+      "pricing",
+      "cost",
+      "how much",
+      "rate",
+      "charge",
+      "fee",
+      "estimate",
+      "calculate",
+      "budget",
+      "price calculator"
+    ],
+    "bangla_keywords": [
+      "দাম",
+      "মূল্য",
+      "খরচ",
+      "কতো টাকা",
+      "রেট",
+      "হিসাব"
+    ],
+    "banglish_keywords": [
+      "price koto",
+      "daam koto",
+      "koto taka",
+      "khoros koto",
+      "rate koto",
+      "charge koto",
+      "estimate dao",
+      "koto hobe",
+      "price calculator",
+      "budget koto"
+    ]
+  },
+  {
+    "id": "price-thesis-start",
+    "topic": "Thesis Starting Price",
+    "answer": "Thesis pricing শুরু হয় ৳5,000 থেকে (5,000 words / ~20 pages, Standard rate)। Premium Package starting from ৳45,000। Final price নির্ভর করে word count, deadline এবং research complexity-র উপর। Order করলে ২৪ ঘণ্টার মধ্যে exact quote পাবেন।",
+    "keywords": [
+      "thesis price",
+      "thesis cost",
+      "how much thesis",
+      "thesis pricing",
+      "full thesis cost",
+      "starting price",
+      "minimum price"
+    ],
+    "bangla_keywords": [
+      "থিসিসের দাম",
+      "থিসিস কতো টাকা",
+      "শুরু কতো থেকে"
+    ],
+    "banglish_keywords": [
+      "thesis price koto",
+      "thesis daam koto",
+      "thesis koto taka lagbe",
+      "minimum price koto",
+      "starting price koto",
+      "premium package price",
+      "full thesis price"
+    ]
+  },
+  {
+    "id": "price-urgency",
+    "topic": "Urgency Levels & Pricing",
+    "answer": "তিনটি urgency level:\n• Standard (৭-১৪ দিন) — base price\n• Urgent (৩-৭ দিন) — +২০% extra\n• Express (১-৩ দিন) — +৫০% extra\n\nUrgent order-এর জন্য আলাদা যোগাযোগ করুন।",
+    "keywords": [
+      "urgency",
+      "urgent",
+      "express",
+      "rush",
+      "fast",
+      "quick",
+      "deadline",
+      "speed",
+      "standard",
+      "urgent pricing",
+      "express pricing"
+    ],
+    "bangla_keywords": [
+      "জরুরি",
+      "দ্রুত",
+      "এক্সপ্রেস",
+      "তাড়াতাড়ি",
+      "আর্জেন্ট"
+    ],
+    "banglish_keywords": [
+      "urgent lagbe",
+      "express order",
+      "druto dao",
+      "rush order",
+      "fast delivery",
+      "koto din lagbe",
+      "express price koto",
+      "urgent price koto",
+      "standard koto din"
+    ]
+  },
+  {
+    "id": "price-addons",
+    "topic": "Add-on Service Prices",
+    "answer": "Optional add-on গুলোর exact price (order page থেকে):\n• Plagiarism Check — FREE (সবার জন্য included)\n• Presentation Slides — +৳500\n• Data Collection — +৳1,000\n• Custom Cover Page — +৳100\n• All Figures & Charts — +৳300",
+    "keywords": [
+      "add on",
+      "addon",
+      "extra service",
+      "presentation slides price",
+      "data collection price",
+      "cover page price",
+      "charts price",
+      "additional service price"
+    ],
+    "bangla_keywords": [
+      "অতিরিক্ত সেবার দাম",
+      "আলাদা সার্ভিস মূল্য"
+    ],
+    "banglish_keywords": [
+      "addon price",
+      "presentation slides koto taka",
+      "cover page price",
+      "chart price koto",
+      "extra service price",
+      "data collection koto taka"
+    ]
+  },
+  {
+    "id": "price-words",
+    "topic": "Word Count & Pages",
+    "answer": "250 words = ১ পাতা (standard calculation)। Order page-এ word count option: 2,000 / 5,000 / 10,000 / 15,000 / 20,000 / 25,000+ words। Minimum 5,000 words থেকে order নেওয়া হয়।",
+    "keywords": [
+      "word count",
+      "pages",
+      "how many pages",
+      "per page",
+      "per word",
+      "words",
+      "minimum words"
+    ],
+    "bangla_keywords": [
+      "শব্দ সংখ্যা",
+      "পাতা সংখ্যা",
+      "ন্যূনতম"
+    ],
+    "banglish_keywords": [
+      "word count koto",
+      "page koto hobe",
+      "minimum words koto",
+      "5000 words price",
+      "10000 words price",
+      "per page price koto"
+    ]
+  }
+]

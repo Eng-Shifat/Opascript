@@ -1,0 +1,125 @@
+[
+  {
+    "id": "pay-methods",
+    "topic": "Payment Methods",
+    "answer": "Scriptora-তে ৩টি payment method:\n• bKash — Send Money করুন (number: dashboard-এ দেওয়া থাকে)\n• Nagad — Send Money করুন\n• Bank Transfer — Dutch-Bangla Bank, Narayanganj Branch\n\nসব method-এ ৫০% advance দিতে হয়, বাকি ৫০% delivery-র পর।",
+    "keywords": [
+      "payment",
+      "pay",
+      "bkash",
+      "nagad",
+      "rocket",
+      "bank transfer",
+      "dutch bangla",
+      "payment method",
+      "how to pay",
+      "mobile banking"
+    ],
+    "bangla_keywords": [
+      "পেমেন্ট",
+      "বিকাশ",
+      "নগদ",
+      "রকেট",
+      "ব্যাংক ট্রান্সফার",
+      "টাকা পাঠানো"
+    ],
+    "banglish_keywords": [
+      "payment koro",
+      "bkash dibo",
+      "nagad dibo",
+      "kivabe pay korbo",
+      "taka pathabo",
+      "payment method ki",
+      "dutch bangla bank",
+      "bank transfer korbo"
+    ]
+  },
+  {
+    "id": "pay-50-50",
+    "topic": "Advance Payment Structure",
+    "answer": "Payment দুই ভাগে হয়:\n• এখন: ৫০% Advance দিলে কাজ শুরু হয়\n• Delivery-র পর: বাকি ৫০% দিলে final file unlock হয়\n\nTransaction ID ও payment amount dashboard-এ submit করুন। Admin ২৪ ঘণ্টার মধ্যে verify করবেন।",
+    "keywords": [
+      "advance payment",
+      "installment",
+      "half payment",
+      "50 percent",
+      "payment structure",
+      "deposit",
+      "upfront",
+      "two installments"
+    ],
+    "bangla_keywords": [
+      "অগ্রিম",
+      "কিস্তি",
+      "অর্ধেক পেমেন্ট",
+      "দুই ভাগে"
+    ],
+    "banglish_keywords": [
+      "advance koto",
+      "50 percent age dite hobe",
+      "kisti ache",
+      "payment dui vage",
+      "age koto dibo",
+      "advance payment koto",
+      "50 50 payment"
+    ]
+  },
+  {
+    "id": "pay-confirm",
+    "topic": "How to Confirm Payment",
+    "answer": "Payment করার পর: Transaction ID এবং payment amount dashboard-এ দিন। Screenshot upload করতে পারেন (optional, PNG/JPG max 5MB)। Admin ২৪ ঘণ্টার মধ্যে verify করে confirmation দেবেন। Confirm হলে order section-এ দেখা যাবে ও live countdown শুরু হবে।",
+    "keywords": [
+      "transaction id",
+      "payment confirmation",
+      "payment proof",
+      "screenshot",
+      "verify payment",
+      "payment received",
+      "confirm payment",
+      "payment screenshot"
+    ],
+    "bangla_keywords": [
+      "লেনদেন আইডি",
+      "পেমেন্ট নিশ্চিত",
+      "স্ক্রিনশট"
+    ],
+    "banglish_keywords": [
+      "transaction id koi debo",
+      "payment confirm hoise",
+      "screenshot pathabo",
+      "payment verify kokhon hobe",
+      "payment proof dao"
+    ]
+  },
+  {
+    "id": "pay-refund",
+    "topic": "Refund Policy",
+    "answer": "হ্যাঁ, refund পাওয়া যায়। Scriptora-র refund policy:\n• কাজ সম্পূর্ণ না হলে — পূর্ণ refund\n• মান সন্তোষজনক না হলে — পূর্ণ refund\n• Deadline miss হলে — full refund অথবা free revision (আপনার পছন্দ)\n\nRefund-এর জন্য support-এ যোগাযোগ করুন।",
+    "keywords": [
+      "refund",
+      "money back",
+      "cancel",
+      "cancellation",
+      "return money",
+      "refund policy",
+      "get refund",
+      "money back guarantee"
+    ],
+    "bangla_keywords": [
+      "ফেরত",
+      "রিফান্ড",
+      "টাকা ফেরত",
+      "বাতিল",
+      "গ্যারান্টি"
+    ],
+    "banglish_keywords": [
+      "refund pabo",
+      "taka ferot pabo",
+      "cancel korbo",
+      "refund policy ki",
+      "kaz na hole ki hobe",
+      "money back guarantee",
+      "deadline miss hole refund"
+    ]
+  }
+]

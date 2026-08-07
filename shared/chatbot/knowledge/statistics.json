@@ -1,0 +1,75 @@
+[
+  {
+    "id": "stats-spss",
+    "topic": "SPSS Service Details",
+    "answer": "Scriptora SPSS analysis service-এ যা include করা হয়:\n\n📊 Descriptive Statistics (Mean, SD, Min/Max, Frequency)\n📈 Regression Analysis (Linear, Multiple, Logistic)\n🔗 Correlation (Pearson, Spearman)\n📉 ANOVA (One-way, Two-way)\n✅ Hypothesis Testing (t-test, z-test)\n🔄 Reliability Analysis (Cronbach's Alpha)\n🧩 Factor Analysis (EFA, CFA)\n📋 Chi-Square Test & Crosstab\n🧹 Data Cleaning & Coding\n📝 Result Interpretation & Report Writing\n\nDataset ও research questions share করুন — বাকিটা আমরা করবো।\n\n👉 Suggested next: Pricing জানতে চান? Sample report দেখতে চান?",
+    "keywords": [
+      "spss",
+      "spss details",
+      "spss full",
+      "spss services",
+      "spss what includes",
+      "regression",
+      "anova",
+      "correlation",
+      "cronbach",
+      "factor analysis",
+      "hypothesis",
+      "descriptive statistics",
+      "chi square",
+      "reliability",
+      "data cleaning",
+      "spss report"
+    ],
+    "bangla_keywords": [
+      "এসপিএসএস বিস্তারিত",
+      "পরিসংখ্যান বিশ্লেষণ"
+    ],
+    "banglish_keywords": [
+      "spss e ki ki koren",
+      "spss details bolo",
+      "spss full service",
+      "spss complete",
+      "regression koren",
+      "anova koren",
+      "correlation koren",
+      "cronbach alpha",
+      "factor analysis koren"
+    ]
+  },
+  {
+    "id": "stats-methodology",
+    "topic": "Research Methodology Options",
+    "answer": "Scriptora-তে সব major methodology support করা হয়:\n• Survey / Questionnaire (Structured, Likert scale)\n• In-depth Interview (Qualitative, narrative)\n• Secondary Data (Reports, journals, databases)\n• Mixed Method (Quantitative + Qualitative)\n• Experimental (Lab-based, hardware, prototype)\n• Simulation (MATLAB, modelling, analysis)\n• Data-driven (Dataset, ML model, analysis)\n\nOrder form-এ methodology select করুন।",
+    "keywords": [
+      "methodology",
+      "research methodology",
+      "survey",
+      "questionnaire",
+      "interview",
+      "secondary data",
+      "mixed method",
+      "experimental",
+      "simulation",
+      "quantitative",
+      "qualitative"
+    ],
+    "bangla_keywords": [
+      "গবেষণা পদ্ধতি",
+      "মেথডলজি",
+      "সার্ভে",
+      "সাক্ষাৎকার"
+    ],
+    "banglish_keywords": [
+      "methodology ki",
+      "survey methodology",
+      "questionnaire help",
+      "mixed method",
+      "qualitative help",
+      "quantitative help",
+      "secondary data help",
+      "simulation help",
+      "matlab help"
+    ]
+  }
+]

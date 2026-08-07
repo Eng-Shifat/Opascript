@@ -1,0 +1,132 @@
+[
+  {
+    "id": "pol-revision",
+    "topic": "Revision Policy",
+    "answer": "Standard package: ৩টি free revision। Premium package: Unlimited revision। Delivery-র পর ৩০ দিনের মধ্যে revision request করতে হবে। Condition: original scope-এর মধ্যে থাকতে হবে।",
+    "keywords": [
+      "revision",
+      "revise",
+      "correction",
+      "change",
+      "rework",
+      "revision policy",
+      "how many revisions",
+      "unlimited revision",
+      "free revision",
+      "3 revisions"
+    ],
+    "bangla_keywords": [
+      "সংশোধন",
+      "পরিবর্তন",
+      "রিভিশন",
+      "ঠিক করা"
+    ],
+    "banglish_keywords": [
+      "revision pabo",
+      "kotobar revision",
+      "free revision ache",
+      "revision dao",
+      "change korte chai",
+      "3 ta revision",
+      "unlimited revision"
+    ]
+  },
+  {
+    "id": "pol-confidential",
+    "topic": "Confidentiality",
+    "answer": "আপনার সকল তথ্য সম্পূর্ণ গোপনীয়: কোনো third party-র সাথে share করা হয় না। কাজ resell বা publish করা হয় না। NDA সহ confidentiality guaranteed। Files 60 days secure storage।",
+    "keywords": [
+      "confidential",
+      "privacy",
+      "secret",
+      "safe",
+      "third party",
+      "share",
+      "nda",
+      "non disclosure",
+      "identity",
+      "personal info",
+      "confidentiality"
+    ],
+    "bangla_keywords": [
+      "গোপনীয়",
+      "নিরাপদ",
+      "ব্যক্তিগত তথ্য",
+      "শেয়ার হবে না"
+    ],
+    "banglish_keywords": [
+      "gopotoniyo thakbe",
+      "amr info safe",
+      "keu janbe na",
+      "third party share hobe na",
+      "nda ache",
+      "confidential ache",
+      "amr data safe"
+    ]
+  },
+  {
+    "id": "pol-originality",
+    "topic": "Plagiarism & Originality",
+    "answer": "প্রতিটি কাজ 100% original এবং plagiarism-free। Scratch থেকে লেখা হয়। Turnitin report FREE সব order-এ included। AI content use করা হয় না — human writers দ্বারা manually written।",
+    "keywords": [
+      "original",
+      "plagiarism free",
+      "originality",
+      "unique",
+      "not copied",
+      "turnitin",
+      "similarity",
+      "fresh content",
+      "100 percent original",
+      "ai free",
+      "human written"
+    ],
+    "bangla_keywords": [
+      "নকল নেই",
+      "মৌলিক",
+      "অরিজিনাল",
+      "কপি না",
+      "মানুষের লেখা"
+    ],
+    "banglish_keywords": [
+      "original thakbe",
+      "plagiarism free",
+      "copy paste na",
+      "unique content",
+      "turnitin e pass hobe",
+      "similarity koto thakbe",
+      "ai content na",
+      "human writer"
+    ]
+  },
+  {
+    "id": "pol-ai",
+    "topic": "AI Content Policy",
+    "answer": "Scriptora human writers দিয়ে কাজ করে — AI-generated content (ChatGPT, etc.) use করা হয় না। প্রতিটি thesis ও assignment real academic writers দ্বারা manually লেখা। এটি Turnitin ও AI detection tools-এ pass করে।",
+    "keywords": [
+      "ai",
+      "chatgpt",
+      "ai generated",
+      "human written",
+      "not ai",
+      "ai free",
+      "ai detection",
+      "ai policy",
+      "ai tool"
+    ],
+    "bangla_keywords": [
+      "এআই",
+      "মানুষের লেখা",
+      "কৃত্রিম বুদ্ধিমত্তা"
+    ],
+    "banglish_keywords": [
+      "ai diye lekha",
+      "chatgpt use koro",
+      "human writer",
+      "ai free",
+      "ai detection e dhora porbe",
+      "real human writer ache",
+      "chatgpt use na"
+    ]
+  }
+]

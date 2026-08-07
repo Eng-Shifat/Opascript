@@ -1,0 +1,60 @@
+[
+  {
+    "id": "wf-steps",
+    "topic": "Complete Order Process",
+    "answer": "Scriptora-র ৬-step order process:\n① Topic ও requirements submit করুন (order page)\n② ৫০% advance payment দিন (bKash/Nagad/Bank)\n③ Expert writer কাজ শুরু করেন\n④ Progress update ও draft পান (Dashboard)\n⑤ বাকি ৫০% payment করুন\n⑥ File unlock ও delivery (DOCX + PDF)\n\nOrder confirm-এর ২৪ ঘণ্টার মধ্যে team WhatsApp-এ যোগাযোগ করবে।",
+    "keywords": [
+      "how to order",
+      "order process",
+      "steps",
+      "how it works",
+      "workflow",
+      "procedure",
+      "start order",
+      "place order",
+      "order korbo kivabe"
+    ],
+    "bangla_keywords": [
+      "কিভাবে অর্ডার করবো",
+      "অর্ডার প্রক্রিয়া",
+      "ধাপ",
+      "পদক্ষেপ"
+    ],
+    "banglish_keywords": [
+      "kivabe order korbo",
+      "order process ki",
+      "steps ki",
+      "how to start",
+      "order debo kivabe",
+      "kaz shuru korbo kivabe",
+      "order korar niyon"
+    ]
+  },
+  {
+    "id": "wf-order-types",
+    "topic": "Order Types Available",
+    "answer": "Scriptora-তে order করা যায়:\n• Full Thesis (সম্পূর্ণ)\n• Single Chapter\n• Proposal Only\n• Analysis Only (Chapter 4-5)\n• Custom — specific requirements\n\nDepartments: Honours & Masters অথবা Engineering।",
+    "keywords": [
+      "full thesis",
+      "single chapter",
+      "proposal only",
+      "analysis only",
+      "custom order",
+      "chapter",
+      "order type"
+    ],
+    "bangla_keywords": [
+      "পুরো থিসিস",
+      "একটি অধ্যায়",
+      "প্রস্তাব শুধু"
+    ],
+    "banglish_keywords": [
+      "full thesis order",
+      "single chapter order",
+      "proposal only order",
+      "analysis only",
+      "chapter 4 5 only",
+      "custom order"
+    ]
+  }
+]
