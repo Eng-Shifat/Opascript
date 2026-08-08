@@ -706,7 +706,7 @@
 
       <!-- University Logo Grid -->
       <div class="uni-grid-wrap">
-        <div class="uni-grid">
+        <div class="uni-grid" id="uniGrid">
           <!-- Row 1 -->
           <div class="uni-card"><div class="uni-logo-wrap"><img src="assets/uni/buet.png" alt="BUET"></div><span class="uni-name">BUET</span></div>
           <div class="uni-card"><div class="uni-logo-wrap"><img src="assets/uni/du.png" alt="University of Dhaka"></div><span class="uni-name">University of Dhaka</span></div>
@@ -753,11 +753,90 @@
           <div class="uni-card more-card"><div class="uni-logo-wrap"><span class="uni-more-plus">+10</span></div><span class="uni-name">More Universities</span></div>
         </div>
       </div>
+      <script>
+      (function () {
+        var mq = window.matchMedia('(max-width: 600px)');
+        var originalGrid = document.getElementById('uniGrid');
+        var originalCards = Array.prototype.slice.call(originalGrid.children);
+        var pageSize = 15; // 5 columns x 3 rows
+        var paged = false;
+
+        var autoTimer = null;
+        var resumeTimer = null;
+        var currentPage = 0;
+
+        function stopAuto() {
+          if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+        }
+
+        function startAuto(track) {
+          stopAuto();
+          var totalPages = track.children.length;
+          if (totalPages <= 1) return;
+          autoTimer = setInterval(function () {
+            currentPage = (currentPage + 1) % totalPages;
+            track.scrollTo({ left: track.clientWidth * currentPage, behavior: 'smooth' });
+          }, 3000);
+        }
+
+        function pauseThenResume(track) {
+          stopAuto();
+          clearTimeout(resumeTimer);
+          resumeTimer = setTimeout(function () { startAuto(track); }, 4000);
+        }
+
+        function buildPages() {
+          if (paged) return;
+          var track = document.createElement('div');
+          track.className = 'uni-grid-track';
+          track.id = 'uniGridTrack';
+          for (var i = 0; i < originalCards.length; i += pageSize) {
+            var page = document.createElement('div');
+            page.className = 'uni-grid-page';
+            originalCards.slice(i, i + pageSize).forEach(function (card) {
+              page.appendChild(card);
+            });
+            track.appendChild(page);
+          }
+          originalGrid.replaceWith(track);
+          paged = true;
+
+          currentPage = 0;
+          track.addEventListener('touchstart', function () { pauseThenResume(track); }, { passive: true });
+          track.addEventListener('scroll', function () {
+            currentPage = Math.round(track.scrollLeft / track.clientWidth);
+          }, { passive: true });
+          startAuto(track);
+        }
+
+        function buildFlat() {
+          if (!paged) return;
+          stopAuto();
+          clearTimeout(resumeTimer);
+          var track = document.getElementById('uniGridTrack');
+          if (!track) return;
+          originalCards.forEach(function (card) {
+            originalGrid.appendChild(card);
+          });
+          track.replaceWith(originalGrid);
+          paged = false;
+        }
+
+        function sync(e) {
+          if (e.matches) buildPages(); else buildFlat();
+        }
+
+        mq.addEventListener('change', sync);
+        sync(mq);
+      })();
+      </script>
 
       <!-- Serving badge -->
       <div class="uni-serving-badge">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg>
-        Serving students from <strong>30+</strong> top public &amp; private universities across Bangladesh
+        <div class="uni-serving-icon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg>
+        </div>
+        <div class="uni-serving-text">Serving students from <strong>30+</strong> top public &amp; private universities across Bangladesh</div>
       </div>
 
       <!-- Marquee -->
@@ -808,36 +887,6 @@
         </div>
       </div>
 
-      <!-- Stats Bar -->
-      <div class="uni-stats-bar">
-        <div class="uni-stat">
-          <div class="uni-stat-icon" style="background:rgba(17,181,217,0.12);color:#11b5d9;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-          </div>
-          <div><div class="uni-stat-val">30+</div><div class="uni-stat-label">Universities</div><div class="uni-stat-sub">Across Bangladesh</div></div>
-        </div>
-        <div class="uni-stat-divider"></div>
-        <div class="uni-stat">
-          <div class="uni-stat-icon" style="background:rgba(52,211,153,0.12);color:#34d399;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div><div class="uni-stat-val" id="hp-stat-clients">150+</div><div class="uni-stat-label">Students Served</div><div class="uni-stat-sub">Happy &amp; Satisfied</div></div>
-        </div>
-        <div class="uni-stat-divider"></div>
-        <div class="uni-stat">
-          <div class="uni-stat-icon" style="background:rgba(167,139,250,0.12);color:#a78bfa;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <div><div class="uni-stat-val" id="hp-stat-projects">250+</div><div class="uni-stat-label">Academic Projects</div><div class="uni-stat-sub">Completed Successfully</div></div>
-        </div>
-        <div class="uni-stat-divider"></div>
-        <div class="uni-stat">
-          <div class="uni-stat-icon" style="background:rgba(251,191,36,0.12);color:#fbbf24;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div><div class="uni-stat-val" id="hp-stat-rate">98%</div><div class="uni-stat-label">Satisfaction Rate</div><div class="uni-stat-sub">From Our Students</div></div>
-        </div>
-      </div>
 
 
     </div>

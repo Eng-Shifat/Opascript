@@ -439,7 +439,11 @@ body {
   .card-icon-box { width: 40px; height: 40px; }
   .card-icon-box svg { width: 19px; height: 19px; }
   .section-title-2 { font-size: 21px; }
-  .trust-bar { grid-template-columns: 1fr; padding: 1.2rem 1.4rem; }
+  .trust-bar { grid-template-columns: repeat(2, 1fr); padding: 1.2rem 1.4rem; gap: 1rem 0.8rem; }
+  .trust-item { gap: 8px; }
+  .trust-icon { width: 32px; height: 32px; border-radius: 9px; }
+  .trust-title { font-size: 12px; }
+  .trust-sub { font-size: 10px; }
 }
 
 
@@ -1284,6 +1288,8 @@ body {
 }
 .uni-serving-badge svg { color: var(--accent); flex-shrink: 0; }
 .uni-serving-badge strong { color: var(--text-main); }
+.uni-serving-icon { display: inline-flex; align-items: center; }
+.uni-serving-text { display: inline; }
 
 /* ── Marquee ── */
 .uni-marquee-wrap {
@@ -1355,6 +1361,9 @@ body {
 }
 [data-theme="light"] .uni-card { background: #f8fafc; border-color: rgba(0,0,0,.07); }
 [data-theme="light"] .uni-card:hover { background: #f0f4f8; }
+@media (max-width: 600px) {
+  [data-theme="light"] .uni-stat { background: #f8fafc; border-color: rgba(0,0,0,.07); }
+}
 [data-theme="light"] .uni-trust-badge { color: #11b5d9; border-color: rgba(17,181,217,.35); background: rgba(17,181,217,.06); }
 [data-theme="light"] .uni-serving-badge { background: #f8fafc; border-color: rgba(0,0,0,.1); }
 
@@ -1364,14 +1373,68 @@ body {
 }
 @media (max-width: 600px) {
   .uni-trust-section { padding: 3.5rem 1rem 2.5rem; }
-  .uni-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .uni-card { padding: 8px 10px; gap: 8px; }
-  .uni-logo-wrap { width: 34px; height: 34px; border-radius: 6px; }
-  .uni-name { font-size: 11px; }
-  .uni-stats-bar { flex-direction: column; gap: 16px; padding: 18px; }
-  .uni-stat { justify-content: flex-start; width: 100%; }
-  .uni-stat-divider { width: 100%; height: 1px; }
+  .uni-grid-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .uni-grid-track::-webkit-scrollbar { display: none; }
+  .uni-grid-page {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 5px;
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+  }
+  .uni-card { padding: 5px 3px; gap: 4px; border-radius: 8px; }
+  .uni-logo-wrap { width: 26px; height: 26px; border-radius: 5px; }
+  .uni-logo-wrap img { padding: 3px; }
+  .uni-name { font-size: 8.5px; line-height: 1.15; }
+  .uni-serving-badge {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),.10), rgba(var(--accent-rgb),.03));
+    border: 1px solid rgba(var(--accent-rgb),.22);
+  }
+  .uni-serving-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: rgba(var(--accent-rgb),.15);
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .uni-serving-text {
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(var(--text-rgb),.65);
+  }
+  .uni-serving-badge strong { font-size: 13.5px; }
+  .uni-stats-bar { flex-direction: column; gap: 10px; padding: 0; background: none; border: none; }
+  .uni-stat {
+    justify-content: flex-start;
+    width: 100%;
+    background: rgba(var(--text-rgb),.03);
+    border: 1px solid rgba(var(--text-rgb),.08);
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+  }
+  .uni-stat-divider { display: none; }
   .uni-cta-btns { flex-direction: column; align-items: center; width: 100%; }
   .uni-cta-btns .cta-btn-whatsapp,
   .uni-cta-btns .cta-btn-hire { width: 100%; max-width: 320px; justify-content: center; }
+}
+@media (max-width: 380px) {
+  .uni-grid-wrap { padding: 10px; }
+  .uni-grid-page { gap: 4px; }
+  .uni-card { padding: 4px 2px; gap: 3px; }
+  .uni-logo-wrap { width: 24px; height: 24px; }
+  .uni-name { font-size: 7.5px; }
 }
