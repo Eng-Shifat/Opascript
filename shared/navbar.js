@@ -9,8 +9,8 @@
   const isLogin    = path.includes('Login');
   const isRegister = path.includes('Register');
 
-  const clientName = localStorage.getItem('scriptora_name') || '';
-  const clientRole = localStorage.getItem('scriptora_role') || '';
+  const clientName = localStorage.getItem('opascript_name') || '';
+  const clientRole = localStorage.getItem('opascript_role') || '';
   const isLoggedIn = clientRole === 'client' || clientRole === 'admin';
   const initials   = clientName ? clientName.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : 'U';
   const firstName  = clientName ? clientName.split(' ')[0] : '';
@@ -19,6 +19,10 @@
   function homeLink(anchor) {
     if (isHome) return anchor || '#';
     return '../Homepage/index.html' + (anchor || '');
+  }
+  function logoPath() {
+    if (isHome) return './assets/logo.png';
+    return '../Homepage/assets/logo.png';
   }
   function dashboardLink() {
     if (clientRole === 'admin') return '../Admin Dashboard/admin.html';
@@ -37,7 +41,7 @@
       <div class="profile-dropdown" id="profileDropdown">
         <a href="${dashboardLink()}">Dashboard</a>
         <a href="${dashboardLink()}">Profile</a>
-        <button class="dropdown-logout" onclick="scriptoraLogout()">Logout</button>
+        <button class="dropdown-logout" onclick="opascriptLogout()">Logout</button>
       </div>
     </div>
   ` : `
@@ -50,8 +54,8 @@
   const navHTML = `
   <nav id="shared-nav">
     <a class="logo" href="${homeLink()}">
-      <div class="logo-icon">S</div>
-      Scriptora
+      <img src="${logoPath()}" alt="Opascript" class="logo-img">
+      Opascript
     </a>
     <div class="nav-links">
       <a href="${homeLink('#services')}">Services</a>
@@ -83,8 +87,8 @@
     #shared-nav, #shared-nav * { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     .mobile-menu { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     [data-theme="light"] #shared-nav { background:rgba(var(--bg-nav-rgb),1); border-bottom:1px solid rgba(0,0,0,0.08); }
-    .logo { display:flex; align-items:center; gap:10px; font-weight:600; font-size:17px; color:var(--text-main); text-decoration:none; }
-    .logo-icon { width:34px; height:34px; border-radius:8px; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; color:#ffffff; }
+    .logo { display:flex; align-items:center; gap:0px; font-weight:700; font-size:20px; color:var(--text-main); text-decoration:none; height:100%; }
+    .logo-img { height:calc(58px - 4px); width:auto; object-fit:contain; display:block; margin-right:-16px; }
     .nav-links { display:flex; gap:1.6rem; align-items:center; }
     .nav-links a { color:rgba(var(--text-rgb),0.7); font-size:14px; text-decoration:none; transition:color 0.2s; }
     .nav-links a:hover { color:var(--text-main); }
@@ -158,7 +162,7 @@
 
 })();
 
-async function scriptoraLogout() {
+async function opascriptLogout() {
   try {
     if (typeof supabase !== 'undefined') {
       const sb = supabase.createClient(
