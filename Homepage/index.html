@@ -84,11 +84,11 @@
         </div>
         <div class="stats-grid">
           <div class="stat-box">
-            <div class="stat-num white">50+</div>
+            <div class="stat-num white" id="hero-stat-projects">250+</div>
             <div class="stat-label">Projects</div>
           </div>
           <div class="stat-box">
-            <div class="stat-num green">100%</div>
+            <div class="stat-num green" id="hero-stat-rate">98%</div>
             <div class="stat-label">Success</div>
           </div>
           <div class="stat-box">
@@ -96,7 +96,7 @@
             <div class="stat-label">Writers</div>
           </div>
           <div class="stat-box">
-            <div class="stat-num green">50+</div>
+            <div class="stat-num green" id="hero-stat-clients">150+</div>
             <div class="stat-label">Clients</div>
           </div>
         </div>
@@ -107,12 +107,12 @@
   <!-- BOTTOM STATS -->
   <div class="bottom-stats">
     <div class="bstat">
-      <div class="bstat-num">500+</div>
+      <div class="bstat-num" id="bstat-projects">250+</div>
       <div class="bstat-label">Completed Projects</div>
     </div>
     <div class="bstat-divider"></div>
     <div class="bstat">
-      <div class="bstat-num">350+</div>
+      <div class="bstat-num" id="bstat-clients">150+</div>
       <div class="bstat-label">Happy Clients</div>
     </div>
     <div class="bstat-divider"></div>
@@ -122,7 +122,7 @@
     </div>
     <div class="bstat-divider"></div>
     <div class="bstat">
-      <div class="bstat-num">98%</div>
+      <div class="bstat-num" id="bstat-rate">98%</div>
       <div class="bstat-label">Success Rate</div>
     </div>
   </div>
@@ -414,8 +414,9 @@
 
   <!-- HOW IT WORKS -->
   <section class="hiw-section">
-    <div class="section-header">
+    <div class="hiw-header">
       <div class="section-badge">How It Works</div>
+      <div class="hiw-subtitle">মাত্র ৬টি ধাপে — দ্রুত, সহজ, নির্ভরযোগ্য</div>
     </div>
 
       <div class="hiw-track">
@@ -820,35 +821,24 @@
           <div class="uni-stat-icon" style="background:rgba(52,211,153,0.12);color:#34d399;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <div><div class="uni-stat-val">500+</div><div class="uni-stat-label">Students Served</div><div class="uni-stat-sub">Happy &amp; Satisfied</div></div>
+          <div><div class="uni-stat-val" id="hp-stat-clients">150+</div><div class="uni-stat-label">Students Served</div><div class="uni-stat-sub">Happy &amp; Satisfied</div></div>
         </div>
         <div class="uni-stat-divider"></div>
         <div class="uni-stat">
           <div class="uni-stat-icon" style="background:rgba(167,139,250,0.12);color:#a78bfa;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
-          <div><div class="uni-stat-val">1200+</div><div class="uni-stat-label">Academic Projects</div><div class="uni-stat-sub">Completed Successfully</div></div>
+          <div><div class="uni-stat-val" id="hp-stat-projects">250+</div><div class="uni-stat-label">Academic Projects</div><div class="uni-stat-sub">Completed Successfully</div></div>
         </div>
         <div class="uni-stat-divider"></div>
         <div class="uni-stat">
           <div class="uni-stat-icon" style="background:rgba(251,191,36,0.12);color:#fbbf24;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </div>
-          <div><div class="uni-stat-val">98%</div><div class="uni-stat-label">Satisfaction Rate</div><div class="uni-stat-sub">From Our Students</div></div>
+          <div><div class="uni-stat-val" id="hp-stat-rate">98%</div><div class="uni-stat-label">Satisfaction Rate</div><div class="uni-stat-sub">From Our Students</div></div>
         </div>
       </div>
 
-      <!-- CTA Buttons -->
-      <div class="uni-cta-btns">
-        <a href="https://t.me/scriptora" class="cta-btn-whatsapp" style="background:#229ED9;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-          Telegram করুন
-        </a>
-        <a href="#" class="cta-btn-hire">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Free Consultation
-        </a>
-      </div>
 
     </div>
   </section>
@@ -959,13 +949,31 @@
     hiwObserver.observe(hiwSection);
 
     // Fade-up animation for cards and sections
-    const fadeEls = document.querySelectorAll(
-      '.service-card, .wcu-card, .stat-box, .bstat, .section-header, .cta-content'
+    const allFadeEls = document.querySelectorAll(
+      '.service-card, .wcu-card, .stat-box, .bstat, .cta-content'
     );
+    const fadeEls = Array.from(allFadeEls);
     fadeEls.forEach((el, i) => {
       el.style.opacity = '0';
       el.style.transform = 'translateY(28px)';
       el.style.transition = `opacity 0.55s ease ${(i % 8) * 0.08}s, transform 0.55s ease ${(i % 8) * 0.08}s`;
+    });
+
+    // Section headers except hiw — fade separately
+    const headerEls = Array.from(document.querySelectorAll('.section-header')).filter(el => {
+      const inHiw = el.closest('.hiw-section');
+      if (inHiw) {
+        // Force visible immediately
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        el.style.visibility = 'visible';
+      }
+      return !inHiw;
+    });
+    headerEls.forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = `opacity 0.55s ease ${i * 0.08}s, transform 0.55s ease ${i * 0.08}s`;
     });
 
     const fadeObserver = new IntersectionObserver((entries) => {
@@ -979,10 +987,11 @@
     }, { threshold: 0.15 });
 
     fadeEls.forEach(el => fadeObserver.observe(el));
+    headerEls.forEach(el => fadeObserver.observe(el));
 
     // Safety net: IntersectionObserver kono karone miss korle 2.5s por force reveal
     setTimeout(() => {
-      fadeEls.forEach(el => {
+      [...fadeEls, ...headerEls].forEach(el => {
         el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
       });
@@ -1016,6 +1025,63 @@
     }, { threshold: 0.5 });
     statNums.forEach(el => countObserver.observe(el));
 
+  </script>
+
+  <script>
+  /* ── Homepage Live Stats from Supabase ── */
+  (async function loadHomepageStats() {
+    const BASE_PROJECTS = 250;
+    const BASE_CLIENTS  = 150;
+
+    const ids = {
+      projects: ['hp-stat-projects', 'hero-stat-projects', 'bstat-projects'],
+      clients:  ['hp-stat-clients',  'hero-stat-clients',  'bstat-clients'],
+      rate:     ['hp-stat-rate',     'hero-stat-rate',     'bstat-rate'],
+    };
+
+    function setAll(keys, value) {
+      keys.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      });
+    }
+
+    try {
+      const db = window.scriptoraSupabase;
+      if (!db) return;
+
+      const { data, error } = await db
+        .from('orders')
+        .select('status, special_instructions');
+
+      if (error || !data || data.length === 0) return;
+
+      const completed = data.filter(o => o.status === 'completed').length;
+      const cancelled = data.filter(o => o.status === 'cancelled').length;
+
+      const clientNames = new Set();
+      data.forEach(o => {
+        const lines    = (o.special_instructions || '').split('\n');
+        const nameLine = lines.find(l => l.startsWith('Name:'));
+        const name     = nameLine ? nameLine.replace('Name:', '').trim() : null;
+        if (name) clientNames.add(name.toLowerCase());
+      });
+      const uniqueClients = clientNames.size;
+
+      const rateBase = completed + cancelled;
+      const rate     = rateBase > 0 ? Math.round((completed / rateBase) * 100) : 98;
+
+      const finalProjects = BASE_PROJECTS + completed;
+      const finalClients  = BASE_CLIENTS  + uniqueClients;
+
+      setAll(ids.projects, finalProjects + '+');
+      setAll(ids.clients,  finalClients  + '+');
+      setAll(ids.rate,     rate + '%');
+
+    } catch (err) {
+      console.error('[Homepage Stats]', err);
+    }
+  })();
   </script>
 
 </body>
