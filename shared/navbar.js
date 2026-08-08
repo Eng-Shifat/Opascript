@@ -119,10 +119,14 @@
     .mobile-menu a { color:rgba(var(--text-rgb),0.75); font-size:15px; text-decoration:none; padding:10px 0; border-bottom:0.5px solid rgba(var(--text-rgb),0.06); }
     .mobile-menu.open { display:flex; }
     @media (max-width:768px) {
-      #shared-nav { padding:0 1.2rem; }
+      #shared-nav { padding:0 1rem; }
       .nav-links { display:none; }
       .hamburger { display:block; }
-      .btn-login, .btn-register { padding:6px 12px; font-size:12.5px; }
+      .logo { font-size:15px; gap:6px; }
+      .logo-img { height:32px; width:auto; margin-right:0; }
+      .theme-toggle-btn { display:none; }
+      .btn-login { padding:5px 10px; font-size:12px; }
+      .btn-register { padding:5px 10px; font-size:12px; }
       .nav-dashboard-btn { padding:4px; border:none; }
       .nav-dashboard-btn span { display:none; }
     }
