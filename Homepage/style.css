@@ -388,6 +388,9 @@ body {
 .sc-red .card-icon-box { background: linear-gradient(135deg, var(--color-orange), var(--color-red-deep)); }
 .sc-red .card-btn { color: var(--color-orange-light); }
 
+.sc-magenta .card-icon-box { background: linear-gradient(135deg, var(--color-violet), var(--color-pink)); }
+.sc-magenta .card-btn { color: var(--color-pink); }
+
 .services-grid-2 .service-card:hover .card-btn {
   border-color: currentColor;
   background: rgba(var(--text-rgb),0.08);
@@ -593,7 +596,8 @@ body {
 }
 
 @media (max-width: 768px) {
-  .wcu-section { padding: 1.2rem 1.2rem 3rem; }
+  .wcu-section { padding: 1.2rem 1.2rem 1.2rem; }
+  .wcu-section .section-header { margin-bottom: 1.2rem; }
   .wcu-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .wcu-card { padding: 1.5rem 1rem; }
   .wcu-icon-wrap { width: 50px; height: 50px; }
@@ -790,7 +794,8 @@ body {
 }
 
 @media (max-width: 560px) {
-  .hiw-section { padding: 2.5rem 1.2rem 1rem; }
+  .hiw-section { padding: 0.8rem 1.2rem 1rem; }
+  .hiw-header { margin-bottom: 0.5rem; }
   .hiw-section::after { display: none; }
   .hiw-track {
     flex-direction: row;
@@ -938,11 +943,15 @@ body {
   .footer-col a { font-size: 12.5px; padding: 3px 0; }
   .footer-col:last-child { grid-column: 1 / -1; }
   .footer-col:last-child .footer-col-title { margin-top: 0; }
-  .footer-col:last-child { display: flex; flex-direction: row; flex-wrap: wrap; gap: 0 1.5rem; align-items: center; }
-  .footer-col:last-child .footer-col-title { width: 100%; }
-  .footer-col:last-child a { flex: 0 0 auto; }
+  .footer-contact-row { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 0 1rem; align-items: center; }
+  .footer-contact-row a { flex: 0 0 auto; white-space: nowrap; font-size: 11.5px; }
   .footer-bottom { flex-direction: column; gap: 4px; text-align: center; padding: 0.9rem 1.2rem; }
   .footer-bottom-left, .footer-bottom-right { font-size: 11px; }
+}
+@media (max-width: 380px) {
+  .footer-contact-row { gap: 0 0.6rem; }
+  .footer-contact-row a { font-size: 10px; gap: 5px; }
+  .footer-contact-row a svg { width: 13px; height: 13px; flex-shrink: 0; }
 }
 @media (max-width: 480px) {
   .footer-top { grid-template-columns: 1fr 1fr; padding: 1.5rem 1rem; }
@@ -1195,12 +1204,14 @@ body {
 .uni-trust-header { text-align: center; max-width: 700px; }
 .uni-trust-badge {
   display: inline-flex; align-items: center; gap: 7px;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
-  color: var(--accent);
-  border: 1px solid rgba(var(--accent-rgb),0.35);
-  background: rgba(var(--accent-rgb),0.07);
-  padding: 6px 14px; border-radius: 99px;
-  margin-bottom: 1.2rem;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #11b5d9;
+  border: 1px solid rgba(17, 181, 217, 0.45);
+  background: rgba(17, 181, 217, 0.1);
+  padding: 6px 16px; border-radius: 20px;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 16px rgba(17, 181, 217, 0.15);
 }
 .uni-trust-title {
   font-size: clamp(22px, 3.5vw, 36px);
@@ -1372,7 +1383,7 @@ body {
   .uni-grid { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 600px) {
-  .uni-trust-section { padding: 3.5rem 1rem 2.5rem; }
+  .uni-trust-section { padding: 1.2rem 1rem 2.5rem; }
   .uni-grid-track {
     display: flex;
     overflow-x: auto;

@@ -27,11 +27,6 @@
       </a>
       <p class="sc-footer-tagline">বাংলাদেশের বিশ্বস্ত Academic Writing Service — Professional, Confidential, On-Time.</p>
       <div class="sc-footer-socials">
-        <a href="https://t.me/opascript" class="sc-social-btn" title="Telegram" target="_blank" rel="noopener">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-          </svg>
-        </a>
         <a href="https://www.facebook.com/opascript" class="sc-social-btn" title="Facebook" target="_blank" rel="noopener">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -68,25 +63,21 @@
 
     <div class="sc-footer-col">
       <div class="sc-footer-col-title">Contact</div>
-      <a href="https://t.me/opascript" class="sc-footer-contact-item" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-        </svg>
-        Telegram
-      </a>
-      <a href="https://www.facebook.com/opascript" class="sc-footer-contact-item" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-        </svg>
-        Facebook Page
-      </a>
-      <a href="mailto:hello@opascript.com" class="sc-footer-contact-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
-        hello@opascript.com
-      </a>
+      <div class="sc-footer-contact-row">
+        <a href="https://www.facebook.com/opascript" class="sc-footer-contact-item" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Facebook Page
+        </a>
+        <a href="mailto:hello@opascript.com" class="sc-footer-contact-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          hello@opascript.com
+        </a>
+      </div>
     </div>
 
   </div>
@@ -164,9 +155,15 @@
   .sc-footer-socials { justify-content: flex-start; }
   .sc-footer-col-title { font-size: 11px; margin-bottom: 0.6rem; }
   .sc-footer-col a { font-size: 12.5px; padding: 3px 0; }
-  .sc-footer-col:last-child { grid-column: 1 / -1; display: flex; flex-direction: row; flex-wrap: wrap; gap: 0 1.5rem; align-items: center; }
-  .sc-footer-col:last-child .sc-footer-col-title { width: 100%; }
+  .sc-footer-col:last-child { grid-column: 1 / -1; }
+  .sc-footer-contact-row { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 0 1rem; align-items: center; }
+  .sc-footer-contact-item { white-space: nowrap; font-size: 11.5px; }
   .sc-footer-bottom { flex-direction: column; gap: 4px; text-align: center; padding: 0.9rem 1.2rem; }
+}
+@media (max-width: 380px) {
+  .sc-footer-contact-row { gap: 0 0.6rem; }
+  .sc-footer-contact-item { font-size: 10px; gap: 5px; }
+  .sc-footer-contact-item svg { width: 13px; height: 13px; flex-shrink: 0; }
 }
 
 /* ── Light mode overrides ── */

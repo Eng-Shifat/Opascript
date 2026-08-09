@@ -124,7 +124,7 @@
       .hamburger { display:block; }
       .logo { font-size:15px; gap:0; padding-left:0; margin-left:0; }
       .logo-img { height:46px; width:auto; margin-right:-15px; margin-left:2px; }
-      .theme-toggle-btn { display:none; }
+      .theme-toggle-btn { width:28px; height:28px; font-size:13px; }
       .btn-login { padding:5px 10px; font-size:12px; }
       .btn-register { padding:5px 10px; font-size:12px; }
       .nav-dashboard-btn { padding:4px; border:none; }
