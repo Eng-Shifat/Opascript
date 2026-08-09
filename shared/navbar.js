@@ -83,10 +83,10 @@
 
   const navCSS = `
   <style id="shared-nav-css">
-    #shared-nav { background:rgba(var(--bg-nav-rgb),1); backdrop-filter:blur(12px) saturate(180%); -webkit-backdrop-filter:blur(12px) saturate(180%); padding:0 2.5rem; height:55px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--text-rgb),0.10); position:sticky; top:0; z-index:1000; transition:background 0.3s; isolation:isolate; will-change:transform; font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
+    #shared-nav { background:rgba(var(--bg-nav-rgb),0.55); backdrop-filter:blur(16px) saturate(180%); -webkit-backdrop-filter:blur(16px) saturate(180%); padding:0 2.5rem; height:55px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--text-rgb),0.10); position:sticky; top:0; z-index:1000; transition:background 0.3s; isolation:isolate; will-change:transform; font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     #shared-nav, #shared-nav * { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     .mobile-menu { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
-    [data-theme="light"] #shared-nav { background:rgba(var(--bg-nav-rgb),1); border-bottom:1px solid rgba(0,0,0,0.08); }
+    [data-theme="light"] #shared-nav { background:rgba(var(--bg-nav-rgb),0.6); border-bottom:1px solid rgba(0,0,0,0.08); }
     .logo { display:flex; align-items:center; gap:0px; font-weight:700; font-size:20px; color:var(--text-main); text-decoration:none; height:100%; }
     .logo-img { height:calc(55px - 4px); width:auto; object-fit:contain; display:block; margin-right:-16px; }
     .nav-links { display:flex; gap:1.6rem; align-items:center; }

@@ -509,9 +509,10 @@ body {
 /* -------- WHY CHOOSE US -------- */
 .wcu-section {
   background: linear-gradient(180deg, var(--bg-card-alt) 0%, var(--bg-main) 100%);
-  padding: 2.5rem 2.5rem 1.5rem;
+  padding: 1.5rem 2.5rem 1.5rem;
   border-top: 0.5px solid rgba(var(--text-rgb),0.06);
 }
+.wcu-section .section-header { margin-bottom: 1.2rem; }
 .wcu-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -597,7 +598,6 @@ body {
 
 @media (max-width: 768px) {
   .wcu-section { padding: 1.2rem 1.2rem 1.2rem; }
-  .wcu-section .section-header { margin-bottom: 1.2rem; }
   .wcu-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .wcu-card { padding: 1.5rem 1rem; }
   .wcu-icon-wrap { width: 50px; height: 50px; }
