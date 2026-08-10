@@ -153,11 +153,12 @@ function showLoginSuccess(redirectFn, delay = 750) {
   setTimeout(redirectFn, delay);
 }
 
-function saveClientSession(user, name, email) {
+function saveClientSession(user, name, email, avatarUrl) {
   localStorage.setItem('scriptora_client_id', user.id);
   localStorage.setItem('scriptora_name', name || user.user_metadata?.full_name || '');
   localStorage.setItem('scriptora_email', email || user.email);
   localStorage.setItem('scriptora_role', 'client');
+  localStorage.setItem('scriptora_avatar', avatarUrl || '');
 }
 
 function redirectAfterLogin() {
@@ -243,14 +244,15 @@ async function handleLogin() {
     // ── CLIENT — clients table থেকে name নিয়ে আসো ───────────────────────
     const { data: clientData } = await sb
       .from('clients')
-      .select('name, email, phone')
+      .select('name, email, phone, avatar_url')
       .eq('id', authUser.id)
       .single();
 
     saveClientSession(
       authUser,
       clientData?.name || authUser.user_metadata?.full_name,
-      clientData?.email || authUser.email
+      clientData?.email || authUser.email,
+      clientData?.avatar_url || ''
     );
 
     showLoginSuccess(redirectAfterLogin);

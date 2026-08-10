@@ -89,6 +89,7 @@ function updateSidebarUser() {
   if (currentClient.avatar_url) {
     document.getElementById('sbAvatar').innerHTML = `<img src="${currentClient.avatar_url}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
   }
+  localStorage.setItem('scriptora_avatar', currentClient.avatar_url || '');
 }
 
 function updatePageDate() {
@@ -902,6 +903,7 @@ async function uploadAvatar(e) {
   const avatarUrl=urlData.publicUrl;
   await sb.from('clients').update({avatar_url:avatarUrl}).eq('id',currentUser.id);
   currentClient.avatar_url=avatarUrl;
+  localStorage.setItem('scriptora_avatar', avatarUrl);
   const avImg=`<img src="${avatarUrl}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
   document.getElementById('sbAvatar').innerHTML=avImg;
   document.getElementById('profileAvatar').innerHTML=avImg;

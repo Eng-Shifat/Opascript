@@ -264,9 +264,9 @@ body {
 .services-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  max-width: 1100px;
-  margin: 0 auto;
+  gap: 16px;
+  max-width: 1150px;
+  margin: 0 auto 1.8rem;
 }
 
 @media (max-width: 1024px) {
@@ -1448,4 +1448,16 @@ body {
   .uni-card { padding: 4px 2px; gap: 3px; }
   .uni-logo-wrap { width: 24px; height: 24px; }
   .uni-name { font-size: 7.5px; }
+}
+
+/* -------- FADE ANIMATION (class-based) -------- */
+.fade-pending {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease var(--fade-delay, 0s), transform 0.5s ease var(--fade-delay, 0s);
+}
+.fade-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition: opacity 0.5s ease var(--fade-delay, 0s), transform 0.5s ease var(--fade-delay, 0s);
 }

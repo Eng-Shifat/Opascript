@@ -134,7 +134,7 @@
       <div class="section-title-2">Academic writing থেকে<br><span class="grad-text">research support</span> — সবকিছু এক
         প্ল্যাটফর্মে</div>
     </div>
-    <div class="services-grid services-grid-2">
+    <div class="services-grid">
 
       <div class="service-card sc-purple">
         <div class="card-icon-box">
@@ -161,7 +161,7 @@
         </div>
       </div>
 
-      <div class="service-card sc-pink">
+      <div class="service-card sc-pink" style="display:flex!important;opacity:1!important;visibility:visible!important;">
         <div class="card-icon-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round">
@@ -884,55 +884,49 @@
     }, { threshold: 0.25 });
     hiwObserver.observe(hiwSection);
 
-    // Fade-up animation for cards and sections
+    // Fade-up animation — CSS class based, no opacity:0 trap
     const allFadeEls = document.querySelectorAll(
       '.service-card, .wcu-card, .stat-box, .bstat, .cta-content'
     );
     const fadeEls = Array.from(allFadeEls);
-    fadeEls.forEach((el, i) => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(28px)';
-      el.style.transition = `opacity 0.55s ease ${(i % 8) * 0.08}s, transform 0.55s ease ${(i % 8) * 0.08}s`;
-    });
 
-    // Section headers except hiw — fade separately
     const headerEls = Array.from(document.querySelectorAll('.section-header')).filter(el => {
       const inHiw = el.closest('.hiw-section');
       if (inHiw) {
-        // Force visible immediately
         el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
         el.style.visibility = 'visible';
       }
       return !inHiw;
     });
-    headerEls.forEach((el, i) => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(28px)';
-      el.style.transition = `opacity 0.55s ease ${i * 0.08}s, transform 0.55s ease ${i * 0.08}s`;
+
+    const allAnimEls = [...fadeEls, ...headerEls];
+
+    allAnimEls.forEach((el, i) => {
+      el.classList.add('fade-pending');
+      el.style.setProperty('--fade-delay', (i % 8) * 0.08 + 's');
     });
 
     const fadeObserver = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
-          e.target.style.opacity = '1';
-          e.target.style.transform = 'translateY(0)';
+          e.target.classList.remove('fade-pending');
+          e.target.classList.add('fade-in');
           fadeObserver.unobserve(e.target);
         }
       });
-    }, { threshold: 0.15 });
+    }, { threshold: 0, rootMargin: '0px 0px 80px 0px' });
 
-    fadeEls.forEach(el => fadeObserver.observe(el));
-    headerEls.forEach(el => fadeObserver.observe(el));
+    allAnimEls.forEach(el => fadeObserver.observe(el));
 
-    // Safety net: IntersectionObserver kono karone miss korle 2.5s por force reveal
+    // Safety net — 500ms por force reveal
     setTimeout(() => {
-      [...fadeEls, ...headerEls].forEach(el => {
-        el.style.opacity = '1';
-        el.style.transform = 'translateY(0)';
+      allAnimEls.forEach(el => {
+        el.classList.remove('fade-pending');
+        el.classList.add('fade-in');
       });
       fadeObserver.disconnect();
-    }, 2500);
+    }, 500);
 
     // Bottom stats count-up animation
     const statNums = document.querySelectorAll('.bstat-num');

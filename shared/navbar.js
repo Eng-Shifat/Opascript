@@ -9,11 +9,15 @@
   const isLogin    = path.includes('Login');
   const isRegister = path.includes('Register');
 
-  const clientName = localStorage.getItem('opascript_name') || '';
-  const clientRole = localStorage.getItem('opascript_role') || '';
+  const clientName  = localStorage.getItem('scriptora_name') || '';
+  const clientRole  = localStorage.getItem('scriptora_role') || '';
+  const clientAvatar = localStorage.getItem('scriptora_avatar') || '';
   const isLoggedIn = clientRole === 'client' || clientRole === 'admin';
   const initials   = clientName ? clientName.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : 'U';
   const firstName  = clientName ? clientName.split(' ')[0] : '';
+  const avatarInner = clientAvatar
+    ? `<img src="${clientAvatar}" alt="${firstName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+    : initials;
 
   function pricingLink() { return '../Pricing page/pricing.html'; }
   function homeLink(anchor) {
@@ -33,7 +37,7 @@
     <div class="profile-wrap" id="profileWrap">
       <button class="nav-dashboard-btn" id="profileBtn">
         <div class="nav-avatar-wrap">
-          <div class="nav-avatar">${initials}</div>
+          <div class="nav-avatar">${avatarInner}</div>
           <span class="nav-avatar-arrow">▾</span>
         </div>
         <span>${firstName}</span>
@@ -101,7 +105,7 @@
     .btn-logout:hover { background:rgba(var(--color-red-rgb),0.1); border-color:var(--color-red); color:var(--color-red); }
     .nav-dashboard-btn { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--text-main); padding:5px 14px 5px 6px; border:0.5px solid rgba(var(--text-rgb),0.15); border-radius:20px; background:transparent; cursor:pointer; font-family:inherit; }
     .nav-dashboard-btn:hover { background:rgba(var(--text-rgb),0.08); }
-    .nav-avatar { width:26px; height:26px; border-radius:50%; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text-on-accent); }
+    .nav-avatar { width:26px; height:26px; border-radius:50%; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text-on-accent); overflow:hidden; }
     .nav-avatar-wrap { position:relative; display:flex; margin-right: 2px; }
     .nav-avatar-arrow { position:absolute; bottom:-3px; right:-3px; width:13px; height:13px; border-radius:50%; background:var(--bg-nav); border:1px solid rgba(var(--text-rgb),0.2); display:flex; align-items:center; justify-content:center; font-size:8px; line-height:1; color:rgba(var(--text-rgb),0.8); }
     .nav-dashboard-btn span { font-size:13.5px; font-weight:500; }
