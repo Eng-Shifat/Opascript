@@ -9,7 +9,7 @@
   <!-- থিম বুটস্ট্র্যাপ: পেজ রেন্ডার হওয়ার আগেই সংরক্ষিত থিম বসিয়ে দেয়, যাতে রিলোডে রং ফ্ল্যাশ না করে -->
   <script>
     (function () {
-      if (localStorage.getItem('opascript_theme') === 'light') {
+      if (localStorage.getItem('scriptora_theme') === 'light' || localStorage.getItem('opascript_theme') === 'light') {
         document.documentElement.setAttribute('data-theme', 'light');
       }
     })();

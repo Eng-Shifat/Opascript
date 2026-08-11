@@ -18,6 +18,33 @@ window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const orderId = params.get('order_id');
 
+  /* ── Navbar avatar sync ── */
+  (async () => {
+    const sb = window.scriptoraSupabase;
+    const client_id = localStorage.getItem('scriptora_client_id');
+    if (!sb || !client_id) return;
+    const { data: cl } = await sb
+      .from('clients')
+      .select('name, avatar_url')
+      .eq('id', client_id)
+      .single();
+    if (!cl) return;
+    if (cl.name)       localStorage.setItem('scriptora_name', cl.name);
+    if (cl.avatar_url) localStorage.setItem('scriptora_avatar', cl.avatar_url);
+    /* navbar avatar element live update */
+    const avatarEl = document.querySelector('.nav-avatar');
+    if (avatarEl) {
+      if (cl.avatar_url) {
+        avatarEl.innerHTML = `<img src="${cl.avatar_url}" alt="${cl.name || ''}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      } else if (cl.name) {
+        const initials = cl.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        avatarEl.textContent = initials;
+      }
+    }
+    const nameEl = document.querySelector('.nav-client-name');
+    if (nameEl && cl.name) nameEl.textContent = cl.name.split(' ')[0];
+  })();
+
   if (orderId) {
     _payMode = 'due';
     _dueOrderId = orderId;

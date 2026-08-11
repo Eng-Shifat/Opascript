@@ -26,6 +26,7 @@
       html.removeAttribute('data-theme');
     }
     localStorage.setItem('scriptora_theme', next);
+    localStorage.setItem('opascript_theme', next);
 
     applyIcon(document.getElementById('theme-toggle'));
   };

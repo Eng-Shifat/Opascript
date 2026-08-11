@@ -590,3 +590,204 @@ body {
 [data-theme="light"] .step-num.rocket { background: rgba(109,40,217,0.1); color: #6d28d9; }
 [data-theme="light"] .highlight.upay   { color: #7c3aed; }
 [data-theme="light"] .highlight.rocket { color: #6d28d9; }
+
+/* ════════════════════════════════════════════════════════════
+   LIGHT MODE — FULL REDESIGN (eye-catching, clear, beautiful)
+   ════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] body {
+  background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 40%, #ede9fe 100%) !important;
+  color: #1e1b4b;
+}
+
+/* Cards */
+[data-theme="light"] .pay-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(99,102,241,0.12) !important;
+  box-shadow: 0 4px 24px rgba(99,102,241,0.08), 0 1px 4px rgba(0,0,0,0.05) !important;
+}
+
+/* Card headers */
+[data-theme="light"] .card-head {
+  background: linear-gradient(90deg, rgba(99,102,241,0.06), rgba(139,92,246,0.04)) !important;
+  border-bottom: 1px solid rgba(99,102,241,0.1) !important;
+  color: #4338ca !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em;
+}
+[data-theme="light"] .card-head-dot { background: #6366f1 !important; box-shadow: 0 0 6px rgba(99,102,241,0.5); }
+
+/* Method tabs */
+[data-theme="light"] .method-tabs {
+  background: #fafafa;
+  border-bottom: 1px solid rgba(99,102,241,0.1) !important;
+  padding: 12px;
+}
+[data-theme="light"] .method-tab {
+  background: #f5f5ff !important;
+  border: 1.5px solid rgba(99,102,241,0.15) !important;
+  color: #4b5563 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+[data-theme="light"] .method-tab:hover {
+  border-color: #6366f1 !important;
+  background: #eef2ff !important;
+  color: #4338ca !important;
+}
+[data-theme="light"] .method-tab.active {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff) !important;
+  border-color: #6366f1 !important;
+  color: #4338ca !important;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.2) !important;
+}
+
+/* Step list */
+[data-theme="light"] .step-item { color: #374151 !important; }
+[data-theme="light"] .step-num {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff) !important;
+  color: #4338ca !important;
+  box-shadow: 0 1px 4px rgba(99,102,241,0.2);
+}
+[data-theme="light"] .step-num.nagad { background: linear-gradient(135deg,#fff1ee,#ffe4dd) !important; color: #c2410c !important; }
+[data-theme="light"] .step-num.bank  { background: linear-gradient(135deg,#eff6ff,#dbeafe) !important; color: #1d4ed8 !important; }
+[data-theme="light"] .step-num.upay  { background: linear-gradient(135deg,#f5f3ff,#ede9fe) !important; color: #6d28d9 !important; }
+[data-theme="light"] .step-num.rocket{ background: linear-gradient(135deg,#f5f3ff,#ede9fe) !important; color: #7c3aed !important; }
+
+[data-theme="light"] .highlight        { color: #4338ca !important; font-weight: 700; }
+[data-theme="light"] .highlight.nagad  { color: #c2410c !important; }
+[data-theme="light"] .highlight.bank   { color: #1d4ed8 !important; }
+[data-theme="light"] .highlight.upay   { color: #6d28d9 !important; }
+[data-theme="light"] .highlight.rocket { color: #7c3aed !important; }
+
+/* Form labels & inputs */
+[data-theme="light"] .fg label { color: #1e1b4b !important; font-weight: 600; }
+[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="number"] {
+  background: #f8f7ff !important;
+  border: 1.5px solid rgba(99,102,241,0.2) !important;
+  color: #1e1b4b !important;
+  box-shadow: inset 0 1px 3px rgba(99,102,241,0.05);
+}
+[data-theme="light"] input[type="text"]:focus,
+[data-theme="light"] input[type="number"]:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+}
+[data-theme="light"] input::placeholder { color: #9ca3af !important; }
+
+/* Amount input */
+[data-theme="light"] .amount-input-wrap {
+  background: #f8f7ff !important;
+  border: 1.5px solid rgba(99,102,241,0.2) !important;
+  box-shadow: inset 0 1px 3px rgba(99,102,241,0.05);
+}
+[data-theme="light"] .amount-input-wrap:focus-within {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+}
+[data-theme="light"] .amount-prefix {
+  color: #6366f1 !important;
+  background: #eef2ff !important;
+  border-right-color: rgba(99,102,241,0.15) !important;
+  font-weight: 700;
+}
+[data-theme="light"] .amount-input-wrap input { color: #1e1b4b !important; }
+
+/* Remaining notice */
+[data-theme="light"] .remaining-notice {
+  background: linear-gradient(135deg,#f8f7ff,#f0f4ff) !important;
+  border: 1px solid rgba(99,102,241,0.15) !important;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.06);
+}
+[data-theme="light"] .remaining-label { color: #6b7280 !important; }
+[data-theme="light"] .remaining-val   { color: #1e1b4b !important; }
+[data-theme="light"] .remaining-divider { background: rgba(99,102,241,0.12) !important; }
+
+/* Below 50% warning */
+[data-theme="light"] .below-half-notice {
+  background: rgba(251,191,36,0.1) !important;
+  border-color: rgba(217,163,0,0.3) !important;
+  color: #78350f !important;
+}
+[data-theme="light"] .below-half-notice strong { color: #b45309 !important; }
+
+/* Full payment notice */
+[data-theme="light"] .full-pay-notice {
+  background: rgba(34,197,94,0.08) !important;
+  border: 1px solid rgba(22,163,74,0.2) !important;
+  color: #166534 !important;
+}
+[data-theme="light"] .full-pay-notice svg { color: #16a34a !important; }
+[data-theme="light"] .full-pay-notice strong { color: #15803d !important; }
+
+/* Upload zone */
+[data-theme="light"] .upload-zone {
+  background: #f8f7ff !important;
+  border: 2px dashed rgba(99,102,241,0.3) !important;
+}
+[data-theme="light"] .upload-zone:hover {
+  background: #eef2ff !important;
+  border-color: #6366f1 !important;
+}
+[data-theme="light"] .upload-text { color: #4338ca !important; font-weight: 600; }
+[data-theme="light"] .upload-hint { color: #9ca3af !important; }
+
+/* Pay button */
+[data-theme="light"] .pay-btn {
+  background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.35) !important;
+  color: #fff !important;
+}
+[data-theme="light"] .pay-btn:hover {
+  box-shadow: 0 6px 28px rgba(99,102,241,0.5) !important;
+}
+[data-theme="light"] .pay-secure { color: #9ca3af !important; }
+
+/* Summary card */
+[data-theme="light"] .summary-card .pay-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(99,102,241,0.12) !important;
+  box-shadow: 0 8px 32px rgba(99,102,241,0.1) !important;
+}
+[data-theme="light"] .summary-title { color: #1e1b4b !important; font-weight: 700; }
+[data-theme="light"] .summary-sub   { color: #6b7280 !important; }
+[data-theme="light"] .sum-label     { color: #6b7280 !important; }
+[data-theme="light"] .sum-val       { color: #1e1b4b !important; font-weight: 600; }
+[data-theme="light"] .sum-total-label { color: #1e1b4b !important; }
+[data-theme="light"] .sum-total-val   { color: #6366f1 !important; }
+[data-theme="light"] .split-head { color: #6366f1 !important; }
+[data-theme="light"] .split-row   { color: #6b7280 !important; }
+[data-theme="light"] .split-row span:last-child { color: #1e1b4b !important; }
+[data-theme="light"] .sum-split { background: rgba(99,102,241,0.04) !important; }
+[data-theme="light"] .sum-info { color: #4b5563 !important; }
+[data-theme="light"] .sum-info.deadline { background: rgba(251,191,36,0.06) !important; }
+[data-theme="light"] .sum-info.deadline strong { color: #b45309 !important; }
+[data-theme="light"] .green-text { color: #16a34a !important; }
+
+/* Row borders */
+[data-theme="light"] .summary-rows,
+[data-theme="light"] .summary-title-box,
+[data-theme="light"] .sum-total,
+[data-theme="light"] .sum-split,
+[data-theme="light"] .sum-info {
+  border-color: rgba(99,102,241,0.08) !important;
+}
+
+/* Amount breakdown */
+[data-theme="light"] .amount-breakdown {
+  background: #f8f7ff !important;
+  border-color: rgba(99,102,241,0.12) !important;
+}
+[data-theme="light"] .breakdown-pct { color: #4338ca !important; }
+[data-theme="light"] .breakdown-label { color: #6b7280 !important; }
+[data-theme="light"] .breakdown-bar-wrap { background: rgba(99,102,241,0.12) !important; }
+
+/* Copy button */
+[data-theme="light"] .copy-btn { color: #6366f1 !important; }
+
+/* Handwritten rows */
+[data-theme="light"] .hw-pages-val { color: #6366f1 !important; }
+[data-theme="light"] .hw-row { border-left-color: rgba(99,102,241,0.25) !important; }
+[data-theme="light"] .hw-row .sum-label { color: rgba(99,102,241,0.6) !important; }
+
+[data-theme="light"] .detail-head { color: #1e1b4b !important; }
