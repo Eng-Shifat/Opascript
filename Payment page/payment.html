@@ -5,12 +5,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment – Scriptora</title>
+  <script>
+    (function () {
+      if (localStorage.getItem('opascript_theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/variables.css" />
   <link rel="stylesheet" href="css/payment.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../shared/supabaseClient.js"></script>
+  <script src="../shared/theme.js"></script>
   <!-- Fallback: inline selectMethod so tabs work even if payment.js has errors -->
   <script>
     function selectMethod(m, el) {
@@ -40,12 +49,20 @@
           </div>
           <div class="method-tabs">
             <div class="method-tab active" data-method="bkash" onclick="selectMethod('bkash',this)">
-              <div class="method-icon bkash">B</div>
+              <div class="method-icon bkash"><img src="asset/bkash.png" alt="bKash" onerror="this.style.display='none';this.parentElement.textContent='B'"></div>
               <span>bKash</span>
             </div>
             <div class="method-tab" data-method="nagad" onclick="selectMethod('nagad',this)">
-              <div class="method-icon nagad">N</div>
+              <div class="method-icon nagad"><img src="asset/nagad.png" alt="Nagad" onerror="this.style.display='none';this.parentElement.textContent='N'"></div>
               <span>Nagad</span>
+            </div>
+            <div class="method-tab" data-method="upay" onclick="selectMethod('upay',this)">
+              <div class="method-icon upay"><img src="asset/upay.png" alt="Upay" onerror="this.style.display='none';this.parentElement.textContent='U'"></div>
+              <span>Upay</span>
+            </div>
+            <div class="method-tab" data-method="rocket" onclick="selectMethod('rocket',this)">
+              <div class="method-icon rocket"><img src="asset/rocket.png" alt="Rocket" onerror="this.style.display='none';this.parentElement.textContent='R'"></div>
+              <span>Rocket</span>
             </div>
             <div class="method-tab" data-method="bank" onclick="selectMethod('bank',this)">
               <div class="method-icon bank">৳</div>
@@ -66,11 +83,13 @@
               </div>
               <div class="step-item">
                 <div class="step-num">2</div>
-                <div>Number: <span class="highlight">01XXXXXXXXX</span></div>
+                <div>Number: <span class="highlight" id="bkash-num">01881870349</span>
+                  <button class="copy-btn" onclick="copyNum('01881870349', this)" title="Copy">📋</button>
+                </div>
               </div>
               <div class="step-item">
                 <div class="step-num">3</div>
-                <div>Amount: মোট মূল্যের <span class="highlight">৫০% Advance</span></div>
+                <div>Amount: নিচে আপনার পরিমাণ লিখুন</div>
               </div>
               <div class="step-item">
                 <div class="step-num">4</div>
@@ -92,14 +111,72 @@
               </div>
               <div class="step-item">
                 <div class="step-num nagad">2</div>
-                <div>Number: <span class="highlight nagad">01XXXXXXXXX</span></div>
+                <div>Number: <span class="highlight nagad">01881870349</span>
+                  <button class="copy-btn nagad" onclick="copyNum('01881870349', this)" title="Copy">📋</button>
+                </div>
               </div>
               <div class="step-item">
                 <div class="step-num nagad">3</div>
-                <div>Amount: মোট মূল্যের <span class="highlight nagad">৫০% Advance</span></div>
+                <div>Amount: নিচে আপনার পরিমাণ লিখুন</div>
               </div>
               <div class="step-item">
                 <div class="step-num nagad">4</div>
+                <div>Transaction ID নিচে দিন ও confirm করুন</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upay Instructions -->
+          <div class="method-detail" id="detail-upay">
+            <div class="detail-head">
+              <div class="card-head-dot upay"></div>
+              <span>Upay এ পাঠান</span>
+            </div>
+            <div class="step-list">
+              <div class="step-item">
+                <div class="step-num upay">1</div>
+                <div>Upay থেকে <strong>Send Money</strong> করুন</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num upay">2</div>
+                <div>Number: <span class="highlight upay">01881870349</span>
+                  <button class="copy-btn upay" onclick="copyNum('01881870349', this)" title="Copy">📋</button>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-num upay">3</div>
+                <div>Amount: নিচে আপনার পরিমাণ লিখুন</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num upay">4</div>
+                <div>Transaction ID নিচে দিন ও confirm করুন</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rocket Instructions -->
+          <div class="method-detail" id="detail-rocket">
+            <div class="detail-head">
+              <div class="card-head-dot rocket"></div>
+              <span>Rocket এ পাঠান</span>
+            </div>
+            <div class="step-list">
+              <div class="step-item">
+                <div class="step-num rocket">1</div>
+                <div>Rocket থেকে <strong>Send Money</strong> করুন</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num rocket">2</div>
+                <div>Number: <span class="highlight rocket">01XXXXXXXXX</span>
+                  <button class="copy-btn rocket" onclick="copyNum('01XXXXXXXXX', this)" title="Copy">📋</button>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-num rocket">3</div>
+                <div>Amount: নিচে আপনার পরিমাণ লিখুন</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num rocket">4</div>
                 <div>Transaction ID নিচে দিন ও confirm করুন</div>
               </div>
             </div>
@@ -114,18 +191,28 @@
             <div class="step-list">
               <div class="step-item">
                 <div class="step-num bank">1</div>
-                <div>Account Name: <span class="highlight bank">Scriptora</span></div>
+                <div>Account Name: <span class="highlight bank">MD Yeasin Kabir Shifat</span></div>
               </div>
               <div class="step-item">
                 <div class="step-num bank">2</div>
-                <div>Account No: <span class="highlight bank">1234-5678-9012</span></div>
+                <div>Account No: <span class="highlight bank">0730101043287</span>
+                  <button class="copy-btn" onclick="copyNum('0730101043287', this)" title="Copy">📋</button>
+                </div>
               </div>
               <div class="step-item">
                 <div class="step-num bank">3</div>
-                <div>Bank: Dutch-Bangla · Narayanganj Branch</div>
+                <div>Bank: <strong>Pubali Bank</strong> · Tan Bazar, Narayanganj Branch</div>
               </div>
               <div class="step-item">
                 <div class="step-num bank">4</div>
+                <div>Routing No: <span class="highlight bank">175671751</span></div>
+              </div>
+              <div class="step-item">
+                <div class="step-num bank">5</div>
+                <div>জরুরি যোগাযোগ: <span class="highlight bank">+8801881870349</span></div>
+              </div>
+              <div class="step-item">
+                <div class="step-num bank">6</div>
                 <div>Transaction ID নিচে দিন ও confirm করুন</div>
               </div>
             </div>
@@ -145,8 +232,35 @@
               <div class="field-err" id="err-txnId"></div>
             </div>
             <div class="fg">
-              <label>Payment পরিমাণ</label>
-              <input type="text" id="payAmount" placeholder="৳ 8,000 (৫০% Advance)" readonly>
+              <label>আপনি কত টাকা পাঠাচ্ছেন? <span class="req">*</span></label>
+              <div class="amount-input-wrap">
+                <span class="amount-prefix">৳</span>
+                <input type="number" id="payAmount" placeholder="যেমন: 5000" min="1" autocomplete="off" oninput="onAmountInput(this)">
+              </div>
+              <div class="field-err" id="err-payAmount"></div>
+            </div>
+
+            <!-- Remaining amount info (shows when total is known) -->
+            <div class="remaining-notice" id="remainingNotice" style="display:none;">
+              <div class="remaining-row">
+                <span class="remaining-label">মোট মূল্য</span>
+                <span class="remaining-val" id="remainingTotal">—</span>
+              </div>
+              <div class="remaining-row">
+                <span class="remaining-label">এখন পাঠাচ্ছেন</span>
+                <span class="remaining-val paying" id="remainingPaying">—</span>
+              </div>
+              <div class="remaining-divider"></div>
+              <div class="remaining-row">
+                <span class="remaining-label">কাজ পাওয়ার পর বাকি</span>
+                <span class="remaining-val due" id="remainingDue">—</span>
+              </div>
+            </div>
+
+            <!-- Full payment unlock notice (always visible) -->
+            <div class="full-pay-notice">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              <span>Deadline শেষ হওয়ার আগে <strong>full payment</strong> করলে সম্পূর্ণ কাজ Download করার access পাবেন।</span>
             </div>
             <div class="fg">
               <label>Screenshot <span class="opt">(ঐচ্ছিক)</span></label>

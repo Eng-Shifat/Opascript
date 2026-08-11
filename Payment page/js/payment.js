@@ -58,9 +58,11 @@ function loadNewOrderMode() {
 
   const payAmountEl = document.getElementById('payAmount');
   if (payAmountEl && half) {
-    payAmountEl.value = '৳ ' + half.toLocaleString() + ' (৫০% Advance)';
+    payAmountEl.value = half;
   }
   _dueAmount = half;
+  _orderTotal = total;
+  updateAmountUI(half, total);
 
   const couponRow = document.getElementById('sumCouponRow');
   if (coupon && discount > 0 && couponRow) {
@@ -131,8 +133,10 @@ async function loadDuePaymentMode(orderId) {
 
     const payAmountEl = document.getElementById('payAmount');
     if (payAmountEl) {
-      payAmountEl.value = due > 0 ? '৳ ' + due.toLocaleString() + ' (সম্পূর্ণ বাকি)' : '৳ 0 (সম্পূর্ণ পরিশোধিত)';
+      payAmountEl.value = due > 0 ? due : 0;
     }
+    _orderTotal = total;
+    updateAmountUI(due, total);
 
     if (due === 0) {
       const payBtn = document.querySelector('.pay-btn');
@@ -237,11 +241,20 @@ async function submitPayment() {
   const activeMethod = document.querySelector('.method-tab.active');
   const method = activeMethod ? activeMethod.getAttribute('data-method') : 'bkash';
 
+  const enteredAmount = parseFloat(document.getElementById('payAmount').value);
+  const errPayEl = document.getElementById('err-payAmount');
+  if (!enteredAmount || enteredAmount <= 0) {
+    if (errPayEl) errPayEl.textContent = 'কত টাকা পাঠাচ্ছেন তা লিখুন';
+    document.getElementById('payAmount').focus();
+    return;
+  }
+  if (errPayEl) errPayEl.textContent = '';
+
   let order_id, amount, data = null;
 
   if (_payMode === 'due') {
     order_id = _dueOrderId;
-    amount = _dueAmount;
+    amount = enteredAmount;
 
     if (!order_id) {
       errEl.textContent = 'Order পাওয়া যায়নি।';
@@ -254,7 +267,7 @@ async function submitPayment() {
   } else {
     data = JSON.parse(sessionStorage.getItem('scriptora_order') || '{}');
     order_id = data.orderId;
-    amount = data.advance || _dueAmount || 0;
+    amount = enteredAmount || data.advance || _dueAmount || 0;
 
     if (!order_id) {
       errEl.textContent = 'Order পাওয়া যায়নি। আবার order করুন।';
@@ -329,4 +342,50 @@ async function submitPayment() {
     btn.disabled = false;
     btn.textContent = '💳 Payment নিশ্চিত করুন';
   }
+}
+
+// ── Global order total ───────────────────────────────────────────────────────
+let _orderTotal = 0;
+
+// ── Live amount input handler ────────────────────────────────────────────────
+function onAmountInput(input) {
+  const val = parseFloat(input.value);
+  _dueAmount = val || 0;
+  updateAmountUI(val, _orderTotal);
+  const errEl = document.getElementById('err-payAmount');
+  if (errEl) errEl.textContent = '';
+}
+
+function updateAmountUI(amount, total) {
+  const noticeEl = document.getElementById('remainingNotice');
+  if (!noticeEl) return;
+
+  if (!total || total <= 0) {
+    noticeEl.style.display = 'none';
+    return;
+  }
+
+  noticeEl.style.display = 'flex';
+  const remaining = Math.max(0, total - (amount || 0));
+
+  const totalEl   = document.getElementById('remainingTotal');
+  const payingEl  = document.getElementById('remainingPaying');
+  const dueEl     = document.getElementById('remainingDue');
+
+  if (totalEl)  totalEl.textContent  = '৳' + total.toLocaleString();
+  if (payingEl) payingEl.textContent = amount > 0 ? '৳' + amount.toLocaleString() : '—';
+  if (dueEl) {
+    dueEl.textContent = remaining > 0 ? '৳' + remaining.toLocaleString() : '✅ সম্পূর্ণ পরিশোধিত';
+    dueEl.classList.toggle('paid', remaining === 0);
+  }
+}
+
+// ── Copy number to clipboard ─────────────────────────────────────────────────
+function copyNum(num, btn) {
+  navigator.clipboard.writeText(num).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  });
 }

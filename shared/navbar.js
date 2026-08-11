@@ -103,7 +103,7 @@
     .btn-register:hover { background:var(--accent-hover); }
     .btn-logout { padding:7px 18px; border:0.5px solid rgba(var(--color-red-rgb),0.4); border-radius:7px; background:transparent; color:var(--color-red-light); font-size:13.5px; cursor:pointer; font-family:inherit; }
     .btn-logout:hover { background:rgba(var(--color-red-rgb),0.1); border-color:var(--color-red); color:var(--color-red); }
-    .nav-dashboard-btn { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--text-main); padding:5px 14px 5px 6px; border:0.5px solid rgba(var(--text-rgb),0.15); border-radius:20px; background:transparent; cursor:pointer; font-family:inherit; }
+    .nav-dashboard-btn { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--text-main); padding:5px 14px 5px 6px; border:0.5px solid rgba(150,150,180,0.35); border-radius:20px; background:transparent; cursor:pointer; font-family:inherit; }
     .nav-dashboard-btn:hover { background:rgba(var(--text-rgb),0.08); }
     .nav-avatar { width:26px; height:26px; border-radius:50%; background:var(--accent-color); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text-on-accent); overflow:hidden; }
     .nav-avatar-wrap { position:relative; display:flex; margin-right: 2px; }
@@ -131,8 +131,8 @@
       .theme-toggle-btn { width:28px; height:28px; font-size:13px; }
       .btn-login { padding:5px 10px; font-size:12px; }
       .btn-register { padding:5px 10px; font-size:12px; }
-      .nav-dashboard-btn { padding:4px; border:none; }
-      .nav-dashboard-btn span { display:none; }
+      .nav-dashboard-btn { padding:5px 12px 5px 6px; border:0.5px solid rgba(150,150,180,0.35); border-radius:20px; }
+      .nav-dashboard-btn span { display:inline; }
     }
   </style>`;
 
