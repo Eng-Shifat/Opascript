@@ -533,6 +533,27 @@ body {
 [data-theme="light"] .remaining-label { color: rgba(0,0,0,0.5); }
 [data-theme="light"] .remaining-val { color: #10182b; }
 
+/* ── Below 50% soft warning ── */
+.below-half-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(251,191,36,0.08);
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.6;
+}
+.below-half-notice svg { color: #fbbf24; flex-shrink: 0; margin-top: 2px; }
+.below-half-notice strong { color: #fbbf24; }
+
+[data-theme="light"] .below-half-notice {
+  background: rgba(234,170,0,0.08);
+  border-color: rgba(234,170,0,0.3);
+}
+
 /* ── Handwritten summary rows ── */
 .hw-tier-badge {
   font-weight: 700;

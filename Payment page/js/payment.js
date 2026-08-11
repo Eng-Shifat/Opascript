@@ -408,14 +408,15 @@ function onAmountInput(input) {
 
 function updateAmountUI(amount, total) {
   const noticeEl = document.getElementById('remainingNotice');
-  if (!noticeEl) return;
+  const warnEl   = document.getElementById('belowHalfNotice');
 
   if (!total || total <= 0) {
-    noticeEl.style.display = 'none';
+    if (noticeEl) noticeEl.style.display = 'none';
+    if (warnEl)   warnEl.style.display   = 'none';
     return;
   }
 
-  noticeEl.style.display = 'flex';
+  if (noticeEl) noticeEl.style.display = 'flex';
   const remaining = Math.max(0, total - (amount || 0));
 
   const totalEl   = document.getElementById('remainingTotal');
@@ -427,6 +428,13 @@ function updateAmountUI(amount, total) {
   if (dueEl) {
     dueEl.textContent = remaining > 0 ? '৳' + remaining.toLocaleString() : '✅ সম্পূর্ণ পরিশোধিত';
     dueEl.classList.toggle('paid', remaining === 0);
+  }
+
+  // ── Below 50% soft warning ──
+  if (warnEl) {
+    const half = Math.round(total / 2);
+    const show = amount > 0 && amount < half;
+    warnEl.style.display = show ? 'flex' : 'none';
   }
 }
 
