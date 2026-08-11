@@ -262,10 +262,7 @@
   text-decoration: none;
 }
 
-/* Desktop — hide */
-@media (min-width: 481px) {
-  .op-overlay, .op-sheet { display: none !important; }
-}
+/* Desktop — op-sheet is allowed on all screen sizes (unlike mp-sheet which is mobile-only) */
 
 /* ── File Upload ── */
 .op-file-drop {

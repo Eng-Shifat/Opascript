@@ -255,12 +255,11 @@
                 <span class="remaining-label">কাজ পাওয়ার পর বাকি</span>
                 <span class="remaining-val due" id="remainingDue">—</span>
               </div>
-            </div>
-
-            <!-- Below 50% warning (soft warning, does not block) -->
-            <div class="below-half-notice" id="belowHalfNotice" style="display:none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span>Minimum <strong>৫০% Advance</strong> দেওয়া recommended — তবে চাইলে কম পাঠাতেও পারবেন।</span>
+              <!-- Below 50% warning — inside the breakdown box -->
+              <div class="below-half-notice" id="belowHalfNotice" style="display:none;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Minimum <strong>৫০% Advance</strong> দেওয়া recommended — তবে চাইলে কম পাঠাতেও পারবেন।</span>
+              </div>
             </div>
 
             <!-- Full payment unlock notice (always visible) -->
@@ -269,12 +268,12 @@
               <span>Deadline শেষ হওয়ার আগে <strong>full payment</strong> করলে সম্পূর্ণ কাজ Download করার access পাবেন।</span>
             </div>
             <div class="fg">
-              <label>Screenshot <span class="opt">(ঐচ্ছিক)</span></label>
+              <label>Payment Screenshot <span class="req">*</span></label>
               <div class="upload-zone" id="ssZone" onclick="document.getElementById('ssInput').click()"
                 ondragover="event.preventDefault();this.classList.add('drag')"
                 ondragleave="this.classList.remove('drag')" ondrop="handleSSdrop(event)">
                 <div class="upload-icon">🖼️</div>
-                <div class="upload-text">Screenshot আপলোড করুন</div>
+                <div class="upload-text">Payment Screenshot আপলোড করুন</div>
                 <div class="upload-hint">PNG, JPG · সর্বোচ্চ 5MB</div>
                 <input type="file" id="ssInput" accept="image/*" style="display:none" onchange="handleSSfile(this)">
               </div>

@@ -170,11 +170,11 @@
             </div>
 
             <div class="svc-hero-fb-cta">
-              <button class="svc-hero-fb-btn-primary">
+              <button class="svc-hero-fb-btn-primary" onclick="window.location.href='../Order page/order.html?service=thesis'">
                 Start Your Project
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               </button>
-              <button class="svc-hero-fb-btn-outline" onclick="window.open('https://wa.me/8801XXXXXXXXX','_blank')">Talk to an Expert</button>
+              <button class="svc-hero-fb-btn-outline" onclick="openExpertChat()">Talk to an Expert</button>
             </div>
 
             <div class="svc-hero-fb-stats">
@@ -1120,7 +1120,7 @@
           <p>Let our experts help you achieve academic success.</p>
         </div>
         <div class="svc-cta-buttons">
-          <button class="svc-btn-primary svc-btn-lg">Start Your Project Today →</button>
+          <button class="svc-btn-primary svc-btn-lg" onclick="openThesisOrderPopup()">Start Your Project Today →</button>
           <button class="svc-btn-outline-lg">Talk to Expert</button>
         </div>
       </div>
@@ -1132,6 +1132,51 @@
   <script src="../shared/footer.js"></script>
   <script src="js/thesis-data.js"></script>
   <script src="js/mobile.js"></script>
+
+  <!-- Order Popup — thesis "Start Your Project" বাটনের জন্য -->
+  <link rel="stylesheet" href="../Pricing page/css/order-popup.css" />
+  <script src="../Pricing page/js/pricing-config.js"></script>
+  <script src="../Pricing page/js/order-popup.js"></script>
+  <script>
+    /* ── Talk to an Expert — chatbot liveChat mode এ খোলে ── */
+    function openExpertChat() {
+      if (window.scriptoraChat && typeof window.scriptoraChat.openLiveChat === 'function') {
+        window.scriptoraChat.openLiveChat();
+      }
+    }
+
+    /* ── Thesis Order Popup opener ── */
+    function openThesisOrderPopup() {
+      if (typeof window.opOpen !== 'function') {
+        window.location.href = '../Order page/order.html?service=thesis';
+        return;
+      }
+
+      var THC        = (window.SCRIPTORA_CONFIG || {}).thesis || {};
+      var words      = THC.minWords || 5000;
+      var ratePerWord = (THC.pricePerWord && THC.pricePerWord.full) ? THC.pricePerWord.full : 1.0;
+      var price      = Math.round(words * ratePerWord);   /* ৳5,000 for 5000 words @ ৳1/word */
+      var ratePer1k  = Math.round(ratePerWord * 1000);    /* ৳1,000 per 1000 words */
+
+      window.opOpen({
+        serviceId:    'thesis-writing',
+        title:        'Thesis Writing',
+        titleBn:      'থিসিস রাইটিং',
+        icon:         '🎓',
+        iconBg:       'rgba(99,102,241,0.2)',
+        unitType:     'words',
+        qty:          words,
+        unitLabel:    'words',
+        urgencyLabel: 'Standard (10–15 Days)',
+        rate:         ratePer1k,
+        perUnit:      1000,
+        tiers:        null,
+        tierIndex:    0,
+        price:        price,
+        thesisType:   'full',
+      });
+    }
+  </script>
 
   <script>
     /* Disable auto-cycle completely. Hover highlight works normally. */

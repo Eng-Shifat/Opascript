@@ -124,6 +124,25 @@ async function bootstrap() {
 
   EventBus.emit('app:ready', { initialModule: initialKey });
   console.info('[Scriptora Chatbot V2] ready — active module:', initialKey);
+
+  /* ── Global bridge — non-module pages (e.g. thesis-writing.html) এর
+        জন্য, যেখানে EventBus import করা সম্ভব না।
+        Usage:
+          window.scriptoraChat.open()                   // widget খোলে
+          window.scriptoraChat.openLiveChat()           // widget খোলে + liveChat activate করে
+   ── */
+  window.scriptoraChat = {
+    open() {
+      WidgetShell.open();
+    },
+    openLiveChat() {
+      WidgetShell.open();
+      /* Shell open হওয়ার পর liveChat activate করো */
+      setTimeout(() => {
+        EventBus.emit('router:activate', { key: 'liveChat' });
+      }, 120);
+    },
+  };
 }
 
 if (document.readyState !== 'loading') bootstrap();

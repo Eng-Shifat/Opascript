@@ -300,6 +300,17 @@ async function submitPayment() {
   }
   if (errPayEl) errPayEl.textContent = '';
 
+  if (!_ssFile) {
+    const ssZone = document.getElementById('ssZone');
+    if (ssZone) {
+      ssZone.style.border = '2px solid #f87171';
+      ssZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => { ssZone.style.border = ''; }, 3000);
+    }
+    alert('Payment screenshot upload করা mandatory। screenshot ছাড়া submit হবে না।');
+    return;
+  }
+
   let order_id, amount, data = null;
 
   if (_payMode === 'due') {

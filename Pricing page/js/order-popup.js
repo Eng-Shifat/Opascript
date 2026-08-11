@@ -368,12 +368,23 @@
       const db   = window.scriptoraSupabase;
       const opts = window._opOpts || {};
 
-      /* ── Logged-in user ── */
-      let clientId = null;
-      try {
-        const { data } = await db.auth.getUser();
-        if (data?.user) clientId = data.user.id;
-      } catch (_) {}
+      /* ── Auth check — লগইন না থাকলে login page এ পাঠাও ── */
+      let clientId = localStorage.getItem('scriptora_client_id') || null;
+      if (!clientId && db) {
+        try {
+          const { data } = await db.auth.getUser();
+          if (data?.user) {
+            clientId = data.user.id;
+            localStorage.setItem('scriptora_client_id', clientId);
+          }
+        } catch (_) {}
+      }
+      if (!clientId) {
+        if (btn) { btn.disabled = false; btn.innerHTML = '📱 Confirm Order / অর্ডার নিশ্চিত করুন'; }
+        const returnUrl = encodeURIComponent(window.location.href);
+        window.location.href = '../Login page/login.html?return=' + returnUrl;
+        return;
+      }
 
       /* ── Order number ── */
       const now         = new Date();
@@ -430,6 +441,9 @@
       if (error) throw error;
 
       const orderId = insertData.id;
+
+      /* ── Ensure scriptora_client_id is persisted in localStorage ── */
+      if (clientId) localStorage.setItem('scriptora_client_id', clientId);
 
       /* ── Upload attached files ── */
       if (orderId && window._opFiles?.length > 0) {

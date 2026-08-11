@@ -11,7 +11,7 @@ window.PAGE_DATA = {
     title:           'Writing a Thesis is Your Defining Milestone',
     desc:            'Led by a Fiverr Level-2 Certified Writer, we deliver 100% flawless, AI-free, and plagiarism-free thesis support tailored to 20+ local &amp; international university guidelines—delivered right on time.',
     primaryBtn:      'Start Your Project',
-    primaryOnClick:  '',
+    primaryOnClick:  'openThesisOrderPopup()',
     secondaryBtn:    'Talk to an Expert',
     secondaryOnClick: "window.open('https://wa.me/8801XXXXXXXXX','_blank')",
   },

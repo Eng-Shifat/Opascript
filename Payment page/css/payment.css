@@ -537,14 +537,15 @@ body {
 .below-half-notice {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
   background: rgba(251,191,36,0.08);
-  border: 1px solid rgba(251,191,36,0.3);
-  border-radius: 10px;
-  padding: 11px 14px;
-  font-size: 13px;
-  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(251,191,36,0.25);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.75);
   line-height: 1.6;
+  margin-top: 4px;
 }
 .below-half-notice svg { color: #fbbf24; flex-shrink: 0; margin-top: 2px; }
 .below-half-notice strong { color: #fbbf24; }
@@ -552,6 +553,7 @@ body {
 [data-theme="light"] .below-half-notice {
   background: rgba(234,170,0,0.08);
   border-color: rgba(234,170,0,0.3);
+  color: rgba(0,0,0,0.7);
 }
 
 /* ── Handwritten summary rows ── */
