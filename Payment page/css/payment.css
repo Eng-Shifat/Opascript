@@ -533,6 +533,20 @@ body {
 [data-theme="light"] .remaining-label { color: rgba(0,0,0,0.5); }
 [data-theme="light"] .remaining-val { color: #10182b; }
 
+/* ── Handwritten summary rows ── */
+.hw-tier-badge {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+}
+.hw-pages-val {
+  font-weight: 700;
+  color: #a78bfa;
+  font-size: 13px;
+}
+.hw-row { border-left: 2px solid rgba(167,139,250,0.25); }
+.hw-row .sum-label { color: rgba(167,139,250,0.7); }
+
 /* ── Upay & Rocket colors ── */
 .card-head-dot.upay   { background: #7c3aed; }
 .card-head-dot.rocket { background: #8b1cf7; }

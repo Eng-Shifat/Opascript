@@ -127,7 +127,6 @@ function orderThesisPackage() {
 
   var params = new URLSearchParams({
     service: 'thesis',
-    price:   pkg.price.replace(/[^\d]/g, ''),
     urgency: 'normal',
     tier:    pkg.name,
   });

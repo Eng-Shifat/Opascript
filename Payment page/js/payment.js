@@ -28,18 +28,70 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// ── Helper: show a row only if value is non-empty ──────────────────────────
+function setRow(rowId, value, valId) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  if (value && value !== '—') {
+    row.style.display = 'flex';
+    if (valId) setText(valId, value);
+  } else {
+    row.style.display = 'none';
+  }
+}
+
 // ── MODE A: Fresh order — use sessionStorage data (existing behaviour) ──────
 function loadNewOrderMode() {
   const data = JSON.parse(sessionStorage.getItem('scriptora_order') || '{}');
+  const isHW = data.serviceType === 'handwritten' || (data.pages && data.pages.includes('handwritten'));
 
-  setText('sumTitle', data.title || 'Thesis Order');
-  setText('sumSub', (data.dept || '') + (data.university ? ' · ' + data.university : ''));
-  setText('sumPkg', data.pkg || '—');
-  setText('sumResearch', data.research || '—');
-  setText('sumPages', data.pages || '—');
-  setText('sumCitation', data.citation || '—');
-  setText('sumUrgency', data.urgency || '—');
+  setText('sumTitle',   data.title || 'Order');
+  setText('sumSub',     (data.dept || '') + (data.university ? ' · ' + data.university : ''));
   setText('sumDeadline', data.deadline || '—');
+
+  if (isHW) {
+    // ── Handwritten: hide thesis-specific rows ──
+    ['rowPkg', 'rowResearch', 'rowPages', 'rowCitation'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    // Tier badge with colour
+    const tierColors = { Standard: '#60a5fa', Recommended: '#a78bfa', Premium: '#fbbf24' };
+    const tierName = data.hwTier || '';
+    if (tierName) {
+      const tierEl = document.getElementById('sumHwTier');
+      if (tierEl) { tierEl.textContent = tierName; tierEl.style.color = tierColors[tierName] || '#60a5fa'; }
+      const rowTier = document.getElementById('rowHwTier');
+      if (rowTier) rowTier.style.display = 'flex';
+    }
+
+    setRow('rowHwType',    data.hwType,    'sumHwType');
+    setRow('rowHwSubject', data.hwSubject, 'sumHwSubject');
+    setRow('rowHwDept',    data.hwDept,    'sumHwDept');
+    setRow('rowHwInk',     data.hwInk,     'sumHwInk');
+    setRow('rowHwPaper',   data.hwPaper,   'sumHwPaper');
+
+    // Pages — show with page count
+    if (data.pages) {
+      setText('sumHwPages', data.pages);
+      const rowHwPages = document.getElementById('rowHwPages');
+      if (rowHwPages) rowHwPages.style.display = 'flex';
+    }
+
+    // Urgency always show for HW
+    const rowUrg = document.getElementById('rowUrgency');
+    if (rowUrg) rowUrg.style.display = 'flex';
+    setText('sumUrgency', data.urgency || '—');
+
+  } else {
+    // ── Thesis / General: standard rows ──
+    setText('sumPkg',      data.pkg      || '—');
+    setText('sumResearch', data.research  || '—');
+    setText('sumPages',    data.pages     || '—');
+    setText('sumCitation', data.citation  || '—');
+    setText('sumUrgency',  data.urgency   || '—');
+  }
 
   if (data.addons && data.addons.length > 0) {
     const addonsRow = document.getElementById('sumAddonsRow');
@@ -47,20 +99,18 @@ function loadNewOrderMode() {
     setText('sumAddons', data.addons.join(', '));
   }
 
-  const total = data.total || 0;
+  const total    = data.total    || 0;
   const discount = data.discount || 0;
-  const coupon = data.coupon || null;
-  const half = Math.round(total / 2);
+  const coupon   = data.coupon   || null;
+  const half     = Math.round(total / 2);
 
-  setText('sumTotal', total ? '৳' + total.toLocaleString() + '+' : '—');
-  setText('splitNow', half ? '৳' + half.toLocaleString() : '—');
-  setText('splitLater', half ? '৳' + half.toLocaleString() : '—');
+  setText('sumTotal',   total ? '৳' + total.toLocaleString() + '+' : '—');
+  setText('splitNow',   half  ? '৳' + half.toLocaleString()  : '—');
+  setText('splitLater', half  ? '৳' + half.toLocaleString()  : '—');
 
   const payAmountEl = document.getElementById('payAmount');
-  if (payAmountEl && half) {
-    payAmountEl.value = half;
-  }
-  _dueAmount = half;
+  if (payAmountEl && half) payAmountEl.value = half;
+  _dueAmount  = half;
   _orderTotal = total;
   updateAmountUI(half, total);
 

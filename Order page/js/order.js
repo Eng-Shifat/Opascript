@@ -1033,8 +1033,9 @@ async function nextStep() {
 
     // sessionStorage — UI display এর জন্য (পরবর্তী page গুলোতে দেখানোর জন্য, এগুলো DB column না)
     sessionStorage.setItem('scriptora_order', JSON.stringify({
-      orderId:     orderRow.id,           // real UUID — payments.order_id এ যাবে
-      orderNumber: orderRow.order_number, // human-readable, badge এ দেখানোর জন্য
+      orderId:     orderRow.id,
+      orderNumber: orderRow.order_number,
+      serviceType: new URLSearchParams(window.location.search).get('service') || null,
       title:    titleVal,
       dept:     dept,
       university: universityVal,
@@ -1049,7 +1050,16 @@ async function nextStep() {
       advance:  advanceVal,
       due:      dueVal,
       coupon:   appliedCoupon || null,
-      discount: discountAmount || 0
+      discount: discountAmount || 0,
+      // ── Handwritten-specific fields for payment page summary ──
+      ...(window._isHandwritten ? {
+        hwTier:    window._hwSelectedTier || null,
+        hwType:    hwAssignmentTypeVal,
+        hwSubject: hwSubjectVal,
+        hwDept:    document.getElementById('hwDepartment')?.value.trim() || null,
+        hwInk:     hwInkPrefVal,
+        hwPaper:   hwPaperTypeVal,
+      } : {})
     }));
 
     // ── Client-uploaded files → temp থেকে orders/ path-এ move করো ──────

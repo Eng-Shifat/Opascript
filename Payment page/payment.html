@@ -305,20 +305,44 @@
           </div>
 
           <div class="summary-rows">
-            <div class="sum-row"><span class="sum-label">Package</span><span class="sum-val" id="sumPkg">—</span></div>
-            <div class="sum-row"><span class="sum-label">Research Area</span><span class="sum-val"
-                id="sumResearch">—</span></div>
-            <div class="sum-row"><span class="sum-label">পেজ সংখ্যা</span><span class="sum-val" id="sumPages">—</span>
+            <!-- Thesis / General rows -->
+            <div class="sum-row" id="rowPkg"><span class="sum-label">Package</span><span class="sum-val" id="sumPkg">—</span></div>
+            <div class="sum-row" id="rowResearch"><span class="sum-label">Research Area</span><span class="sum-val" id="sumResearch">—</span></div>
+            <div class="sum-row" id="rowPages"><span class="sum-label">পেজ সংখ্যা</span><span class="sum-val" id="sumPages">—</span></div>
+            <div class="sum-row" id="rowCitation"><span class="sum-label">Citation</span><span class="sum-val" id="sumCitation">—</span></div>
+            <div class="sum-row" id="rowUrgency"><span class="sum-label">Urgency</span><span class="sum-val" id="sumUrgency">—</span></div>
+            <!-- Handwritten-only rows -->
+            <div class="sum-row hw-row" id="rowHwTier" style="display:none;">
+              <span class="sum-label">Package Tier</span>
+              <span class="sum-val hw-tier-badge" id="sumHwTier">—</span>
             </div>
-            <div class="sum-row"><span class="sum-label">Citation</span><span class="sum-val" id="sumCitation">—</span>
+            <div class="sum-row hw-row" id="rowHwType" style="display:none;">
+              <span class="sum-label">Document Type</span>
+              <span class="sum-val" id="sumHwType">—</span>
             </div>
-            <div class="sum-row"><span class="sum-label">Urgency</span><span class="sum-val" id="sumUrgency">—</span>
+            <div class="sum-row hw-row" id="rowHwSubject" style="display:none;">
+              <span class="sum-label">Subject / Course</span>
+              <span class="sum-val" id="sumHwSubject">—</span>
             </div>
-            <div class="sum-row" id="sumAddonsRow" style="display:none;"><span class="sum-label">Extra
-                Services</span><span class="sum-val" id="sumAddons"
-                style="color:#60a5fa;text-align:right;max-width:60%;line-height:1.5;">—</span></div>
-            <div class="sum-row" id="sumCouponRow" style="display:none;"><span class="sum-label">Coupon</span><span
-                class="sum-val" id="sumCoupon" style="color:#4ade80;">—</span></div>
+            <div class="sum-row hw-row" id="rowHwDept" style="display:none;">
+              <span class="sum-label">বিভাগ</span>
+              <span class="sum-val" id="sumHwDept">—</span>
+            </div>
+            <div class="sum-row hw-row" id="rowHwPages" style="display:none;">
+              <span class="sum-label">পাতার সংখ্যা</span>
+              <span class="sum-val hw-pages-val" id="sumHwPages">—</span>
+            </div>
+            <div class="sum-row hw-row" id="rowHwInk" style="display:none;">
+              <span class="sum-label">Ink Preference</span>
+              <span class="sum-val" id="sumHwInk">—</span>
+            </div>
+            <div class="sum-row hw-row" id="rowHwPaper" style="display:none;">
+              <span class="sum-label">Paper / Notebook</span>
+              <span class="sum-val" id="sumHwPaper">—</span>
+            </div>
+            <!-- Shared -->
+            <div class="sum-row" id="sumAddonsRow" style="display:none;"><span class="sum-label">Extra Services</span><span class="sum-val" id="sumAddons" style="color:#60a5fa;text-align:right;max-width:60%;line-height:1.5;">—</span></div>
+            <div class="sum-row" id="sumCouponRow" style="display:none;"><span class="sum-label">Coupon</span><span class="sum-val" id="sumCoupon" style="color:#4ade80;">—</span></div>
           </div>
 
           <div class="sum-total">
