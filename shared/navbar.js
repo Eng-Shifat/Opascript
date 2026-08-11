@@ -65,7 +65,7 @@
       <a href="${homeLink('#services')}">Services</a>
       <a href="${pricingLink()}">Pricing</a>
       <a href="${homeLink('#samples')}">Samples</a>
-      <a href="${homeLink('#reviews')}">Reviews</a>
+      <a href="${homeLink('#how-it-works')}">How it Works</a>
       <a href="${homeLink('#faq')}">FAQ</a>
       <a href="${homeLink('#contact')}">Contact</a>
     </div>
@@ -79,7 +79,7 @@
     <a href="${homeLink('#services')}">Services</a>
     <a href="${pricingLink()}">Pricing</a>
     <a href="${homeLink('#samples')}">Samples</a>
-    <a href="${homeLink('#reviews')}">Reviews</a>
+    <a href="${homeLink('#how-it-works')}">How it Works</a>
     <a href="${homeLink('#faq')}">FAQ</a>
     <a href="${homeLink('#contact')}">Contact</a>
     ${mobileAuthButtons}
