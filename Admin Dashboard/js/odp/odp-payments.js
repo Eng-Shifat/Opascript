@@ -477,6 +477,17 @@
     await window._loadPaymentHistory();
     window._toast('Payment rejected. Client notified.', 'var(--red)');
     window._logActivity('payment', 'Payment rejected by admin');
+
+    /* If this order never had any real advance paid, it now falls out
+       of the admin filter (unpaid/rejected + advance_paid = 0) —
+       refresh the table so it disappears immediately, and close the
+       panel since the order it was showing is no longer listed. */
+    const stillHasMoney = Number(window._currentOrder?.financials?.paid?.replace(/[^\d.]/g, '')) > 0
+      || Number(window._currentOrder?.advance_paid) > 0;
+    if (!stillHasMoney) {
+      if (typeof window.closeDetail === 'function') window.closeDetail();
+      if (typeof window.loadRealOrders === 'function') await window.loadRealOrders();
+    }
   };
 
   /* "Mark as Payment Received" button — same logic as Approve, just a UI alias */

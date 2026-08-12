@@ -1089,12 +1089,17 @@ async function loadRealOrders() {
   if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:rgba(255,255,255,0.3);font-size:13px;"><div style="margin-bottom:8px">⏳</div>Loading orders...</td></tr>`;
 
   try {
-    /* Step 1: orders load — শুধু minimum payment করা orders দেখাবে
-       payment_status = 'unpaid' AND advance_paid = 0 হলে admin-এ দেখাবে না */
+    /* Step 1: orders load.
+       Admin dashboard-এ দেখাবে না যদি:
+         payment_status = 'unpaid' OR 'rejected'  AND  advance_paid = 0
+         → fake/invalid orders যেগুলোতে কোনো real payment হয়ইনি।
+       দেখাবে: under_review (proof জমা দিয়েছে, approve বাকি), approved,
+               paid, confirmed — এবং যেকোনো order যেখানে advance_paid > 0
+               (real টাকা এসেছে, status যাই হোক না কেন)। */
     const { data, error } = await sb
       .from('orders')
       .select('*')
-      .or('payment_status.neq.unpaid,advance_paid.gt.0,payment_status.eq.rejected')
+      .or('payment_status.not.in.(unpaid,rejected),advance_paid.gt.0')
       .order('order_date', { ascending: false });
 
     if (error) throw error;

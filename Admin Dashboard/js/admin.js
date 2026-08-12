@@ -105,9 +105,16 @@ async function loadOrdersFromSupabase() {
     const db = window.scriptoraSupabase;
     if (!db) { renderOrders(orders); return; }
 
+    /* Fetch orders — hide fake / never-paid orders from admin.
+       Logic: hide when payment_status is 'unpaid' or 'rejected' AND
+       advance_paid = 0 (no real money ever came in for this order).
+       Show: under_review (proof submitted, needs approval), approved,
+       paid, confirmed — and anything with advance_paid > 0 regardless
+       of status, since that money still needs to be accounted for. */
     const { data, error } = await db
       .from('orders')
       .select('*')
+      .or('payment_status.not.in.(unpaid,rejected),advance_paid.gt.0')
       .order('order_date', { ascending: false })
       .limit(50);
 
