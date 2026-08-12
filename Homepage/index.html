@@ -1002,24 +1002,19 @@
     async function fetchStats(db) {
       try {
 
-      const { data, error } = await db
-        .from('orders')
-        .select('status, special_instructions');
+      /* Raw order rows আর টানা হচ্ছে না — RPC শুধু aggregate সংখ্যা
+         রিটার্ন করে (security definer, RLS bypass করে), তাই
+         logged-in / logged-out দুই অবস্থাতেই একই real data আসবে
+         এবং কোনো client-এর raw তথ্য browser-এ আসবে না। */
+      const { data: rows, error } = await db.rpc('get_homepage_stats');
+      const stats = Array.isArray(rows) ? rows[0] : rows;
 
-      if (error || !data || data.length === 0) return;
+      if (error || !stats) return;
 
-      const completed  = data.filter(o => o.status === 'completed' || o.status === 'delivered').length;
-      const cancelled  = data.filter(o => o.status === 'cancelled').length;
-      const total      = data.length;
-
-      const clientNames = new Set();
-      data.forEach(o => {
-        const lines    = (o.special_instructions || '').split('\n');
-        const nameLine = lines.find(l => l.startsWith('Name:'));
-        const name     = nameLine ? nameLine.replace('Name:', '').trim() : null;
-        if (name) clientNames.add(name.toLowerCase());
-      });
-      const uniqueClients = clientNames.size;
+      const completed  = Number(stats.completed_orders) || 0;
+      const cancelled  = Number(stats.cancelled_orders) || 0;
+      const total      = Number(stats.total_orders) || 0;
+      const uniqueClients = Number(stats.unique_clients) || 0;
 
       const finished = completed + cancelled;
       const rate     = finished > 0 ? Math.round((completed / finished) * 100) : 100;

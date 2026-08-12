@@ -76,22 +76,22 @@
 
         <div class="auth-left-stats">
           <div class="auth-stat">
-            <div class="auth-stat-num">500+</div>
+            <div class="auth-stat-num" id="auth-stat-projects">250+</div>
             <div class="auth-stat-label">Projects</div>
           </div>
           <div class="auth-stat-div"></div>
           <div class="auth-stat">
-            <div class="auth-stat-num green">98%</div>
+            <div class="auth-stat-num green" id="auth-stat-rate">98%</div>
             <div class="auth-stat-label">Success</div>
           </div>
           <div class="auth-stat-div"></div>
           <div class="auth-stat">
-            <div class="auth-stat-num">25+</div>
+            <div class="auth-stat-num" id="auth-stat-writers">5+</div>
             <div class="auth-stat-label">Writers</div>
           </div>
           <div class="auth-stat-div"></div>
           <div class="auth-stat">
-            <div class="auth-stat-num">350+</div>
+            <div class="auth-stat-num" id="auth-stat-clients">150+</div>
             <div class="auth-stat-label">Clients</div>
           </div>
         </div>
@@ -206,6 +206,70 @@
 
   <script src="js/supabaseClient.js"></script>
   <script src="js/auth.js"></script>
+
+  <script>
+  /* ── Login Page Live Stats — homepage-এর মতো একই RPC ব্যবহার করে,
+     তাই login/register/homepage সব জায়গায় একই real সংখ্যা দেখাবে। ── */
+  (function loadLoginStats() {
+    const BASE_PROJECTS = 250;
+    const BASE_CLIENTS  = 150;
+
+    const elProjects = document.getElementById('auth-stat-projects');
+    const elRate     = document.getElementById('auth-stat-rate');
+    const elClients  = document.getElementById('auth-stat-clients');
+
+    /* localStorage-এ homepage/register এর cache করা data থাকলে সাথে সাথে দেখাও */
+    const cachedProjects = localStorage.getItem('scriptora_stat_projects');
+    const cachedRate     = localStorage.getItem('scriptora_stat_rate');
+    const cachedClients  = localStorage.getItem('scriptora_stat_clients');
+    if (cachedProjects && elProjects) elProjects.textContent = cachedProjects;
+    if (cachedRate     && elRate)     elRate.textContent     = cachedRate;
+    if (cachedClients  && elClients)  elClients.textContent  = cachedClients;
+
+    function getDB() { return window.scriptoraSupabase || null; }
+
+    let db = getDB();
+    if (!db) {
+      let tries = 0;
+      const wait = setInterval(() => {
+        db = getDB();
+        tries++;
+        if (db) { clearInterval(wait); fetchFresh(db); }
+        else if (tries >= 20) clearInterval(wait);
+      }, 300);
+      return;
+    }
+    fetchFresh(db);
+
+    async function fetchFresh(db) {
+      try {
+        const { data: rows, error } = await db.rpc('get_homepage_stats');
+        const stats = Array.isArray(rows) ? rows[0] : rows;
+        if (error || !stats) return;
+
+        const completed = Number(stats.completed_orders) || 0;
+        const cancelled = Number(stats.cancelled_orders) || 0;
+        const total     = Number(stats.total_orders) || 0;
+        const uniqueClients = Number(stats.unique_clients) || 0;
+
+        const finished = completed + cancelled;
+        const rate     = finished > 0 ? Math.round((completed / finished) * 100) : 100;
+        const finalProjects = BASE_PROJECTS + total;
+        const finalClients  = BASE_CLIENTS  + uniqueClients;
+
+        if (elProjects) elProjects.textContent = finalProjects + '+';
+        if (elRate)     elRate.textContent     = rate + '%';
+        if (elClients)  elClients.textContent  = finalClients + '+';
+
+        localStorage.setItem('scriptora_stat_projects', finalProjects + '+');
+        localStorage.setItem('scriptora_stat_clients',  finalClients  + '+');
+        localStorage.setItem('scriptora_stat_rate',     rate + '%');
+      } catch (err) {
+        console.error('[Login Stats]', err);
+      }
+    }
+  })();
+  </script>
 
 </body>
 </html>

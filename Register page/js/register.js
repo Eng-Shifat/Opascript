@@ -421,33 +421,27 @@ async function loadLiveStats() {
   if (cached.rate     && elSuccess)  elSuccess.textContent  = cached.rate;
   if (elWriters) elWriters.textContent = '5+';
 
-  /* তারপর fresh data fetch করো এবং update করো */
+  /* তারপর fresh data fetch করো এবং update করো — same RPC যেটা homepage ব্যবহার করে,
+     তাই login/logout, register — সব জায়গায় একই real সংখ্যা আসবে, raw order
+     data কখনো browser এ আসবে না। */
   try {
     const BASE_PROJECTS = 250;
     const BASE_CLIENTS  = 150;
 
-    const { data, error } = await sb
-      .from('orders')
-      .select('status, special_instructions');
+    const { data: rows, error } = await sb.rpc('get_homepage_stats');
+    const stats = Array.isArray(rows) ? rows[0] : rows;
 
-    if (error || !data || data.length === 0) return;
+    if (error || !stats) return;
 
-    const completed = data.filter(o => o.status === 'completed' || o.status === 'delivered').length;
-    const cancelled = data.filter(o => o.status === 'cancelled').length;
-    const total     = data.length;
-
-    const clientNames = new Set();
-    data.forEach(o => {
-      const lines    = (o.special_instructions || '').split('\n');
-      const nameLine = lines.find(l => l.startsWith('Name:'));
-      const name     = nameLine ? nameLine.replace('Name:', '').trim() : null;
-      if (name) clientNames.add(name.toLowerCase());
-    });
+    const completed = Number(stats.completed_orders) || 0;
+    const cancelled = Number(stats.cancelled_orders) || 0;
+    const total     = Number(stats.total_orders) || 0;
+    const uniqueClients = Number(stats.unique_clients) || 0;
 
     const finished      = completed + cancelled;
     const rate          = finished > 0 ? Math.round((completed / finished) * 100) : 100;
     const finalProjects = BASE_PROJECTS + total;
-    const finalClients  = BASE_CLIENTS  + clientNames.size;
+    const finalClients  = BASE_CLIENTS  + uniqueClients;
 
     if (elProjects) elProjects.textContent = finalProjects + '+';
     if (elSuccess)  elSuccess.textContent  = rate + '%';
