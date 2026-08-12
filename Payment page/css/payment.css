@@ -419,6 +419,65 @@ body {
 .full-pay-notice svg { color: #4ade80; flex-shrink: 0; margin-top: 2px; }
 .full-pay-notice strong { color: #4ade80; }
 
+/* Split unlock hint badge */
+.split-unlock-hint {
+  display: inline-block;
+  font-size: 10px;
+  background: rgba(251,191,36,0.12);
+  color: #fbbf24;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 4px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Two-part payment explanation */
+.two-part-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(99,102,241,0.06);
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+}
+.two-part-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.two-part-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.25);
+  color: #a5b4fc;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .split-unlock-hint {
+  background: rgba(180,83,9,0.08) !important;
+  color: #b45309 !important;
+}
+[data-theme="light"] .two-part-notice {
+  background: rgba(99,102,241,0.04) !important;
+  border-color: rgba(99,102,241,0.1) !important;
+  color: #4b5563 !important;
+}
+[data-theme="light"] .two-part-num {
+  background: rgba(99,102,241,0.12) !important;
+  color: #4338ca !important;
+}
+
 [data-theme="light"] .amount-input-wrap {
   border-color: rgba(0,0,0,.15); background: #fff;
 }

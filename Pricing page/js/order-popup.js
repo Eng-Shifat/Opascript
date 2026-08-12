@@ -405,11 +405,35 @@
       else if (sid.includes('assignment'))  serviceType = 'writing';
 
       /* ── Package ── */
+      // Map serviceId to a readable package label so the dashboard filter always has a value
+      const SERVICE_PKG_MAP = {
+        'thesis':                   'Thesis Writing',
+        'handwritten':              'Handwritten Assignment',
+        'assignment-writing':       'Assignment Writing',
+        'presentation-slides':      'Presentation Slides',
+        'proofreading':             'Proofreading',
+        'apa-mla-formatting':       'APA/MLA Formatting',
+        'plagiarism-reduction':     'Plagiarism Reduction',
+        'spss-analysis':            'SPSS Analysis',
+        'research-proposal':        'Research Proposal',
+        'case-study-report':        'Case Study Report',
+        'cv-writing':               'CV Writing',
+        'ai-plagiarism-remover':    'AI Plagiarism Remover',
+        'sop-writing':              'SOP Writing',
+        'lab-report-writing':       'Lab Report Writing',
+        'project-assignment-planning': 'Project Planning',
+        'ai-detection-report':      'AI Detection Report',
+        'research-article-writing': 'Research Article',
+      };
       let pkg = '';
       if (opts.unitType === 'tier' && opts.tiers?.[opts.tierIndex]) {
         pkg = opts.tiers[opts.tierIndex].name;
       } else if (opts.thesisType) {
         pkg = opts.thesisType;
+      } else if (sid && SERVICE_PKG_MAP[sid]) {
+        pkg = SERVICE_PKG_MAP[sid];
+      } else if (opts.title) {
+        pkg = opts.title;
       }
 
       const pageCount = opts.unitType === 'words' && opts.qty

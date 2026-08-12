@@ -947,31 +947,33 @@ async function nextStep() {
     const universityVal = window._isHandwritten
       ? (document.getElementById('hwUniversity')?.value.trim() || '')
       : (document.getElementById('university')?.value.trim() || '');
-    // Category-based package label — pricing page এর 3 section অনুযায়ী
+    // Service-to-package label map — clean names without emoji for consistent dashboard filter matching
     const SERVICE_CATEGORY_MAP = {
-      'assignment-writing': '✍️ Writing & Content',
-      'presentation-slides': '✍️ Writing & Content',
-      'case-study-report': '✍️ Writing & Content',
-      'cv-writing': '✍️ Writing & Content',
-      'sop-writing': '✍️ Writing & Content',
-      'research-article': '✍️ Writing & Content',
-      'research-article-writing': '✍️ Writing & Content',
-      'lab-report-writing': '✍️ Writing & Content',
-      'proofreading': '🔍 Editing & Plagiarism',
-      'apa-mla-formatting': '🔍 Editing & Plagiarism',
-      'plagiarism-reduction': '🔍 Editing & Plagiarism',
-      'ai-plagiarism-remover': '🔍 Editing & Plagiarism',
-      'ai-detection-report': '🔍 Editing & Plagiarism',
-      'spss-analysis': '📊 Research & Analysis',
-      'research-proposal': '📊 Research & Analysis',
-      'project-planning': '📊 Research & Analysis',
-      'project-assignment-planning': '📊 Research & Analysis',
-      'handwritten': '✍️ Writing & Content',
-      'thesis': pkgData[selectedDept]?.label || 'Thesis Writing',
+      'assignment-writing':          'Assignment Writing',
+      'presentation-slides':         'Presentation Slides',
+      'case-study-report':           'Case Study Report',
+      'cv-writing':                  'CV Writing',
+      'sop-writing':                 'SOP Writing',
+      'research-article':            'Research Article',
+      'research-article-writing':    'Research Article',
+      'lab-report-writing':          'Lab Report Writing',
+      'proofreading':                'Proofreading',
+      'apa-mla-formatting':          'APA/MLA Formatting',
+      'plagiarism-reduction':        'Plagiarism Reduction',
+      'ai-plagiarism-remover':       'AI Plagiarism Remover',
+      'ai-detection-report':         'AI Detection Report',
+      'spss-analysis':               'SPSS Analysis',
+      'research-proposal':           'Research Proposal',
+      'project-planning':            'Project Planning',
+      'project-assignment-planning': 'Project Planning',
+      'handwritten':                 'Handwritten Assignment',
+      'thesis':                      selectedDept === 'bba' ? 'Honours & Masters Thesis'
+                                   : selectedDept === 'cse' ? 'Engineering Thesis'
+                                   : 'Premium Thesis',
     };
     const packageVal    = (serviceId && SERVICE_CATEGORY_MAP[serviceId])
                        ? SERVICE_CATEGORY_MAP[serviceId]
-                       : (pkgData[selectedDept]?.label
+                       : (pkgData[selectedDept]?.label?.replace(/^[\p{Emoji}\s]+/u, '').trim()
                        || (cfg?.navLabel ? cfg.navLabel.replace(/^[\p{Emoji}\s]+/u, '').trim() : '')
                        || (serviceId ? serviceId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—'));
     const citationVal   = window._isHandwritten ? '—' : (document.getElementById('citationStyle')?.value || '—');

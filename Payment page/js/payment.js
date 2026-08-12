@@ -461,11 +461,45 @@ function updateAmountUI(amount, total) {
   const payingEl  = document.getElementById('remainingPaying');
   const dueEl     = document.getElementById('remainingDue');
 
+  // ── Calculate percentage ──
+  const pct = amount > 0 ? Math.round((amount / total) * 100) : 0;
+  const remainingPct = Math.max(0, 100 - pct);
+
   if (totalEl)  totalEl.textContent  = '৳' + total.toLocaleString();
-  if (payingEl) payingEl.textContent = amount > 0 ? '৳' + amount.toLocaleString() : '—';
+  if (payingEl) {
+    payingEl.textContent = amount > 0
+      ? '৳' + amount.toLocaleString() + ' (' + pct + '%)'
+      : '—';
+  }
   if (dueEl) {
-    dueEl.textContent = remaining > 0 ? '৳' + remaining.toLocaleString() : '✅ সম্পূর্ণ পরিশোধিত';
-    dueEl.classList.toggle('paid', remaining === 0);
+    if (remaining > 0) {
+      dueEl.textContent = '৳' + remaining.toLocaleString() + ' (' + remainingPct + '%) — Delivery এর পরে';
+      dueEl.classList.remove('paid');
+    } else {
+      dueEl.textContent = '✅ সম্পূর্ণ পরিশোধিত';
+      dueEl.classList.add('paid');
+    }
+  }
+
+  // ── Update right-side split labels dynamically ──
+  const splitNowLabel   = document.getElementById('splitNowLabel');
+  const splitLaterLabel = document.getElementById('splitLaterLabel');
+  const splitNow        = document.getElementById('splitNow');
+  const splitLater      = document.getElementById('splitLater');
+
+  if (splitNowLabel && amount > 0) {
+    splitNowLabel.innerHTML = 'এখন (' + pct + '% Advance)';
+  }
+  if (splitLaterLabel && remaining >= 0) {
+    splitLaterLabel.innerHTML = 'Delivery এর পরে <span class="split-unlock-hint">🔒 File unlock</span>';
+  }
+  if (splitNow && amount > 0) {
+    splitNow.textContent = '৳' + amount.toLocaleString();
+  }
+  if (splitLater) {
+    splitLater.textContent = remaining > 0
+      ? '৳' + remaining.toLocaleString()
+      : '✅ Paid';
   }
 
   // ── Below 50% soft warning ──

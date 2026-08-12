@@ -265,7 +265,18 @@
             <!-- Full payment unlock notice (always visible) -->
             <div class="full-pay-notice">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-              <span>Deadline শেষ হওয়ার আগে <strong>full payment</strong> করলে সম্পূর্ণ কাজ Download করার access পাবেন।</span>
+              <span>Delivery-র পরে বাকি টাকা পরিশোধ করলে <strong>🔓 সম্পূর্ণ কাজ Download</strong> করার access পাবেন।</span>
+            </div>
+            <!-- How 2-part payment works -->
+            <div class="two-part-notice">
+              <div class="two-part-step">
+                <span class="two-part-num">১</span>
+                <span>এখন Advance দিন → Admin কাজ শুরু করবে</span>
+              </div>
+              <div class="two-part-step">
+                <span class="two-part-num">২</span>
+                <span>কাজ deliver হলে বাকি টাকা পাঠান → File unlock হবে</span>
+              </div>
             </div>
             <div class="fg">
               <label>Payment Screenshot <span class="req">*</span></label>
@@ -357,8 +368,8 @@
 
           <div class="sum-split">
             <div class="split-head">Payment দুই ভাগে</div>
-            <div class="split-row"><span>এখন (৫০% Advance)</span><span id="splitNow">—</span></div>
-            <div class="split-row"><span>Delivery এর পরে</span><span id="splitLater">—</span></div>
+            <div class="split-row"><span id="splitNowLabel">এখন (৫০% Advance)</span><span id="splitNow">—</span></div>
+            <div class="split-row split-row-later"><span id="splitLaterLabel">Delivery এর পরে <span class="split-unlock-hint">🔒 File unlock</span></span><span id="splitLater">—</span></div>
           </div>
 
           <div class="sum-info deadline">
