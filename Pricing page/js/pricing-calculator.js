@@ -298,43 +298,8 @@ window.orderThesis = async function() {
     }
   }
 
-  const THC   = window.SCRIPTORA_CONFIG.thesis;
-  const type  = document.getElementById('thesisType')?.value || 'full';
-  const dl    = window._thesisDl || 'standard';
-  const words = window._thesisWords || THC.minWords;
-  const price = Math.round(words * THC.pricePerWord[type] * THC.deadlineMultiplier[dl]);
-
-  const urgMap = { standard:'normal', express:'urgent', rush:'critical' };
-
-  const urgLabel = { standard: 'Standard (10–15 Days)', express: 'Express (5–7 Days)', rush: 'Rush (2–3 Days)' };
-  const typeLabel = { full: 'Full Thesis', chapter: 'Single Chapter', proposal: 'Proposal Only' };
-
-  window._popupState = {
-    qty:       words,
-    tierIndex: 0,
-    urgency:   urgMap[dl] || 'normal',
-    thesisType: type,
-  };
-
-  if (typeof window.opOpen === 'function') {
-    window.opOpen({
-      serviceId:    'thesis-writing',
-      title:        'Thesis Writing',
-      titleBn:      'থিসিস রাইটিং',
-      icon:         '🎓',
-      iconBg:       'rgba(99,102,241,0.2)',
-      unitType:     'words',
-      qty:          words,
-      unitLabel:    'words',
-      urgencyLabel: urgLabel[dl] || dl,
-      rate:         THC.pricePerWord[type] * 1000,
-      perUnit:      1000,
-      tiers:        null,
-      tierIndex:    0,
-      price:        price,
-      thesisType:   type,
-    });
-  }
+  /* Order page এ নিয়ে যাও — thesis 5-step wizard */
+  window.location.href = '../Order page/order.html?service=thesis';
 };
 
 /* ── Init ── */
