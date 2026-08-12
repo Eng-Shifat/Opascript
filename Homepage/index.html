@@ -977,8 +977,30 @@
     }
 
     try {
-      const db = window.opascriptSupabase;
-      if (!db) return;
+      function getDB() {
+        return window.opascriptSupabase || window.scriptoraSupabase || null;
+      }
+
+      let db = getDB();
+      if (!db) {
+        /* Supabase client এখনো ready না — retry করো */
+        let tries = 0;
+        const wait = setInterval(() => {
+          db = getDB();
+          tries++;
+          if (db) { clearInterval(wait); fetchStats(db); }
+          else if (tries >= 20) clearInterval(wait);
+        }, 300);
+        return;
+      }
+      fetchStats(db);
+
+    } catch (err) {
+      console.error('[Homepage Stats]', err);
+    }
+
+    async function fetchStats(db) {
+      try {
 
       const { data, error } = await db
         .from('orders')
@@ -986,8 +1008,9 @@
 
       if (error || !data || data.length === 0) return;
 
-      const completed = data.filter(o => o.status === 'completed').length;
-      const cancelled = data.filter(o => o.status === 'cancelled').length;
+      const completed  = data.filter(o => o.status === 'completed' || o.status === 'delivered').length;
+      const cancelled  = data.filter(o => o.status === 'cancelled').length;
+      const total      = data.length;
 
       const clientNames = new Set();
       data.forEach(o => {
@@ -998,19 +1021,25 @@
       });
       const uniqueClients = clientNames.size;
 
-      const rateBase = completed + cancelled;
-      const rate     = rateBase > 0 ? Math.round((completed / rateBase) * 100) : 98;
+      const finished = completed + cancelled;
+      const rate     = finished > 0 ? Math.round((completed / finished) * 100) : 100;
 
-      const finalProjects = BASE_PROJECTS + completed;
+      const finalProjects = BASE_PROJECTS + total;
       const finalClients  = BASE_CLIENTS  + uniqueClients;
 
       setAll(ids.projects, finalProjects + '+');
       setAll(ids.clients,  finalClients  + '+');
       setAll(ids.rate,     rate + '%');
 
-    } catch (err) {
-      console.error('[Homepage Stats]', err);
-    }
+      /* Register page এর জন্য localStorage এ save করো */
+      localStorage.setItem('scriptora_stat_projects', finalProjects + '+');
+      localStorage.setItem('scriptora_stat_clients',  finalClients  + '+');
+      localStorage.setItem('scriptora_stat_rate',     rate + '%');
+
+      } catch (err) {
+        console.error('[Homepage Stats]', err);
+      }
+    } /* end fetchStats */
   })();
   </script>
 

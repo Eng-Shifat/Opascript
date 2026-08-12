@@ -404,3 +404,62 @@ document.addEventListener('keydown', function (e) {
 
 
 // Session check removed — register page loads always
+
+
+/* ── Live Stats — Homepage এর localStorage থেকে নেয়, না থাকলে নিজে fetch করে ── */
+async function loadLiveStats() {
+  const elProjects = document.getElementById('stat-projects');
+  const elSuccess  = document.getElementById('stat-success');
+  const elWriters  = document.getElementById('stat-writers');
+
+  /* localStorage এ আগের data থাকলে সাথে সাথে দেখাও */
+  const cached = {
+    projects: localStorage.getItem('scriptora_stat_projects'),
+    rate:     localStorage.getItem('scriptora_stat_rate'),
+  };
+  if (cached.projects && elProjects) elProjects.textContent = cached.projects;
+  if (cached.rate     && elSuccess)  elSuccess.textContent  = cached.rate;
+  if (elWriters) elWriters.textContent = '5+';
+
+  /* তারপর fresh data fetch করো এবং update করো */
+  try {
+    const BASE_PROJECTS = 250;
+    const BASE_CLIENTS  = 150;
+
+    const { data, error } = await sb
+      .from('orders')
+      .select('status, special_instructions');
+
+    if (error || !data || data.length === 0) return;
+
+    const completed = data.filter(o => o.status === 'completed' || o.status === 'delivered').length;
+    const cancelled = data.filter(o => o.status === 'cancelled').length;
+    const total     = data.length;
+
+    const clientNames = new Set();
+    data.forEach(o => {
+      const lines    = (o.special_instructions || '').split('\n');
+      const nameLine = lines.find(l => l.startsWith('Name:'));
+      const name     = nameLine ? nameLine.replace('Name:', '').trim() : null;
+      if (name) clientNames.add(name.toLowerCase());
+    });
+
+    const finished      = completed + cancelled;
+    const rate          = finished > 0 ? Math.round((completed / finished) * 100) : 100;
+    const finalProjects = BASE_PROJECTS + total;
+    const finalClients  = BASE_CLIENTS  + clientNames.size;
+
+    if (elProjects) elProjects.textContent = finalProjects + '+';
+    if (elSuccess)  elSuccess.textContent  = rate + '%';
+
+    /* localStorage update করো — homepage ও next visit এ পাবে */
+    localStorage.setItem('scriptora_stat_projects', finalProjects + '+');
+    localStorage.setItem('scriptora_stat_clients',  finalClients  + '+');
+    localStorage.setItem('scriptora_stat_rate',     rate + '%');
+
+  } catch (e) {
+    console.warn('[Stats] Failed to load live stats:', e);
+  }
+}
+
+loadLiveStats();
