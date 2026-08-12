@@ -250,11 +250,14 @@ function renderOrdersTable() {
   document.getElementById('otEmpty').style.display = filtered.length === 0 ? 'flex' : 'none';
 
   pageItems.forEach(order => {
-    // Payment না করা orders-এ special badge দেখাবে
-    const isUnpaid = (order.payment_status === 'unpaid' || !order.payment_status) && (!order.advance_paid || Number(order.advance_paid) === 0);
-    const badge = isUnpaid
-      ? { cls: 'badge-waiting-payment', label: 'Waiting for Payment' }
-      : getStatusBadge(order.status);
+    // Payment না করা বা rejected orders-এ special badge দেখাবে
+    const isUnpaid   = (order.payment_status === 'unpaid' || !order.payment_status) && (!order.advance_paid || Number(order.advance_paid) === 0);
+    const isRejected = order.payment_status === 'rejected' && (!order.advance_paid || Number(order.advance_paid) === 0);
+    const badge = isRejected
+      ? { cls: 'badge-payment-rejected', label: '❌ Payment Rejected' }
+      : isUnpaid
+        ? { cls: 'badge-waiting-payment', label: 'Waiting for Payment' }
+        : getStatusBadge(order.status);
     const overdue = otIsOverdue(order);
     const tr = document.createElement('tr');
     tr.className = 'ot-row';
@@ -488,6 +491,34 @@ async function openOrderDetail(orderId) {
   payBadges.innerHTML='';
   if(livePaid>0) payBadges.innerHTML+=`<span class="pay-badge confirmed">✓ Advance paid</span>`;
   if(liveDue>0)  payBadges.innerHTML+=`<span class="pay-badge pending">✗ Due pending</span>`;
+
+  /* ── Rejected payment banner — show prominently above everything ── */
+  const existingRejBanner = document.getElementById('rejectedPaymentBanner');
+  if (existingRejBanner) existingRejBanner.remove();
+  const isPaymentRejected = order.payment_status === 'rejected' && livePaid === 0;
+  if (isPaymentRejected) {
+    const rejBanner = document.createElement('div');
+    rejBanner.id = 'rejectedPaymentBanner';
+    rejBanner.className = 'rejected-payment-banner';
+    rejBanner.innerHTML = `
+      <div class="rej-banner-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <div class="rej-banner-body">
+        <div class="rej-banner-title">Payment Rejected হয়েছে</div>
+        <div class="rej-banner-msg">আপনার আগের payment verify করা যায়নি। সঠিক Transaction ID এবং screenshot দিয়ে আবার submit করুন।</div>
+      </div>
+      <button class="rej-banner-btn" onclick="window.location.href='../Payment page/payment.html?order_id=${order.id}'">
+        🔄 পুনরায় Payment করুন
+      </button>
+    `;
+    const detailHeader = document.querySelector('#orderDetailView .detail-header') || document.querySelector('#orderDetailView');
+    if (detailHeader) detailHeader.insertAdjacentElement('afterend', rejBanner);
+  }
 
   /* Use live values for lock/unlock logic */
   const hasDue = liveDue > 0;

@@ -512,6 +512,10 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .s-review { background: rgba(245,158,11,0.15); color: var(--yellow); }
 .s-pending { background: rgba(107,114,128,0.15); color: var(--muted2); }
 .s-completed { background: rgba(52,211,153,0.15); color: var(--green); }
+.s-rejected { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.25); }
+
+/* Package badge — rejected state */
+.pkg-rejected { background: rgba(248,113,113,0.08); color: #f87171; border-color: rgba(248,113,113,0.2); }
 
 .amount { font-size: 12px; font-weight: 600; color: var(--text); text-align: right; white-space: nowrap; }
 

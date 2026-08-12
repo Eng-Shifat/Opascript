@@ -173,8 +173,12 @@ function renderTable() {
           <div class="topic-uni">${o.uni}</div>
         </div>
       </td>
-      <td><span class="pkg-badge ${o.pkgClass}">${o.pkg}</span></td>
-      <td><span class="status-badge ${o.statusClass}">${o.status}</span></td>
+      <td><span class="pkg-badge ${o.pkgClass}" data-pkg="${o.pkg || ''}">${o.pkg || '<span style=\"color:rgba(255,255,255,0.3);font-style:italic\">—</span>'}</span></td>
+      <td>
+        <span class="status-badge ${o.statusClass}">${o.status}</span>
+        ${o.paymentStatus === 'rejected' ? '<span class="status-badge s-rejected" style="margin-top:3px;display:block;font-size:10px">💳 Payment Rejected</span>' : ''}
+        ${(o.paymentStatus === 'unpaid' || o.paymentStatus === 'under_review') && o.statusClass === 's-pending' ? '<span class="status-badge" style="margin-top:3px;display:block;font-size:10px;background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.25)">' + (o.paymentStatus === 'under_review' ? '⏳ Payment Review' : '⏳ Awaiting Payment') + '</span>' : ''}
+      </td>
       <td class="deadline-cell">
         <div class="deadline-date ${o.deadlineClass}">${o.deadline}</div>
         <div class="deadline-time">${o.deadlineTime}</div>
@@ -608,7 +612,8 @@ function initFilterBtns() {
             document.querySelectorAll('#ordersTableBody tr').forEach(row => {
               if (pkg === 'All Packages') { row.style.display = ''; return; }
               const pkgEl = row.querySelector('.pkg-badge');
-              row.style.display = pkgEl && pkgEl.textContent.trim() === pkg ? '' : 'none';
+              const pkgVal = pkgEl ? (pkgEl.dataset.pkg || pkgEl.textContent.trim()) : '';
+              row.style.display = pkgVal === pkg ? '' : 'none';
             });
             btn.querySelector('span') && (btn.querySelector('span').textContent = pkg);
             menu.remove();
@@ -1022,7 +1027,8 @@ function mapSupabaseOrderToLocal(o) {
     uni:           uni,
     topic:         o.title || 'Untitled',
     pkg:           o.package || '—',
-    pkgClass:      'pkg-msc',
+    pkgClass:      o.payment_status === 'rejected' ? 'pkg-rejected' : 'pkg-msc',
+    paymentStatus: o.payment_status || 'unpaid',
     pages:         Number.isFinite(pageNum) && pageNum > 0 ? pageNum : null,
     chapters:      Number.isFinite(pageNum) && pageNum > 0 ? Math.ceil(pageNum / 30) : '—',
     wordcount:     Number.isFinite(pageNum) && pageNum > 0 ? (pageNum * 250).toLocaleString() + ' w' : '—',
@@ -1088,7 +1094,7 @@ async function loadRealOrders() {
     const { data, error } = await sb
       .from('orders')
       .select('*')
-      .or('payment_status.neq.unpaid,advance_paid.gt.0')
+      .or('payment_status.neq.unpaid,advance_paid.gt.0,payment_status.eq.rejected')
       .order('order_date', { ascending: false });
 
     if (error) throw error;
