@@ -1083,10 +1083,12 @@ async function loadRealOrders() {
   if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:rgba(255,255,255,0.3);font-size:13px;"><div style="margin-bottom:8px">⏳</div>Loading orders...</td></tr>`;
 
   try {
-    /* Step 1: orders load — NO date filter, load all */
+    /* Step 1: orders load — শুধু minimum payment করা orders দেখাবে
+       payment_status = 'unpaid' AND advance_paid = 0 হলে admin-এ দেখাবে না */
     const { data, error } = await sb
       .from('orders')
       .select('*')
+      .or('payment_status.neq.unpaid,advance_paid.gt.0')
       .order('order_date', { ascending: false });
 
     if (error) throw error;

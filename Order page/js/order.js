@@ -947,7 +947,33 @@ async function nextStep() {
     const universityVal = window._isHandwritten
       ? (document.getElementById('hwUniversity')?.value.trim() || '')
       : (document.getElementById('university')?.value.trim() || '');
-    const packageVal    = pkgData[selectedDept]?.label || '';
+    // Category-based package label — pricing page এর 3 section অনুযায়ী
+    const SERVICE_CATEGORY_MAP = {
+      'assignment-writing': '✍️ Writing & Content',
+      'presentation-slides': '✍️ Writing & Content',
+      'case-study-report': '✍️ Writing & Content',
+      'cv-writing': '✍️ Writing & Content',
+      'sop-writing': '✍️ Writing & Content',
+      'research-article': '✍️ Writing & Content',
+      'research-article-writing': '✍️ Writing & Content',
+      'lab-report-writing': '✍️ Writing & Content',
+      'proofreading': '🔍 Editing & Plagiarism',
+      'apa-mla-formatting': '🔍 Editing & Plagiarism',
+      'plagiarism-reduction': '🔍 Editing & Plagiarism',
+      'ai-plagiarism-remover': '🔍 Editing & Plagiarism',
+      'ai-detection-report': '🔍 Editing & Plagiarism',
+      'spss-analysis': '📊 Research & Analysis',
+      'research-proposal': '📊 Research & Analysis',
+      'project-planning': '📊 Research & Analysis',
+      'project-assignment-planning': '📊 Research & Analysis',
+      'handwritten': '✍️ Writing & Content',
+      'thesis': pkgData[selectedDept]?.label || 'Thesis Writing',
+    };
+    const packageVal    = (serviceId && SERVICE_CATEGORY_MAP[serviceId])
+                       ? SERVICE_CATEGORY_MAP[serviceId]
+                       : (pkgData[selectedDept]?.label
+                       || (cfg?.navLabel ? cfg.navLabel.replace(/^[\p{Emoji}\s]+/u, '').trim() : '')
+                       || (serviceId ? serviceId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—'));
     const citationVal   = window._isHandwritten ? '—' : (document.getElementById('citationStyle')?.value || '—');
     const urgencyLabel  = { standard:'Standard', urgent:'Urgent +২০%', express:'Express +৫০%' }[selectedUrgencyVal];
     const deadlineVal   = document.getElementById('deadlineDate')?.value || null;

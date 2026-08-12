@@ -250,7 +250,11 @@ function renderOrdersTable() {
   document.getElementById('otEmpty').style.display = filtered.length === 0 ? 'flex' : 'none';
 
   pageItems.forEach(order => {
-    const badge = getStatusBadge(order.status);
+    // Payment না করা orders-এ special badge দেখাবে
+    const isUnpaid = (order.payment_status === 'unpaid' || !order.payment_status) && (!order.advance_paid || Number(order.advance_paid) === 0);
+    const badge = isUnpaid
+      ? { cls: 'badge-waiting-payment', label: 'Waiting for Payment' }
+      : getStatusBadge(order.status);
     const overdue = otIsOverdue(order);
     const tr = document.createElement('tr');
     tr.className = 'ot-row';
