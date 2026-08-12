@@ -273,7 +273,7 @@ async function handleGoogleLogin() {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/Client%20Dashbaord/dashboard.html',
+        redirectTo: window.location.origin + '/Client%20Dashboard/dashboard.html',
       },
     });
     if (error) {
@@ -301,7 +301,7 @@ async function handleForgotPassword() {
 
   try {
     const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/Login Page/reset-password.html',
+      redirectTo: window.location.origin + '/Login%20page/reset-password.html',
     });
 
     if (error) {
