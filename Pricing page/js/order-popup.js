@@ -127,6 +127,63 @@
           </div>
         </div>
 
+        ${opts.serviceId === 'cv-writing' ? `
+
+        <div class="op-field-group">
+          <label class="op-field-label">CV Type <span style="color:#ef4444">*</span></label>
+          <div class="op-input-wrap">
+            <select class="op-input" id="opCvType" style="cursor:pointer;">
+              <option value="" disabled selected>Select CV type</option>
+              <option value="Job CV">Job CV</option>
+              <option value="Internship CV">Internship CV</option>
+              <option value="Academic CV">Academic CV</option>
+              <option value="Freshers CV">Freshers CV</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="op-field-group">
+          <label class="op-field-label">Target Job / Position</label>
+          <div class="op-input-wrap">
+            <span class="op-input-icon">🎯</span>
+            <input class="op-input" id="opTargetJob" type="text" placeholder="e.g. Software Engineer at Google"/>
+          </div>
+        </div>
+
+        <div class="op-field-group">
+          <label class="op-field-label">Degree & University <span style="color:#ef4444">*</span></label>
+          <div class="op-input-wrap">
+            <span class="op-input-icon">🎓</span>
+            <input class="op-input" id="opEducation" type="text" placeholder="e.g. BSc in CSE, Daffodil International University"/>
+          </div>
+        </div>
+
+        <div class="op-field-group">
+          <label class="op-field-label">Technical Skills</label>
+          <div class="op-input-wrap">
+            <span class="op-input-icon">💻</span>
+            <input class="op-input" id="opSkills" type="text" placeholder="e.g. Python, React, Figma, MS Office"/>
+          </div>
+        </div>
+
+        <div class="op-field-group">
+          <label class="op-field-label">Work / Internship Experience</label>
+          <div class="op-input-wrap op-textarea-wrap">
+            <span class="op-input-icon op-ta-icon">💼</span>
+            <textarea class="op-input op-textarea" id="opExperience" placeholder="Company, Role, Duration... (Fresher? Write internship/project)" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="op-field-group">
+          <label class="op-field-label">Special Notes <span class="op-optional">(Optional)</span></label>
+          <div class="op-input-wrap op-textarea-wrap">
+            <span class="op-input-icon op-ta-icon">📋</span>
+            <textarea class="op-input op-textarea" id="opNotes" placeholder="Any specific format or requirements..." rows="2"></textarea>
+          </div>
+        </div>
+
+        ` : `
+
         <div class="op-field-group">
           <label class="op-field-label">${topicLabel}</label>
           <div class="op-input-wrap op-textarea-wrap">
@@ -142,6 +199,8 @@
             <textarea class="op-input op-textarea" id="opNotes" placeholder="Any formatting requirements, references, etc." rows="3"></textarea>
           </div>
         </div>
+
+        `}
 
         <div class="op-field-group">
           <label class="op-field-label">Attach File / ফাইল সংযুক্ত করুন <span class="op-optional">(Optional)</span></label>
@@ -359,7 +418,17 @@
 
     if (!name)  { highlight('opName',  'Name লিখুন'); return; }
     if (!phone) { highlight('opPhone', 'WhatsApp নম্বর লিখুন'); return; }
-    if (!topic) { highlight('opTopic', 'Topic লিখুন'); return; }
+
+    // CV Writing এর জন্য আলাদা validation
+    const isCV = (window._opOpts?.serviceId === 'cv-writing');
+    if (isCV) {
+      const cvType = document.getElementById('opCvType')?.value;
+      const cvEdu  = document.getElementById('opEducation')?.value.trim();
+      if (!cvType) { highlight('opCvType', 'CV Type select করুন'); return; }
+      if (!cvEdu)  { highlight('opEducation', 'Education details দিন'); return; }
+    } else {
+      if (!topic) { highlight('opTopic', 'Topic লিখুন'); return; }
+    }
 
     const btn = document.querySelector('.op-confirm-btn');
     if (btn) { btn.innerHTML = '⏳ Processing...'; btn.disabled = true; }
@@ -455,10 +524,35 @@
         payment_status:       'unpaid',
         progress:             0,
         deadline:             deadline,
-        research_area:        topic,
+        research_area: (() => {
+          if (opts.serviceId === 'cv-writing') {
+            return document.getElementById('opTargetJob')?.value.trim() || 'CV Writing';
+          }
+          return topic;
+        })(),
         page_count:           pageCount,
         pages:                pageCount ? String(pageCount) : null,
-        special_instructions: `Name: ${name}\nPhone: ${phone}` + (notes ? `\n\n${notes}` : ''),
+        special_instructions: (() => {
+          const isCV = (opts.serviceId === 'cv-writing');
+          if (isCV) {
+            const cvType    = document.getElementById('opCvType')?.value || '';
+            const targetJob = document.getElementById('opTargetJob')?.value.trim() || '';
+            const education = document.getElementById('opEducation')?.value.trim() || '';
+            const skills    = document.getElementById('opSkills')?.value.trim() || '';
+            const exp       = document.getElementById('opExperience')?.value.trim() || '';
+            const cvNotes   = document.getElementById('opNotes')?.value.trim() || '';
+            return [
+              `Name: ${name}`, `Phone: ${phone}`,
+              `CV Type: ${cvType}`,
+              targetJob ? `Target Job: ${targetJob}` : '',
+              `Education: ${education}`,
+              skills ? `Skills: ${skills}` : '',
+              exp ? `Experience: ${exp}` : '',
+              cvNotes ? `Notes: ${cvNotes}` : '',
+            ].filter(Boolean).join('\n');
+          }
+          return `Name: ${name}\nPhone: ${phone}` + (notes ? `\n\n${notes}` : '');
+        })(),
       };
 
       const { data: insertData, error } = await db.from('orders').insert(row).select('id').single();

@@ -423,6 +423,109 @@
           </div>
 
         </div>
+
+        <!-- ── CV Writing fields ── -->
+        <div id="scopeCV" style="display:none">
+
+          <div class="fg">
+            <label>Full Name <span>*</span></label>
+            <input type="text" id="cvFullName" placeholder="e.g. Rahim Hossain" />
+            <div class="field-err" id="err-cvFullName"></div>
+          </div>
+
+          <div class="fg-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="fg">
+              <label>Phone <span>*</span></label>
+              <input type="tel" id="cvPhone" placeholder="01XXXXXXXXX" />
+              <div class="field-err" id="err-cvPhone"></div>
+            </div>
+            <div class="fg">
+              <label>Email <span>*</span></label>
+              <input type="email" id="cvEmail" placeholder="example@gmail.com" />
+              <div class="field-err" id="err-cvEmail"></div>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label>Address</label>
+            <input type="text" id="cvAddress" placeholder="e.g. Dhaka, Bangladesh" />
+          </div>
+
+          <div class="fg">
+            <label>LinkedIn Profile URL</label>
+            <input type="url" id="cvLinkedIn" placeholder="https://linkedin.com/in/..." />
+          </div>
+
+          <div class="fg" style="margin-top:8px;">
+            <label>CV Type <span>*</span></label>
+            <div class="sw">
+              <select id="cvType">
+                <option value="" disabled selected>Select CV type</option>
+                <option value="job">Job CV</option>
+                <option value="internship">Internship CV</option>
+                <option value="academic">Academic CV</option>
+                <option value="freshers">Freshers CV</option>
+              </select>
+            </div>
+            <div class="field-err" id="err-cvType"></div>
+          </div>
+
+          <div class="fg">
+            <label>Target Job / Position</label>
+            <input type="text" id="cvTargetJob" placeholder="e.g. Software Engineer at Google" />
+          </div>
+
+          <div style="margin-top:16px;padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.07);">
+            <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:.5px;margin-bottom:10px;">EDUCATION</div>
+
+            <div class="fg">
+              <label>Degree & University <span>*</span></label>
+              <input type="text" id="cvEducation" placeholder="e.g. BSc in CSE, Daffodil International University" />
+              <div class="field-err" id="err-cvEducation"></div>
+            </div>
+            <div class="fg-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="fg">
+                <label>Passing Year</label>
+                <input type="text" id="cvPassYear" placeholder="e.g. 2024" />
+              </div>
+              <div class="fg">
+                <label>CGPA / Result</label>
+                <input type="text" id="cvCGPA" placeholder="e.g. 3.75 / 4.00" />
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.07);">
+            <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:.5px;margin-bottom:10px;">WORK EXPERIENCE</div>
+            <div class="fg">
+              <label>Company, Role & Duration</label>
+              <textarea id="cvExperience" placeholder="e.g. XYZ Company — Software Intern (Jan 2023 – Jun 2023)&#10;Worked on REST APIs, React frontend..." style="min-height:80px;"></textarea>
+            </div>
+            <div style="font-size:11.5px;color:rgba(255,255,255,0.35);margin-top:4px;">Fresher? Internship / project experience লিখুন।</div>
+          </div>
+
+          <div style="margin-top:12px;padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.07);">
+            <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:.5px;margin-bottom:10px;">SKILLS & OTHERS</div>
+            <div class="fg">
+              <label>Technical Skills / Software</label>
+              <input type="text" id="cvSkills" placeholder="e.g. Python, React, Figma, MS Office" />
+            </div>
+            <div class="fg" style="margin-top:10px;">
+              <label>Languages</label>
+              <input type="text" id="cvLanguages" placeholder="e.g. Bangla (Native), English (Fluent)" />
+            </div>
+            <div class="fg" style="margin-top:10px;">
+              <label>Certificates / Awards / Extra-curricular</label>
+              <textarea id="cvExtras" placeholder="e.g. Google Data Analytics Certificate, Dean's List 2023, Debate Club President..." style="min-height:70px;"></textarea>
+            </div>
+          </div>
+
+          <div class="fg" style="margin-top:12px;">
+            <label>Special Instructions</label>
+            <textarea id="specialInstructionsCV" placeholder="Any specific format, style or requirements..." style="min-height:70px;"></textarea>
+          </div>
+
+        </div>
       </div>
 
       <!-- ══ STEP 3: Timeline ══ -->

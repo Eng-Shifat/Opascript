@@ -327,3 +327,29 @@
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
+
+/* ── Desktop: centered modal instead of bottom sheet ── */
+@media (min-width: 768px) {
+  .op-overlay {
+    backdrop-filter: blur(4px);
+  }
+  .op-sheet {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -40%);
+    width: 520px;
+    max-width: 95vw;
+    height: auto;
+    max-height: 88vh;
+    border-radius: 20px;
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.25, 0.85, 0.25, 1.05), opacity 0.3s ease;
+  }
+  .op-sheet.open {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
+  .op-drag-handle { display: none; }
+}

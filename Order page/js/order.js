@@ -647,6 +647,27 @@ function validate(s) {
   if (s===3) {
     ce('deadlineDate'); if(!gv('deadlineDate')){se('deadlineDate','Deadline date নির্বাচন করুন');ok=false;}
     if (window._isHandwritten) return ok; // word count + citation not applicable
+    if (window._isCV) {
+      // CV required fields validate
+      const cvFields = [
+        { id: 'cvFullName',  err: 'err-cvFullName',  msg: 'Full name দিন' },
+        { id: 'cvPhone',     err: 'err-cvPhone',     msg: 'Phone number দিন' },
+        { id: 'cvEmail',     err: 'err-cvEmail',     msg: 'Email দিন' },
+        { id: 'cvType',      err: 'err-cvType',      msg: 'CV type select করুন' },
+        { id: 'cvEducation', err: 'err-cvEducation', msg: 'Education details দিন' },
+      ];
+      cvFields.forEach(f => {
+        const el = document.getElementById(f.id);
+        const errEl = document.getElementById(f.err);
+        if (el && !el.value.trim()) {
+          if (errEl) errEl.textContent = f.msg;
+          ok = false;
+        } else {
+          if (errEl) errEl.textContent = '';
+        }
+      });
+      return ok;
+    }
     // Word Count + Citation now in Step 3
     ce('wordCount');
     const wcVal = document.getElementById('wordCount')?.value;
@@ -1312,6 +1333,30 @@ function initServiceAware() {
 
   // ── 0. Handwritten mode: swap Step 1 / Step 2 field sets, hide Word Count & Citation ──
   window._isHandwritten = (serviceId === 'handwritten');
+  window._isCV = (serviceId === 'cv-writing');
+
+  // ── CV Writing mode ──
+  if (window._isCV) {
+    // সব thesis scope লুকাও
+    ['scopeBBA', 'scopeCSE', 'scopePremium', 'scopeHandwritten'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    // CV scope দেখাও
+    const cvScope = document.getElementById('scopeCV');
+    if (cvScope) cvScope.style.display = 'block';
+
+    // Word count, citation, addons, ref — CV তে দরকার নেই
+    ['wcCitationBlock','addonsBlock','refReqWrap'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    // Step 1 heading fix
+    const t1 = document.getElementById('step1Thesis');
+    if (t1) t1.style.display = 'block';
+  }
+
   if (window._isHandwritten) {
     const t1 = document.getElementById('step1Thesis');
     const h1 = document.getElementById('step1Handwritten');
