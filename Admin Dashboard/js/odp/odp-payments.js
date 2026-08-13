@@ -364,6 +364,7 @@
         await window._sb().from('orders').update({
           payment_status: 'approved',
           advance_paid:   newTotalPaid,
+          status:         'pending',
           updated_at:     new Date().toISOString(),
         }).eq('id', window._currentOrderId);
       }

@@ -268,13 +268,16 @@ function renderOrdersTable() {
 
   pageItems.forEach(order => {
     // Payment না করা বা rejected orders-এ special badge দেখাবে
-    const isUnpaid   = (order.payment_status === 'unpaid' || !order.payment_status) && (!order.advance_paid || Number(order.advance_paid) === 0);
-    const isRejected = order.payment_status === 'rejected' && (!order.advance_paid || Number(order.advance_paid) === 0);
+    const isUnpaid      = (order.payment_status === 'unpaid' || !order.payment_status) && (!order.advance_paid || Number(order.advance_paid) === 0);
+    const isRejected    = order.payment_status === 'rejected' && (!order.advance_paid || Number(order.advance_paid) === 0);
+    const isUnderReview = order.payment_status === 'under_review' && (!order.advance_paid || Number(order.advance_paid) === 0);
     const badge = isRejected
       ? { cls: 'badge-payment-rejected', label: '❌ Payment Rejected' }
-      : isUnpaid
-        ? { cls: 'badge-waiting-payment', label: 'Waiting for Payment' }
-        : getStatusBadge(order.status);
+      : isUnderReview
+        ? { cls: 'badge-payment-review', label: '⏳ Payment Review' }
+        : isUnpaid
+          ? { cls: 'badge-waiting-payment', label: 'Waiting for Payment' }
+          : getStatusBadge(order.status);
     const overdue = otIsOverdue(order);
     const tr = document.createElement('tr');
     tr.className = 'ot-row';
@@ -1445,7 +1448,7 @@ function tickLiveCountdowns() {
   });
 }
 setInterval(tickLiveCountdowns, 1000);
-function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
+function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'under_review':{cls:'badge-payment-review',label:'⏳ Payment Review'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
 /* ═══════════════════════════════════════════
    PAYMENT PROOF SUBMIT — Client Side

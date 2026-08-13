@@ -558,6 +558,7 @@ input, select, textarea { font-family: inherit; }
 .ot-status.badge-revision  { color: var(--red); background: none; }
 .ot-status.badge-waiting-payment { color: #f97316; background: none; }
 .ot-status.badge-payment-rejected { color: #f87171; background: none; font-weight: 700; }
+.ot-status.badge-payment-review   { color: #fbbf24; background: none; font-weight: 600; }
 
 /* Rejected Payment Banner — shown at top of order detail */
 .rejected-payment-banner {
@@ -660,6 +661,7 @@ input, select, textarea { font-family: inherit; }
 .order-card.badge-writing   { border-left: 3px solid var(--accent-light); }
 .order-card.badge-review    { border-left: 3px solid #2dd4bf; }
 .order-card.badge-pending   { border-left: 3px solid var(--gold); }
+.order-card.badge-payment-review { border-left: 3px solid #fbbf24; }
 .order-card.badge-completed { border-left: 3px solid var(--green); }
 .order-card.badge-confirmed { border-left: 3px solid #c4b5fd; }
 .order-card.badge-revision  { border-left: 3px solid var(--red); }
@@ -740,7 +742,8 @@ input, select, textarea { font-family: inherit; }
 }
 .status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .status-badge.badge-writing   { background: rgba(59,130,246,.15);  color: var(--accent-light); }
-.status-badge.badge-pending   { background: var(--gold-bg);          color: var(--gold); }
+.status-badge.badge-pending        { background: var(--gold-bg);          color: var(--gold); }
+.status-badge.badge-payment-review { background: rgba(251,191,36,0.12);    color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
 .status-badge.badge-completed { background: var(--green-bg);         color: var(--green); }
 .status-badge.badge-confirmed { background: var(--purple-bg);        color: #c4b5fd; }
 .status-badge.badge-revision  { background: var(--red-bg);           color: var(--red); }

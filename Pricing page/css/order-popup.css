@@ -353,3 +353,35 @@
   }
   .op-drag-handle { display: none; }
 }
+
+/* ── Light Mode: popup text visibility fix ── */
+[data-theme="light"] .op-sheet-title,
+[data-theme="light"] .op-section-title,
+[data-theme="light"] .op-item-name,
+[data-theme="light"] .op-row strong,
+[data-theme="light"] .op-field-label,
+[data-theme="light"] .op-input,
+[data-theme="light"] .op-select,
+[data-theme="light"] .op-textarea,
+[data-theme="light"] .op-svc-sub {
+  color: #10182b !important;
+}
+
+[data-theme="light"] .op-sheet-sub,
+[data-theme="light"] .op-row span,
+[data-theme="light"] .op-file-text {
+  color: rgba(16,24,43,0.65) !important;
+}
+
+[data-theme="light"] .op-field-label {
+  color: rgba(16,24,43,0.75) !important;
+}
+
+[data-theme="light"] .op-input::placeholder,
+[data-theme="light"] .op-textarea::placeholder {
+  color: rgba(16,24,43,0.4) !important;
+}
+
+[data-theme="light"] .op-privacy-bn {
+  color: rgba(16,24,43,0.55) !important;
+}

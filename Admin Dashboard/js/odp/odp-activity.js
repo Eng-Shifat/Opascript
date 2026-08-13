@@ -107,16 +107,21 @@ window._loadClientOrderCount = async function() {
       const elActive = document.getElementById('odpClientActive');
       if (elActive && activeCount !== null) elActive.textContent = activeCount;
 
-      /* Total spend */
+      /* Total spend — advance_paid থেকে actual paid amount নাও (paid + approved উভয় ক্ষেত্রে) */
       const { data: spendData } = await window._sb()
         .from('orders')
-        .select('total_price')
+        .select('advance_paid, total_price, payment_status')
         .eq('client_id', clientId)
-        .eq('payment_status', 'paid');
+        .in('payment_status', ['paid', 'approved']);
 
       const elSpend = document.getElementById('odpClientSpend');
       if (elSpend && spendData) {
-        const total = spendData.reduce((s, o) => s + (Number(o.total_price) || 0), 0);
+        const total = spendData.reduce((s, o) => {
+          const paid = Number(o.advance_paid) || 0;
+          const full = Number(o.total_price)  || 0;
+          /* paid status মানে full paid, approved মানে advance_paid amount */
+          return s + (o.payment_status === 'paid' ? full : paid);
+        }, 0);
         elSpend.textContent = total > 0 ? '৳' + total.toLocaleString() : '৳0';
       }
 
