@@ -28,10 +28,10 @@ window.PAGE_DATA = {
     badge:            'Human Written Service',
     title:            'Handwritten Assignments<br>Done Right, On Time',
     desc:             'সময় বাঁচান, presentation আরও professional করুন। আমাদের professionally trained handwriting specialists আপনার assignment, lab report ও practical notebook সুন্দর, পরিষ্কার হাতের লেখায় এবং university-standard format অনুসরণ করে প্রস্তুত করেন। আপনার নির্ধারিত সময়ের মধ্যেই আমরা Scan PDF অথবা Physical Delivery—যেভাবে প্রয়োজন, সেভাবেই কাজ পৌঁছে দিই।',
-    primaryBtn:       'এখনই শুরু করো',
-    primaryOnClick:   '',
-    secondaryBtn:     'আগে কথা বলি',
-    secondaryOnClick: "window.open('https://wa.me/8801XXXXXXXXX','_blank')",
+    primaryBtn:       'Start Your Order',
+    primaryOnClick:   "window.location.href='../Order page/order.html?service=handwritten'",
+    secondaryBtn:     'Talk to an Expert',
+    secondaryOnClick: "if(window.scriptoraChat && typeof window.scriptoraChat.openLiveChat==='function'){window.scriptoraChat.openLiveChat();}",
   },
 
   stats: [
@@ -44,7 +44,7 @@ window.PAGE_DATA = {
   about: {
     title: 'Why Students Trust Scriptora for Handwritten Academic Work',
     paras: [
-      'সময় বাঁচান, presentation আরও professional করুন। আমাদের professionally trained handwriting specialists আপনার assignment, lab report ও practical notebook সুন্দর, পরিষ্কার হাতের লেখায় এবং university-standard format অনুসরণ করে প্রস্তুত করেন। আপনার নির্ধারিত সময়ের মধ্যেই আমরা Scan PDF অথবা Physical Delivery—যেভাবে প্রয়োজন, সেভাবেই কাজ পৌঁছে দিই।',
+      'আমাদের ৫০০+ সফল project এবং ৯৮% on-time delivery rate আমাদের সবচেয়ে বড় পরিচয়। প্রতিটি document university guideline অনুযায়ী তৈরি — সঠিক margin, heading, এবং ink preference সহ।',
     ],
     highlights: [
       { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>', title: 'Professional Handwriting Specialists', desc: 'Experienced in university-standard academic documents with consistent handwriting and clean margins.' },
