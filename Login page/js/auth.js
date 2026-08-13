@@ -237,6 +237,8 @@ async function handleLogin() {
     if (authUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
       localStorage.setItem('scriptora_role', 'admin');
       localStorage.setItem('scriptora_email', authUser.email);
+      localStorage.setItem('scriptora_name', authUser.user_metadata?.full_name || 'Admin');
+      localStorage.setItem('scriptora_avatar', authUser.user_metadata?.avatar_url || '');
       showLoginSuccess(() => { window.location.href = '../Admin Dashboard/admin.html'; });
       return;
     }

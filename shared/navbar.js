@@ -166,17 +166,49 @@
         }
       });
     }
+
+    // ── Supabase session দিয়ে navbar সিঙ্ক করো ──────────────────────────
+    // reset-password page এ এই sync চালানো যাবে না — recovery session কে
+    // logged-in ভেবে reload loop হয়ে যায়
+    const isResetPage = window.location.pathname.includes('reset-password');
+    (async function syncNavbarWithSession() {
+      if (isResetPage) return;
+      const sb = window.scriptoraSupabase;
+      if (!sb) return;
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+          // সত্যিই logged out — localStorage ও clear করো
+          localStorage.removeItem('scriptora_role');
+          localStorage.removeItem('scriptora_email');
+          localStorage.removeItem('scriptora_name');
+          localStorage.removeItem('scriptora_avatar');
+          localStorage.removeItem('scriptora_client_id');
+          return;
+        }
+        // Session আছে কিন্তু localStorage এ role নেই → ঠিক করো
+        const storedRole = localStorage.getItem('scriptora_role');
+        if (!storedRole) {
+          const ADMIN_EMAIL = 'yeasinkabirshifat@gmail.com';
+          const role = session.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'client';
+          localStorage.setItem('scriptora_role', role);
+          localStorage.setItem('scriptora_email', session.user.email);
+          localStorage.setItem('scriptora_client_id', session.user.id);
+          // Navbar refresh করতে page reload (একবারই হবে)
+          window.location.reload();
+        }
+      } catch (e) { /* ignore */ }
+    })();
+
   });
 
 })();
 
 async function opascriptLogout() {
   try {
-    if (typeof supabase !== 'undefined') {
-      const sb = supabase.createClient(
-        'https://hivrmntxpmpwthmjtoem.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI'
-      );
+    // ✅ Shared client use করো — নতুন createClient() করলে session signout হয় না
+    const sb = window.scriptoraSupabase;
+    if (sb) {
       await sb.auth.signOut({ scope: 'local' });
     }
   } catch(e) { console.error('Logout error:', e); }

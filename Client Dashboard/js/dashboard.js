@@ -4,8 +4,17 @@
 
 const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// window.scriptoraSupabase থাকলে সেটা use করো, না থাকলে নতুন বানাও
+// একই client use করলে session properly থাকে
+let sb;
+if (window.scriptoraSupabase) {
+  sb = window.scriptoraSupabase;
+} else {
+  const { createClient } = supabase;
+  sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+  window.scriptoraSupabase = sb;
+}
 window._sb = sb; /* shared client — chat.js reuses this instead of opening a 2nd socket */
 
 const LOGIN_PATH = '../Login page/login.html';
@@ -85,7 +94,15 @@ async function checkSession() {
 function updateSidebarUser() {
   const name = currentClient.name||'Client';
   setText('sbName', name); setText('sbEmail', currentClient.email||'');
-  setText('headerName', name.split(' ')[0]); setText('sbAvatar', getInitials(name));
+  const firstName = currentClient.first_name || name.split(' ')[0];
+  setText('headerName', firstName);
+  setText('sbAvatar', getInitials(name));
+  // Gender suffix — Supabase এ gender column থাকলে সেটা use করো
+  // না থাকলে default ভাই
+  const gender = currentClient.gender || 'male';
+  const suffix = gender === 'female' ? 'আপু' : 'ভাই';
+  const suffixEl = document.getElementById('headerSuffix');
+  if (suffixEl) suffixEl.textContent = suffix;
   if (currentClient.avatar_url) {
     document.getElementById('sbAvatar').innerHTML = `<img src="${currentClient.avatar_url}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
   }
@@ -866,10 +883,12 @@ async function loadPaymentsPage() {
 
 function loadProfileData() {
   if(!currentClient) return;
-  const name=currentClient.name||'';
-  const parts=name.split(' ');
-  setVal('pFirstName',parts[0]||''); setVal('pLastName',parts.slice(1).join(' ')||'');
+  const firstName=currentClient.first_name||'';
+  const lastName=currentClient.last_name||'';
+  const name=`${firstName} ${lastName}`.trim()||currentClient.name||'';
+  setVal('pFirstName',firstName); setVal('pLastName',lastName);
   setVal('pEmail',currentClient.email||''); setVal('pPhone',currentClient.phone||'');
+  const genderEl=document.getElementById('pGender'); if(genderEl) genderEl.value=currentClient.gender||'male';
   setVal('pUniversity',currentClient.university||''); setVal('pSubject',currentClient.subject||'');
   setVal('pYear',currentClient.academic_year||'');
   const av=document.getElementById('profileAvatar');
@@ -893,10 +912,11 @@ async function saveProfile() {
   if(!firstName){showProfileMsg('profileMsg','নাম দিন','error');return;}
   btn.textContent='Saving...'; btn.disabled=true;
   const fullName=`${firstName} ${lastName}`.trim();
-  const {error}=await sb.from('clients').update({name:fullName,phone:getVal('pPhone').trim(),university:getVal('pUniversity').trim(),subject:getVal('pSubject').trim(),academic_year:getVal('pYear').trim()}).eq('id',currentUser.id);
+  const genderVal=document.getElementById('pGender')?.value||'male';
+  const {error}=await sb.from('clients').update({name:fullName,first_name:firstName,last_name:lastName,gender:genderVal,phone:getVal('pPhone').trim(),university:getVal('pUniversity').trim(),subject:getVal('pSubject').trim(),academic_year:getVal('pYear').trim()}).eq('id',currentUser.id);
   btn.textContent='Profile Save করুন'; btn.disabled=false;
   if(error){showProfileMsg('profileMsg','Save হয়নি: '+error.message,'error');}
-  else{currentClient.name=fullName;updateSidebarUser();showProfileMsg('profileMsg','✓ Profile save হয়েছে!','success');showToast('Profile update হয়েছে','success');}
+  else{currentClient.name=fullName;currentClient.first_name=firstName;currentClient.last_name=lastName;currentClient.gender=genderVal;localStorage.setItem('scriptora_name',fullName);const sfx=document.getElementById('headerSuffix');if(sfx)sfx.textContent=genderVal==='female'?'আপু':'ভাই';updateSidebarUser();showProfileMsg('profileMsg','✓ Profile save হয়েছে!','success');showToast('Profile update হয়েছে','success');}
 }
 
 async function changePassword() {
