@@ -193,10 +193,46 @@
         </div>
 
         <div class="op-field-group">
+          <label class="op-field-label">Department / বিভাগ <span class="op-optional">(Optional)</span></label>
+          <div class="op-input-wrap">
+            <span class="op-input-icon">🏛️</span>
+            <input class="op-input" id="opDepartment" type="text" placeholder="e.g. CSE, BBA, EEE, Pharmacy..."/>
+          </div>
+        </div>
+
+        <div class="op-field-group">
+          <label class="op-field-label">University / Institution <span class="op-optional">(Optional)</span></label>
+          <div class="op-input-wrap">
+            <span class="op-input-icon">🎓</span>
+            <input class="op-input" id="opUniversity" type="text" placeholder="e.g. BUET, DU, NSU, BRACU..."/>
+          </div>
+        </div>
+
+        <div class="op-field-group">
+          <label class="op-field-label">Language / ভাষা <span class="op-optional">(Optional)</span></label>
+          <div class="op-input-wrap">
+            <select class="op-input" id="opLanguage" style="cursor:pointer;">
+              <option value="">Select language</option>
+              <option value="English">English</option>
+              <option value="Bengali">Bengali / বাংলা</option>
+              <option value="Both">Both / উভয়</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="op-field-group">
+          <label class="op-field-label">Pages / Word Count <span class="op-optional">(Optional)</span></label>
+          <div class="op-input-wrap">
+            <span class="op-input-icon">📄</span>
+            <input class="op-input" id="opPages" type="text" placeholder="e.g. 10 pages or 2500 words"/>
+          </div>
+        </div>
+
+        <div class="op-field-group">
           <label class="op-field-label">Special Notes / বিশেষ নির্দেশনা <span class="op-optional">(Optional)</span></label>
           <div class="op-input-wrap op-textarea-wrap">
             <span class="op-input-icon op-ta-icon">📋</span>
-            <textarea class="op-input op-textarea" id="opNotes" placeholder="Any formatting requirements, references, etc." rows="3"></textarea>
+            <textarea class="op-input op-textarea" id="opNotes" placeholder="Formatting requirements, references, citation style, supervisor guidelines, etc." rows="3"></textarea>
           </div>
         </div>
 
@@ -333,7 +369,7 @@
   ──────────────────────────────── */
   window.opOpen = function(opts) {
     /* remove old */
-    document.querySelectorAll('.op-overlay,.op-sheet,[id="opMount"]').forEach(el => el.remove());
+    document.querySelectorAll('.op-overlay,.op-sheet:not(.mp-sheet),[id="opMount"]').forEach(el => el.remove());
 
     const div = document.createElement('div');
     div.id = 'opMount';
@@ -356,10 +392,12 @@
     const overlay = document.getElementById('opOverlay');
     if (sheet)   sheet.classList.remove('open');
     if (overlay) overlay.classList.remove('open');
-    document.body.style.overflow = '';
     setTimeout(() => {
       const m = document.getElementById('opMount');
       if (m) m.remove();
+      /* mobile sheet এখনও open থাকলে overflow hidden রাখো */
+      const mpSheet = document.querySelector('.mp-sheet.open');
+      if (!mpSheet) document.body.style.overflow = '';
     }, 340);
   };
 
@@ -532,6 +570,10 @@
         })(),
         page_count:           pageCount,
         pages:                pageCount ? String(pageCount) : null,
+        department:           document.getElementById('opDepartment')?.value.trim() || null,
+        university:           document.getElementById('opUniversity')?.value.trim() || null,
+        language:             document.getElementById('opLanguage')?.value || null,
+        pages:                document.getElementById('opPages')?.value.trim() || null,
         special_instructions: (() => {
           const isCV = (opts.serviceId === 'cv-writing');
           if (isCV) {
@@ -551,7 +593,18 @@
               cvNotes ? `Notes: ${cvNotes}` : '',
             ].filter(Boolean).join('\n');
           }
-          return `Name: ${name}\nPhone: ${phone}` + (notes ? `\n\n${notes}` : '');
+          const dept  = document.getElementById('opDepartment')?.value.trim() || '';
+          const uni   = document.getElementById('opUniversity')?.value.trim() || '';
+          const lang  = document.getElementById('opLanguage')?.value || '';
+          const pages = document.getElementById('opPages')?.value.trim() || '';
+          return [
+            `Name: ${name}`, `Phone: ${phone}`,
+            dept  ? `Department: ${dept}`   : '',
+            uni   ? `University: ${uni}`    : '',
+            lang  ? `Language: ${lang}`     : '',
+            pages ? `Pages/Words: ${pages}` : '',
+            notes ? `Notes: ${notes}`       : '',
+          ].filter(Boolean).join('\n');
         })(),
       };
 

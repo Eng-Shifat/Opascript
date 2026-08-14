@@ -393,29 +393,25 @@
     const price        = calcPrice(s, st.urgency, st);
     const urgencyLabel = URGENCY[st.urgency]?.label || st.urgency;
 
-    /* Close mobile sheet first, then open order popup */
-    mpClose();
-
-    setTimeout(() => {
-      if (typeof window.opOpen === 'function') {
-        window.opOpen({
-          serviceId:    id,
-          title:        s.title,
-          titleBn:      s.titleBn,
-          icon:         s.icon,
-          iconBg:       s.iconBg,
-          unitType:     s.unitType,
-          qty:          st.qty,
-          unitLabel:    s.unitLabel || '',
-          urgencyLabel: urgencyLabel,
-          rate:         s.rate,
-          perUnit:      s.perUnit,
-          tiers:        s.tiers,
-          tierIndex:    st.tierIndex,
-          price:        price,
-        });
-      }
-    }, 360); /* sheet close animation শেষ হওয়ার পর */
+    /* Mobile sheet-এর উপরে order popup overlay করো — দুটো একসাথে থাকবে */
+    if (typeof window.opOpen === 'function') {
+      window.opOpen({
+        serviceId:    id,
+        title:        s.title,
+        titleBn:      s.titleBn,
+        icon:         s.icon,
+        iconBg:       s.iconBg,
+        unitType:     s.unitType,
+        qty:          st.qty,
+        unitLabel:    s.unitLabel || '',
+        urgencyLabel: urgencyLabel,
+        rate:         s.rate,
+        perUnit:      s.perUnit,
+        tiers:        s.tiers,
+        tierIndex:    st.tierIndex,
+        price:        price,
+      });
+    }
   };
 
   /* ────────────────────────────────
