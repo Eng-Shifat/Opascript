@@ -481,7 +481,6 @@ async function openOrderDetail(orderId) {
   const badge=getStatusBadge(order.status);
   const statusEl=document.getElementById('detailStatus');
   statusEl.textContent=badge.label; statusEl.className=`status-badge ${badge.cls}`;
-  startCountdown(order.deadline);
   renderStepper(order.status, order.payment_status);
 
   /* Payment Verification badge */
@@ -497,8 +496,9 @@ async function openOrderDetail(orderId) {
   }
   setText('detailTotal',`৳${fmt(order.total_price)}`);
 
-  /* ── Fetch live approved-payment sum (don't trust stale advance_paid column) ── */
+  /* ── Fetch live approved-payment sum + pending payment requests ── */
   let livePaid = 0, liveDue = 0;
+  let hasPendingPaymentRequest = false;
   try {
     const { data: approvedPays } = await sb
       .from('payments')
@@ -508,11 +508,25 @@ async function openOrderDetail(orderId) {
       .in('type', ['received', 'approval']);
     livePaid = (approvedPays || []).reduce((s, p) => s + Number(p.amount || 0), 0);
     liveDue  = Math.max(0, Number(order.total_price || 0) - livePaid);
+
+    /* Check if there's any pending/under_review payment request */
+    const { data: pendingPays } = await sb
+      .from('payments')
+      .select('id')
+      .eq('order_id', orderId)
+      .in('type', ['pending', 'under_review', 'screenshot'])
+      .limit(1);
+    hasPendingPaymentRequest = (pendingPays && pendingPays.length > 0)
+      || order.payment_status === 'under_review';
   } catch(_) {
     /* fallback to order row if query fails */
     livePaid = order.advance_paid || 0;
     liveDue  = order.due_amount   || 0;
+    hasPendingPaymentRequest = order.payment_status === 'under_review';
   }
+
+  /* ── Start countdown with full payment context ── */
+  startCountdown(order.deadline, order.payment_status, livePaid, hasPendingPaymentRequest);
 
   setText('detailAdvance',`৳${fmt(livePaid)}`);
   setText('detailDue',`৳${fmt(liveDue)}`);
@@ -618,24 +632,69 @@ if (cdViewBtn) cdViewBtn.onclick = () => {
   document.getElementById('orderDetailView').scrollIntoView({behavior:'smooth'});
 };
 
-function startCountdown(deadlineStr) {
+function startCountdown(deadlineStr, paymentStatus, livePaid, hasPendingRequest) {
   clearInterval(countdownTimer);
-  const deadline=new Date(deadlineStr);
-  function tick() {
-    const diff=deadline-new Date();
-    if(diff<=0){
-      ['cdDays','cdHours','cdMins','cdSecs'].forEach(id=>setText(id,'00'));
-      setText('cdDaysLeft','সময় শেষ!'); clearInterval(countdownTimer); return;
+
+  const pendingEl  = document.getElementById('cdPaymentPending');
+  const activeEl   = document.getElementById('cdActiveTimer');
+  const titleEl    = document.getElementById('cdppTitle');
+  const subEl      = document.getElementById('cdppSub');
+  const iconEl     = document.getElementById('cdppIcon');
+  const payLinkEl  = document.getElementById('cdppPayLink');
+
+  const isApproved = paymentStatus === 'approved'
+    || paymentStatus === 'paid'
+    || paymentStatus === 'confirmed'
+    || livePaid > 0;
+
+  if (isApproved) {
+    // ✅ Payment approved — countdown চলবে
+    if (pendingEl) pendingEl.style.display = 'none';
+    if (activeEl)  activeEl.style.display  = 'flex';
+    const deadline = new Date(deadlineStr);
+    function tick() {
+      const diff = deadline - new Date();
+      if (diff <= 0) {
+        ['cdDays','cdHours','cdMins','cdSecs'].forEach(id => setText(id,'00'));
+        setText('cdDaysLeft','সময় শেষ!'); clearInterval(countdownTimer); return;
+      }
+      const d=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000);
+      const m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
+      setText('cdDays',pad(d)); setText('cdHours',pad(h));
+      setText('cdMins',pad(m)); setText('cdSecs',pad(s));
+      setText('cdDeadline',fmtDateLong(deadlineStr));
+      setText('cdDaysLeft',`আর মাত্র ${d} দিন বাকি`);
+      const el2=document.getElementById('cdDaysLeft2'); if(el2) el2.textContent=d;
     }
-    const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000);
-    const m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
-    setText('cdDays',pad(d)); setText('cdHours',pad(h));
-    setText('cdMins',pad(m)); setText('cdSecs',pad(s));
-    setText('cdDeadline',fmtDateLong(deadlineStr));
-    setText('cdDaysLeft',`আর মাত্র ${d} দিন বাকি`);
-    const el2=document.getElementById('cdDaysLeft2'); if(el2) el2.textContent=d;
+    tick(); countdownTimer = setInterval(tick, 1000);
+    return;
   }
-  tick(); countdownTimer=setInterval(tick,1000);
+
+  // ❌ Not yet approved — show pending state
+  if (pendingEl) pendingEl.style.display = 'flex';
+  if (activeEl)  activeEl.style.display  = 'none';
+
+  const dlPending = document.getElementById('cdDeadlinePending');
+  if (dlPending) dlPending.textContent = deadlineStr ? fmtDateLong(deadlineStr) : '—';
+
+  if (hasPendingRequest || paymentStatus === 'under_review') {
+    // State 2: Payment request দেওয়া আছে, admin approve করেনি
+    if (titleEl) titleEl.textContent = 'Countdown শুরু হয়নি';
+    if (subEl)   subEl.textContent   = 'Payment request পাঠানো হয়েছে। Admin approve করলে countdown শুরু হবে।';
+    if (iconEl)  iconEl.style.color  = '#fbbf24'; // yellow
+    if (payLinkEl) payLinkEl.style.display = 'none';
+  } else {
+    // State 1: কোনো payment request নেই
+    if (titleEl) titleEl.textContent = 'Order এখনো শুরু হয়নি';
+    if (subEl)   subEl.textContent   = 'Minimum advance payment confirm করুন। তারপরই order progress শুরু হবে।';
+    if (iconEl)  iconEl.style.color  = '#f87171'; // red
+    if (payLinkEl) {
+      payLinkEl.style.display = 'inline-flex';
+      // order_id URL-এ pass করো
+      const ordId = typeof orderId !== 'undefined' ? orderId : (typeof currentOrderId !== 'undefined' ? currentOrderId : '');
+      if (ordId) payLinkEl.href = `../Payment page/payment.html?order_id=${ordId}`;
+    }
+  }
 }
 
 function renderStepper(status, paymentStatus) {

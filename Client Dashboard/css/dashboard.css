@@ -1769,6 +1769,10 @@ input, select, textarea { font-family: inherit; }
   justify-content: space-between;
   gap: 20px;
 }
+#cdActiveTimer[style*="display:none"],
+#cdActiveTimer[style*="display: none"] {
+  display: none !important;
+}
 .cd-left { flex: 1; }
 .cd-label {
   font-size: 11px;
@@ -3174,7 +3178,7 @@ input, select, textarea { font-family: inherit; }
   pointer-events: none;
   z-index: 0;
 }
-.cd-inner {
+.cd-inner:not([style*="display:none"]):not([style*="display: none"]) {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -3322,3 +3326,107 @@ input, select, textarea { font-family: inherit; }
   .step-label { font-size: 7.5px !important; margin-top: 4px !important; }
   .step:not(:last-child)::after { top: 9px !important; }
 }
+
+/* ══════════════════════════════════════════════════
+   COUNTDOWN — Payment Pending State
+   shown when payment not yet approved by admin
+══════════════════════════════════════════════════ */
+.cd-payment-pending {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cdpp-icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+}
+
+.cdpp-body {
+  flex: 1;
+}
+
+.cdpp-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-bottom: 4px;
+}
+
+.cdpp-sub {
+  font-size: 12px;
+  color: var(--muted, #8892b0);
+  line-height: 1.5;
+}
+
+.cdpp-deadline {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--muted, #8892b0);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.cdpp-deadline strong {
+  color: var(--text, #fff);
+  font-weight: 600;
+}
+
+@media (max-width: 520px) {
+  .cd-payment-pending {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .cdpp-deadline {
+    white-space: normal;
+  }
+}
+
+/* ── Payment pending — updated layout ── */
+.cd-payment-pending {
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 22px;
+}
+.cdpp-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.cdpp-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.cdpp-pay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.cdpp-pay-btn:hover { opacity: 0.85; }
