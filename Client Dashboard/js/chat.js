@@ -117,8 +117,16 @@ async function loadOrdersIntoSelect(userId) {
   ordersCache = {};
   orders.forEach(o => ordersCache[o.id] = o);
 
+  /* শুধু paid orders dropdown-এ দেখাবে */
+  const paidOrders = orders.filter(o =>
+    o.payment_status === 'approved' ||
+    o.payment_status === 'paid' ||
+    o.payment_status === 'confirmed' ||
+    Number(o.advance_paid || 0) > 0
+  );
+
   sel.innerHTML = '<option value="">Order বেছে নিন</option>';
-  orders.forEach(o => {
+  paidOrders.forEach(o => {
     const opt = document.createElement('option');
     opt.value = o.id;
     opt.textContent = `${o.order_number ? '#' + o.order_number + ' — ' : ''}${o.title || o.service_type || 'Order'}`;
@@ -384,13 +392,12 @@ function renderOrderSummary(orderId) {
   dueEl.classList.toggle('cos-due', due > 0);
   dueEl.classList.toggle('cos-paid', due <= 0);
 
-  const stepMap = window._STATUS_STEP_MAP || {};
-  const totalSteps = window._STEPS_TOTAL || 6;
-  const step = stepMap[order.status] || 1;
-  const derivedPct = Math.round((step / totalSteps) * 100);
-  const pct = (typeof order.progress === 'number') ? order.progress : derivedPct;
-  document.getElementById('cosProgress').textContent = `${pct}%`;
-  document.getElementById('cosProgressFill').style.width = `${pct}%`;
+  const paid = Number(order.advance_paid || 0);
+  const paidEl = document.getElementById('cosPaid');
+  if (paidEl) {
+    paidEl.textContent = `৳${paid.toLocaleString()}`;
+    paidEl.className = paid > 0 ? 'cos-value cos-paid' : 'cos-value';
+  }
 }
 
 /* ── Admin online/offline presence ────────────────────────────────────── */
@@ -458,6 +465,51 @@ function showTypingRow(show) {
 }
 
 /* ── Load chat for an order ────────────────────────────────────────────── */
+/* ── Payment blocked notice ──────────────────────────────────────────── */
+function showPaymentBlockedNotice() {
+  const body = document.getElementById('chatBody');
+  if (!body) return;
+  /* Already showing notice? */
+  if (document.getElementById('payBlockedNotice')) return;
+  const notice = document.createElement('div');
+  notice.id = 'payBlockedNotice';
+  notice.style.cssText = 'margin:12px 16px;padding:12px 14px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;font-size:12.5px;color:#fbbf24;text-align:center;';
+  notice.innerHTML = '🔒 Message করতে হলে আগে payment সম্পন্ন করুন।';
+  body.appendChild(notice);
+  setTimeout(() => notice.remove(), 3500);
+}
+
+/* ── Input lock for unpaid orders ───────────────────────────────────── */
+function updateChatInputLock(orderId) {
+  const activeOrder = ordersCache[orderId];
+  const isPaid = activeOrder && (
+    activeOrder.payment_status === 'approved' ||
+    activeOrder.payment_status === 'paid' ||
+    activeOrder.payment_status === 'confirmed' ||
+    Number(activeOrder.advance_paid || 0) > 0
+  );
+  const input   = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('chatSendBtn');
+  const attachBtn = document.getElementById('chatAttachBtn');
+  if (!input) return;
+
+  if (activeOrder && !isPaid) {
+    input.disabled    = true;
+    input.placeholder = '🔒 Payment করুন — তারপর message করতে পারবেন';
+    if (sendBtn)   sendBtn.disabled  = true;
+    if (attachBtn) attachBtn.disabled = true;
+    input.style.opacity = '0.5';
+    if (sendBtn)   sendBtn.style.opacity = '0.4';
+  } else {
+    input.disabled    = false;
+    input.placeholder = 'Type your message...';
+    if (sendBtn)   sendBtn.disabled  = false;
+    if (attachBtn) attachBtn.disabled = false;
+    input.style.opacity = '';
+    if (sendBtn)   sendBtn.style.opacity = '';
+  }
+}
+
 async function loadChat(orderId) {
   chatActiveOrderId = orderId;
   showChatBox(orderId);
@@ -480,6 +532,7 @@ async function loadChat(orderId) {
   subscribeToChat(orderId);
   subscribeTyping(orderId);
   markMessagesRead(orderId);
+  updateChatInputLock(orderId);
 }
 
 /* ── Pinned notice banner ──────────────────────────────────────────────── */
@@ -686,6 +739,19 @@ async function sendMessage() {
 
   if (!chatActiveOrderId || !currentUserId) return;
   if (!text && !pendingAttachment) return;
+
+  /* Unpaid order-এ message block করো */
+  const activeOrder = ordersCache[chatActiveOrderId];
+  const isPaid = activeOrder && (
+    activeOrder.payment_status === 'approved' ||
+    activeOrder.payment_status === 'paid' ||
+    activeOrder.payment_status === 'confirmed' ||
+    Number(activeOrder.advance_paid || 0) > 0
+  );
+  if (activeOrder && !isPaid) {
+    showPaymentBlockedNotice();
+    return;
+  }
 
   btn.disabled = true;
   broadcastTyping(false);

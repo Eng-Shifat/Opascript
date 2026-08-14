@@ -296,19 +296,33 @@ function cdRenderMsgEmpty(list) {
 }
 
 function cdRenderMsgList(list, msgs, orderMap) {
-  list.innerHTML = msgs.map(m => {
+  /* Order অনুযায়ী group করো — একটা order = একটা entry, latest message দেখাবে */
+  const grouped = {};
+  msgs.forEach(m => {
+    if (!grouped[m.order_id]) {
+      grouped[m.order_id] = { latest: m, unreadCount: 0 };
+    }
+    /* latest message (already sorted desc) */
+    if (new Date(m.created_at) > new Date(grouped[m.order_id].latest.created_at)) {
+      grouped[m.order_id].latest = m;
+    }
+    if (m.status !== 'read') grouped[m.order_id].unreadCount++;
+  });
+
+  list.innerHTML = Object.values(grouped).map(({ latest: m, unreadCount }) => {
     const order = orderMap[m.order_id];
     const title = order ? (order.title || order.service_type || 'Order') : 'Order';
+    const orderNo = order?.order_number ? `#${order.order_number}` : '';
     const preview = m.is_deleted ? '🚫 Message deleted'
-      : (m.message || (m.message_type === 'file' ? '📄 File' : m.message_type === 'image' || m.message_type === 'payment_screenshot' ? '📷 Photo' : ''));
+      : (m.message || (m.message_type === 'file' ? '📄 File sent' : m.message_type === 'image' || m.message_type === 'payment_screenshot' ? '📷 Photo' : ''));
     const timeAgo = m.created_at ? cdTimeAgo(m.created_at) : '';
-    const unread = m.status !== 'read';
+    const unread = unreadCount > 0;
     return `
       <div class="cd-notif-item ${unread ? 'unread' : ''}" data-order="${m.order_id}" onclick="cdMsgClick('${m.order_id}')">
         <div class="cd-notif-icon message">💬</div>
         <div class="cd-notif-content">
-          <div class="cd-notif-msg"><strong>${_esc(title)}</strong> — ${_esc(preview)}</div>
-          <div class="cd-notif-time">${timeAgo}</div>
+          <div class="cd-notif-msg"><strong>${_esc(orderNo || title)}</strong> — ${_esc(preview)}</div>
+          <div class="cd-notif-time">${timeAgo}${unread ? ` <span style="color:#6366f1;font-weight:700;">(${unreadCount})</span>` : ''}</div>
         </div>
       </div>`;
   }).join('');

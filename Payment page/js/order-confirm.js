@@ -58,15 +58,34 @@ function showPaymentStatus(status) {
     pending:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
   };
 
-  if (status === 'confirmed') {
+  if (status === 'confirmed' || status === 'approved' || status === 'paid') {
     el.innerHTML  = icons.confirmed + 'Payment Confirmed';
     el.className  = 'payment-status-badge confirmed';
+    /* Step 2 → done */
+    const psStep = document.getElementById('psPaymentStep');
+    const psIcon = document.getElementById('psPaymentIcon');
+    const psTitle = document.getElementById('psPaymentTitle');
+    const psWriting = document.getElementById('psWritingStep');
+    if (psStep)  { psStep.className = 'ps-item done'; }
+    if (psIcon)  { psIcon.innerHTML = '✓'; }
+    if (psTitle) { psTitle.textContent = 'Payment received'; }
+    if (psWriting) { psWriting.className = 'ps-item active'; }
   } else if (status === 'rejected') {
     el.innerHTML  = icons.rejected + 'Payment Rejected — Admin এর সাথে যোগাযোগ করুন';
     el.className  = 'payment-status-badge rejected';
+    /* Step 2 → rejected */
+    const psStep = document.getElementById('psPaymentStep');
+    const psIcon = document.getElementById('psPaymentIcon');
+    const psTitle = document.getElementById('psPaymentTitle');
+    if (psStep)  { psStep.className = 'ps-item rejected'; }
+    if (psIcon)  { psIcon.innerHTML = '✗'; psIcon.style.color = '#f87171'; }
+    if (psTitle) { psTitle.textContent = 'Payment Rejected'; }
   } else {
     el.innerHTML  = icons.pending + 'Payment Verification চলছে...';
     el.className  = 'payment-status-badge pending';
+    /* Step 2 → pending (under_review) */
+    const psStep = document.getElementById('psPaymentStep');
+    if (psStep) psStep.className = 'ps-item pending';
   }
 }
 

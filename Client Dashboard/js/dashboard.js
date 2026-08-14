@@ -268,16 +268,13 @@ function renderOrdersTable() {
 
   pageItems.forEach(order => {
     // Payment না করা বা rejected orders-এ special badge দেখাবে
-    const isUnpaid      = (order.payment_status === 'unpaid' || !order.payment_status) && (!order.advance_paid || Number(order.advance_paid) === 0);
-    const isRejected    = order.payment_status === 'rejected' && (!order.advance_paid || Number(order.advance_paid) === 0);
-    const isUnderReview = order.payment_status === 'under_review' && (!order.advance_paid || Number(order.advance_paid) === 0);
+    const isUnpaid   = (order.payment_status === 'unpaid' || !order.payment_status) && (!order.advance_paid || Number(order.advance_paid) === 0);
+    const isRejected = order.payment_status === 'rejected' && (!order.advance_paid || Number(order.advance_paid) === 0);
     const badge = isRejected
       ? { cls: 'badge-payment-rejected', label: '❌ Payment Rejected' }
-      : isUnderReview
-        ? { cls: 'badge-payment-review', label: '⏳ Payment Review' }
-        : isUnpaid
-          ? { cls: 'badge-waiting-payment', label: 'Waiting for Payment' }
-          : getStatusBadge(order.status);
+      : isUnpaid
+        ? { cls: 'badge-waiting-payment', label: 'Waiting for Payment' }
+        : getStatusBadge(order.status);
     const overdue = otIsOverdue(order);
     const tr = document.createElement('tr');
     tr.className = 'ot-row';
@@ -485,7 +482,19 @@ async function openOrderDetail(orderId) {
   const statusEl=document.getElementById('detailStatus');
   statusEl.textContent=badge.label; statusEl.className=`status-badge ${badge.cls}`;
   startCountdown(order.deadline);
-  renderStepper(order.status);
+  renderStepper(order.status, order.payment_status);
+
+  /* Payment Verification badge */
+  const existingVerBadge = document.getElementById('payVerificationBadge');
+  if (existingVerBadge) existingVerBadge.remove();
+  if (order.payment_status === 'under_review') {
+    const verBadge = document.createElement('div');
+    verBadge.id = 'payVerificationBadge';
+    verBadge.style.cssText = 'background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:20px;padding:6px 14px;font-size:12px;color:#fbbf24;font-weight:600;display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;';
+    verBadge.innerHTML = '⏳ Payment Verification চলছে...';
+    const stepperEl = document.getElementById('progressStepper');
+    if (stepperEl && stepperEl.parentNode) stepperEl.parentNode.insertBefore(verBadge, stepperEl);
+  }
   setText('detailTotal',`৳${fmt(order.total_price)}`);
 
   /* ── Fetch live approved-payment sum (don't trust stale advance_paid column) ── */
@@ -629,9 +638,15 @@ function startCountdown(deadlineStr) {
   tick(); countdownTimer=setInterval(tick,1000);
 }
 
-function renderStepper(status) {
+function renderStepper(status, paymentStatus) {
   const stepper=document.getElementById('progressStepper');
-  const currentStep=STATUS_STEP_MAP[status]??0;
+  /* payment_status দিয়ে effective step determine করো */
+  let effectiveStep = STATUS_STEP_MAP[status] ?? 1;
+  /* under_review → step 1 (order placed, payment pending verification) */
+  if (paymentStatus === 'under_review' && effectiveStep < 2) effectiveStep = 1;
+  /* approved/paid → step 2 (payment received) — কিন্তু admin status update করলে সেটা override হবে */
+  if ((paymentStatus === 'approved' || paymentStatus === 'paid') && effectiveStep < 2) effectiveStep = 2;
+  const currentStep = effectiveStep;
   stepper.innerHTML='';
   STEPS.forEach((step,i)=>{
     const isDone=i<currentStep, isActive=i===currentStep;
@@ -1448,7 +1463,7 @@ function tickLiveCountdowns() {
   });
 }
 setInterval(tickLiveCountdowns, 1000);
-function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'under_review':{cls:'badge-payment-review',label:'⏳ Payment Review'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
+function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
 /* ═══════════════════════════════════════════
    PAYMENT PROOF SUBMIT — Client Side
