@@ -914,6 +914,10 @@ function jumpToStep(target) {
 }
 
 async function nextStep() {
+  /* serviceId ও cfg — initServiceAware() এ global set হয়েছে */
+  const serviceId = window._serviceId || new URLSearchParams(window.location.search).get('service') || '';
+  const cfg = serviceId ? SERVICE_CONFIG[serviceId] : null;
+
   if (step===total) {
     if (!validate(step)) return;
 
@@ -1321,6 +1325,7 @@ const SERVICE_CONFIG = {
 function initServiceAware() {
   const params   = new URLSearchParams(window.location.search);
   const serviceId = params.get("service");
+  window._serviceId = serviceId; /* global scope-এ রাখো যাতে nextStep() access করতে পারে */
   const price     = parseInt(params.get("price") || "0", 10);
   const urgency   = params.get("urgency")   || "normal";
   const qty       = parseInt(params.get("qty") || "0", 10);

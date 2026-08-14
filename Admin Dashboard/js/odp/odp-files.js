@@ -54,8 +54,26 @@
         if (!d || !d.files || !d.files.length) list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No files uploaded yet.</div>';
         return;
       }
+      /* order_file_access থেকে Client files এর path গুলো নাও — এগুলো admin list থেকে বাদ দেব */
+      let clientPaths = new Set();
+      try {
+        const { data: clientMeta } = await window._sb()
+          .from('order_file_access')
+          .select('storage_path, uploaded_by')
+          .eq('order_id', window._currentOrderId)
+          .eq('uploaded_by', 'Client');
+        if (clientMeta) clientMeta.forEach(r => clientPaths.add(r.storage_path));
+      } catch(e) {}
+
       const tableHeader = window._buildFileTableHeader();
-      const html = data.map(f => {
+      const adminFiles = data.filter(f => {
+        const storagePath = `${path}/${f.name}`;
+        /* Client-submitted file হলে admin list থেকে বাদ দাও */
+        if (clientPaths.has(storagePath)) return false;
+        return true;
+      });
+
+      const html = adminFiles.map(f => {
         /* Check cache for uploaded_by — admin upload shows 'Admin', else 'Writer' */
         const storagePath = `${path}/${f.name}`;
         const cachedMeta = window._fileMetaCache[storagePath] || {};
@@ -68,8 +86,8 @@
           uploaded_by: uploader
         });
       }).join('');
-      if (list) list.innerHTML = tableHeader + html;
-      if (listOv) listOv.innerHTML = tableHeader + html;
+      if (list) list.innerHTML = tableHeader + (html || '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No admin/writer files yet.</div>');
+      if (listOv) listOv.innerHTML = tableHeader + (html || '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No admin/writer files yet.</div>');
     } catch(e) {
       if (!d || !d.files || !d.files.length) {
         if (list) list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Could not load files.</div>';

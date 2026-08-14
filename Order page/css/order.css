@@ -796,6 +796,26 @@ color:var(--text-on-accent);font-size:14px;font-weight:600;font-family:'DM Sans'
   /* Grid rows */
   .row2, .row3 { grid-template-columns: 1fr !important; }
 
+  /* Research type cards — mobile-এ max 2 column */
+  #researchTypeCards {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  #researchTypeCards .rc {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 10px !important;
+    gap: 6px !important;
+  }
+  #researchTypeCards .rc-icon {
+    font-size: 18px !important;
+  }
+  #researchTypeCards .rc-title {
+    font-size: 12px !important;
+  }
+  #researchTypeCards .rc-desc {
+    font-size: 10.5px !important;
+  }
+
   /* Urgency & review grids */
   .urgency-grid  { grid-template-columns: repeat(2, 1fr) !important; }
   .review-grid   { grid-template-columns: 1fr !important; }
@@ -807,10 +827,33 @@ color:var(--text-on-accent);font-size:14px;font-weight:600;font-family:'DM Sans'
   .fg select,
   .fg textarea   { font-size: 13px !important; padding: 9px 11px !important; }
 
-  /* Submit / Next button */
-  .btn-next, .btn-submit, .btn-primary {
-    width: 100% !important;
+  /* Footer buttons — mobile */
+  .modal-footer {
+    padding: 0.75rem 1rem !important;
+    gap: 8px !important;
+  }
+  .footer-btns {
+    gap: 8px !important;
+    flex: 1 !important;
+    justify-content: flex-end !important;
+  }
+  .btn-prev {
+    padding: 11px 16px !important;
+    font-size: 13px !important;
+    border-radius: 12px !important;
+    min-width: 72px !important;
+  }
+  .btn-next {
+    padding: 12px 22px !important;
     font-size: 14px !important;
-    padding: 13px !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.45) !important;
+    flex: 1 !important;
+    justify-content: center !important;
+    max-width: 220px !important;
+  }
+  .btn-next.green {
+    box-shadow: 0 4px 20px rgba(var(--color-success-rgb), 0.4) !important;
   }
 }

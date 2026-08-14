@@ -1147,6 +1147,11 @@
 
     /* ── Thesis Order Popup opener ── */
     function openThesisOrderPopup() {
+      /* Mobile-এ সবসময় 5-step order page-এ যাবে */
+      if (window.innerWidth <= 768) {
+        window.location.href = '../Order page/order.html?service=thesis';
+        return;
+      }
       if (typeof window.opOpen !== 'function') {
         window.location.href = '../Order page/order.html?service=thesis';
         return;
