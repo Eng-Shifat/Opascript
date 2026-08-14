@@ -1010,7 +1010,21 @@ async function nextStep() {
     const pagesVal      = window._isHandwritten
       ? (hwPageCountVal ? hwPageCountVal + ' পাতা (handwritten)' : '—')
       : (pages ? pages + ' পাতা (~' + wc + ' words)' : '—');
-    const orderNumber   = 'SCR-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
+    // ── Generate sequential order number via atomic Supabase function ──
+    // Uses PostgreSQL function get_next_order_number() to prevent race conditions.
+    // Even if two orders are placed at the exact same millisecond, the DB
+    // guarantees each gets a unique serial for that month.
+    const now = new Date();
+    const yyyymm = String(now.getFullYear()) + String(now.getMonth() + 1).padStart(2, '0');
+    const { data: seqData, error: seqError } = await window.scriptoraSupabase
+      .rpc('get_next_order_number', { p_yyyymm: yyyymm });
+    if (seqError) {
+      console.error('Order number generation failed:', seqError);
+      if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay Now'; }
+      alert('Order number তৈরি করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      return;
+    }
+    const orderNumber = seqData; // e.g. "OPA-202608-001"
 
     if (!deadlineVal) { se('deadlineDate','Deadline date নির্বাচন করুন'); return; }
 

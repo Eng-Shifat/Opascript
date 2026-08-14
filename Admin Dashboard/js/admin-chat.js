@@ -194,6 +194,43 @@ async function openConv(orderId) {
     const badge = document.getElementById('chatStatusBadge');
     badge.textContent = conv.status || '';
     badge.className   = `order-status-badge ${conv.status || ''}`;
+
+    /* ── Order summary banner (deadline / due / paid) ─────────────── */
+    const orderNo = conv.order_number
+      ? `#${conv.order_number}`
+      : `#${String(orderId).slice(0,8).toUpperCase()}`; /* fallback if order_number missing */
+    const orderNoEl = document.getElementById('adminCosOrderNo');
+    if (orderNoEl) orderNoEl.textContent = orderNo;
+
+    const statusBadgeEl = document.getElementById('adminCosStatusBadge');
+    if (statusBadgeEl) {
+      statusBadgeEl.textContent = conv.status || '—';
+      statusBadgeEl.className = `order-status-badge ${conv.status || ''}`;
+    }
+
+    const deadlineEl = document.getElementById('adminCosDeadline');
+    if (deadlineEl) {
+      deadlineEl.textContent = conv.deadline
+        ? new Date(conv.deadline).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '—';
+    }
+
+    const dueEl = document.getElementById('adminCosDue');
+    if (dueEl) {
+      const due = Number(conv.due_amount || 0);
+      dueEl.textContent = `৳${due.toLocaleString()}`;
+      dueEl.className = due <= 0 ? 'cos-value cos-paid' : 'cos-value cos-due';
+    }
+
+    const paidEl = document.getElementById('adminCosPaid');
+    if (paidEl) {
+      const paid = Number(conv.advance_paid || 0);
+      paidEl.textContent = `৳${paid.toLocaleString()}`;
+      paidEl.className = paid > 0 ? 'cos-value cos-paid' : 'cos-value';
+    }
+
+    const summaryEl = document.getElementById('adminChatOrderSummary');
+    if (summaryEl) summaryEl.style.display = 'block';
   }
 
   const body = document.getElementById('adminChatBody');
