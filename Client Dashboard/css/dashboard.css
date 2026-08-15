@@ -2760,7 +2760,7 @@ input, select, textarea { font-family: inherit; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 16px 0 28px;
   z-index: 900;
   gap: 12px;
 }
@@ -3430,3 +3430,43 @@ input, select, textarea { font-family: inherit; }
   transition: opacity 0.2s;
 }
 .cdpp-pay-btn:hover { opacity: 0.85; }
+
+/* Order card — unpaid state label */
+.oc-pay-first {
+  font-size: 11px;
+  font-weight: 600;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+/* ── Topbar — Logo + Brand (matches homepage nav exactly) ── */
+.cd-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  text-decoration: none;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 20px;
+  color: #fff;
+  height: 100%;
+}
+.cd-brand-logo {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+  margin-left: -16px;
+  margin-right: -10px;
+}
+.cd-brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}

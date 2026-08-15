@@ -29,18 +29,19 @@ const STEPS = [
 ];
 
 const STATUS_STEP_MAP = {
-  /* Step 1 — Order Placed */
-  'pending':1, 'confirmed':1, 'hold':1,
-  /* Step 2 — Payment Received */
-  'payment_received':2, 'payment_done':2,
+  /* Step 0 — Order Placed (active) */
+  'pending':0, 'hold':0,
+  /* Step 1 — Order Placed (done), Payment Received (active) */
+  'confirmed':1, 'payment_received':1, 'payment_done':1,
+  /* Step 2 — Writing চলছে */
   /* Step 3 — Writing চলছে */
-  'writing':3, 'in_progress':3, 'overdue':3,
+  'writing':2, 'in_progress':2, 'overdue':2,
   /* Step 4 — File in Review */
-  'in_review':4, 'draft_ready':4, 'draft_sent':4, 's-review':4,
+  'in_review':3, 'draft_ready':3, 'draft_sent':3, 's-review':3,
   /* Step 5 — Delivery */
-  'delivered':5,
+  'delivered':4,
   /* Step 6 — Completed */
-  'completed':6,
+  'completed':5,
 };
 window._STATUS_STEP_MAP = STATUS_STEP_MAP;
 window._STEPS_TOTAL = STEPS.length;
@@ -383,6 +384,10 @@ function buildOrderCard(order) {
   const deadline=new Date(order.deadline), now=new Date();
   const diffMs=deadline-now, daysLeft=Math.floor(diffMs/86400000);
   const isUrgent=daysLeft<=3;
+  const isPaymentApproved = order.payment_status === 'approved'
+    || order.payment_status === 'paid'
+    || order.payment_status === 'confirmed'
+    || Number(order.advance_paid || 0) > 0;
   const card=document.createElement('div');
   const badge=getStatusBadge(order.status);
   card.className=`order-card ${badge.cls}`; // left border color = status badge color
@@ -414,7 +419,10 @@ function buildOrderCard(order) {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Deadline — <strong>${fmtDate(order.deadline)}</strong>
       </div>
-      <div class="${cdColor} js-countdown" data-deadline="${order.deadline}">${diffMs>0?formatCountdown(diffMs):'সময় শেষ!'}</div>
+      ${isPaymentApproved
+        ? `<div class="${cdColor} js-countdown" data-deadline="${order.deadline}">${diffMs>0?formatCountdown(diffMs):'সময় শেষ!'}</div>`
+        : `<div class="oc-pay-first">💳 Pay first</div>`
+      }
     </div>`;
   return card;
 }
@@ -481,7 +489,7 @@ async function openOrderDetail(orderId) {
   const badge=getStatusBadge(order.status);
   const statusEl=document.getElementById('detailStatus');
   statusEl.textContent=badge.label; statusEl.className=`status-badge ${badge.cls}`;
-  renderStepper(order.status, order.payment_status);
+  renderStepper(order.status, order.payment_status, 0); // will re-render after livePaid is fetched
 
   /* Payment Verification badge */
   const existingVerBadge = document.getElementById('payVerificationBadge');
@@ -524,6 +532,9 @@ async function openOrderDetail(orderId) {
     liveDue  = order.due_amount   || 0;
     hasPendingPaymentRequest = order.payment_status === 'under_review';
   }
+
+  /* ── Re-render stepper now that we have real livePaid ── */
+  renderStepper(order.status, order.payment_status, livePaid);
 
   /* ── Start countdown with full payment context ── */
   startCountdown(order.deadline, order.payment_status, livePaid, hasPendingPaymentRequest);
@@ -697,14 +708,33 @@ function startCountdown(deadlineStr, paymentStatus, livePaid, hasPendingRequest)
   }
 }
 
-function renderStepper(status, paymentStatus) {
+function renderStepper(status, paymentStatus, livePaid) {
   const stepper=document.getElementById('progressStepper');
-  /* payment_status দিয়ে effective step determine করো */
   let effectiveStep = STATUS_STEP_MAP[status] ?? 1;
-  /* under_review → step 1 (order placed, payment pending verification) */
-  if (paymentStatus === 'under_review' && effectiveStep < 2) effectiveStep = 1;
-  /* approved/paid → step 2 (payment received) — কিন্তু admin status update করলে সেটা override হবে */
-  if ((paymentStatus === 'approved' || paymentStatus === 'paid') && effectiveStep < 2) effectiveStep = 2;
+
+  // Payment Received step (step index 1) শুধু তখনই
+  // যখন admin explicitly payment_received status দিয়েছে
+  // অথবা livePaid > 0 (actual approved payment আছে)
+  const actuallyPaid = Number(livePaid || 0) > 0
+    || paymentStatus === 'approved'
+    || paymentStatus === 'paid'
+    || paymentStatus === 'confirmed';
+
+  // explicitly unpaid → never show Payment Received
+  const explicitlyUnpaid = paymentStatus === 'unpaid'
+    || paymentStatus === 'pending'
+    || paymentStatus === 'under_review'
+    || paymentStatus === 'rejected'
+    || !paymentStatus;
+
+  // যদি status-based step ইতিমধ্যে ২ বা তার বেশি,
+  // সেটাই থাকবে। কিন্তু step 1 থেকে 2-এ যাবে
+  // শুধু actually paid হলে।
+  // Payment Received = index 1
+  if (effectiveStep < 1 && actuallyPaid && !explicitlyUnpaid) effectiveStep = 1;
+  // unpaid → Order Placed active (index 0)
+  if (explicitlyUnpaid || (!actuallyPaid && effectiveStep < 1)) effectiveStep = 0;
+
   const currentStep = effectiveStep;
   stepper.innerHTML='';
   STEPS.forEach((step,i)=>{
