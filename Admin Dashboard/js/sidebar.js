@@ -47,9 +47,9 @@
   const sidebarHTML = `
   <aside class="s-sidebar" id="globalSidebar">
     <a class="s-logo" href="../Homepage/index.html">
-      <div class="s-logo-icon">S</div>
+      <div class="s-logo-icon">O</div>
       <div class="s-logo-text">
-        <strong>Scriptora</strong>
+        <strong>Opascript</strong>
         <span>Admin Panel</span>
       </div>
     </a>
@@ -64,8 +64,8 @@
         <span class="s-badge" id="ordersBadge" style="display:none">0</span>
       </a>
       <a class="s-nav-item" href="admin-messages.html" data-page="messages" data-tooltip="Messages">
-        <i class="ti ti-message-circle"></i><span class="s-nav-item-label">Messages</span>
-        <span class="s-badge" id="sidebarMsgBadge" style="display:none">0</span>
+        <i class="ti ti-message"></i><span class="s-nav-item-label">Messages</span>
+        
       </a>
       <a class="s-nav-item" href="admin-website-chats.html" data-page="website-chats" data-tooltip="Website Chats">
         <i class="ti ti-brand-hipchat"></i><span class="s-nav-item-label">Website Chats</span>

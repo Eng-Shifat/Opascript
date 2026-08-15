@@ -128,7 +128,7 @@ async function loadConversations() {
 /* ── Render conversation list ──────────────────────────────────────────── */
 function renderConvList(list) {
   const el = document.getElementById('convList');
-  document.getElementById('convCount').textContent = list.length;
+  
 
   if (!list.length) {
     el.innerHTML = '<div class="conv-empty">কোনো conversation নেই। Client message করলে এখানে দেখা যাবে।</div>';
@@ -188,12 +188,10 @@ async function openConv(orderId) {
     const name = p.name || p.email || 'Unknown';
     document.getElementById('clientAv').textContent   = name.substring(0, 2).toUpperCase();
     document.getElementById('clientName').textContent  = name;
-    document.getElementById('chatOrderMeta').textContent =
-      `${conv.title || conv.service_type || 'Order'} · #${String(orderId).slice(-6).toUpperCase()}`;
+    document.getElementById('chatOrderMeta').textContent = conv.title || conv.service_type || 'Order';
 
     const badge = document.getElementById('chatStatusBadge');
-    badge.textContent = conv.status || '';
-    badge.className   = `order-status-badge ${conv.status || ''}`;
+    if (badge) { badge.textContent = conv.status || ''; badge.className = `order-status-badge ${conv.status || ''}`; }
 
     /* ── Order summary banner (deadline / due / paid) ─────────────── */
     const orderNo = conv.order_number
@@ -201,6 +199,9 @@ async function openConv(orderId) {
       : `#${String(orderId).slice(0,8).toUpperCase()}`; /* fallback if order_number missing */
     const orderNoEl = document.getElementById('adminCosOrderNo');
     if (orderNoEl) orderNoEl.textContent = orderNo;
+
+    const cosTitleEl = document.getElementById('adminCosTitle');
+    if (cosTitleEl) cosTitleEl.textContent = conv.title || conv.service_type || '';
 
     const statusBadgeEl = document.getElementById('adminCosStatusBadge');
     if (statusBadgeEl) {

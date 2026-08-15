@@ -498,66 +498,57 @@
    (mirrors client-side .chat-order-summary style)
 ══════════════════════════════════════════════════════ */
 .admin-chat-order-summary {
-  background: var(--card, #1a1f35);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  padding: 10px 18px 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: #0f0c1d;
+  border-bottom: 1px solid #1c1733;
+  overflow-x: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 100%;
+}
+.admin-chat-order-summary::-webkit-scrollbar { display: none; }
+
+.acos-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 18px;
+  gap: 3px;
   flex-shrink: 0;
 }
 
-.acos-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.acos-order-no {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text, #fff);
-  letter-spacing: 0.3px;
-}
-
-.acos-grid {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.acos-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--muted, #8892b0);
-}
-
-.acos-item svg {
+.acos-divider {
+  width: 1px;
+  background: #1c1733;
+  align-self: stretch;
   flex-shrink: 0;
-  opacity: 0.7;
 }
 
 .acos-label {
   display: block;
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.7px;
   text-transform: uppercase;
-  color: var(--muted, #8892b0);
-  line-height: 1.2;
+  color: #4b5563;
+  line-height: 1;
 }
 
-.acos-value {
+.acos-val {
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text, #fff);
+  color: #e2e8f0;
   line-height: 1.4;
 }
 
-.acos-value.cos-due {
-  color: #f97316;  /* orange for due */
+.acos-val.acos-order-no {
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
 }
 
-.acos-value.cos-paid {
-  color: #22c55e;  /* green for paid */
-}
+.acos-val.cos-due  { color: #f97316; }
+.acos-val.cos-paid { color: #22c55e; }
