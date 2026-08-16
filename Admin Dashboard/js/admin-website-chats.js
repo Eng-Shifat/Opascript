@@ -251,7 +251,7 @@ function buildBubble(msg) {
 function subscribeToLead(leadId) {
   if (leadChannel) { sb.removeChannel(leadChannel); leadChannel = null; }
   leadChannel = sb
-    .channel('admin-wc-lead-' + leadId)
+    .channel('livechat-lead-' + leadId)
     .on('postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'website_chat_messages', filter: `lead_id=eq.${leadId}` },
       (payload) => {
