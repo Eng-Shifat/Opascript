@@ -862,13 +862,13 @@ async function markOrderComplete(orderId) {
   try {
     const { error } = await sb.from('orders').update({
       status: 'completed',
-      updated_at: new Date().toISOString()
     }).eq('id', orderId);
     if (error) throw error;
 
     /* Notify admin via messages */
     await sb.from('messages').insert({
       order_id:   orderId,
+      client_id:  (await sb.auth.getUser()).data.user?.id,
       text:       '✅ Client order টি Completed হিসেবে confirm করেছেন।',
       from_admin: false,
       read:       false,
@@ -892,15 +892,15 @@ async function markOrderComplete(orderId) {
 async function submitReviewRequest(orderId, reviewText) {
   try {
     const { error } = await sb.from('orders').update({
-      status:     'in_review',
-      updated_at: new Date().toISOString()
+      status: 'in_review',
     }).eq('id', orderId);
     if (error) throw error;
 
-    /* Send review message to admin */
+    /* Send review message — use a plain text prefix admin can filter on */
     await sb.from('messages').insert({
       order_id:   orderId,
-      text:       `🔄 Review Request:\n\n${reviewText}`,
+      client_id:  (await sb.auth.getUser()).data.user?.id,
+      text:       '[REVIEW_REQUEST] ' + reviewText,
       from_admin: false,
       read:       false,
       sent_at:    new Date().toISOString(),
@@ -908,7 +908,6 @@ async function submitReviewRequest(orderId, reviewText) {
 
     showToast('⚠️ Review request পাঠানো হয়েছে। Admin দেখবেন।', '');
 
-    /* Update local and re-render */
     const o = allOrders.find(x => String(x.id) === String(orderId));
     if (o) o.status = 'in_review';
     const wrap = document.getElementById('deliveryReviewBannerWrap');
