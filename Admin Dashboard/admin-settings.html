@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — Scriptora Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/admin.css"/>
+  <link rel="stylesheet" href="css/sidebar.css"/>
+  <link rel="stylesheet" href="css/admin-settings.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<script src="js/supabaseClient.js"></script>
+<script src="js/topbar.js" data-title="Settings" data-sub="Admin panel settings &amp; configuration"></script>
+<script src="js/sidebar.js" data-page="settings"></script>
+
+<div class="main">
+  <div class="content stg-wrap">
+
+    <!-- 1. ADMIN ACCOUNT -->
+    <div class="stg-section purple-glow">
+      <div class="stg-sec-head">
+        <div class="stg-sec-icon" style="background:rgba(124,92,255,.15);color:var(--accent2)">
+          <i class="ti ti-user-shield"></i>
+        </div>
+        <div class="stg-sec-head-text">
+          <div class="stg-sec-title">Admin Account</div>
+          <div class="stg-sec-sub">Update your profile &amp; login information</div>
+        </div>
+        <svg class="stg-sec-deco" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="38" fill="rgba(124,92,255,.08)" stroke="rgba(124,92,255,.18)" stroke-width="1.5"/>
+          <circle cx="40" cy="30" r="13" fill="rgba(124,92,255,.25)" stroke="rgba(124,92,255,.5)" stroke-width="1.5"/>
+          <path d="M14 62c0-14.4 11.6-26 26-26s26 11.6 26 26" stroke="rgba(124,92,255,.5)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="60" cy="20" r="8" fill="rgba(212,175,106,.15)" stroke="rgba(212,175,106,.5)" stroke-width="1.2"/>
+          <path d="M57 20h6M60 17v6" stroke="rgba(212,175,106,.8)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stg-sec-body">
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Display Name</div>
+            <div class="stg-field-hint">আপনার প্রদর্শিত নাম</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-user stg-input-icon"></i>
+            <input class="stg-input" type="text" id="s-display-name" placeholder="Super Admin">
+          </div>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Admin Email</div>
+            <div class="stg-field-hint">লগইন করার জন্য ব্যবহৃত ইমেইল</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-mail stg-input-icon"></i>
+            <input class="stg-input" type="email" id="s-email" readonly>
+          </div>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Phone / WhatsApp</div>
+            <div class="stg-field-hint">Contact number (optional)</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-phone stg-input-icon"></i>
+            <input class="stg-input" type="text" id="s-phone" placeholder="01XXXXXXXXX">
+          </div>
+        </div>
+        <div class="stg-action-row">
+          <span class="stg-inline-msg" id="profile-msg"></span>
+          <button class="stg-btn stg-btn-primary" onclick="saveProfile()">
+            <i class="ti ti-check"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. PASSWORD CHANGE -->
+    <div class="stg-section gold-glow">
+      <div class="stg-sec-head">
+        <div class="stg-sec-icon" style="background:rgba(212,175,106,.12);color:var(--gold)">
+          <i class="ti ti-lock"></i>
+        </div>
+        <div class="stg-sec-head-text">
+          <div class="stg-sec-title">Password Change</div>
+          <div class="stg-sec-sub">Update your account password</div>
+        </div>
+        <svg class="stg-sec-deco" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="38" fill="rgba(212,175,106,.06)" stroke="rgba(212,175,106,.15)" stroke-width="1.5"/>
+          <rect x="22" y="36" width="36" height="26" rx="6" fill="rgba(212,175,106,.18)" stroke="rgba(212,175,106,.5)" stroke-width="1.5"/>
+          <path d="M30 36V28a10 10 0 1 1 20 0v8" stroke="rgba(212,175,106,.7)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="40" cy="49" r="4" fill="rgba(212,175,106,.8)"/>
+          <path d="M40 53v4" stroke="rgba(212,175,106,.8)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stg-sec-body">
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">New Password</div>
+            <div class="stg-field-hint">নতুন পাসওয়ার্ড দিন</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-lock stg-input-icon"></i>
+            <input class="stg-input" type="password" id="s-new-pw" placeholder="••••••••••" style="padding-right:38px">
+            <i class="ti ti-eye stg-pw-eye" onclick="togglePw('s-new-pw', this)"></i>
+          </div>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Confirm Password</div>
+            <div class="stg-field-hint">পাসওয়ার্ড নিশ্চিত করুন</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-lock stg-input-icon"></i>
+            <input class="stg-input" type="password" id="s-confirm-pw" placeholder="••••••••••" style="padding-right:38px">
+            <i class="ti ti-eye stg-pw-eye" onclick="togglePw('s-confirm-pw', this)"></i>
+          </div>
+        </div>
+        <div class="stg-action-row">
+          <span class="stg-inline-msg" id="pw-msg"></span>
+          <button class="stg-btn stg-btn-gold" onclick="changePassword()" id="pw-btn">
+            <i class="ti ti-refresh"></i> Update Password
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. BUSINESS SETTINGS -->
+    <div class="stg-section green-glow">
+      <div class="stg-sec-head">
+        <div class="stg-sec-icon" style="background:rgba(52,211,153,.12);color:var(--green)">
+          <i class="ti ti-building-store"></i>
+        </div>
+        <div class="stg-sec-head-text">
+          <div class="stg-sec-title">Business Settings</div>
+          <div class="stg-sec-sub">Platform ও business configuration</div>
+        </div>
+        <svg class="stg-sec-deco" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="38" fill="rgba(52,211,153,.06)" stroke="rgba(52,211,153,.15)" stroke-width="1.5"/>
+          <rect x="14" y="32" width="52" height="30" rx="4" fill="rgba(52,211,153,.1)" stroke="rgba(52,211,153,.4)" stroke-width="1.4"/>
+          <path d="M14 36l26-16 26 16" stroke="rgba(52,211,153,.5)" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="32" y="46" width="16" height="16" rx="2" fill="rgba(52,211,153,.25)" stroke="rgba(52,211,153,.5)" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="stg-sec-body">
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Platform Name</div>
+            <div class="stg-field-hint">Service site-এ দেখানো হবে</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-brand-appgallery stg-input-icon"></i>
+            <input class="stg-input" type="text" id="s-platform-name" placeholder="Scriptora">
+          </div>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Contact Email</div>
+            <div class="stg-field-hint">Client দের দেওয়া support email</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-mail stg-input-icon"></i>
+            <input class="stg-input" type="email" id="s-contact-email" placeholder="support@scriptora.com">
+          </div>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">WhatsApp Number</div>
+            <div class="stg-field-hint">Client support number</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-brand-whatsapp stg-input-icon"></i>
+            <input class="stg-input" type="text" id="s-wa-number" placeholder="+8801XXXXXXXXX">
+          </div>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Monthly Revenue Goal (৳)</div>
+            <div class="stg-field-hint">Dashboard progress bar এর target</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-target stg-input-icon"></i>
+            <input class="stg-input" type="number" id="s-monthly-goal" placeholder="100000">
+          </div>
+        </div>
+        <div class="stg-action-row">
+          <span class="stg-inline-msg" id="biz-msg"></span>
+          <button class="stg-btn stg-btn-primary" onclick="saveBizSettings()">
+            <i class="ti ti-check"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. NOTIFICATIONS -->
+    <div class="stg-section purple-glow">
+      <div class="stg-sec-head">
+        <div class="stg-sec-icon" style="background:rgba(167,139,250,.12);color:var(--accent2)">
+          <i class="ti ti-bell-ringing"></i>
+        </div>
+        <div class="stg-sec-head-text">
+          <div class="stg-sec-title">Notification Settings</div>
+          <div class="stg-sec-sub">কোন কোন ঘটনায় notification পাবেন</div>
+        </div>
+      </div>
+      <div class="stg-sec-body">
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">নতুন Order</div>
+            <div class="stg-field-hint">Client নতুন order দিলে notify করুন</div>
+          </div>
+          <label class="stg-toggle">
+            <input type="checkbox" id="n-new-order" checked>
+            <div class="stg-track"></div>
+            <div class="stg-thumb"></div>
+          </label>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Payment Proof</div>
+            <div class="stg-field-hint">Client payment proof দিলে notify করুন</div>
+          </div>
+          <label class="stg-toggle">
+            <input type="checkbox" id="n-payment" checked>
+            <div class="stg-track"></div>
+            <div class="stg-thumb"></div>
+          </label>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">নতুন Message</div>
+            <div class="stg-field-hint">Client message পাঠালে notify করুন</div>
+          </div>
+          <label class="stg-toggle">
+            <input type="checkbox" id="n-message" checked>
+            <div class="stg-track"></div>
+            <div class="stg-thumb"></div>
+          </label>
+        </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Order Overdue Alert</div>
+            <div class="stg-field-hint">Deadline পেরিয়ে গেলে alert করুন</div>
+          </div>
+          <label class="stg-toggle">
+            <input type="checkbox" id="n-overdue" checked>
+            <div class="stg-track"></div>
+            <div class="stg-thumb"></div>
+          </label>
+        </div>
+        <div class="stg-action-row">
+          <span class="stg-inline-msg" id="notif-msg"></span>
+          <button class="stg-btn stg-btn-primary" onclick="saveNotifSettings()">
+            <i class="ti ti-check"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. DANGER ZONE -->
+    <div class="stg-section red-glow">
+      <div class="stg-sec-head">
+        <div class="stg-sec-icon" style="background:rgba(248,113,113,.12);color:var(--red)">
+          <i class="ti ti-alert-triangle"></i>
+        </div>
+        <div class="stg-sec-head-text">
+          <div class="stg-sec-title">Danger Zone</div>
+          <div class="stg-sec-sub">সতর্কতার সাথে ব্যবহার করুন</div>
+        </div>
+      </div>
+      <div class="stg-sec-body">
+        <div class="stg-danger-item">
+          <div>
+            <div class="stg-danger-label">Admin Logout</div>
+            <div class="stg-danger-hint">সব device থেকে logout করুন</div>
+          </div>
+          <button class="stg-btn stg-btn-danger" onclick="handleAdminLogout()">
+            <i class="ti ti-logout"></i> Logout করুন
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toastContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+<script src="js/admin-settings.js"></script>
+
+</body>
+</html>

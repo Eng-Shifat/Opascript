@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Client List — Scriptora Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/admin.css"/>
+  <link rel="stylesheet" href="css/sidebar.css"/>
+  <link rel="stylesheet" href="css/admin-clients.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<script src="js/supabaseClient.js"></script>
+<script src="js/topbar.js" data-title="Client List" data-sub="সব client দের তথ্য দেখুন ও manage করুন"></script>
+<script src="js/sidebar.js" data-page="clients"></script>
+
+<div class="main">
+  <div class="content cl-page">
+
+    <!-- Header -->
+    <div class="cl-header">
+      <div class="cl-header-left">
+        <h2>Client List</h2>
+        <p id="cl-subtitle">Loading...</p>
+      </div>
+      <button class="cl-add-btn" onclick="openNewClientModal()">
+        <i class="ti ti-user-plus"></i> নতুন Client
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="cl-stats">
+      <div class="cl-stat">
+        <div class="cl-stat-label">Total Clients</div>
+        <div class="cl-stat-val purple" id="st-total">—</div>
+        <div class="cl-stat-sub">সব মিলিয়ে</div>
+      </div>
+      <div class="cl-stat">
+        <div class="cl-stat-label">Active Clients</div>
+        <div class="cl-stat-val green" id="st-active">—</div>
+        <div class="cl-stat-sub">কমপক্ষে ১টা order আছে</div>
+      </div>
+      <div class="cl-stat">
+        <div class="cl-stat-label">Total Revenue</div>
+        <div class="cl-stat-val" id="st-revenue">—</div>
+        <div class="cl-stat-sub">সব client থেকে</div>
+      </div>
+      <div class="cl-stat">
+        <div class="cl-stat-label">Amount Due</div>
+        <div class="cl-stat-val red" id="st-due">—</div>
+        <div class="cl-stat-sub">বকেয়া পেমেন্ট</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="cl-filters">
+      <div class="cl-search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" id="cl-search" placeholder="নাম, email, phone বা university খুঁজুন...">
+      </div>
+      <button class="cl-filter-chip active" data-status="all" onclick="setFilter('all', this)">সব</button>
+      <button class="cl-filter-chip" data-status="active" onclick="setFilter('active', this)">Active</button>
+      <button class="cl-filter-chip" data-status="inactive" onclick="setFilter('inactive', this)">Inactive</button>
+    </div>
+
+    <!-- Table -->
+    <div class="cl-table-wrap">
+      <table class="cl-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Contact</th>
+            <th>University</th>
+            <th>Orders</th>
+            <th>Total Spent</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cl-tbody">
+          <tr>
+            <td colspan="7" class="cl-empty">
+              <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
+              <p>Loading clients...</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="cl-pagination" id="cl-pagination" style="display:none">
+        <span id="cl-pg-info">—</span>
+        <div class="cl-pg-btns" id="cl-pg-btns"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Client Detail Panel -->
+<div class="cl-detail-overlay" id="clDetailOverlay" onclick="closeDetailPanel(event)">
+  <div class="cl-detail-panel" id="clDetailPanel">
+    <div class="cdp-head">
+      <h3>Client Details</h3>
+      <div class="cdp-close" onclick="closeDetail()">×</div>
+    </div>
+    <div id="cdp-content">
+      <div style="padding:40px;text-align:center;color:var(--muted2)">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- New Client Modal -->
+<div class="nc-modal" id="ncModal" onclick="closeNcOutside(event)">
+  <div class="nc-box" onclick="event.stopPropagation()">
+    <div class="nc-title">নতুন Client যোগ করুন</div>
+    <div class="nc-sub">Client এর তথ্য দিন — system এ save হবে</div>
+    <div class="nc-row">
+      <div class="nc-field">
+        <label>Full Name *</label>
+        <input type="text" id="nc-name" placeholder="Rahim Uddin">
+      </div>
+      <div class="nc-field">
+        <label>Email *</label>
+        <input type="email" id="nc-email" placeholder="rahim@example.com">
+      </div>
+    </div>
+    <div class="nc-row">
+      <div class="nc-field">
+        <label>Phone / WhatsApp</label>
+        <input type="text" id="nc-phone" placeholder="01XXXXXXXXX">
+      </div>
+      <div class="nc-field">
+        <label>University</label>
+        <input type="text" id="nc-uni" placeholder="BUET, DU, BRAC...">
+      </div>
+    </div>
+    <div class="nc-row full">
+      <div class="nc-field">
+        <label>Department</label>
+        <input type="text" id="nc-dept" placeholder="CSE, BBA, EEE...">
+      </div>
+    </div>
+    <div class="nc-actions">
+      <button class="nc-btn-cancel" onclick="closeNcModal()">বাতিল</button>
+      <button class="nc-btn-save" onclick="saveNewClient()">
+        <i class="ti ti-check"></i> Save করুন
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Message Order Picker Modal -->
+<div class="nc-modal" id="msgPickerModal" onclick="closeMsgPickerOutside(event)">
+  <div class="nc-box" onclick="event.stopPropagation()" style="width:420px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div class="nc-title">Message করুন</div>
+      <div class="cdp-close" onclick="closeMsgPicker()">×</div>
+    </div>
+    <div class="nc-sub">
+      <span id="msgPickerClientName"></span> — কোন order এ message করবেন?
+    </div>
+    <div id="msgPickerList" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toastContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+<script src="js/admin-clients.js"></script>
+</body>
+</html>

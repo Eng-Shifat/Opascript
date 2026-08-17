@@ -71,14 +71,14 @@
         <i class="ti ti-brand-hipchat"></i><span class="s-nav-item-label">Website Chats</span>
         <span class="s-badge" id="sidebarWcBadge" style="display:none">0</span>
       </a>
-      <a class="s-nav-item" href="#" data-page="clients" data-tooltip="Client List">
+      <a class="s-nav-item" href="admin-clients.html" data-page="clients" data-tooltip="Client List">
         <i class="ti ti-users"></i><span class="s-nav-item-label">Client List</span>
       </a>
-      <a class="s-nav-item" href="#" data-page="payments" data-tooltip="Payments &amp; Billing">
+      <a class="s-nav-item" href="admin-payments.html" data-page="payments" data-tooltip="Payments &amp; Billing">
         <i class="ti ti-credit-card"></i><span class="s-nav-item-label">Payments &amp; Billing</span>
         <span class="s-badge" id="payBadge" style="display:none">0</span>
       </a>
-      <a class="s-nav-item" href="#" data-page="files" data-tooltip="File Manager">
+      <a class="s-nav-item" href="admin-files.html" data-page="files" data-tooltip="File Manager">
         <i class="ti ti-folder"></i><span class="s-nav-item-label">File Manager</span>
       </a>
 
@@ -87,10 +87,10 @@
       </a>
 
       <div class="s-nav-label">System</div>
-      <a class="s-nav-item" href="#" data-page="settings" data-tooltip="Settings">
+      <a class="s-nav-item" href="admin-settings.html" data-page="settings" data-tooltip="Settings">
         <i class="ti ti-settings"></i><span class="s-nav-item-label">Settings</span>
       </a>
-      <a class="s-nav-item" href="#" data-page="help" data-tooltip="Help &amp; Support">
+      <a class="s-nav-item" href="admin-settings.html" data-page="help" data-tooltip="Help &amp; Support">
         <i class="ti ti-help-circle"></i><span class="s-nav-item-label">Help &amp; Support</span>
       </a>
     </div>

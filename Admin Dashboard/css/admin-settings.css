@@ -1,0 +1,232 @@
+/* ═══════════════════════════════════════════
+   SCRIPTORA — Admin Settings Page
+   admin-settings.css
+═══════════════════════════════════════════ */
+
+.stg-wrap { padding: 28px 32px; max-width: 900px; }
+
+/* ── Section Card ── */
+.stg-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  margin-bottom: 22px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Decorative glow blob top-right */
+.stg-section::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.07;
+}
+.stg-section.purple-glow::before { background: radial-gradient(circle, #7c5cff, transparent 70%); }
+.stg-section.gold-glow::before   { background: radial-gradient(circle, #d4af6a, transparent 70%); }
+.stg-section.red-glow::before    { background: radial-gradient(circle, #f87171, transparent 70%); }
+.stg-section.green-glow::before  { background: radial-gradient(circle, #34d399, transparent 70%); }
+
+/* ── Section Header ── */
+.stg-sec-head {
+  padding: 24px 28px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.stg-sec-icon {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+.stg-sec-head-text { flex: 1; }
+.stg-sec-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+.stg-sec-sub   { font-size: .75rem; color: var(--muted2); margin-top: 2px; }
+
+/* Decorative SVG — right side of header */
+.stg-sec-deco {
+  position: absolute;
+  right: 24px; top: 50%;
+  transform: translateY(-50%);
+  width: 72px; height: 72px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* ── Section Body ── */
+.stg-sec-body { padding: 6px 28px 22px; }
+
+/* ── Field Row ── */
+.stg-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(167,139,250,.06);
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.stg-field-row:last-of-type { border-bottom: none; }
+
+.stg-field-label { font-size: .85rem; font-weight: 600; color: var(--text); }
+.stg-field-hint  { font-size: .73rem; color: var(--muted2); margin-top: 3px; }
+
+/* ── Input with icon ── */
+.stg-input-wrap {
+  position: relative;
+  width: 300px;
+}
+.stg-input-icon {
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); font-size: .9rem;
+  pointer-events: none;
+}
+.stg-input {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px 10px 36px;
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+  font-size: .83rem;
+  outline: none;
+  transition: border-color .18s, box-shadow .18s;
+}
+.stg-input:focus {
+  border-color: rgba(124,92,255,.55);
+  box-shadow: 0 0 0 3px rgba(124,92,255,.1);
+}
+.stg-input[readonly] {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.stg-input::placeholder { color: var(--muted); }
+
+/* ── Password eye toggle ── */
+.stg-pw-eye {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--muted2); font-size: .9rem;
+  transition: color .15s;
+}
+.stg-pw-eye:hover { color: var(--text); }
+
+/* ── Action row (save buttons) ── */
+.stg-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+/* ── Buttons ── */
+.stg-btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-family: 'Sora', sans-serif;
+  font-size: .82rem; font-weight: 600;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: all .18s;
+  border: none;
+}
+.stg-btn-primary {
+  background: linear-gradient(135deg, #7c5cff, #b69dfd);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(124,92,255,.3);
+}
+.stg-btn-primary:hover   { opacity: .88; transform: translateY(-1px); }
+.stg-btn-primary:active  { transform: translateY(0); }
+.stg-btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.stg-btn-gold {
+  background: linear-gradient(135deg, #d4af6a, #f0d08a);
+  color: #1a1208; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(212,175,106,.25);
+}
+.stg-btn-gold:hover  { opacity: .9; transform: translateY(-1px); }
+.stg-btn-gold:active { transform: translateY(0); }
+
+.stg-btn-danger {
+  background: rgba(248,113,113,.12);
+  border: 1px solid rgba(248,113,113,.28) !important;
+  color: var(--red);
+}
+.stg-btn-danger:hover { background: rgba(248,113,113,.2); }
+
+/* ── Inline status message ── */
+.stg-inline-msg {
+  font-size: .76rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: none;
+}
+.stg-inline-msg.ok  { display: inline-block; background: rgba(52,211,153,.1);  color: var(--green); }
+.stg-inline-msg.err { display: inline-block; background: rgba(248,113,113,.1); color: var(--red);   }
+
+/* ── Toggle switch ── */
+.stg-toggle {
+  position: relative;
+  width: 46px; height: 26px;
+  flex-shrink: 0; cursor: pointer;
+}
+.stg-toggle input { opacity: 0; width: 0; height: 0; }
+.stg-track {
+  position: absolute; inset: 0;
+  background: rgba(167,139,250,.12);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  transition: all .22s;
+}
+.stg-toggle input:checked + .stg-track {
+  background: linear-gradient(135deg, #7c5cff, #b69dfd);
+  border-color: #7c5cff;
+}
+.stg-thumb {
+  position: absolute; top: 4px; left: 4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff;
+  transition: transform .22s;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.stg-toggle input:checked ~ .stg-thumb { transform: translateX(20px); }
+
+/* ── Danger zone items ── */
+.stg-danger-item {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 16px 0; gap: 16px;
+  border-bottom: 1px solid rgba(167,139,250,.06);
+  flex-wrap: wrap;
+}
+.stg-danger-item:last-child { border-bottom: none; }
+.stg-danger-label { font-size: .85rem; font-weight: 600; }
+.stg-danger-hint  { font-size: .73rem; color: var(--muted2); margin-top: 3px; }
+
+/* ── Spinner animation ── */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .stg-wrap        { padding: 16px; }
+  .stg-input-wrap  { width: 100%; }
+  .stg-field-row   { flex-direction: column; align-items: flex-start; }
+  .stg-sec-deco    { display: none; }
+  .stg-sec-head    { padding: 18px 16px 14px; }
+  .stg-sec-body    { padding: 4px 16px 18px; }
+}

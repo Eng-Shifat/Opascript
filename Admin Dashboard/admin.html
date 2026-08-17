@@ -200,17 +200,36 @@
           <option>Thesis Writing</option>
           <option>Report Writing</option>
           <option>Research Paper</option>
-          <option>Presentation</option>
+          <option>Presentation Slides</option>
+          <option>Case Study Report</option>
+          <option>CV Writing</option>
+          <option>SOP Writing</option>
+          <option>Research Article / Journal</option>
+          <option>Proofreading</option>
+          <option>Formatting (APA/MLA)</option>
+          <option>Plagiarism Reduction</option>
+          <option>AI Plagiarism Remover</option>
+          <option>SPSS Analysis</option>
+          <option>Lab Report Writing</option>
+          <option>Handwritten Assignment</option>
         </select>
       </div>
       <div class="modal-field">
         <label>Department</label>
         <select id="m-dept">
           <option>BBA</option>
+          <option>MBA</option>
           <option>CSE</option>
           <option>EEE</option>
+          <option>Civil Engineering</option>
           <option>Law</option>
           <option>English</option>
+          <option>Economics</option>
+          <option>Accounting</option>
+          <option>Finance</option>
+          <option>Marketing</option>
+          <option>Pharmacy</option>
+          <option>Medical</option>
           <option>Other</option>
         </select>
       </div>
@@ -228,13 +247,13 @@
     </div>
 
     <div class="modal-field modal-notes">
-      <label>Notes</label>
-      <textarea id="m-notes" rows="2" placeholder="অতিরিক্ত তথ্য..."></textarea>
+      <label>Notes / Special Instructions</label>
+      <textarea id="m-notes" rows="2" placeholder="অতিরিক্ত তথ্য, citation style, word count ইত্যাদি..."></textarea>
     </div>
 
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="submitOrder()">Create Order →</button>
+      <button class="btn btn-primary modal-btn-submit" id="modal-submit-btn" onclick="submitOrder()">Create Order →</button>
     </div>
   </div>
 </div>

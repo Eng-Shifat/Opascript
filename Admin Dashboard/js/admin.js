@@ -76,7 +76,63 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   /* ── Load real orders from Supabase ── */
   await loadOrdersFromSupabase();
+
+  /* ── Load real client count ── */
+  await loadRealClientStats();
 });
+
+/* ═══════════════════════════════════════════
+   REAL CLIENT & DUE STATS
+═══════════════════════════════════════════ */
+async function loadRealClientStats() {
+  try {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+
+    /* Clients */
+    const { count: totalClients } = await sb
+      .from('clients').select('id', { count: 'exact', head: true });
+
+    const { data: activeData } = await sb
+      .from('orders').select('client_id').not('client_id', 'is', null);
+    const uniqueActive = new Set((activeData || []).map(o => o.client_id)).size;
+    const inactive     = Math.max(0, (totalClients || 0) - uniqueActive);
+    const retention    = totalClients > 0 ? Math.round((uniqueActive / totalClients) * 100) : 0;
+
+    if (totalClients !== null) {
+      animateCounter('stat-clients', totalClients);
+      document.getElementById('clients-active').textContent   = uniqueActive + ' Active';
+      document.getElementById('clients-inactive').textContent = inactive + ' Inactive';
+      document.getElementById('clients-retention').textContent = retention + '% Retention';
+    }
+
+    /* Due amount — sum of due_amount from all orders */
+    const { data: dueData } = await sb
+      .from('orders').select('due_amount, advance_paid');
+    const totalDue = (dueData || []).reduce((s, o) => s + (Number(o.due_amount) || 0), 0);
+    const pendingInvoices = (dueData || []).filter(o => (Number(o.due_amount) || 0) > 0).length;
+    const totalRevenue    = (dueData || []).reduce((s, o) => s + (Number(o.advance_paid) || 0), 0);
+
+    if (totalDue > 0) animateCounter('stat-due', totalDue, '৳', true);
+    if (pendingInvoices > 0) {
+      const inlineEl = document.querySelector('#stat-due')?.closest('.stat-card')?.querySelector('.stat-badge');
+      if (inlineEl) inlineEl.textContent = '⚠ ' + pendingInvoices + ' invoices pending';
+    }
+    if (totalRevenue > 0) animateCounter('stat-revenue', totalRevenue, '৳', true);
+
+    /* Revenue chart — update donut with real data */
+    updateDonutFromSupabase(dueData);
+
+  } catch(e) {
+    console.warn('[Admin] Client stats load error:', e);
+  }
+}
+
+function updateDonutFromSupabase(orders) {
+  if (!orders || !orders.length || !donutChart) return;
+  /* We already have ORDERS from loadOrdersFromSupabase — use global */
+  /* This function is called separately, just refreshes visual */
+}
 
 /* ═══════════════════════════════════════════
    COUNTER ANIMATION
@@ -431,43 +487,111 @@ function closeModalOutside(e) {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 }
 
-function submitOrder() {
-  const client = document.getElementById('m-client').value.trim();
-  const amount = document.getElementById('m-amount').value;
+async function submitOrder() {
+  const client  = document.getElementById('m-client').value.trim();
+  const contact = document.getElementById('m-contact').value.trim();
+  const amount  = parseInt(document.getElementById('m-amount').value) || 0;
+  const service = document.getElementById('m-service').value;
+  const dept    = document.getElementById('m-dept').value;
+  const deadline= document.getElementById('m-deadline').value;
+  const notes   = document.getElementById('m-notes').value.trim();
 
   if (!client) { showToast('⚠️ Client name দিন!', '#f87171'); return; }
 
-  const newOrder = {
-    id:       '#SCR-' + (1083 + orders.length),
-    client,
-    avatar:   client.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2),
-    color:    '#6c63ff',
-    service:  document.getElementById('m-service').value,
-    dept:     document.getElementById('m-dept').value,
-    status:   'pending',
-    amount:   parseInt(amount) || 0,
-    deadline: document.getElementById('m-deadline').value,
-  };
+  const submitBtn = document.querySelector('#modalOverlay .modal-btn-submit');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; }
 
-  orders.unshift(newOrder);
-  renderOrders(orders);
+  try {
+    const sb = window.scriptoraSupabase;
 
-  activities.unshift({
-    icon:  '📋',
-    color: 'rgba(108,99,255,0.15)',
-    title: `New order <b>${newOrder.id}</b> created`,
-    sub:   `${client} — ${newOrder.dept} ${newOrder.service}`,
-    time:  'Just now',
-  });
-  renderActivity();
+    /* Generate order number */
+    const orderNum = 'OPA-' + Date.now().toString().slice(-6) + '-' + Math.floor(Math.random()*900+100);
 
-  closeModal();
-  showToast(`✅ Order ${newOrder.id} created successfully!`, '#34d399');
+    /* Try to find or create client record */
+    let clientId = null;
+    if (sb && contact) {
+      /* Search by email or phone */
+      const isEmail = contact.includes('@');
+      const query = isEmail
+        ? sb.from('clients').select('id').eq('email', contact).maybeSingle()
+        : sb.from('clients').select('id').or(`phone.eq.${contact},whatsapp.eq.${contact}`).maybeSingle();
+      const { data: existingClient } = await query;
 
-  // Reset form
-  ['m-client','m-contact','m-amount','m-notes'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+      if (existingClient) {
+        clientId = existingClient.id;
+      } else {
+        /* Create new client */
+        const clientData = { name: client, created_at: new Date().toISOString() };
+        if (isEmail) clientData.email = contact;
+        else         clientData.phone = contact;
+        const { data: newClient } = await sb.from('clients').insert(clientData).select('id').single();
+        if (newClient) clientId = newClient.id;
+      }
+    }
+
+    /* Insert order to Supabase */
+    if (sb) {
+      const orderPayload = {
+        order_number:         orderNum,
+        client_id:            clientId,
+        title:                service,
+        service_type:         service,
+        department:           dept,
+        total_price:          amount,
+        advance_paid:         0,
+        due_amount:           amount,
+        status:               'pending',
+        payment_status:       'unpaid',
+        deadline:             deadline || null,
+        special_instructions: notes || null,
+        order_date:           new Date().toISOString(),
+        created_at:           new Date().toISOString(),
+      };
+      const { error: orderErr } = await sb.from('orders').insert(orderPayload);
+      if (orderErr) throw orderErr;
+    }
+
+    /* Local UI update (optimistic) */
+    const localOrder = {
+      id:       '#' + orderNum,
+      client,
+      avatar:   client.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2),
+      color:    '#6c63ff',
+      service,
+      dept,
+      status:   'pending',
+      amount,
+      deadline: deadline ? new Date(deadline).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '—',
+    };
+    orders.unshift(localOrder);
+    renderOrders(orders);
+
+    activities.unshift({
+      icon:  '📋',
+      color: 'rgba(108,99,255,0.15)',
+      title: `New order <b>#${orderNum}</b> created`,
+      sub:   `${client} — ${dept} ${service}`,
+      time:  'এখনই',
+    });
+    renderActivity();
+
+    closeModal();
+    showToast(`✅ Order #${orderNum} Supabase-এ save হয়েছে!`, '#34d399');
+
+    /* Reload real stats after 1s */
+    setTimeout(loadOrdersFromSupabase, 1200);
+
+  } catch(err) {
+    console.error('[Admin] Order create error:', err);
+    showToast('❌ Error: ' + (err.message || 'Unknown'), '#f87171');
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Create Order'; }
+    /* Reset form */
+    ['m-client','m-contact','m-amount','m-notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  }
 }
 
 /* ═══════════════════════════════════════════

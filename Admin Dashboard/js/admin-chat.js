@@ -61,8 +61,15 @@ async function init() {
     if (presenceChannel) presenceChannel.untrack();
   });
 
-  const wantedOrderId = new URLSearchParams(window.location.search).get('order');
-  if (wantedOrderId) openConv(wantedOrderId);
+  const params        = new URLSearchParams(window.location.search);
+  const wantedOrderId  = params.get('order');
+  const wantedClientId = params.get('client');
+
+  if (wantedOrderId) {
+    openConv(wantedOrderId);
+  } else if (wantedClientId) {
+    filterConvsByClient(wantedClientId);
+  }
 }
 
 function trackAdminPresence() {
@@ -160,6 +167,42 @@ function renderConvList(list) {
       </div>
     </div>`;
   }).join('');
+}
+
+/* ── Filter conversations by client (for ?client= navigation) ────────────── */
+async function filterConvsByClient(clientId) {
+  /* Wait for conversations to be loaded */
+  let attempts = 0;
+  while (conversations.length === 0 && attempts < 20) {
+    await new Promise(r => setTimeout(r, 150));
+    attempts++;
+  }
+
+  const clientConvs = conversations.filter(c => c.client_id === clientId);
+
+  if (clientConvs.length === 1) {
+    /* Exactly one order — open it directly */
+    openConv(clientConvs[0].id);
+    return;
+  }
+
+  if (clientConvs.length > 1) {
+    /* Multiple orders — highlight them in the conv list */
+    renderConvList(clientConvs);
+    return;
+  }
+
+  /* No conversations yet — show a helpful empty state */
+  const el = document.getElementById('convList');
+  el.innerHTML = `
+    <div class="conv-empty" style="padding:24px 16px;text-align:center;">
+      <div style="font-size:1.6rem;margin-bottom:10px;">💬</div>
+      <div style="font-size:.82rem;font-weight:600;margin-bottom:6px;">কোনো conversation নেই</div>
+      <div style="font-size:.75rem;color:var(--muted2);line-height:1.5;">
+        এই client এর এখনো কোনো order নেই।<br>
+        Order হলে এখানে conversation দেখা যাবে।
+      </div>
+    </div>`;
 }
 
 function previewText(m) {

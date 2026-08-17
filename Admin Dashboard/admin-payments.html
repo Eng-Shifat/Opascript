@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payments & Billing — Scriptora Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/admin.css"/>
+  <link rel="stylesheet" href="css/sidebar.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    /* ── Payments Page Styles ── */
+    .pay-page { padding: 22px 24px; }
+
+    /* Stats */
+    .pay-stats {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+      margin-bottom: 22px;
+    }
+    .pay-stat {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 20px;
+    }
+    .pay-stat-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; margin-bottom: 12px;
+    }
+    .pay-stat-label { font-size: .7rem; color: var(--muted2); text-transform: uppercase; letter-spacing: .06em; }
+    .pay-stat-val   { font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
+    .pay-stat-sub   { font-size: .72rem; color: var(--muted2); margin-top: 4px; }
+
+    /* Pending verifications */
+    .pay-section {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; margin-bottom: 18px;
+    }
+    .pay-section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .pay-section-title {
+      font-size: .9rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pay-count-badge {
+      background: rgba(245,158,11,.15); color: var(--yellow);
+      font-size: .68rem; padding: 2px 8px; border-radius: 20px; font-weight: 700;
+    }
+    .pay-count-badge.green { background: rgba(52,211,153,.12); color: var(--green); }
+    .pay-count-badge.red   { background: rgba(248,113,113,.12); color: var(--red); }
+
+    /* Payment item */
+    .pay-item {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 14px;
+      transition: background .15s;
+    }
+    .pay-item:last-child { border-bottom: none; }
+    .pay-item:hover { background: rgba(124,92,255,.04); }
+
+    .pay-item-avatar {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .78rem; font-weight: 700; flex-shrink: 0;
+    }
+    .pay-item-body { flex: 1; min-width: 0; }
+    .pay-item-top {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px;
+    }
+    .pay-item-client { font-size: .85rem; font-weight: 600; }
+    .pay-item-amount { font-size: 1rem; font-weight: 700; color: var(--green); }
+    .pay-item-meta   { font-size: .75rem; color: var(--muted2); margin-top: 4px; }
+    .pay-item-txn    { font-family: monospace; font-size: .72rem; color: var(--accent2); margin-top: 3px; }
+
+    .pay-item-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .pay-btn {
+      padding: 7px 14px; border-radius: 8px;
+      font-family: 'Sora', sans-serif; font-size: .75rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      transition: all .18s;
+    }
+    .pay-btn-approve {
+      background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.3);
+      color: var(--green);
+    }
+    .pay-btn-approve:hover { background: rgba(52,211,153,.22); }
+    .pay-btn-reject {
+      background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.25);
+      color: var(--red);
+    }
+    .pay-btn-reject:hover { background: rgba(248,113,113,.18); }
+    .pay-btn-view {
+      background: var(--card2); border: 1px solid var(--border);
+      color: var(--muted2);
+    }
+    .pay-btn-view:hover { border-color: rgba(124,92,255,.4); color: var(--accent2); }
+
+    .pay-proof-img {
+      width: 100%; max-width: 200px; border-radius: 8px;
+      border: 1px solid var(--border); margin-top: 8px; cursor: pointer;
+      transition: transform .18s;
+    }
+    .pay-proof-img:hover { transform: scale(1.03); }
+
+    /* History table */
+    .pay-table-wrap { overflow-x: auto; }
+    table.pay-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    table.pay-table thead th {
+      padding: 11px 16px; text-align: left;
+      font-size: .7rem; font-weight: 600; color: var(--muted2);
+      text-transform: uppercase; letter-spacing: .06em;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    table.pay-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    table.pay-table tbody tr:last-child { border-bottom: none; }
+    table.pay-table tbody tr:hover { background: rgba(124,92,255,.04); }
+    table.pay-table tbody td { padding: 12px 16px; font-size: .8rem; vertical-align: middle; }
+
+    .pay-status-pill {
+      display: inline-flex; padding: 3px 10px; border-radius: 20px;
+      font-size: .68rem; font-weight: 700;
+    }
+    .pay-status-pill.approved  { background: rgba(52,211,153,.12); color: var(--green); }
+    .pay-status-pill.pending   { background: rgba(245,158,11,.12); color: var(--yellow); }
+    .pay-status-pill.rejected  { background: rgba(248,113,113,.12); color: var(--red); }
+
+    .pay-method-tag {
+      background: rgba(124,92,255,.1); color: var(--accent2);
+      padding: 2px 8px; border-radius: 6px; font-size: .7rem; font-weight: 600;
+    }
+
+    /* Filters row */
+    .pay-filters {
+      display: flex; align-items: center; gap: 10px; padding: 14px 20px;
+      border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .pay-search-wrap {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 9px; padding: 7px 12px; flex: 1; max-width: 260px;
+    }
+    .pay-search-wrap:focus-within { border-color: rgba(124,92,255,.4); }
+    .pay-search-wrap i { color: var(--muted); }
+    .pay-search-wrap input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-family: 'Sora', sans-serif; font-size: .8rem; width: 100%;
+    }
+    .pay-filter-sel {
+      background: var(--card2); border: 1px solid var(--border);
+      color: var(--text); padding: 7px 12px; border-radius: 9px;
+      font-family: 'Sora', sans-serif; font-size: .78rem; outline: none; cursor: pointer;
+    }
+
+    /* Proof modal */
+    .proof-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.8);
+      z-index: 500; display: none; align-items: center; justify-content: center;
+      backdrop-filter: blur(6px);
+    }
+    .proof-modal.open { display: flex; }
+    .proof-modal img {
+      max-width: 90vw; max-height: 85vh; border-radius: 12px;
+      border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .proof-close {
+      position: fixed; top: 20px; right: 24px;
+      width: 40px; height: 40px; background: var(--card);
+      border: 1px solid var(--border); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.2rem; color: var(--muted2);
+      transition: all .18s; z-index: 501;
+    }
+    .proof-close:hover { border-color: var(--red); color: var(--red); }
+
+    .pay-empty {
+      text-align: center; padding: 48px 20px; color: var(--muted2);
+    }
+    .pay-empty i { font-size: 2rem; display: block; margin-bottom: 10px; opacity: .4; }
+    .pay-empty p { font-size: .82rem; }
+
+    @media (max-width: 768px) {
+      .pay-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<script src="js/supabaseClient.js"></script>
+<script src="js/topbar.js" data-title="Payments & Billing" data-sub="Payment verify করুন ও billing ইতিহাস দেখুন"></script>
+<script src="js/sidebar.js" data-page="payments"></script>
+
+<div class="main">
+  <div class="content pay-page">
+
+    <!-- Stats -->
+    <div class="pay-stats">
+      <div class="pay-stat">
+        <div class="pay-stat-icon" style="background:rgba(52,211,153,.12);color:var(--green)">
+          <i class="ti ti-currency-taka"></i>
+        </div>
+        <div class="pay-stat-label">Total Collected</div>
+        <div class="pay-stat-val" id="ps-collected">—</div>
+        <div class="pay-stat-sub">approved payments</div>
+      </div>
+      <div class="pay-stat">
+        <div class="pay-stat-icon" style="background:rgba(245,158,11,.12);color:var(--yellow)">
+          <i class="ti ti-clock"></i>
+        </div>
+        <div class="pay-stat-label">Pending Verification</div>
+        <div class="pay-stat-val" id="ps-pending">—</div>
+        <div class="pay-stat-sub" id="ps-pending-amt">verify বাকি</div>
+      </div>
+      <div class="pay-stat">
+        <div class="pay-stat-icon" style="background:rgba(248,113,113,.12);color:var(--red)">
+          <i class="ti ti-alert-circle"></i>
+        </div>
+        <div class="pay-stat-label">Amount Due</div>
+        <div class="pay-stat-val" id="ps-due">—</div>
+        <div class="pay-stat-sub">orders থেকে বকেয়া</div>
+      </div>
+      <div class="pay-stat">
+        <div class="pay-stat-icon" style="background:rgba(124,92,255,.12);color:var(--accent2)">
+          <i class="ti ti-receipt"></i>
+        </div>
+        <div class="pay-stat-label">Total Transactions</div>
+        <div class="pay-stat-val" id="ps-txn-count">—</div>
+        <div class="pay-stat-sub">সব payment মিলিয়ে</div>
+      </div>
+    </div>
+
+    <!-- Pending Verifications -->
+    <div class="pay-section" id="pending-section">
+      <div class="pay-section-head">
+        <div class="pay-section-title">
+          <i class="ti ti-clock" style="color:var(--yellow)"></i>
+          Pending Verification
+          <span class="pay-count-badge" id="pending-badge">0</span>
+        </div>
+        <span style="font-size:.75rem;color:var(--muted2)">Client payment proof জমা দিয়েছে</span>
+      </div>
+      <div id="pending-list">
+        <div style="padding:40px;text-align:center;color:var(--muted2)">
+          <i class="ti ti-loader-2" style="font-size:1.5rem;animation:spin 1s linear infinite"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="pay-section">
+      <div class="pay-section-head">
+        <div class="pay-section-title">
+          <i class="ti ti-history" style="color:var(--accent2)"></i>
+          Payment History
+          <span class="pay-count-badge green" id="history-badge">0</span>
+        </div>
+      </div>
+      <div class="pay-filters">
+        <div class="pay-search-wrap">
+          <i class="ti ti-search"></i>
+          <input type="text" id="pay-search" placeholder="Client, TXN ID...">
+        </div>
+        <select class="pay-filter-sel" id="pay-method-filter">
+          <option value="">সব Method</option>
+          <option value="bKash">bKash</option>
+          <option value="Nagad">Nagad</option>
+          <option value="Rocket">Rocket</option>
+          <option value="Bank">Bank Transfer</option>
+        </select>
+        <select class="pay-filter-sel" id="pay-status-filter">
+          <option value="">সব Status</option>
+          <option value="approved">Approved</option>
+          <option value="pending">Pending</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="pay-table-wrap">
+        <table class="pay-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Client</th>
+              <th>Order</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>TXN ID</th>
+              <th>Status</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted2)">
+              <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Proof Image Modal -->
+<div class="proof-modal" id="proofModal" onclick="closeProof()">
+  <div class="proof-close" onclick="closeProof()">×</div>
+  <img id="proofImg" src="" alt="Payment Proof">
+</div>
+
+<div id="toastContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+<style>@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }</style>
+
+<script>
+'use strict';
+
+let ALL_PAYMENTS = [];
+let ALL_ORDERS   = {};
+let ALL_CLIENTS  = {};
+let SEARCH_Q     = '';
+let METHOD_F     = '';
+let STATUS_F     = '';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('pay-search').addEventListener('input', e => { SEARCH_Q = e.target.value.toLowerCase(); renderHistory(); });
+  document.getElementById('pay-method-filter').addEventListener('change', e => { METHOD_F = e.target.value; renderHistory(); });
+  document.getElementById('pay-status-filter').addEventListener('change', e => { STATUS_F = e.target.value; renderHistory(); });
+  await loadAll();
+});
+
+async function loadAll() {
+  const sb = window.scriptoraSupabase;
+  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+
+  try {
+    /* Load payments */
+    const { data: payments, error: pErr } = await sb
+      .from('payments')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (pErr) throw pErr;
+    ALL_PAYMENTS = payments || [];
+
+    /* Load orders (for order numbers) */
+    const { data: orders } = await sb
+      .from('orders')
+      .select('id, order_number, title, client_id, due_amount');
+    (orders || []).forEach(o => { ALL_ORDERS[o.id] = o; });
+
+    /* Load clients */
+    const clientIds = [...new Set((orders||[]).map(o=>o.client_id).filter(Boolean))];
+    if (clientIds.length) {
+      const { data: clients } = await sb.from('clients').select('id, name, email').in('id', clientIds);
+      (clients||[]).forEach(c => { ALL_CLIENTS[c.id] = c; });
+    }
+
+    /* Stats */
+    const approved   = ALL_PAYMENTS.filter(p => p.confirmed || p.type === 'received');
+    const pending    = ALL_PAYMENTS.filter(p => !p.confirmed && p.type !== 'rejected' && p.screenshot_url);
+    const totalColl  = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
+    const pendingAmt = pending.reduce((s,p)  => s + (Number(p.amount)||0), 0);
+    const totalDue   = (orders||[]).reduce((s,o) => s + (Number(o.due_amount)||0), 0);
+
+    document.getElementById('ps-collected').textContent   = '৳' + totalColl.toLocaleString('en-IN');
+    document.getElementById('ps-pending').textContent     = pending.length;
+    document.getElementById('ps-pending-amt').textContent = '৳' + pendingAmt.toLocaleString('en-IN') + ' verify বাকি';
+    document.getElementById('ps-due').textContent         = '৳' + totalDue.toLocaleString('en-IN');
+    document.getElementById('ps-txn-count').textContent   = ALL_PAYMENTS.length;
+    document.getElementById('pending-badge').textContent  = pending.length;
+    document.getElementById('history-badge').textContent  = approved.length;
+
+    renderPending(pending);
+    renderHistory();
+
+  } catch(e) {
+    console.error('[Payments]', e);
+    showToast('Error loading: ' + e.message, '#f87171');
+  }
+}
+
+/* ── Pending Verification List ── */
+function renderPending(pending) {
+  const COLORS = ['#6c63ff','#34d399','#f59e0b','#a78bfa','#f87171'];
+  if (!pending.length) {
+    document.getElementById('pending-list').innerHTML = `
+      <div class="pay-empty">
+        <i class="ti ti-check-circle" style="color:var(--green)"></i>
+        <p>কোনো pending verification নেই — সব clear! 🎉</p>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('pending-list').innerHTML = pending.map((p, i) => {
+    const order  = ALL_ORDERS[p.order_id] || {};
+    const client = ALL_CLIENTS[order.client_id] || {};
+    const name   = client.name || client.email || 'Client';
+    const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const color  = COLORS[i % COLORS.length];
+    const date   = p.paid_at || p.created_at;
+    const dateStr = date ? new Date(date).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    const orderNum = order.order_number || (p.order_id || '').slice(0,8).toUpperCase();
+
+    return `<div class="pay-item" id="pay-item-${p.id}">
+      <div class="pay-item-avatar" style="background:${color}22;color:${color}">${initials}</div>
+      <div class="pay-item-body">
+        <div class="pay-item-top">
+          <div>
+            <div class="pay-item-client">${esc(name)}</div>
+            <div class="pay-item-meta">${esc(dateStr)} · Order: <span style="color:var(--accent2);font-family:monospace">${esc(orderNum)}</span> · ${esc(p.method||'—')}</div>
+            ${p.txn_id ? `<div class="pay-item-txn">TXN: ${esc(p.txn_id)}</div>` : ''}
+            ${p.client_note ? `<div class="pay-item-meta" style="font-style:italic;margin-top:4px">"${esc(p.client_note)}"</div>` : ''}
+          </div>
+          <div class="pay-item-amount">৳${Number(p.amount||0).toLocaleString('en-IN')}</div>
+        </div>
+        ${p.screenshot_url ? `<img class="pay-proof-img" src="${esc(p.screenshot_url)}" onclick="viewProof('${esc(p.screenshot_url)}')" alt="Payment Proof">` : ''}
+        <div class="pay-item-actions">
+          <button class="pay-btn pay-btn-approve" onclick="approvePayment('${p.id}','${p.order_id}',${Number(p.amount||0)})">
+            <i class="ti ti-check"></i> Approve করুন
+          </button>
+          <button class="pay-btn pay-btn-reject" onclick="rejectPayment('${p.id}')">
+            <i class="ti ti-x"></i> Reject
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Approve ── */
+async function approvePayment(payId, orderId, amount) {
+  if (!confirm('এই payment approve করবেন?')) return;
+  const sb = window.scriptoraSupabase;
+
+  try {
+    /* Mark payment confirmed */
+    const { error: e1 } = await sb.from('payments')
+      .update({ confirmed: true, type: 'received', note: 'Approved by Admin', updated_at: new Date().toISOString() })
+      .eq('id', payId);
+    if (e1) throw e1;
+
+    /* Update order advance_paid + payment_status */
+    const order = ALL_ORDERS[orderId] || {};
+    const { data: latestOrder } = await sb.from('orders').select('advance_paid, total_price').eq('id', orderId).single();
+    if (latestOrder) {
+      const newAdvance = (Number(latestOrder.advance_paid)||0) + amount;
+      const total      = Number(latestOrder.total_price)||0;
+      const newDue     = Math.max(0, total - newAdvance);
+      const newStatus  = newDue === 0 ? 'confirmed' : 'writing';
+      const payStatus  = newDue === 0 ? 'paid' : 'approved';
+
+      await sb.from('orders').update({
+        advance_paid:   newAdvance,
+        due_amount:     newDue,
+        payment_status: payStatus,
+        status:         newStatus,
+        updated_at:     new Date().toISOString(),
+      }).eq('id', orderId);
+    }
+
+    document.getElementById(`pay-item-${payId}`)?.remove();
+    showToast('✅ Payment approved!', '#34d399');
+    await loadAll();
+  } catch(e) {
+    showToast('Error: ' + e.message, '#f87171');
+  }
+}
+
+/* ── Reject ── */
+async function rejectPayment(payId) {
+  const reason = prompt('Reject এর কারণ (optional):') ?? null;
+  if (reason === null) return; /* cancelled */
+  const sb = window.scriptoraSupabase;
+  try {
+    await sb.from('payments').update({
+      confirmed: false, type: 'rejected',
+      note: reason || 'Rejected by Admin',
+      updated_at: new Date().toISOString(),
+    }).eq('id', payId);
+    document.getElementById(`pay-item-${payId}`)?.remove();
+    showToast('❌ Payment rejected', '#f87171');
+    await loadAll();
+  } catch(e) {
+    showToast('Error: ' + e.message, '#f87171');
+  }
+}
+
+/* ── History Table ── */
+function renderHistory() {
+  let data = ALL_PAYMENTS.filter(p => {
+    if (SEARCH_Q) {
+      const order  = ALL_ORDERS[p.order_id] || {};
+      const client = ALL_CLIENTS[order.client_id] || {};
+      const hay    = [(client.name||''), (client.email||''), (p.txn_id||''), (order.order_number||'')].join(' ').toLowerCase();
+      if (!hay.includes(SEARCH_Q)) return false;
+    }
+    if (METHOD_F && (p.method||'') !== METHOD_F) return false;
+    if (STATUS_F) {
+      const isApproved = p.confirmed || p.type === 'received';
+      const isRejected = p.type === 'rejected';
+      const isPending  = !isApproved && !isRejected && p.screenshot_url;
+      if (STATUS_F === 'approved' && !isApproved) return false;
+      if (STATUS_F === 'rejected' && !isRejected) return false;
+      if (STATUS_F === 'pending'  && !isPending)  return false;
+    }
+    return true;
+  });
+
+  if (!data.length) {
+    document.getElementById('history-tbody').innerHTML = `<tr><td colspan="8"><div class="pay-empty"><i class="ti ti-receipt-off"></i><p>কোনো payment record নেই</p></div></td></tr>`;
+    return;
+  }
+
+  document.getElementById('history-tbody').innerHTML = data.map(p => {
+    const order    = ALL_ORDERS[p.order_id] || {};
+    const client   = ALL_CLIENTS[order.client_id] || {};
+    const name     = client.name || client.email || '—';
+    const date     = p.paid_at || p.created_at;
+    const dateStr  = date ? new Date(date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    const orderNum = order.order_number || (p.order_id||'').slice(0,8).toUpperCase();
+    const isApproved = p.confirmed || p.type === 'received';
+    const isRejected = p.type === 'rejected';
+    const statusCls  = isApproved ? 'approved' : isRejected ? 'rejected' : 'pending';
+    const statusLbl  = isApproved ? 'Approved'  : isRejected ? 'Rejected'  : 'Pending';
+
+    return `<tr>
+      <td style="color:var(--muted2)">${dateStr}</td>
+      <td>${esc(name)}</td>
+      <td style="font-family:monospace;font-size:.75rem;color:var(--accent2)">${esc(orderNum)}</td>
+      <td style="font-weight:700;color:${isApproved?'var(--green)':isRejected?'var(--red)':'var(--yellow)'}">
+        ৳${Number(p.amount||0).toLocaleString('en-IN')}
+      </td>
+      <td><span class="pay-method-tag">${esc(p.method||'—')}</span></td>
+      <td style="font-family:monospace;font-size:.72rem;color:var(--muted2)">${esc(p.txn_id||'—')}</td>
+      <td><span class="pay-status-pill ${statusCls}">${statusLbl}</span></td>
+      <td style="font-size:.75rem;color:var(--muted2)">${esc(p.note||'—')}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Proof Image ── */
+function viewProof(url) {
+  document.getElementById('proofImg').src = url;
+  document.getElementById('proofModal').classList.add('open');
+}
+function closeProof() {
+  document.getElementById('proofModal').classList.remove('open');
+}
+
+/* ── Helpers ── */
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function showToast(msg, color='#34d399') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.style.cssText = `background:${color};color:#fff;padding:12px 18px;border-radius:10px;font-size:.82rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.3);`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>
