@@ -148,20 +148,61 @@ window._buildShell = function(order) {
 window._buildOverviewHTML = function(order, statusClass) {
     const d = order.detail || {};
     statusClass = statusClass || order.statusClass || 's-pending';
-    const statusPctMap = { 'pending':5, 's-pending':5, 'writing':40, 's-inprogress':40, 'draft_ready':80, 'in_review':85, 's-review':80, 'completed':100, 's-completed':100, 'overdue':40, 's-overdue':40, 'hold':20 };
+    const statusPctMap = { 'pending':5, 's-pending':5, 'writing':40, 's-inprogress':40, 'draft_ready':75, 'in_review':85, 's-review':80, 'revision':50, 'completed':100, 's-completed':100, 'overdue':40, 's-overdue':40, 'hold':20 };
     const pct = d.overall || order.progressPct || statusPctMap[order.statusClass] || statusPctMap[order.status] || 0;
     const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
     const pfClass  = pct >= 80 ? 'pf-green'    : pct >= 40 ? 'pf-yellow'     : 'pf-red';
     const pageCount = window._getPageCount(order);
 
-    /* Milestone steps */
+    /* Milestone steps — dynamically derived from order status */
+    const _rawDB2 = order._rawDB || {};
+    const _dbStatus = _rawDB2.status || order.status || '';
+    const _dbPayStatus = _rawDB2.payment_status || order.paymentStatus || '';
+    const _isPayConfirmed = _dbPayStatus === 'confirmed' || _dbPayStatus === 'paid' || _dbPayStatus === 'approved'
+      || (order.detail && order.detail.financials && order.detail.financials.paid > 0);
+    const _statusOrderMap = {
+      'pending': 1, 'writing': 2, 'draft_ready': 3, 'in_review': 3,
+      'completed': 5, 'overdue': 2, 'hold': 1,
+    };
+    const _statusIdx = _statusOrderMap[_dbStatus] || _statusOrderMap[order.status] || 0;
+
+    function _msState(requiredIdx) {
+      if (_statusIdx > requiredIdx) return 'done';
+      if (_statusIdx === requiredIdx) return 'active';
+      return 'pending';
+    }
+
     const milestones = d.milestones || [
-      { name:'Order Placed',       state:'pending' },
-      { name:'Payment Confirmed',  state:'pending' },
-      { name:'Topic Approved',     state:'pending' },
-      { name:'Writing in Progress',state:'pending' },
-      { name:'Review Phase',       state:'pending' },
-      { name:'Final Delivery',     state:'pending' },
+      {
+        name: 'Order Placed',
+        state: 'done',
+        date: _rawDB2.created_at ? new Date(_rawDB2.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : (order.date || ''),
+      },
+      {
+        name: 'Payment Confirmed',
+        state: _isPayConfirmed ? 'done' : (_statusIdx >= 1 ? 'active' : 'pending'),
+        date: _isPayConfirmed ? '' : 'Pending',
+      },
+      {
+        name: 'Work Started',
+        state: _statusIdx >= 2 ? (_statusIdx > 2 ? 'done' : 'active') : 'pending',
+        date: _statusIdx >= 2 ? (_rawDB2.updated_at ? new Date(_rawDB2.updated_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '') : 'Pending',
+      },
+      {
+        name: 'Draft Ready',
+        state: _statusIdx >= 3 ? (_statusIdx > 3 ? 'done' : 'active') : 'pending',
+        date: _statusIdx >= 3 ? '' : 'Pending',
+      },
+      {
+        name: 'Review',
+        state: _dbStatus === 'in_review' ? 'active' : (_dbStatus === 'revision' ? 'done' : (_statusIdx > 3 ? 'done' : 'pending')),
+        date: (_dbStatus === 'in_review' || _dbStatus === 'revision') ? 'Client Reviewed' : 'Pending',
+      },
+      {
+        name: 'Delivered',
+        state: _statusIdx >= 5 ? 'done' : 'pending',
+        date: _statusIdx >= 5 ? '' : 'Pending',
+      },
     ];
 
     const msHTML = milestones.map((ms, i) => {
@@ -293,10 +334,11 @@ window._buildOverviewHTML = function(order, statusClass) {
               <select class="odp-qa-select" id="odpStatusSelect" onchange="odpUpdateStatus(this.value)">
                 <option value="" disabled selected>Update Order Status</option>
                 <option value="writing"     ${order.statusClass==='s-inprogress'?'selected':''}>🔵 In Progress</option>
+                <option value="draft_ready" ${order.status==='draft_ready'?'selected':''}>📦 Delivered (Waiting Review)</option>
+                <option value="in_review"   ${order.status==='in_review'?'selected':''}>🔶 Revision Requested</option>
+                <option value="revision"    ${order.status==='revision'?'selected':''}>✏️ Revision in Progress</option>
                 <option value="completed"   ${order.statusClass==='s-completed' ?'selected':''}>🟢 Completed</option>
                 <option value="pending"     ${order.statusClass==='s-pending'   ?'selected':''}>🟡 Pending</option>
-                <option value="draft_ready" ${order.statusClass==='s-review'&&order.status==='draft_ready'?'selected':''}>🔷 Delivered</option>
-                <option value="in_review"   ${order.status==='in_review'?'selected':''}>🔶 Client Review</option>
                 <option value="overdue"     ${order.statusClass==='s-overdue'   ?'selected':''}>🔴 Overdue</option>
                 <option value="hold">⚫ On Hold</option>
               </select>

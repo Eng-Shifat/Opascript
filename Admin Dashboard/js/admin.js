@@ -700,7 +700,7 @@ async function loadAdminMessages() {
       orderId: oid,
       name:    client.name || client.email || 'Client',
       title:   o.title || o.service_type || 'Order',
-      preview: grouped[oid].latest.text,
+      preview: (grouped[oid].latest.text || '').replace(/^\[REVIEW_REQUEST\]\s*/i, '📋 Review: '),
       time:    grouped[oid].latest.sent_at,
       count:   grouped[oid].count,
     };

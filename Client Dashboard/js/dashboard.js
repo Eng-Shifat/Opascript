@@ -37,7 +37,7 @@ const STATUS_STEP_MAP = {
   /* Step 3 — Writing চলছে */
   'writing':2, 'in_progress':2, 'overdue':2,
   /* Step 4 — File in Review */
-  'in_review':3, 'draft_ready':3, 'draft_sent':3, 's-review':3,
+  'in_review':3, 'draft_ready':3, 'draft_sent':3, 's-review':3, 'revision':2,
   /* Step 5 — Delivery */
   'delivered':4,
   /* Step 6 — Completed */
@@ -193,7 +193,7 @@ function otIsOverdue(order) {
 function otMatchesTab(order, tab) {
   switch (tab) {
     case 'in_progress': return ['confirmed','payment_done','writing'].includes(order.status);
-    case 'in_review':   return ['draft_sent','revision'].includes(order.status);
+    case 'in_review':   return ['draft_sent','in_review','revision'].includes(order.status);
     case 'completed':   return order.status === 'completed';
     case 'pending':     return order.status === 'pending';
     case 'overdue':     return otIsOverdue(order);
@@ -1254,7 +1254,7 @@ const STATUS_LABELS_CLIENT = {
   'writing':     'In Progress — লেখা চলছে',
   'completed':   'Completed — সম্পন্ন হয়েছে ✓',
   'pending':     'Pending — অপেক্ষায় আছে',
-  'draft_ready': 'In Review — রিভিউ চলছে',
+  'draft_ready': 'Waiting for Review — ফাইল দেখুন এবং সিদ্ধান্ত নিন',
   'overdue':     'Overdue — সময় পার হয়ে গেছে',
   'hold':        'On Hold — বিরতিতে আছে',
 };
@@ -1724,7 +1724,7 @@ function tickLiveCountdowns() {
   });
 }
 setInterval(tickLiveCountdowns, 1000);
-function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'Delivery আসছে'},'in_review':{cls:'badge-revision',label:'Review চলছে'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
+function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'Waiting for Review'},'in_review':{cls:'badge-revision',label:'Revision Requested'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision চলছে'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
 /* ═══════════════════════════════════════════
    PAYMENT PROOF SUBMIT — Client Side

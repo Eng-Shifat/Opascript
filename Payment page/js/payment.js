@@ -181,6 +181,7 @@ async function loadDuePaymentMode(orderId) {
 
     _dueOrderData = { total, paid, due, title: ord.title, dept: ord.department, client_id: ord.client_id };
     _dueAmount = due;
+    _alreadyPaid = paid;
 
     setText('sumTitle', ord.title || 'Thesis Order');
     setText('sumSub', (ord.department || '') + (ord.university ? ' · ' + ord.university : ''));
@@ -434,6 +435,7 @@ async function submitPayment() {
 
 // ── Global order total ───────────────────────────────────────────────────────
 let _orderTotal = 0;
+let _alreadyPaid = 0;  // due mode এ আগে যা paid হয়েছে
 
 // ── Live amount input handler ────────────────────────────────────────────────
 function onAmountInput(input) {
@@ -455,7 +457,13 @@ function updateAmountUI(amount, total) {
   }
 
   if (noticeEl) noticeEl.style.display = 'flex';
-  const remaining = Math.max(0, total - (amount || 0));
+
+  // Due mode: remaining = total - already_paid - এখন দিচ্ছে
+  // New mode: remaining = total - amount (amount = advance being paid now)
+  const totalPaidAfterThis = _payMode === 'due'
+    ? _alreadyPaid + (amount || 0)
+    : (amount || 0);
+  const remaining = Math.max(0, total - totalPaidAfterThis);
 
   const totalEl   = document.getElementById('remainingTotal');
   const payingEl  = document.getElementById('remainingPaying');
@@ -463,7 +471,7 @@ function updateAmountUI(amount, total) {
 
   // ── Calculate percentage ──
   const pct = amount > 0 ? Math.round((amount / total) * 100) : 0;
-  const remainingPct = Math.max(0, 100 - pct);
+  const remainingPct = Math.max(0, Math.round((remaining / total) * 100));
 
   if (totalEl)  totalEl.textContent  = '৳' + total.toLocaleString();
   if (payingEl) {
@@ -487,26 +495,42 @@ function updateAmountUI(amount, total) {
   const splitNow        = document.getElementById('splitNow');
   const splitLater      = document.getElementById('splitLater');
 
-  if (splitNowLabel && amount > 0) {
-    splitNowLabel.innerHTML = 'এখন (' + pct + '% Advance)';
-  }
-  if (splitLaterLabel && remaining >= 0) {
-    splitLaterLabel.innerHTML = 'Delivery এর পরে <span class="split-unlock-hint">🔒 File unlock</span>';
-  }
-  if (splitNow && amount > 0) {
-    splitNow.textContent = '৳' + amount.toLocaleString();
-  }
-  if (splitLater) {
-    splitLater.textContent = remaining > 0
+  if (_payMode === 'due') {
+    // Due mode: split shows total paid (including this) vs still remaining
+    if (splitNowLabel) splitNowLabel.innerHTML = 'এখন পর্যন্ত পরিশোধ (এই payment সহ)';
+    if (splitLaterLabel) splitLaterLabel.innerHTML = 'বাকি <span class="split-unlock-hint">🔒 File unlock</span>';
+    if (splitNow) splitNow.textContent = amount > 0
+      ? '৳' + totalPaidAfterThis.toLocaleString()
+      : '৳' + _alreadyPaid.toLocaleString();
+    if (splitLater) splitLater.textContent = remaining > 0
       ? '৳' + remaining.toLocaleString()
       : '✅ Paid';
+  } else {
+    if (splitNowLabel && amount > 0) {
+      splitNowLabel.innerHTML = 'এখন (' + pct + '% Advance)';
+    }
+    if (splitLaterLabel && remaining >= 0) {
+      splitLaterLabel.innerHTML = 'Delivery এর পরে <span class="split-unlock-hint">🔒 File unlock</span>';
+    }
+    if (splitNow && amount > 0) {
+      splitNow.textContent = '৳' + amount.toLocaleString();
+    }
+    if (splitLater) {
+      splitLater.textContent = remaining > 0
+        ? '৳' + remaining.toLocaleString()
+        : '✅ Paid';
+    }
   }
 
-  // ── Below 50% soft warning ──
+  // ── Below 50% soft warning (new order only) ──
   if (warnEl) {
-    const half = Math.round(total / 2);
-    const show = amount > 0 && amount < half;
-    warnEl.style.display = show ? 'flex' : 'none';
+    if (_payMode === 'due') {
+      warnEl.style.display = 'none';
+    } else {
+      const half = Math.round(total / 2);
+      const show = amount > 0 && amount < half;
+      warnEl.style.display = show ? 'flex' : 'none';
+    }
   }
 }
 

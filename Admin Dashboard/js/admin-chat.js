@@ -211,7 +211,8 @@ function previewText(m) {
   if (m.message_type === 'image')              return '📷 Photo';
   if (m.message_type === 'payment_screenshot')  return '💳 Payment Screenshot';
   if (m.message_type === 'file')                return '📄 File';
-  return m.message || '';
+  const raw = m.message || '';
+  return raw.replace(/^\[REVIEW_REQUEST\]\s*/i, '📋 Review: ');
 }
 
 /* ── Open a conversation ───────────────────────────────────────────────── */
@@ -408,7 +409,8 @@ function buildBubble(msg, clientInitials = 'C') {
     bubbleHtml = `<div class="msg-bubble msg-file-bubble">${replyQuoteHtml}<a href="${msg.file_url}" target="_blank" rel="noopener" class="msg-file-link"><span class="msg-file-icon">📄</span><span class="msg-file-name">${escH(msg.file_name || 'File')}</span><span class="msg-file-download">⬇</span></a></div>`;
   } else {
     const cls = msg.is_pinned ? 'msg-bubble msg-notice-bubble' : 'msg-bubble';
-    bubbleHtml = `<div class="${cls}">${replyQuoteHtml}${escH(msg.message || '')}</div>`;
+    const msgText = (msg.message || '').replace(/^\[REVIEW_REQUEST\]\s*/i, '📋 Review Request: ');
+    bubbleHtml = `<div class="${cls}">${replyQuoteHtml}${escH(msgText)}</div>`;
   }
 
   wrap.innerHTML = bubbleHtml;

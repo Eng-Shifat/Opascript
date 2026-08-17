@@ -464,6 +464,7 @@ function initStatusUpdate() {
         'pending':     { status: 'Pending',        statusClass: 's-pending',    rowClass: '' },
         'writing':     { status: 'In Progress',    statusClass: 's-inprogress', rowClass: '' },
         'draft_ready': { status: 'Delivered',      statusClass: 's-review',     rowClass: '' },
+        'revision':    { status: 'Revision',       statusClass: 's-revision',   rowClass: '' },
         'in_review':   { status: 'Client Review',  statusClass: 's-review',     rowClass: '' },
         'completed':   { status: 'Completed',      statusClass: 's-completed',  rowClass: 'row-completed' },
         'overdue':     { status: 'OVERDUE',        statusClass: 's-overdue',    rowClass: 'row-overdue' },

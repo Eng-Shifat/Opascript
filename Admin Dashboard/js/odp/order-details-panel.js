@@ -279,6 +279,9 @@ window._loadFullOrderData = async function() {
     window._subscribePaymentsRealtime();
     window._loadClientOrderCount();
 
+    /* Re-render Overview sidebar (ORDER PROGRESS + QUICK ACTIONS) now that _rawDB and financials are loaded */
+    _refreshOverviewSidebar();
+
   } catch(e) { console.error('loadFullOrderData:', e); }
 };
 
@@ -296,6 +299,112 @@ window.closeOrderDetailsPanel = function() {
   window._currentOrder   = null;
   window._fileMetaCache  = {};
 };
+
+/* ── Re-render only the right sidebar (ORDER PROGRESS + QUICK ACTIONS) ── */
+function _refreshOverviewSidebar() {
+  const sidebar = document.querySelector('.odp-ov-sidebar');
+  if (!sidebar || !window._currentOrder || !window._buildOverviewHTML) return;
+  const order = window._currentOrder;
+  const statusClass = order.statusClass || 's-pending';
+
+  /* Build a temp container to extract only the sidebar html */
+  const tmp = document.createElement('div');
+  // _buildOverviewHTML returns the full 2-col grid; we need to rebuild sidebar only
+  // Build milestones inline here to keep it self-contained
+  const _rawDB2 = order._rawDB || {};
+  const _dbStatus = _rawDB2.status || order.status || '';
+  const _dbPayStatus = _rawDB2.payment_status || order.paymentStatus || '';
+  const _isPayConfirmed = _dbPayStatus === 'confirmed' || _dbPayStatus === 'paid' || _dbPayStatus === 'approved'
+    || (order.detail && order.detail.financials && order.detail.financials.paid > 0);
+  const _statusOrderMap = { 'pending':1, 'writing':2, 'draft_ready':3, 'in_review':4, 'revision':2, 'completed':5, 'overdue':2, 'hold':1 };
+  const _statusIdx = _statusOrderMap[_dbStatus] || 0;
+
+  const milestones = [
+    { name:'Order Placed', state:'done', date: _rawDB2.created_at ? new Date(_rawDB2.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '' },
+    { name:'Payment Confirmed', state: _isPayConfirmed ? 'done' : (_statusIdx >= 1 ? 'active' : 'pending'), date: _isPayConfirmed ? '' : 'Pending' },
+    { name:'Work Started', state: _statusIdx >= 2 ? (_statusIdx > 2 ? 'done' : 'active') : 'pending', date: _statusIdx >= 2 ? (_rawDB2.updated_at ? new Date(_rawDB2.updated_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '') : 'Pending' },
+    { name:'Draft Ready', state: _statusIdx >= 3 ? (_statusIdx > 3 ? 'done' : 'active') : 'pending', date: _statusIdx >= 3 ? '' : 'Pending' },
+    { name:'Review', state: _dbStatus === 'in_review' ? 'active' : (_dbStatus === 'revision' ? 'done' : (_statusIdx > 3 ? 'done' : 'pending')), date: (_dbStatus === 'in_review' || _dbStatus === 'revision') ? 'Client Reviewed' : 'Pending' },
+    { name:'Delivered', state: _statusIdx >= 5 ? 'done' : 'pending', date: _statusIdx >= 5 ? '' : 'Pending' },
+  ];
+
+  const pct = order.detail && order.detail.financials
+    ? order.detail.financials.paidPct
+    : ({ 'pending':5, 's-pending':5, 'writing':40, 's-inprogress':40, 'draft_ready':80, 'in_review':85, 's-review':80, 'completed':100, 's-completed':100 }[statusClass] || 0);
+  const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
+  const pfClass  = pct >= 80 ? 'pf-green' : pct >= 40 ? 'pf-yellow' : 'pf-red';
+
+  function _escSb(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  const stepsHTML = milestones.map((ms, i) => {
+    const isDone   = ms.state === 'done';
+    const isActive = ms.state === 'active';
+    const dotCls   = isDone ? 'done' : isActive ? 'active' : '';
+    const icon     = isDone ? '<i class="ti ti-check"></i>' : isActive ? '<div class="odp-vt-pulse"></div>' : '';
+    return `<div class="odp-vt-step">
+      <div class="odp-vt-dot-wrap">
+        <div class="odp-vt-dot ${dotCls}">${icon}</div>
+        ${i < milestones.length - 1 ? `<div class="odp-vt-line ${isDone ? 'done' : isActive ? 'active' : ''}"></div>` : ''}
+      </div>
+      <div class="odp-vt-body">
+        <div class="odp-vt-name ${dotCls}">${_escSb(ms.name)}</div>
+        <div class="odp-vt-date">${_escSb(ms.date || 'Pending')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const phaseLabel = statusClass === 's-inprogress' ? 'In Progress' : statusClass === 's-review' ? 'Review Phase' : statusClass === 's-completed' ? 'Completed' : 'Pending';
+
+  /* current selected value */
+  const curStatus = _dbStatus || order.status || '';
+  const sc = order.statusClass || 's-pending';
+
+  sidebar.innerHTML = `
+    <!-- Order Progress — vertical timeline -->
+    <div class="odp-card odp-progress-card odp-vt-card">
+      <div class="odp-card-title"><i class="ti ti-chart-bar"></i> Order Progress</div>
+      <div class="odp-vt-steps">${stepsHTML}</div>
+      <div class="odp-prog-label-row" style="margin-top:16px">
+        <span>Overall Progress</span>
+        <span style="color:${pctColor};font-weight:800">${pct}%</span>
+      </div>
+      <div class="odp-progress-track" style="margin:6px 0 4px">
+        <div class="odp-progress-fill ${pfClass}" style="width:${pct}%"></div>
+      </div>
+      <div class="odp-prog-phase-pill">
+        <span class="odp-prog-dot ${pfClass}"></span>
+        ${phaseLabel}
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="odp-card odp-qa-card">
+      <div class="odp-card-title"><i class="ti ti-bolt"></i> Quick Actions</div>
+      <div class="odp-qa-list">
+        <div class="odp-qa-select-wrap">
+          <i class="ti ti-edit"></i>
+          <select class="odp-qa-select" id="odpStatusSelect" onchange="odpUpdateStatus(this.value)">
+            <option value="" disabled ${!curStatus?'selected':''}>Update Order Status</option>
+            <option value="writing"     ${curStatus==='writing'    ?'selected':''}>🔵 In Progress</option>
+            <option value="draft_ready" ${curStatus==='draft_ready'?'selected':''}>📦 Delivered (Waiting Review)</option>
+            <option value="in_review"   ${curStatus==='in_review'  ?'selected':''}>🔶 Revision Requested</option>
+            <option value="revision"    ${curStatus==='revision'   ?'selected':''}>✏️ Revision in Progress</option>
+            <option value="completed"   ${curStatus==='completed'  ?'selected':''}>🟢 Completed</option>
+            <option value="pending"     ${curStatus==='pending'    ?'selected':''}>🟡 Pending</option>
+            <option value="overdue"     ${curStatus==='overdue'    ?'selected':''}>🔴 Overdue</option>
+            <option value="hold"        ${curStatus==='hold'       ?'selected':''}>⚫ On Hold</option>
+          </select>
+        </div>
+        <button class="odp-qa-btn odp-qa-danger" onclick="odpMarkCompleted()">
+          <i class="ti ti-circle-check"></i> Mark as Completed
+        </button>
+      </div>
+    </div>
+    <!-- Client review request banner -->
+    <div id="odpClientReviewWrap"></div>
+  `;
+}
+
 
 /* ══════════════════════════════════════════════════════════════════
    TAB SWITCHING

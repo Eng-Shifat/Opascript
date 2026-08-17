@@ -15,6 +15,7 @@
     'in_review':   'Client Review',
     'overdue':     'Overdue',
     'hold':        'On Hold',
+    'revision':    'Revision in Progress',
   };
 
   const STATUS_EMOJI = {
@@ -25,6 +26,7 @@
     'in_review':   '🔶',
     'overdue':     '🔴',
     'hold':        '⚫',
+    'revision':    '✏️',
   };
 
   window.odpMarkCompleted = function() {
@@ -47,7 +49,7 @@
     /* Mock order — শুধু UI update, DB skip */
     if (!window._isRealUUID(window._currentOrderId)) {
       const label = STATUS_LABELS[val] || val;
-      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
+      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
       document.querySelectorAll('.odp-status-pill').forEach(pill => {
         pill.className = 'odp-status-pill ' + cls;
         pill.textContent = label;
@@ -79,7 +81,7 @@
       if (orderErr) throw orderErr;
 
       /* 2. Update ALL status pills in the panel immediately */
-      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', in_review:'s-review', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
+      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', in_review:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
       document.querySelectorAll('.odp-status-pill').forEach(pill => {
         pill.className = 'odp-status-pill ' + cls;
         pill.textContent = STATUS_LABELS[val] || val;
@@ -121,6 +123,14 @@
       }
 
       window._toast(`✓ Status → "${label}" · Client কে notification পাঠানো হয়েছে`, 'var(--green)');
+
+      /* Refresh ORDER PROGRESS sidebar immediately */
+      if (window._currentOrder) {
+        window._currentOrder.status = val;
+        window._currentOrder.statusClass = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', in_review:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
+        if (window._currentOrder._rawDB) window._currentOrder._rawDB.status = val;
+      }
+      if (typeof _refreshOverviewSidebar === 'function') _refreshOverviewSidebar();
 
     } catch(e) {
       console.error('Status update error:', e);
