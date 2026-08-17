@@ -148,7 +148,7 @@ window._buildShell = function(order) {
 window._buildOverviewHTML = function(order, statusClass) {
     const d = order.detail || {};
     statusClass = statusClass || order.statusClass || 's-pending';
-    const statusPctMap = { 'pending':5, 's-pending':5, 'writing':40, 's-inprogress':40, 'draft_ready':75, 's-review':75, 'completed':100, 's-completed':100, 'overdue':40, 's-overdue':40, 'hold':20 };
+    const statusPctMap = { 'pending':5, 's-pending':5, 'writing':40, 's-inprogress':40, 'draft_ready':80, 'in_review':85, 's-review':80, 'completed':100, 's-completed':100, 'overdue':40, 's-overdue':40, 'hold':20 };
     const pct = d.overall || order.progressPct || statusPctMap[order.statusClass] || statusPctMap[order.status] || 0;
     const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
     const pfClass  = pct >= 80 ? 'pf-green'    : pct >= 40 ? 'pf-yellow'     : 'pf-red';
@@ -295,7 +295,8 @@ window._buildOverviewHTML = function(order, statusClass) {
                 <option value="writing"     ${order.statusClass==='s-inprogress'?'selected':''}>🔵 In Progress</option>
                 <option value="completed"   ${order.statusClass==='s-completed' ?'selected':''}>🟢 Completed</option>
                 <option value="pending"     ${order.statusClass==='s-pending'   ?'selected':''}>🟡 Pending</option>
-                <option value="draft_ready" ${order.statusClass==='s-review'    ?'selected':''}>🔷 Draft Ready</option>
+                <option value="draft_ready" ${order.statusClass==='s-review'&&order.status==='draft_ready'?'selected':''}>🔷 Delivered</option>
+                <option value="in_review"   ${order.status==='in_review'?'selected':''}>🔶 Client Review</option>
                 <option value="overdue"     ${order.statusClass==='s-overdue'   ?'selected':''}>🔴 Overdue</option>
                 <option value="hold">⚫ On Hold</option>
               </select>
@@ -305,6 +306,8 @@ window._buildOverviewHTML = function(order, statusClass) {
             </button>
           </div>
         </div>
+        <!-- Client review request banner — filled by _loadClientReviewRequest() -->
+        <div id="odpClientReviewWrap"></div>
 
       </div><!-- /odp-ov-sidebar -->
 

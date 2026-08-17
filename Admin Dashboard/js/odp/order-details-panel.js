@@ -259,14 +259,22 @@ window._loadFullOrderData = async function() {
     }
 
     /* Status sync */
-    const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' };
-    const lblMap = { writing:'In Progress', completed:'Completed', pending:'Pending', draft_ready:'In Review', overdue:'Overdue', hold:'On Hold' };
+    const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', in_review:'s-review', overdue:'s-overdue', hold:'s-pending' };
+    const lblMap = { writing:'In Progress', completed:'Completed', pending:'Pending', draft_ready:'Delivered', in_review:'Client Review', overdue:'Overdue', hold:'On Hold' };
     document.querySelectorAll('.odp-status-pill').forEach(pill => {
       pill.className   = 'odp-status-pill ' + (clsMap[ord.status] || 's-pending');
       pill.textContent = lblMap[ord.status] || ord.status;
     });
     const statusSel = document.getElementById('odpStatusSelect');
     if (statusSel && ord.status) statusSel.value = ord.status;
+
+    /* Sync current order status from DB */
+    if (window._currentOrder) window._currentOrder.status = ord.status;
+
+    /* Show client review request banner if in_review */
+    if (typeof window._loadClientReviewRequest === 'function') {
+      window._loadClientReviewRequest();
+    }
 
     window._subscribePaymentsRealtime();
     window._loadClientOrderCount();

@@ -110,6 +110,11 @@
   font-size: 0.85rem;
 }
 
+/* Orders where admin hasn't messaged yet */
+.conv-item.conv-no-msg { opacity: 0.75; border-left: 3px solid transparent; }
+.conv-item.conv-no-msg:hover { opacity: 1; }
+.conv-preview-muted { color: #4b5563 !important; font-style: italic; }
+
 /* ── Right: Chat area ──────────────────────────────────────────────────── */
 .chat-area {
   flex: 1;
@@ -415,6 +420,41 @@
   .chat-area.mobile-open { display: flex; }
   .back-mobile-btn { display: flex; }
   .admin-chat-layout { position: relative; }
+
+  /* Order summary bar — scroll horizontally on mobile */
+  .admin-chat-order-summary {
+    overflow-x: auto; flex-wrap: nowrap; gap: 0;
+    padding: 8px 12px; -webkit-overflow-scrolling: touch;
+  }
+  .acos-cell { min-width: 80px; padding: 6px 10px; }
+  .acos-label { font-size: .58rem; }
+  .acos-val { font-size: .75rem; }
+  .acos-divider { display: none; }
+
+  /* Chat head */
+  .chat-head { padding: 10px 12px; gap: 8px; }
+  .chat-client-name { font-size: .85rem; }
+  .chat-order-meta { font-size: .7rem; }
+  .chat-head-actions { gap: 6px; }
+
+  /* Bubbles */
+  .msg-bubble { max-width: 82vw !important; font-size: .82rem; }
+  .msg-img { max-height: 180px; }
+
+  /* Input row */
+  .chat-input-row { padding: 8px 10px; gap: 6px; }
+  .chat-input { font-size: .82rem; }
+  .chat-attach-btn, .chat-pin-btn { width: 34px; height: 34px; }
+  .chat-send-btn { width: 34px; height: 34px; }
+
+  /* Conv list items */
+  .conv-item { padding: 11px 12px; }
+  .conv-name { font-size: .82rem; }
+  .conv-order-title { font-size: .7rem; }
+  .conv-preview { font-size: .72rem; }
+  .conv-header { padding: 12px 14px; }
+  .conv-header h2 { font-size: .9rem; }
+  .conv-search { font-size: .8rem; }
 }
 
 /* ═══════════════════════════════════════════════════════════

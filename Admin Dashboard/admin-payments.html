@@ -186,8 +186,40 @@
     .pay-empty p { font-size: .82rem; }
 
     @media (max-width: 768px) {
-      .pay-stats { grid-template-columns: repeat(2, 1fr); }
+      .pay-page { padding: 14px 12px; }
+      .pay-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+      .pay-stat { padding: 14px 14px; border-radius: 12px; }
+      .pay-stat-val { font-size: 1.2rem; }
+      .pay-stat-icon { width: 32px; height: 32px; margin-bottom: 8px; }
+
+      .pay-section-head { padding: 12px 14px; flex-direction: column; align-items: flex-start; gap: 4px; }
+      .pay-item { padding: 12px 14px; flex-direction: column; gap: 10px; }
+      .pay-item-avatar { display: none; }
+      .pay-item-top { flex-direction: column; align-items: flex-start; gap: 4px; }
+      .pay-item-amount { font-size: .9rem; }
+      .pay-item-actions { flex-wrap: wrap; }
+      .pay-btn { padding: 6px 12px; font-size: .72rem; }
+      .pay-proof-img { max-width: 100%; }
+
+      .pay-filters { padding: 10px 12px; gap: 8px; }
+      .pay-search-wrap { max-width: 100%; }
+      .pay-filter-sel { flex: 1; min-width: 0; font-size: .73rem; padding: 6px 10px; }
+
+      /* Mobile card layout instead of table */
+      .pay-table-wrap { overflow-x: unset; }
+      table.pay-table { display: none; }
+      #history-cards { display: block; }
     }
+    #history-cards { display: none; }
+    .pay-history-card {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .pay-history-card:last-child { border-bottom: none; }
+    .phc-top { display: flex; justify-content: space-between; align-items: center; }
+    .phc-name { font-size: .85rem; font-weight: 600; }
+    .phc-amount { font-size: .9rem; font-weight: 700; }
+    .phc-meta { font-size: .73rem; color: var(--muted2); display: flex; gap: 8px; flex-wrap: wrap; }
   </style>
 </head>
 <body>
@@ -300,6 +332,7 @@
             </td></tr>
           </tbody>
         </table>
+        <div id="history-cards"></div>
       </div>
     </div>
 
@@ -342,14 +375,14 @@ async function loadAll() {
     const { data: payments, error: pErr } = await sb
       .from('payments')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('id', { ascending: false });
     if (pErr) throw pErr;
     ALL_PAYMENTS = payments || [];
 
     /* Load orders (for order numbers) */
     const { data: orders } = await sb
       .from('orders')
-      .select('id, order_number, title, client_id, due_amount');
+      .select('id, order_number, title, client_id, due_amount, advance_paid, total_price');
     (orders || []).forEach(o => { ALL_ORDERS[o.id] = o; });
 
     /* Load clients */
@@ -364,7 +397,12 @@ async function loadAll() {
     const pending    = ALL_PAYMENTS.filter(p => !p.confirmed && p.type !== 'rejected' && p.screenshot_url);
     const totalColl  = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
     const pendingAmt = pending.reduce((s,p)  => s + (Number(p.amount)||0), 0);
-    const totalDue   = (orders||[]).reduce((s,o) => s + (Number(o.due_amount)||0), 0);
+    const totalDue   = (orders||[]).reduce((s,o) => {
+      /* শুধু সেই orders যেগুলোতে কিছু payment হয়েছে কিন্তু বাকি আছে */
+      const paid = Number(o.advance_paid||0);
+      const due  = Number(o.due_amount||0);
+      return s + (paid > 0 && due > 0 ? due : 0);
+    }, 0);
 
     document.getElementById('ps-collected').textContent   = '৳' + totalColl.toLocaleString('en-IN');
     document.getElementById('ps-pending').textContent     = pending.length;
@@ -512,8 +550,36 @@ function renderHistory() {
 
   if (!data.length) {
     document.getElementById('history-tbody').innerHTML = `<tr><td colspan="8"><div class="pay-empty"><i class="ti ti-receipt-off"></i><p>কোনো payment record নেই</p></div></td></tr>`;
+    document.getElementById('history-cards').innerHTML = `<div class="pay-empty"><i class="ti ti-receipt-off"></i><p>কোনো payment record নেই</p></div>`;
     return;
   }
+
+  /* Mobile cards */
+  document.getElementById('history-cards').innerHTML = data.map(p => {
+    const order    = ALL_ORDERS[p.order_id] || {};
+    const client   = ALL_CLIENTS[order.client_id] || {};
+    const name     = client.name || client.email || '—';
+    const date     = p.paid_at || p.created_at;
+    const dateStr  = date ? new Date(date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    const orderNum = order.order_number || (p.order_id||'').slice(0,8).toUpperCase();
+    const isApproved = p.confirmed || p.type === 'received';
+    const isRejected = p.type === 'rejected';
+    const statusCls  = isApproved ? 'approved' : isRejected ? 'rejected' : 'pending';
+    const statusLbl  = isApproved ? 'Approved'  : isRejected ? 'Rejected'  : 'Pending';
+    return `<div class="pay-history-card">
+      <div class="phc-top">
+        <span class="phc-name">${esc(name)}</span>
+        <span class="phc-amount" style="color:${isApproved?'var(--green)':isRejected?'var(--red)':'var(--yellow)'}">৳${Number(p.amount||0).toLocaleString('en-IN')}</span>
+      </div>
+      <div class="phc-meta">
+        <span>${dateStr}</span>·
+        <span style="color:var(--accent2);font-family:monospace">${esc(orderNum)}</span>·
+        <span class="pay-method-tag">${esc(p.method||'—')}</span>·
+        <span class="pay-status-pill ${statusCls}">${statusLbl}</span>
+      </div>
+      ${p.txn_id ? `<div style="font-family:monospace;font-size:.7rem;color:var(--muted2)">TXN: ${esc(p.txn_id)}</div>` : ''}
+    </div>`;
+  }).join('');
 
   document.getElementById('history-tbody').innerHTML = data.map(p => {
     const order    = ALL_ORDERS[p.order_id] || {};

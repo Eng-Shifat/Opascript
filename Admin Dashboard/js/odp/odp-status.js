@@ -11,7 +11,8 @@
     'writing':     'In Progress',
     'completed':   'Completed',
     'pending':     'Pending',
-    'draft_ready': 'In Review',
+    'draft_ready': 'Delivered',
+    'in_review':   'Client Review',
     'overdue':     'Overdue',
     'hold':        'On Hold',
   };
@@ -21,6 +22,7 @@
     'completed':   '🟢',
     'pending':     '🟡',
     'draft_ready': '🔷',
+    'in_review':   '🔶',
     'overdue':     '🔴',
     'hold':        '⚫',
   };
@@ -77,7 +79,7 @@
       if (orderErr) throw orderErr;
 
       /* 2. Update ALL status pills in the panel immediately */
-      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
+      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', in_review:'s-review', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
       document.querySelectorAll('.odp-status-pill').forEach(pill => {
         pill.className = 'odp-status-pill ' + cls;
         pill.textContent = STATUS_LABELS[val] || val;
@@ -165,6 +167,61 @@
     }
     window._toast('✓ Order confirmed and activated!', 'var(--green)');
     window._logActivity('confirm', 'Order confirmed by admin');
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     CLIENT REVIEW REQUEST BANNER
+     in_review status এ client এর message দেখায়
+  ══════════════════════════════════════════════════════════ */
+  window._loadClientReviewRequest = async function() {
+    const wrap = document.getElementById('odpClientReviewWrap');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+
+    if (!window._currentOrder || window._currentOrder.status !== 'in_review') return;
+    if (!window._sb() || !window._isRealUUID(window._currentOrderId)) return;
+
+    try {
+      const { data } = await window._sb()
+        .from('messages')
+        .select('text, sent_at')
+        .eq('order_id', window._currentOrderId)
+        .eq('from_admin', false)
+        .ilike('text', '🔄 Review Request:%')
+        .order('sent_at', { ascending: false })
+        .limit(1);
+
+      const reviewText = data && data.length
+        ? (data[0].text || '').replace('🔄 Review Request:\n\n', '')
+        : '(Client কোনো বিবরণ দেননি)';
+
+      wrap.innerHTML = `
+        <div style="
+          background:linear-gradient(135deg,rgba(251,191,36,0.1) 0%,rgba(217,119,6,0.07) 100%);
+          border:1px solid rgba(251,191,36,0.35);border-radius:12px;
+          padding:16px 18px;margin-top:10px;
+        ">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:18px;">🔶</span>
+            <span style="font-size:13px;font-weight:700;color:#fbbf24;">Client Review Request</span>
+          </div>
+          <div style="font-size:12px;color:#e2e8f0;background:rgba(0,0,0,0.2);border-radius:8px;padding:10px 12px;line-height:1.7;white-space:pre-wrap;">${window._esc ? window._esc(reviewText) : reviewText}</div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="window.odpUpdateStatus('draft_ready')" style="
+              width:100%;padding:9px 14px;border-radius:8px;border:none;cursor:pointer;
+              background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;
+              font-size:12px;font-weight:700;
+            ">📦 সমাধান করে আবার Deliver করুন</button>
+            <button onclick="window.odpUpdateStatus('writing')" style="
+              width:100%;padding:9px 14px;border-radius:8px;border:1px solid rgba(99,102,241,0.3);cursor:pointer;
+              background:transparent;color:#94a3b8;font-size:12px;font-weight:600;
+            ">🔵 Writing এ ফিরিয়ে নিন</button>
+          </div>
+        </div>
+      `;
+    } catch(e) {
+      console.warn('[ReviewBanner]', e);
+    }
   };
 
   /* ══════════════════════════════════════════════════════════

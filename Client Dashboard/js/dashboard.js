@@ -626,6 +626,7 @@ async function openOrderDetail(orderId) {
   await loadOrderFiles(orderId, hasDue);
   await loadLatestAdminMsg(orderId);
   await checkAndShowProofSection(order);
+  await renderDeliveryReviewBanner(order);
 }
 
 document.getElementById('backToOrders').onclick=()=>{
@@ -751,6 +752,174 @@ function renderStepper(status, paymentStatus, livePaid) {
     stepper.appendChild(div);
   });
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DELIVERY REVIEW BANNER — draft_ready status এ দেখায়
+   Client: "সব ঠিক" → completed | "সমস্যা আছে" → in_review
+═══════════════════════════════════════════════════════════════ */
+async function renderDeliveryReviewBanner(order) {
+  const wrap = document.getElementById('deliveryReviewBannerWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  if (order.status !== 'draft_ready') return;
+
+  wrap.innerHTML = `
+    <div style="
+      background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%);
+      border: 1px solid rgba(99,102,241,0.35);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-top: 16px;
+    ">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="font-size:22px;">📦</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#e2e8f0;">Delivery পাঠানো হয়েছে!</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:2px;">ফাইলগুলো দেখুন এবং আপনার সিদ্ধান্ত জানান।</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+        <button id="drBtnOk" style="
+          flex:1;min-width:140px;padding:10px 16px;border-radius:10px;border:none;cursor:pointer;
+          background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:13px;font-weight:700;
+          display:flex;align-items:center;justify-content:center;gap:7px;
+        ">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          সব ঠিক আছে, Complete করুন
+        </button>
+        <button id="drBtnProblem" style="
+          flex:1;min-width:140px;padding:10px 16px;border-radius:10px;border:1px solid rgba(251,191,36,0.4);cursor:pointer;
+          background:rgba(251,191,36,0.1);color:#fbbf24;font-size:13px;font-weight:700;
+          display:flex;align-items:center;justify-content:center;gap:7px;
+        ">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          সমস্যা আছে, Review চাই
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('drBtnOk').onclick = () => confirmMarkComplete(order.id);
+  document.getElementById('drBtnProblem').onclick = () => openReviewRequestModal(order.id);
+}
+
+function confirmMarkComplete(orderId) {
+  const modal = document.createElement('div');
+  modal.id = 'drConfirmModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#1e293b;border:1px solid rgba(99,102,241,0.3);border-radius:18px;padding:28px 24px;max-width:380px;width:100%;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">🎉</div>
+      <div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:8px;">Order Complete করবেন?</div>
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:22px;line-height:1.6;">
+        Confirm করলে এই order <strong style="color:#4ade80;">Completed</strong> হিসেবে চিহ্নিত হবে এবং admin-কে জানানো হবে।
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button id="drConfirmCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:#94a3b8;font-size:13px;cursor:pointer;">বাতিল</button>
+        <button id="drConfirmOk" style="flex:1;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">✓ হ্যাঁ, Complete করুন</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('#drConfirmCancel').onclick = () => modal.remove();
+  modal.querySelector('#drConfirmOk').onclick = async () => {
+    modal.remove();
+    await markOrderComplete(orderId);
+  };
+}
+
+function openReviewRequestModal(orderId) {
+  const modal = document.createElement('div');
+  modal.id = 'drReviewModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#1e293b;border:1px solid rgba(251,191,36,0.25);border-radius:18px;padding:28px 24px;max-width:420px;width:100%;">
+      <div style="font-size:15px;font-weight:700;color:#e2e8f0;margin-bottom:6px;">⚠️ Review Request</div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:16px;line-height:1.6;">কী সমস্যা আছে সেটা লিখুন। Admin দেখে সমাধান করবেন।</div>
+      <textarea id="drReviewText" placeholder="সমস্যার বিবরণ লিখুন..." style="
+        width:100%;min-height:110px;padding:12px;border-radius:10px;
+        background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+        color:#e2e8f0;font-size:13px;resize:vertical;box-sizing:border-box;font-family:inherit;
+      "></textarea>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button id="drReviewCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:#94a3b8;font-size:13px;cursor:pointer;">বাতিল</button>
+        <button id="drReviewSubmit" style="flex:1;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Review পাঠান</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('#drReviewCancel').onclick = () => modal.remove();
+  modal.querySelector('#drReviewSubmit').onclick = async () => {
+    const text = modal.querySelector('#drReviewText').value.trim();
+    if (!text) { showToast('সমস্যার বিবরণ লিখুন', 'error'); return; }
+    modal.remove();
+    await submitReviewRequest(orderId, text);
+  };
+}
+
+async function markOrderComplete(orderId) {
+  try {
+    const { error } = await sb.from('orders').update({
+      status: 'completed',
+      updated_at: new Date().toISOString()
+    }).eq('id', orderId);
+    if (error) throw error;
+
+    /* Notify admin via messages */
+    await sb.from('messages').insert({
+      order_id:   orderId,
+      text:       '✅ Client order টি Completed হিসেবে confirm করেছেন।',
+      from_admin: false,
+      read:       false,
+      sent_at:    new Date().toISOString(),
+    });
+
+    showToast('✅ Order Completed হয়েছে! ধন্যবাদ।', 'success');
+
+    /* Update local order object and re-render */
+    const o = allOrders.find(x => String(x.id) === String(orderId));
+    if (o) o.status = 'completed';
+    const wrap = document.getElementById('deliveryReviewBannerWrap');
+    if (wrap) wrap.innerHTML = '';
+    await openOrderDetail(orderId);
+  } catch (e) {
+    console.error('markOrderComplete error:', e);
+    showToast('Complete করা যায়নি। আবার চেষ্টা করুন।', 'error');
+  }
+}
+
+async function submitReviewRequest(orderId, reviewText) {
+  try {
+    const { error } = await sb.from('orders').update({
+      status:     'in_review',
+      updated_at: new Date().toISOString()
+    }).eq('id', orderId);
+    if (error) throw error;
+
+    /* Send review message to admin */
+    await sb.from('messages').insert({
+      order_id:   orderId,
+      text:       `🔄 Review Request:\n\n${reviewText}`,
+      from_admin: false,
+      read:       false,
+      sent_at:    new Date().toISOString(),
+    });
+
+    showToast('⚠️ Review request পাঠানো হয়েছে। Admin দেখবেন।', '');
+
+    /* Update local and re-render */
+    const o = allOrders.find(x => String(x.id) === String(orderId));
+    if (o) o.status = 'in_review';
+    const wrap = document.getElementById('deliveryReviewBannerWrap');
+    if (wrap) wrap.innerHTML = '';
+    await openOrderDetail(orderId);
+  } catch (e) {
+    console.error('submitReviewRequest error:', e);
+    showToast('Request পাঠানো যায়নি। আবার চেষ্টা করুন।', 'error');
+  }
+}
+/* ═══════════════════════════════════════════════════════════════ */
 
 async function loadOrderFiles(orderId, hasDue) {
   const list = document.getElementById('filesList');
@@ -960,23 +1129,27 @@ async function loadFilesPage() {
 }
 
 async function loadPaymentsPage() {
-  const {data:payments}=await sb.from('payments').select('*').eq('client_id',currentUser.id).order('id',{ascending:false});
+  const {data:payments}=await sb.from('payments').select('*, orders(title,order_number)').eq('client_id',currentUser.id).order('id',{ascending:false});
   const container=document.getElementById('paymentsList');
   const empty=document.getElementById('paymentsEmpty');
   if(!payments||payments.length===0){empty.style.display='flex';return;}
   empty.style.display='none'; container.innerHTML='';
   payments.forEach(pay=>{
-    const cls=pay.confirmed?'confirmed':'pending';
-    const lbl=pay.confirmed?'✓ Confirmed':'⏳ Pending';
+    const isApproved = pay.confirmed || pay.type === 'received';
+    const isRejected = pay.type === 'rejected';
+    const cls = isApproved ? 'confirmed' : isRejected ? 'rejected' : 'pending';
+    const lbl = isApproved ? '✓ Confirmed' : isRejected ? '✗ Rejected' : '⏳ Pending';
+    const orderTitle = pay.orders?.title || (pay.orders?.order_number ? '#'+pay.orders.order_number : 'Order');
     const item=document.createElement('div'); item.className='payment-item';
     item.innerHTML=`
       <div class="pi-left">
-        <div class="pi-order">${escHtml(pay.orders?.title||'Order')}</div>
-        <div class="pi-method">${escHtml(pay.method||'')}${pay.txn_id?` · TXN: ${escHtml(pay.txn_id)}`:''}</div>
-        <div class="pi-txn">${fmtDateLong(pay.created_at)}</div>
+        <div class="pi-order">${escHtml(orderTitle)}</div>
+        <div class="pi-method">${escHtml(pay.method||'—')}${pay.txn_id?` · TXN: ${escHtml(pay.txn_id)}`:''}</div>
+        <div class="pi-txn">${fmtDateLong(pay.paid_at||pay.created_at||'')}</div>
       </div>
       <div class="pi-right">
-        <div><div class="pi-amount">৳${fmt(pay.amount)}</div><div><span class="pay-badge ${cls}">${lbl}</span></div></div>
+        <div class="pi-amount">৳${fmt(pay.amount)}</div>
+        <span class="pay-badge ${cls}">${lbl}</span>
       </div>`;
     container.appendChild(item);
   });
@@ -1552,7 +1725,7 @@ function tickLiveCountdowns() {
   });
 }
 setInterval(tickLiveCountdowns, 1000);
-function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'In Review'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
+function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'Delivery আসছে'},'in_review':{cls:'badge-revision',label:'Review চলছে'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
 /* ═══════════════════════════════════════════
    PAYMENT PROOF SUBMIT — Client Side

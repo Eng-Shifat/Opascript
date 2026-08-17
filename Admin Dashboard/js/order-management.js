@@ -461,11 +461,12 @@ function initStatusUpdate() {
 
       // Map select value → statusClass and status text (matches HTML option values)
       const statusMap = {
-        'pending':     { status: 'Pending',     statusClass: 's-pending',    rowClass: '' },
-        'writing':     { status: 'In Progress', statusClass: 's-inprogress', rowClass: '' },
-        'draft_ready': { status: 'In Review',   statusClass: 's-review',     rowClass: '' },
-        'completed':   { status: 'Completed',   statusClass: 's-completed',  rowClass: 'row-completed' },
-        'overdue':     { status: 'OVERDUE',     statusClass: 's-overdue',    rowClass: 'row-overdue' },
+        'pending':     { status: 'Pending',        statusClass: 's-pending',    rowClass: '' },
+        'writing':     { status: 'In Progress',    statusClass: 's-inprogress', rowClass: '' },
+        'draft_ready': { status: 'Delivered',      statusClass: 's-review',     rowClass: '' },
+        'in_review':   { status: 'Client Review',  statusClass: 's-review',     rowClass: '' },
+        'completed':   { status: 'Completed',      statusClass: 's-completed',  rowClass: 'row-completed' },
+        'overdue':     { status: 'OVERDUE',        statusClass: 's-overdue',    rowClass: 'row-overdue' },
       };
 
       const mapped = statusMap[newStatus];
@@ -988,13 +989,14 @@ function buildOrderMilestones(o) {
 function mapSupabaseOrderToLocal(o) {
   /* status mapping */
   const statusMap = {
-    'pending':    { label: 'Pending',     cls: 's-pending',    row: '' },
-    'confirmed':  { label: 'Confirmed',   cls: 's-inprogress', row: '' },
-    'writing':    { label: 'In Progress', cls: 's-inprogress', row: '' },
-    'draft_ready':{ label: 'In Review',   cls: 's-review',     row: '' },
-    'completed':  { label: 'Completed',   cls: 's-completed',  row: '' },
-    'overdue':    { label: 'Overdue',     cls: 's-overdue',    row: 'row-overdue' },
-    'hold':       { label: 'On Hold',     cls: 's-pending',    row: '' },
+    'pending':    { label: 'Pending',       cls: 's-pending',    row: '' },
+    'confirmed':  { label: 'Confirmed',     cls: 's-inprogress', row: '' },
+    'writing':    { label: 'In Progress',   cls: 's-inprogress', row: '' },
+    'draft_ready':{ label: 'Delivered',     cls: 's-review',     row: '' },
+    'in_review':  { label: 'Client Review', cls: 's-review',     row: 'row-review' },
+    'completed':  { label: 'Completed',     cls: 's-completed',  row: '' },
+    'overdue':    { label: 'Overdue',       cls: 's-overdue',    row: 'row-overdue' },
+    'hold':       { label: 'On Hold',       cls: 's-pending',    row: '' },
   };
   const s = statusMap[o.status] || { label: o.status || 'Pending', cls: 's-pending', row: '' };
 
