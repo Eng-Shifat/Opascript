@@ -1099,6 +1099,49 @@
                 </div>
               </div>
             </div><!-- /cd-inner#cdActiveTimer -->
+
+            <!-- ✅ Completed state — shown when order.status === 'completed' -->
+            <div class="cd-completed" id="cdCompleted" style="display:none">
+              <div class="cd-completed-inner">
+                <div class="cd-completed-left">
+                  <div class="cd-completed-icon">
+                    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                  </div>
+                  <div class="cd-completed-text">
+                    <div class="cd-completed-title">Order Completed!</div>
+                    <div class="cd-completed-sub">সব কাজ সফলভাবে ডেলিভার করা হয়েছে। ধন্যবাদ আমাদের সাথে থাকার জন্য।</div>
+                    <div class="cd-completed-deadline">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      Delivered on: <strong id="cdCompletedDate">—</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="cd-completed-right">
+                  <div class="cd-completed-badge">✓ Completed</div>
+                  <div class="cd-rating-block" id="cdRatingBlock">
+                    <div class="cd-rating-label">আপনার অভিজ্ঞতা কেমন ছিল?</div>
+                    <div class="cd-stars" id="cdStars" role="group" aria-label="Star rating">
+                      <button class="cd-star" data-val="1" aria-label="1 star" type="button">★</button>
+                      <button class="cd-star" data-val="2" aria-label="2 stars" type="button">★</button>
+                      <button class="cd-star" data-val="3" aria-label="3 stars" type="button">★</button>
+                      <button class="cd-star" data-val="4" aria-label="4 stars" type="button">★</button>
+                      <button class="cd-star" data-val="5" aria-label="5 stars" type="button">★</button>
+                    </div>
+                    <div class="cd-rating-saved" id="cdRatingSaved" style="display:none">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      রেটিং দেওয়া হয়েছে
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- Progress Stepper -->

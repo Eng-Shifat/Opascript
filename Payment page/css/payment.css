@@ -850,3 +850,10 @@ body {
 [data-theme="light"] .hw-row .sum-label { color: rgba(99,102,241,0.6) !important; }
 
 [data-theme="light"] .detail-head { color: #1e1b4b !important; }
+
+/* ══ Instruction section — spacing কমানো ══ */
+.method-detail { padding: 10px 12px !important; }
+.step-list     { gap: 6px !important; }
+.step-item     { gap: 8px !important; padding: 0 !important; font-size: 12.5px !important; line-height: 1.4 !important; }
+.step-num      { width: 19px !important; height: 19px !important; font-size: 10px !important; }
+.method-detail > .section-head { margin-bottom: 8px !important; font-size: 12.5px !important; }

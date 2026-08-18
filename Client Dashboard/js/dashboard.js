@@ -537,7 +537,13 @@ async function openOrderDetail(orderId) {
   renderStepper(order.status, order.payment_status, livePaid);
 
   /* ── Start countdown with full payment context ── */
-  startCountdown(order.deadline, order.payment_status, livePaid, hasPendingPaymentRequest);
+  startCountdown(order.deadline, order.payment_status, livePaid, hasPendingPaymentRequest, order.status);
+
+  /* ⭐ Star rating init — completed orders এ */
+  if (order.status === 'completed') {
+    // DOM render হওয়ার পরে init করো
+    setTimeout(() => initStarRating(order.id, order.rating || null), 50);
+  }
 
   setText('detailAdvance',`৳${fmt(livePaid)}`);
   setText('detailDue',`৳${fmt(liveDue)}`);
@@ -644,15 +650,30 @@ if (cdViewBtn) cdViewBtn.onclick = () => {
   document.getElementById('orderDetailView').scrollIntoView({behavior:'smooth'});
 };
 
-function startCountdown(deadlineStr, paymentStatus, livePaid, hasPendingRequest) {
+function startCountdown(deadlineStr, paymentStatus, livePaid, hasPendingRequest, orderStatus) {
   clearInterval(countdownTimer);
 
-  const pendingEl  = document.getElementById('cdPaymentPending');
-  const activeEl   = document.getElementById('cdActiveTimer');
-  const titleEl    = document.getElementById('cdppTitle');
-  const subEl      = document.getElementById('cdppSub');
-  const iconEl     = document.getElementById('cdppIcon');
-  const payLinkEl  = document.getElementById('cdppPayLink');
+  const pendingEl   = document.getElementById('cdPaymentPending');
+  const activeEl    = document.getElementById('cdActiveTimer');
+  const completedEl = document.getElementById('cdCompleted');
+  const titleEl     = document.getElementById('cdppTitle');
+  const subEl       = document.getElementById('cdppSub');
+  const iconEl      = document.getElementById('cdppIcon');
+  const payLinkEl   = document.getElementById('cdppPayLink');
+
+  // ✅ Order completed — countdown সরিয়ে completed card দেখাও
+  if (orderStatus === 'completed') {
+    if (pendingEl)   pendingEl.style.display   = 'none';
+    if (activeEl)    activeEl.style.display    = 'none';
+    if (completedEl) {
+      completedEl.style.display = 'block';
+      const dateEl = document.getElementById('cdCompletedDate');
+      if (dateEl && deadlineStr) dateEl.textContent = fmtDateLong(deadlineStr);
+    }
+    return;
+  }
+
+  if (completedEl) completedEl.style.display = 'none';
 
   const isApproved = paymentStatus === 'approved'
     || paymentStatus === 'paid'
@@ -741,11 +762,14 @@ function renderStepper(status, paymentStatus, livePaid) {
   STEPS.forEach((step,i)=>{
     const isDone=i<currentStep, isActive=i===currentStep;
     const cls=isDone?'done':isActive?'active':'pending';
-    const icon=isDone
-      ?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`
-      :isActive
-        ?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`
-        :`${i+1}`;
+    const checkSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+    /* Completed step (last step) active হলে edit icon না দিয়ে ✓ দেখাও */
+    const isLastStep = i === STEPS.length - 1;
+    const icon = isDone
+      ? checkSvg
+      : isActive
+        ? (isLastStep ? checkSvg : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`)
+        : `${i+1}`;
     const div=document.createElement('div');
     div.className=`step ${cls}`;
     div.innerHTML=`<div class="step-circle ${cls}">${icon}</div><div class="step-label ${cls}">${step.label.replace('\n',' ')}</div>`;
@@ -2339,3 +2363,49 @@ window.closePaymentDuePopup = function() {
     input.focus();
   });
 })();
+
+
+/* ══════════════════════════════════════════
+   ⭐ Star Rating — Completed orders
+   Supabase orders table এ 'rating' column দরকার (int2, nullable)
+══════════════════════════════════════════ */
+function initStarRating(orderId, existingRating) {
+  const stars   = document.querySelectorAll('#cdStars .cd-star');
+  const savedEl = document.getElementById('cdRatingSaved');
+  if (!stars.length) return;
+
+  function highlight(val) {
+    stars.forEach(s => {
+      const sv = parseInt(s.dataset.val);
+      s.classList.toggle('filled',  sv <= val);
+      s.classList.toggle('unfilled', sv > val);
+    });
+  }
+
+  // existing rating load করো
+  if (existingRating) {
+    highlight(existingRating);
+    stars.forEach(s => s.disabled = true);
+    if (savedEl) savedEl.style.display = 'flex';
+    return;
+  }
+
+  // hover effects
+  stars.forEach(s => {
+    s.addEventListener('mouseenter', () => highlight(parseInt(s.dataset.val)));
+    s.addEventListener('mouseleave', () => highlight(0));
+    s.addEventListener('click', async () => {
+      const val = parseInt(s.dataset.val);
+      highlight(val);
+      stars.forEach(st => st.disabled = true);
+      if (savedEl) savedEl.style.display = 'flex';
+      // Supabase save
+      const sb = window.scriptoraSupabase;
+      if (sb && orderId) {
+        const { error } = await sb.from('orders').update({ rating: val }).eq('id', orderId);
+        if (error) console.warn('[Rating] save error:', error.message);
+      }
+    });
+  });
+  highlight(0);
+}

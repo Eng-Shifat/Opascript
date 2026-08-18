@@ -806,7 +806,7 @@ input, select, textarea { font-family: inherit; }
   padding: 7px 14px;
   border-radius: var(--radius);
   font-size: 12px;
-  margin-bottom: 0px;
+  margin-bottom: 12px;
   transition: all .15s;
 }
 .back-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
@@ -3288,6 +3288,15 @@ input, select, textarea { font-family: inherit; }
 .step.done:not(:last-child)::after { background: var(--green) !important; }
 .step.active:not(:last-child)::after { background: linear-gradient(90deg, var(--accent) 50%, #1a2438 50%) !important; }
 
+/* Last step (Completed) active → green, not blue */
+.step:last-child .step-circle.active {
+  background: var(--green) !important;
+  box-shadow: 0 0 0 3px rgba(0,200,100,0.22) !important;
+}
+.step:last-child .step-label.active {
+  color: var(--green) !important;
+}
+
 /* Fix gap between page header and order detail */
 #orderDetailView { margin-top: -8px; }
 
@@ -3484,4 +3493,376 @@ input, select, textarea { font-family: inherit; }
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════
+   ✅ Countdown Card — Completed State
+══════════════════════════════════════════ */
+.cd-completed {
+  padding: 0;
+}
+.cd-completed-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: linear-gradient(135deg, rgba(52,211,153,0.08) 0%, rgba(16,185,129,0.04) 100%);
+  border: 1px solid rgba(52,211,153,0.25);
+  border-radius: 16px;
+  padding: 28px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.cd-completed-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 0% 50%, rgba(52,211,153,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Left side */
+.cd-completed-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  flex: 1;
+}
+.cd-completed-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(52,211,153,0.15);
+  border: 2px solid rgba(52,211,153,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #34d399;
+  flex-shrink: 0;
+  animation: cd-pop-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes cd-pop-in {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.cd-completed-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cd-completed-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #34d399;
+  letter-spacing: -.3px;
+}
+.cd-completed-sub {
+  font-size: .78rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.5;
+  max-width: 320px;
+}
+.cd-completed-deadline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+  color: rgba(255,255,255,0.4);
+  margin-top: 4px;
+}
+.cd-completed-deadline svg { flex-shrink: 0; opacity: .6; }
+.cd-completed-deadline strong { color: rgba(255,255,255,0.65); }
+
+/* Right side */
+.cd-completed-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.cd-completed-badge {
+  background: rgba(52,211,153,0.15);
+  color: #34d399;
+  border: 1px solid rgba(52,211,153,0.3);
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+.cd-completed-stars {
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+}
+.cd-completed-review {
+  font-size: .7rem;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .cd-completed-inner {
+    flex-direction: column;
+    padding: 20px 18px;
+    gap: 16px;
+  }
+  .cd-completed-right { flex-direction: row; align-items: center; gap: 12px; }
+  .cd-completed-sub { max-width: 100%; }
+}
+
+/* ══════════════════════════════════════════
+   ⭐ Star Rating Widget
+══════════════════════════════════════════ */
+.cd-rating-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.cd-rating-label {
+  font-size: .68rem;
+  color: rgba(255,255,255,0.38);
+  text-align: center;
+  white-space: nowrap;
+}
+.cd-stars {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.cd-star {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: rgba(255,255,255,0.15);
+  transition: color .12s, transform .1s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.cd-star:not(:disabled):hover,
+.cd-star.filled {
+  color: #fbbf24;
+}
+.cd-star:not(:disabled):active { transform: scale(1.2); }
+.cd-star:disabled { cursor: default; }
+.cd-star.unfilled { color: rgba(255,255,255,0.12); }
+
+.cd-rating-saved {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .68rem;
+  color: #34d399;
+  font-weight: 600;
+}
+.cd-rating-saved svg { flex-shrink: 0; }
+
+/* Mobile: star size বাড়াও — আঙুলে সহজে tap হবে */
+@media (max-width: 600px) {
+  .cd-star { font-size: 2rem; padding: 6px 3px; }
+  .cd-completed-right {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .cd-rating-block { align-items: flex-start; }
+}
+
+/* ══════════════════════════════════════════
+   📱 MOBILE FIX — Countdown & Payment Card
+   max-width: 640px
+══════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* countdown card padding কমাও */
+  .countdown-card {
+    padding: 14px 14px 12px !important;
+  }
+
+  /* Active timer — stack vertically */
+  .cd-inner:not([style*="display:none"]):not([style*="display: none"]) {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .cd-left  { flex: unset !important; width: 100% !important; }
+  .cd-right { flex: unset !important; width: 100% !important;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 12px;
+    justify-content: center !important;
+    gap: 12px !important;
+  }
+  .cd-hourglass img { width: 80px !important; height: 80px !important; }
+  .cd-days-big { font-size: 15px !important; }
+  .cd-blocks { gap: 6px !important; }
+  .cd-block  { min-width: 44px !important; padding: 7px 8px !important; }
+  .cd-num    { font-size: 20px !important; }
+
+  /* Payment pending card — stack deadline + button vertically */
+  .cd-payment-pending {
+    padding: 16px 14px !important;
+  }
+  .cdpp-top {
+    gap: 12px;
+  }
+  .cdpp-icon {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .cdpp-title { font-size: 13px !important; }
+  .cdpp-sub   { font-size: 11px !important; }
+
+  .cdpp-bottom {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .cdpp-pay-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Completed card — stack on mobile */
+  .cd-completed-inner {
+    flex-direction: column !important;
+    padding: 16px 14px !important;
+    gap: 14px !important;
+  }
+  .cd-completed-left  { gap: 12px; }
+  .cd-completed-icon  { width: 50px !important; height: 50px !important; }
+  .cd-completed-title { font-size: 1rem !important; }
+  .cd-completed-sub   { font-size: .74rem !important; max-width: 100% !important; }
+  .cd-completed-right {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .cd-star { font-size: 1.8rem !important; padding: 5px 2px !important; }
+}
+
+/* ══════════════════════════════════════════════════════
+   📱 FINAL RESPONSIVE OVERRIDE — Countdown Active Timer
+   সব পুরনো conflicting CSS কে override করে
+══════════════════════════════════════════════════════ */
+
+/* ── Base (Desktop ≥ 900px) ── */
+.cd-blocks { display: flex !important; align-items: center !important; gap: 8px !important; flex-wrap: nowrap !important; }
+.cd-block  { background: var(--bg-card2) !important; border: 1px solid var(--border) !important; border-radius: 10px !important; padding: 10px 14px !important; text-align: center !important; min-width: 56px !important; flex: 1 !important; }
+.cd-num    { font-size: clamp(16px, 4vw, 28px) !important; font-weight: 800 !important; color: #fff !important; line-height: 1 !important; }
+.cd-unit   { font-size: clamp(8px, 1.5vw, 10px) !important; color: var(--text-muted) !important; margin-top: 3px !important; }
+.cd-sep    { font-size: clamp(14px, 3vw, 22px) !important; font-weight: 700 !important; color: var(--text-muted) !important; margin-bottom: 10px !important; flex-shrink: 0 !important; }
+
+/* ── Tablet / Small desktop (≤ 860px) ── */
+@media (max-width: 860px) {
+  .cd-inner:not([style*="display:none"]):not([style*="display: none"]) {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .cd-left  { flex: unset !important; width: 100% !important; }
+  .cd-right {
+    flex: unset !important; width: 100% !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid rgba(255,255,255,0.07) !important;
+  }
+  .cd-right-text { align-items: center !important; text-align: center !important; }
+  .cd-hourglass img { width: 90px !important; height: 90px !important; }
+}
+
+/* ── Mobile (≤ 520px) ── */
+@media (max-width: 520px) {
+  .countdown-card { padding: 14px 12px 12px !important; }
+
+  /* Timer blocks — compact */
+  .cd-blocks { gap: 4px !important; }
+  .cd-block  { min-width: 0 !important; padding: 7px 6px !important; border-radius: 8px !important; }
+  .cd-num    { font-size: clamp(17px, 7vw, 22px) !important; }
+  .cd-unit   { font-size: 9px !important; }
+  .cd-sep    { font-size: 16px !important; margin-bottom: 8px !important; }
+
+  /* Right side — hourglass ছোট করো */
+  .cd-hourglass img { width: 64px !important; height: 64px !important; }
+  .cd-days-big { font-size: 14px !important; }
+  .cd-days-sub { font-size: 11px !important; }
+  .cd-view-btn { font-size: 11px !important; padding: 7px 14px !important; }
+
+  /* Payment pending — stack */
+  .cdpp-bottom {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .cdpp-pay-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 11px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    box-sizing: border-box !important;
+  }
+  .cdpp-title { font-size: 13px !important; }
+  .cdpp-sub   { font-size: 11px !important; }
+  .cdpp-icon  { width: 40px !important; height: 40px !important; }
+}
+
+/* ── Very small screens (≤ 360px) ── */
+@media (max-width: 360px) {
+  .cd-block  { padding: 6px 4px !important; }
+  .cd-num    { font-size: 15px !important; }
+  .cd-sep    { font-size: 13px !important; }
+  .cd-hourglass img { width: 50px !important; height: 50px !important; }
+}
+
+/* ══════════════════════════════════════════
+   📱 Order Card Countdown — Mobile Fix
+   Home page এর active order card এর deadline + countdown row
+══════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .oc-cd {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+  .cd-nums-urgent,
+  .cd-nums-safe {
+    font-size: 12px !important;
+    align-self: flex-end !important;
+  }
+}
+
+/* ══ Order Card — Deadline + Countdown same row, no overflow ══ */
+@media (max-width: 480px) {
+  .oc-cd {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+  .oc-cd > :first-child {
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .cd-nums-urgent,
+  .cd-nums-safe {
+    font-size: 11px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    align-self: center !important;
+  }
 }
