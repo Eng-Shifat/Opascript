@@ -18,8 +18,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     CURRENT_PAGE = 1;
     renderTable();
   });
+
+  /* Sidebar auth async শেষ হওয়ার আগে orders query করলে session পাওয়া যায় না।
+     তাই Supabase session confirm হওয়া পর্যন্ত wait করি। */
+  await waitForSession();
   await loadClients();
 });
+
+async function waitForSession(maxWait = 5000) {
+  const interval = 100;
+  let waited = 0;
+  while (waited < maxWait) {
+    const sb = window.scriptoraSupabase;
+    if (sb) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) return session;
+    }
+    await new Promise(r => setTimeout(r, interval));
+    waited += interval;
+  }
+  return null;
+}
 
 /* ── Load clients from Supabase ── */
 async function loadClients() {
@@ -35,17 +54,24 @@ async function loadClients() {
     if (cErr) throw cErr;
     ALL_CLIENTS = clients || [];
 
-    const { data: orders } = await sb
+    /* order-management.js এর মতো একই filter — RLS policy match করতে */
+    const { data: orders, error: oErr } = await sb
       .from('orders')
-      .select('client_id, total_price, advance_paid, due_amount, status, payment_status');
+      .select('id, order_number, title, client_id, total_price, advance_paid, due_amount, status, payment_status, order_date')
+      .or('payment_status.not.in.(unpaid,rejected),advance_paid.gt.0')
+      .order('order_date', { ascending: false });
+
+    if (oErr) console.warn('[Clients] orders fetch error:', oErr.message);
+    console.log('[Clients] orders loaded:', orders?.length ?? 0, oErr ?? '');
 
     ORDER_MAP = {};
     (orders || []).forEach(o => {
       if (!o.client_id) return;
-      if (!ORDER_MAP[o.client_id]) ORDER_MAP[o.client_id] = { count: 0, totalSpent: 0, dueAmount: 0 };
+      if (!ORDER_MAP[o.client_id]) ORDER_MAP[o.client_id] = { count: 0, totalSpent: 0, dueAmount: 0, orders: [] };
       ORDER_MAP[o.client_id].count++;
       ORDER_MAP[o.client_id].totalSpent += Number(o.advance_paid) || 0;
       ORDER_MAP[o.client_id].dueAmount  += Number(o.due_amount)   || 0;
+      ORDER_MAP[o.client_id].orders.push(o);
     });
 
     const totalClients  = ALL_CLIENTS.length;
@@ -236,29 +262,53 @@ async function openDetail(clientId) {
     </div>
   `;
 
-  if (sb) {
-    const { data: orders } = await sb
-      .from('orders')
-      .select('id, order_number, title, status, total_price, advance_paid, created_at')
-      .eq('client_id', clientId)
-      .order('created_at', { ascending: false })
-      .limit(10);
+  /* ORDER_MAP এ already cached — আলাদা Supabase call লাগবে না */
+  const clientOrders = (ORDER_MAP[clientId]?.orders || []).slice(0, 10);
 
-    if (orders && orders.length) {
-      const SC = { completed:'#34d399', writing:'#7c5cff', pending:'#f59e0b', overdue:'#f87171', draft_ready:'#a78bfa' };
-      document.getElementById('cdp-orders-list').innerHTML = orders.map(o => `
-        <div class="cdp-order-item" onclick="window.location.href='order-management.html'">
-          <div>
-            <div class="cdp-order-id">${esc(o.order_number || o.id.slice(0,8).toUpperCase())}</div>
-            <div class="cdp-order-title">${esc(o.title || 'Academic Service')}</div>
+  const SC = {
+    completed:   { bg: '#34d39922', color: '#34d399', label: 'Completed' },
+    writing:     { bg: '#7c5cff22', color: '#7c5cff', label: 'Writing'   },
+    pending:     { bg: '#f59e0b22', color: '#f59e0b', label: 'Pending'   },
+    overdue:     { bg: '#f8717122', color: '#f87171', label: 'Overdue'   },
+    draft_ready: { bg: '#a78bfa22', color: '#a78bfa', label: 'Draft Ready'},
+    revision:    { bg: '#11b5d922', color: '#11b5d9', label: 'Revision'  },
+  };
+
+  if (clientOrders.length) {
+    document.getElementById('cdp-orders-list').innerHTML = clientOrders.map(o => {
+      const st      = SC[o.status] || { bg: '#6f6a8522', color: '#6f6a85', label: o.status || 'pending' };
+      const orderNo = o.order_number ? `#${o.order_number}` : `#${o.id.slice(0,8).toUpperCase()}`;
+      const total   = Number(o.total_price)  || 0;
+      const paid    = Number(o.advance_paid) || 0;
+      const due     = Number(o.due_amount)   || Math.max(0, total - paid);
+      const dateVal = o.order_date || o.created_at;
+      const date    = dateVal
+        ? new Date(dateVal).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+        : '—';
+
+      return `
+        <div class="cdp-order-card" onclick="window.location.href='order-management.html?order=${o.id}'" title="Order খুলুন">
+          <div class="cdp-oc-header">
+            <div class="cdp-oc-meta">
+              <span class="cdp-oc-num">${orderNo}</span>
+              <span class="cdp-oc-date">${date}</span>
+            </div>
+            <span class="cdp-oc-badge" style="background:${st.bg};color:${st.color}">${st.label}</span>
           </div>
-          <span style="background:${SC[o.status]||'#6f6a85'}22;color:${SC[o.status]||'#6f6a85'};font-size:.68rem;padding:2px 8px;border-radius:20px;font-weight:600;">${esc(o.status||'pending')}</span>
-        </div>
-      `).join('');
-    } else {
-      document.getElementById('cdp-orders-list').innerHTML =
-        '<div style="text-align:center;padding:16px;color:var(--muted2);font-size:.78rem">কোনো order নেই</div>';
-    }
+          <div class="cdp-oc-title">${esc(o.title || 'Academic Service')}</div>
+          <div class="cdp-oc-footer">
+            <div class="cdp-oc-amounts">
+              <span class="cdp-oc-total">৳${total.toLocaleString('en-IN')}</span>
+              <span class="cdp-oc-paid">Paid ৳${paid.toLocaleString('en-IN')}</span>
+              ${due > 0 ? `<span class="cdp-oc-due">Due ৳${due.toLocaleString('en-IN')}</span>` : ''}
+            </div>
+            <i class="ti ti-arrow-right cdp-oc-arrow"></i>
+          </div>
+        </div>`;
+    }).join('');
+  } else {
+    document.getElementById('cdp-orders-list').innerHTML =
+      '<div style="text-align:center;padding:20px;color:var(--muted2);font-size:.78rem">কোনো order নেই</div>';
   }
 }
 

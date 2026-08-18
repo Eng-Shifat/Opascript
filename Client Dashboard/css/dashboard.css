@@ -3456,7 +3456,7 @@ input, select, textarea { font-family: inherit; }
 
 /* ── Topbar — Logo + Brand (matches homepage nav exactly) ── */
 .cd-topbar-brand {
-  display: flex;
+  display: none; /* Desktop: sidebar-e logo+name ache, topbar-e duplicate lagbe na */
   align-items: center;
   gap: 0px;
   text-decoration: none;
@@ -3465,6 +3465,10 @@ input, select, textarea { font-family: inherit; }
   font-size: 20px;
   color: #fff;
   height: 100%;
+}
+/* Mobile-e sidebar thake na, tai topbar-e brand dekhabe */
+@media (max-width: 768px) {
+  .cd-topbar-brand { display: flex; }
 }
 .cd-brand-logo {
   height: 44px;

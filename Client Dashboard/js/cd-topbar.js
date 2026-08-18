@@ -188,6 +188,72 @@ async function cdCheckUnreadCount() {
   } catch(e) {}
 }
 
+/* ══════════════════════════════════════════════════════
+   NOTIFICATION SOUND SYSTEM — Web Audio API
+   কোনো external file দরকার নেই, browser-e generate হয়।
+   type: 'notification' → 3-tone descending ding
+   type: 'message'      → 2-tone soft ping
+══════════════════════════════════════════════════════ */
+let _cdAudioCtx = null;
+
+function _cdGetAudioCtx() {
+  if (!_cdAudioCtx) {
+    try {
+      _cdAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {}
+  }
+  return _cdAudioCtx;
+}
+
+window.cdPlayNotifSound = function(type = 'notification') {
+  const ctx = _cdGetAudioCtx();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume();
+
+  const now = ctx.currentTime;
+
+  if (type === 'message') {
+    /* দুইটা soft ascending ping */
+    [[0, 880], [0.18, 1100]].forEach(([delay, freq]) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + delay);
+      gain.gain.setValueAtTime(0, now + delay);
+      gain.gain.linearRampToValueAtTime(0.18, now + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.35);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.36);
+    });
+  } else {
+    /* তিনটা descending ding — classic notification */
+    [[0, 1046], [0.15, 880], [0.30, 698]].forEach(([delay, freq]) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + delay);
+      gain.gain.setValueAtTime(0, now + delay);
+      gain.gain.linearRampToValueAtTime(0.15, now + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.42);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.43);
+    });
+  }
+};
+
+/* Browser autoplay policy: প্রথম user interaction-e AudioContext unlock */
+function _cdUnlockAudio() {
+  _cdGetAudioCtx();
+  document.removeEventListener('click',   _cdUnlockAudio);
+  document.removeEventListener('keydown', _cdUnlockAudio);
+}
+document.addEventListener('click',   _cdUnlockAudio);
+document.addEventListener('keydown', _cdUnlockAudio);
+
 /* ── Realtime: new notifications ──────────────────────── */
 function cdSetupNotifRealtime() {
   if (typeof sb === 'undefined' || !window.currentUser) return;
@@ -202,6 +268,9 @@ function cdSetupNotifRealtime() {
           .single();
 
         if (order?.client_id !== window.currentUser.id) return;
+
+        /* 🔔 Notification sound */
+        cdPlayNotifSound('notification');
 
         /* Show dot */
         const dot = document.getElementById('cdNotifDot');
@@ -368,6 +437,10 @@ function cdSetupMsgRealtime() {
       if (payload.new.sender !== 'admin') return;
       const { data: order } = await sb.from('orders').select('client_id').eq('id', payload.new.order_id).single();
       if (order?.client_id !== window.currentUser.id) return;
+
+      /* 💬 Message sound */
+      cdPlayNotifSound('message');
+
       const dot = document.getElementById('cdMsgDot');
       if (dot) dot.style.display = 'block';
       if (_cdMsgOpen) cdLoadMessagesDropdown();
