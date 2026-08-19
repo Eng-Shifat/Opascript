@@ -48,25 +48,51 @@ function togglePass(inputId, btnId) {
 }
 
 
-// ── Password strength ───────────────────────────────────────────────────────
+// ── Password strength meter ─────────────────────────────────────────────────
 const passwordInput = document.getElementById('password');
+
+function calcStrength(val) {
+  if (!val) return 0;
+  return [
+    val.length >= 8,
+    val.length >= 12,
+    /[A-Z]/.test(val) && /[a-z]/.test(val),
+    /[0-9]/.test(val),
+    /[^A-Za-z0-9]/.test(val),
+  ].filter(Boolean).length;
+}
+
+function updateStrengthMeter(val) {
+  const wrap  = document.getElementById('passStrength');
+  const label = document.getElementById('passLabel');
+  const bars  = [1,2,3,4].map(i => document.getElementById('pbar'+i));
+  if (!wrap || !label || bars.some(b=>!b)) return;
+
+  if (!val) {
+    bars.forEach(b => { b.className = 'pass-bar'; });
+    label.textContent = '';
+    label.className = 'pass-meter-label';
+    return;
+  }
+
+  const score = calcStrength(val);
+  // score: 0-1 = weak, 2-3 = medium, 4 = strong, 5 = very strong
+  let level, labelText, cls;
+  if      (score <= 1) { level = 1; labelText = 'দুর্বল';         cls = 'weak'; }
+  else if (score <= 2) { level = 2; labelText = 'মোটামুটি';       cls = 'fair'; }
+  else if (score <= 3) { level = 3; labelText = 'ভালো';            cls = 'good'; }
+  else                 { level = 4; labelText = 'শক্তিশালী ✓';    cls = 'strong'; }
+
+  bars.forEach((b, i) => {
+    b.className = 'pass-bar' + (i < level ? ' active ' + cls : '');
+  });
+  label.textContent = labelText;
+  label.className = 'pass-meter-label ' + cls;
+}
+
 if (passwordInput) {
   passwordInput.addEventListener('input', function () {
-    const val  = this.value;
-    const hint = document.getElementById('passStrength');
-    if (!hint) return;
-    if (!val) { hint.textContent = ''; hint.className = 'pass-strength'; return; }
-
-    const score = [
-      val.length >= 8,
-      /[A-Z]/.test(val),
-      /[0-9]/.test(val),
-      /[^A-Za-z0-9]/.test(val),
-    ].filter(Boolean).length;
-
-    if (score <= 1)      { hint.textContent = '● দুর্বল পাসওয়ার্ড';      hint.className = 'pass-strength weak'; }
-    else if (score <= 3) { hint.textContent = '●● মধ্যম পাসওয়ার্ড';      hint.className = 'pass-strength medium'; }
-    else                 { hint.textContent = '●●● শক্তিশালী পাসওয়ার্ড'; hint.className = 'pass-strength strong'; }
+    updateStrengthMeter(this.value);
   });
 }
 

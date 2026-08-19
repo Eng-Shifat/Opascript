@@ -374,15 +374,39 @@
 .eye-btn:hover { color: rgba(var(--text-rgb),0.65); }
 
 /* Password strength */
-.pass-strength {
-  font-size: 11.5px;
-  margin-top: 5px;
-  min-height: 15px;
-  font-weight: 500;
+/* ── Password Strength Meter ── */
+.pass-meter-wrap {
+  margin-top: 7px;
+  min-height: 20px;
 }
-.pass-strength.weak   { color: var(--color-red-mid); }
-.pass-strength.medium { color: var(--color-yellow); }
-.pass-strength.strong { color: var(--color-green); }
+.pass-meter-bars {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.pass-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+  transition: background .25s, transform .2s;
+}
+.pass-bar.active        { transform: scaleY(1.15); }
+.pass-bar.active.weak   { background: #f87171; }
+.pass-bar.active.fair   { background: #fb923c; }
+.pass-bar.active.good   { background: #facc15; }
+.pass-bar.active.strong { background: #34d399; }
+
+.pass-meter-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  transition: color .25s;
+}
+.pass-meter-label.weak   { color: #f87171; }
+.pass-meter-label.fair   { color: #fb923c; }
+.pass-meter-label.good   { color: #facc15; }
+.pass-meter-label.strong { color: #34d399; }
 
 /* Error */
 .reg-err {
