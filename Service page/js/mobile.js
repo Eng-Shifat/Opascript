@@ -126,6 +126,13 @@
             '<p>&ldquo;' + D.expert.quote + '&rdquo;</p>' +
             '<span class="mob-exp2-quote-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg></span>' +
           '</div>' +
+          '<div class="mob-exp2-cert-row">' +
+            '<button class="mob-exp2-cert-btn" onclick="openCertModal()">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>' +
+              ' View Fiverr Certificate' +
+            '</button>' +
+            '<span class="mob-exp2-cert-note">Officially verified by Fiverr</span>' +
+          '</div>' +
         '</div>' +
       '</div>' +
       '' : '') +

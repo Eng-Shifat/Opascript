@@ -1292,3 +1292,88 @@ body {
   transition: background 0.2s, width 0.2s;
 }
 .mob-sdot.active { background: var(--color-violet2); width: 20px; border-radius: 4px; }
+
+/* ══ Certificate Button — Mobile Expert Card ══ */
+.mob-exp2-cert-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  flex-wrap: wrap;
+}
+.mob-exp2-cert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(29,191,115,0.12), rgba(45,110,247,0.1));
+  border: 1px solid rgba(29,191,115,0.3);
+  color: #34d399;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+}
+.mob-exp2-cert-btn:hover,
+.mob-exp2-cert-btn:active {
+  background: rgba(29,191,115,0.2);
+  border-color: rgba(29,191,115,0.5);
+}
+.mob-exp2-cert-note {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.28);
+  font-style: italic;
+}
+
+/* Certificate Modal */
+.cert-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.cert-modal-overlay.active { display: flex; }
+.cert-modal-box {
+  background: #0e1432;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  animation: certPop .22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes certPop {
+  from { transform: scale(.88); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.cert-modal-close {
+  position: absolute; top: 10px; right: 12px;
+  background: rgba(255,255,255,0.08);
+  border: none; color: rgba(255,255,255,0.6);
+  width: 28px; height: 28px; border-radius: 50%;
+  font-size: 17px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+}
+.cert-modal-header {
+  display: flex; align-items: center; gap: 7px;
+  padding: 14px 16px;
+  font-size: 13px; font-weight: 700; color: #34d399;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.cert-modal-img-wrap { padding: 14px; }
+.cert-modal-img { width: 100%; border-radius: 8px; display: block; }
+.cert-no-img {
+  text-align: center; padding: 32px 16px;
+  color: rgba(255,255,255,0.35); font-size: 12.5px; line-height: 1.8;
+}
