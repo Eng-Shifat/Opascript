@@ -87,7 +87,8 @@
 
   const navCSS = `
   <style id="shared-nav-css">
-    #shared-nav { background:rgba(var(--bg-nav-rgb),0.55); backdrop-filter:blur(16px) saturate(180%); -webkit-backdrop-filter:blur(16px) saturate(180%); padding:0 2.5rem; height:55px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--text-rgb),0.10); position:sticky; top:0; z-index:1000; transition:background 0.3s; isolation:isolate; will-change:transform; font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
+    body { padding-top: 55px; }
+    #shared-nav { background:rgba(var(--bg-nav-rgb),0.55); backdrop-filter:blur(16px) saturate(180%); -webkit-backdrop-filter:blur(16px) saturate(180%); padding:0 2.5rem; height:55px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--text-rgb),0.10); position:fixed; top:0; left:0; right:0; z-index:1000; transition:background 0.3s; isolation:isolate; will-change:transform; font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     #shared-nav, #shared-nav * { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     .mobile-menu { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     [data-theme="light"] #shared-nav { background:rgba(var(--bg-nav-rgb),0.6); border-bottom:1px solid rgba(0,0,0,0.08); }

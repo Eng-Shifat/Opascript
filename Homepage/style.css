@@ -20,6 +20,7 @@ body {
   background: var(--bg-main);
   color: var(--text-main);
   transition: background-color 0.3s ease, color 0.3s ease;
+  padding-top: 55px; /* fixed navbar height */
 }
 
 /* -------- HERO -------- */
@@ -1460,4 +1461,19 @@ body {
   opacity: 1 !important;
   transform: translateY(0) !important;
   transition: opacity 0.5s ease var(--fade-delay, 0s), transform 0.5s ease var(--fade-delay, 0s);
+}
+
+/* ── Hero desc mobile fix ── */
+@media (max-width: 600px) {
+  .hero-desc {
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+    word-break: keep-all !important;
+  }
+}
+
+/* ── Navbar fixed — ensure no overlap on all breakpoints ── */
+@media (max-width: 560px) {
+  body { padding-top: 55px !important; }
+  .hero { padding-top: 1.8rem !important; }
 }
