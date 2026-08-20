@@ -1516,3 +1516,9 @@ body {
   .stats-title  { font-size: 12.5px !important; }
   .stats-sub    { font-size: 10px !important; }
 }
+
+/* ── Hero buttons — fit content width on mobile ── */
+@media (max-width: 600px) {
+  .hero-btns { flex-direction: row !important; gap: 8px !important; width: auto !important; }
+  .btn-primary, .btn-secondary { flex: 0 !important; width: auto !important; padding: 10px 20px !important; white-space: nowrap !important; }
+}

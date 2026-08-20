@@ -24,8 +24,8 @@
     <!-- Brand column -->
     <div class="sc-footer-brand">
       <a class="sc-footer-logo" href="${homePath}index.html">
-        <img src="${homePath}assets/logo.png" alt="Opascript" style="height:36px;width:auto;object-fit:contain;">
-        Opascript
+        <img src="${homePath}assets/logo.png" alt="Opascript" class="sc-footer-logo-img">
+        <span class="sc-footer-logo-text">Opascript</span>
       </a>
 
       <p class="sc-footer-tagline">
@@ -112,8 +112,8 @@
    Opascript — Shared Footer
 ════════════════════════════════════════ */
 .sc-footer {
-  background: #060d1f;
-  border-top: 0.5px solid rgba(255,255,255,0.07);
+  background: linear-gradient(180deg, #080f22 0%, #060c1d 100%);
+  border-top: 0.5px solid rgba(255,255,255,0.08);
   position: relative;
 }
 
@@ -129,30 +129,45 @@
 
 /* ── Brand ── */
 .sc-footer-logo {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-weight: 700; font-size: 18px; color: white;
+  display: inline-flex; align-items: center; gap: 0;
   text-decoration: none; margin-bottom: 1.1rem;
+  height: 50px;
+  margin-left: -12px;
+}
+.sc-footer-logo-img {
+  height: 50px; width: auto; object-fit: contain;
+  display: block; flex-shrink: 0;
+  margin-right: -16px;
+}
+.sc-footer-logo-text {
+  font-weight: 700; font-size: 20px; color: white;
+  line-height: 1;
 }
 .sc-footer-tagline {
   font-size: 13px;
-  color: rgba(255,255,255,0.45);
-  line-height: 1.85;
-  margin-bottom: 1.2rem;
-  max-width: 310px;
+  color: rgba(255,255,255,0.48);
+  line-height: 1.9;
+  margin-bottom: 1.4rem;
+  max-width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  padding-top: 4px;
 }
 .sc-ft-headline {
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 700;
-  color: rgba(255,255,255,0.88);
-  line-height: 1.5;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.55;
+  letter-spacing: -0.01em;
 }
 .sc-ft-italic {
   font-style: italic;
-  font-size: 12px;
-  color: rgba(255,255,255,0.35);
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.38);
+  border-top: 0.5px solid rgba(255,255,255,0.07);
+  padding-top: 8px;
+  margin-top: 2px;
 }
 
 
@@ -185,11 +200,12 @@
 .sc-footer-col-title svg { opacity: 0.5; }
 .sc-footer-col a {
   font-size: 13px; color: rgba(255,255,255,0.42);
-  text-decoration: none; padding: 4px 0;
+  text-decoration: none; padding: 5px 0;
   transition: color .18s, padding-left .18s;
   display: inline-flex; align-items: center; gap: 6px;
+  border-bottom: 0.5px solid transparent;
 }
-.sc-footer-col a:hover { color: rgba(255,255,255,0.85); padding-left: 4px; }
+.sc-footer-col a:hover { color: #7c9ff5; padding-left: 5px; }
 .sc-footer-contact-item { display: flex !important; align-items: center; gap: 8px; }
 
 
@@ -201,14 +217,15 @@
   margin: 0 auto;
 }
 .sc-footer-bottom {
-  padding: 1.2rem 4rem;
+  padding: 1.1rem 4rem;
   display: flex; justify-content: space-between; align-items: center;
   max-width: 1280px; margin: 0 auto;
+  background: rgba(0,0,0,0.15);
 }
-.sc-footer-bottom-left { font-size: 12px; color: rgba(255,255,255,0.25); }
-.sc-footer-bottom-right { display: flex; align-items: center; gap: 10px; font-size: 12px; color: rgba(255,255,255,0.25); }
-.sc-footer-bottom-right a { color: rgba(255,255,255,0.25); text-decoration: none; transition: color .2s; }
-.sc-footer-bottom-right a:hover { color: rgba(255,255,255,0.6); }
+.sc-footer-bottom-left { font-size: 11.5px; color: rgba(255,255,255,0.22); }
+.sc-footer-bottom-right { display: flex; align-items: center; gap: 12px; font-size: 11.5px; color: rgba(255,255,255,0.22); }
+.sc-footer-bottom-right a { color: rgba(255,255,255,0.28); text-decoration: none; transition: color .2s; }
+.sc-footer-bottom-right a:hover { color: rgba(255,255,255,0.65); }
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
