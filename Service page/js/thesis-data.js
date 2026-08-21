@@ -53,22 +53,22 @@ window.PAGE_DATA = {
   expert: {
     headIcon:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m12 8 1.1 2.3 2.5.35-1.8 1.8.45 2.5L12 13.7l-2.25 1.25.45-2.5-1.8-1.8 2.5-.35L12 8Z"/></svg>',
     heading:    'Meet Your <span class="grad">Academic Expert</span>',
-    subheading: 'Your research is guided by experience, expertise, and a commitment to excellence.',
+    subheading: '8+ years of experience in ghostwriting, academic writing, proofreading &amp; Amazon KDP publishing.',
     photo:      'assets/expert-photo.jpg',
     name:       'Yeasin Kabir Shifat',
     badge:      'Fiverr Level 2 Seller',
-    role:       'Professional Ghostwriter & Academic Specialist',
+    role:       'Ghostwriter · Academic Writer · KDP Specialist',
     ministats: [
       { cls: 'blue', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', val: '500+', label: 'Projects' },
       { cls: 'gold', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg>', val: '8+', label: 'Years Exp.' },
     ],
     features: [
-      { cls: 'green',  svg: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>', title: 'Fiverr Level 2 Certified Seller', desc: 'Verified, trusted & top-rated on Fiverr' },
-      { cls: 'blue',   svg: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>', title: '500+ Delivered Projects', desc: 'Successfully completed academic projects' },
-      { cls: 'purple', svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', title: '8+ Years Experience', desc: 'Extensive experience in academic ghostwriting' },
-      { cls: 'orange', svg: '<path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/>', title: 'Thesis &amp; Research Specialist', desc: 'Expert in thesis writing &amp; research documentation' },
+      { cls: 'purple', svg: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>', title: 'Expert Ghostwriter', desc: 'Your ideas, delivered in your voice — books, essays &amp; content with full confidentiality' },
+      { cls: 'blue',   svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', title: 'Academic Writing Specialist', desc: 'Thesis, dissertation &amp; research papers — well-researched, structured &amp; plagiarism-free' },
+      { cls: 'green',  svg: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>', title: 'Proofreading &amp; Editing', desc: 'Grammar, clarity &amp; formatting — polished to submission-ready standard' },
+      { cls: 'orange', svg: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>', title: 'Renewed KDP Writer for Amazon', desc: 'Manuscript formatting &amp; KDP-ready content for successful Amazon self-publishing' },
     ],
-    quote: 'I help students transform their ideas into well-researched, plagiarism-free academic work with clarity and precision.',
+    quote: 'I help students and authors transform their ideas into well-researched, plagiarism-free work — with clarity, precision, and zero AI.',
   },
 
   workflow: {

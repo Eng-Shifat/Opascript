@@ -854,20 +854,25 @@ body {
   }
   .osc-order-btn { padding: 8px 14px; font-size: 12px; }
 
-  /* Trust bar */
-  .trust-bar    {
-    flex-direction: column;
+  /* Trust bar — 2 column on mobile */
+  .trust-bar {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
     gap: 0;
     padding: 0;
+    flex-direction: unset;
   }
-  .trust-item   {
+  .trust-item {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid rgba(var(--text-rgb),0.06);
-    padding: 0.9rem 1.25rem;
+    padding: 0.9rem 1rem;
     justify-content: flex-start;
   }
-  .trust-item:last-child { border-bottom: none; }
+  .trust-item:nth-child(odd) {
+    border-right: 1px solid rgba(var(--text-rgb),0.06);
+  }
+  .trust-item:nth-last-child(-n+2) { border-bottom: none; }
 
   /* FAQ */
   .pr-faq       { padding: 2rem 1rem; }

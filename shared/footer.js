@@ -127,6 +127,25 @@
   margin: 0 auto;
 }
 
+/* Mobile footer padding */
+@media (max-width: 560px) {
+  .sc-footer-top {
+    padding: 2rem 1.4rem 1.5rem !important;
+    gap: 1.4rem 2rem !important;
+  }
+  .sc-footer-logo {
+    margin-bottom: 0.6rem !important;
+  }
+  .sc-footer-tagline {
+    font-size: 12.5px !important;
+    gap: 7px !important;
+    margin-bottom: 0.9rem !important;
+  }
+  .sc-footer-bottom {
+    padding: 0.9rem 1.4rem !important;
+  }
+}
+
 /* ── Brand ── */
 .sc-footer-logo {
   display: inline-flex; align-items: center; gap: 0;

@@ -892,6 +892,42 @@ body {
 /* No cert button */
 .exp2-cert-btn { display: none; }
 
+/* View Certification button */
+.exp2-cert-btn-link {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  text-decoration: none;
+}
+.exp2-cert-btn-visible {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  background: transparent;
+  border: 1.5px solid rgba(var(--color-violet2-rgb), 0.55);
+  border-radius: 10px;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.exp2-cert-btn-visible svg {
+  width: 15px;
+  height: 15px;
+  color: var(--color-violet2);
+  flex-shrink: 0;
+}
+.exp2-cert-btn-visible:hover {
+  border-color: rgba(var(--color-violet2-rgb), 0.9);
+  background: rgba(var(--color-violet2-rgb), 0.08);
+  box-shadow: 0 0 16px rgba(var(--color-violet2-rgb), 0.2);
+}
+
 /* ===== RIGHT SECTION ===== */
 .exp2-right {
   display: flex;
@@ -976,19 +1012,13 @@ body {
   justify-content: center;
   flex-shrink: 0;
   color: var(--text-main);
-  animation: exp2-icon-glow 3s ease-in-out infinite;
+  animation: none;
 }
-.exp2-feature:nth-child(1) .exp2-feat-icon { animation-delay: 0s; }
-.exp2-feature:nth-child(2) .exp2-feat-icon { animation-delay: 0.6s; }
-.exp2-feature:nth-child(3) .exp2-feat-icon { animation-delay: 1.2s; }
-.exp2-feature:nth-child(4) .exp2-feat-icon { animation-delay: 1.8s; }
-.exp2-feature:nth-child(5) .exp2-feat-icon { animation-delay: 2.4s; }
-@keyframes exp2-icon-glow {
-  0%   { box-shadow: 0 4px 16px rgba(var(--color-violet2-rgb),0.45); background: linear-gradient(135deg, var(--svc-accent2-mobile), var(--color-purple-deep)); }
-  33%  { box-shadow: 0 4px 22px rgba(var(--color-violet-rgb),0.7), 0 0 30px rgba(var(--color-violet-rgb),0.25); background: linear-gradient(135deg, var(--color-purple-deep), var(--svc-magenta-1)); }
-  66%  { box-shadow: 0 4px 22px rgba(var(--color-indigo-rgb),0.7), 0 0 30px rgba(var(--color-indigo-rgb),0.25); background: linear-gradient(135deg, var(--color-purple-deep2), var(--color-purple-deep)); }
-  100% { box-shadow: 0 4px 16px rgba(var(--color-violet2-rgb),0.45); background: linear-gradient(135deg, var(--svc-accent2-mobile), var(--color-purple-deep)); }
-}
+.exp2-feature:nth-child(1) .exp2-feat-icon,
+.exp2-feature:nth-child(2) .exp2-feat-icon,
+.exp2-feature:nth-child(3) .exp2-feat-icon,
+.exp2-feature:nth-child(4) .exp2-feat-icon,
+.exp2-feature:nth-child(5) .exp2-feat-icon { animation: none; }
 .exp2-feat-icon svg { width: 26px; height: 26px; }
 
 /* SVG draw-path on icon strokes */
@@ -1000,35 +1030,9 @@ body {
 .exp2-feat-icon svg rect {
   fill: none;
   stroke: currentColor;
-  stroke-dasharray: 200;
-  stroke-dashoffset: 200;
-  animation: exp2-draw-path 2.5s ease-in-out infinite;
-}
-.exp2-feature:nth-child(1) .exp2-feat-icon svg path,
-.exp2-feature:nth-child(1) .exp2-feat-icon svg polyline,
-.exp2-feature:nth-child(1) .exp2-feat-icon svg polygon,
-.exp2-feature:nth-child(1) .exp2-feat-icon svg circle { animation-delay: 0s; }
-.exp2-feature:nth-child(2) .exp2-feat-icon svg path,
-.exp2-feature:nth-child(2) .exp2-feat-icon svg polyline,
-.exp2-feature:nth-child(2) .exp2-feat-icon svg polygon,
-.exp2-feature:nth-child(2) .exp2-feat-icon svg circle { animation-delay: 0.6s; }
-.exp2-feature:nth-child(3) .exp2-feat-icon svg path,
-.exp2-feature:nth-child(3) .exp2-feat-icon svg polyline,
-.exp2-feature:nth-child(3) .exp2-feat-icon svg polygon,
-.exp2-feature:nth-child(3) .exp2-feat-icon svg circle { animation-delay: 1.2s; }
-.exp2-feature:nth-child(4) .exp2-feat-icon svg path,
-.exp2-feature:nth-child(4) .exp2-feat-icon svg polyline,
-.exp2-feature:nth-child(4) .exp2-feat-icon svg polygon,
-.exp2-feature:nth-child(4) .exp2-feat-icon svg circle { animation-delay: 1.8s; }
-.exp2-feature:nth-child(5) .exp2-feat-icon svg path,
-.exp2-feature:nth-child(5) .exp2-feat-icon svg polyline,
-.exp2-feature:nth-child(5) .exp2-feat-icon svg polygon,
-.exp2-feature:nth-child(5) .exp2-feat-icon svg circle { animation-delay: 2.4s; }
-@keyframes exp2-draw-path {
-  0%   { stroke-dashoffset: 200; opacity: 0.4; }
-  55%  { stroke-dashoffset: 0;   opacity: 1; }
-  80%  { stroke-dashoffset: 0;   opacity: 1; }
-  100% { stroke-dashoffset: 200; opacity: 0.4; }
+  stroke-dasharray: unset;
+  stroke-dashoffset: unset;
+  animation: none;
 }
 
 /* Left border accent on icon */

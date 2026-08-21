@@ -338,10 +338,128 @@
     }
   }
 
+  /* ── CERTIFICATE MODAL ── */
+  var CERT_IMAGES = [
+    { src: 'assets/fiverr-certificate.jpg', label: 'Fiverr Level 2 Seller Certificate' },
+    { src: 'assets/certificate-2.jpg',      label: 'Certificate of Excellence' }
+  ];
+  var certCur = 0;
+
+  function initCertModal() {
+    var modal = document.createElement('div');
+    modal.id = 'mob-cert-modal';
+    modal.innerHTML =
+      '<div class="mcm-backdrop"></div>' +
+      '<div class="mcm-box">' +
+        '<div class="mcm-header">' +
+          '<span class="mcm-title-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>' +
+          '<span class="mcm-title" id="mcm-title">' + CERT_IMAGES[0].label + '</span>' +
+          '<span class="mcm-counter" id="mcm-counter">1 \xd7 ' + CERT_IMAGES.length + '</span>' +
+          '<button class="mcm-close" onclick="closeCertModal()">&#x2715;</button>' +
+        '</div>' +
+        '<div class="mcm-img-wrap">' +
+          '<img id="mcm-img" src="' + CERT_IMAGES[0].src + '" alt="Certificate">' +
+        '</div>' +
+        '<div class="mcm-footer">' +
+          '<span class="mcm-label" id="mcm-label">' + CERT_IMAGES[0].label + '</span>' +
+          '<div class="mcm-dots" id="mcm-dots">' +
+            CERT_IMAGES.map(function(_, i) {
+              return '<span class="mcm-dot' + (i === 0 ? ' active' : '') + '" data-ci="' + i + '"></span>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    // dot clicks
+    modal.querySelectorAll('.mcm-dot').forEach(function(d) {
+      d.addEventListener('click', function() { certGoTo(parseInt(d.getAttribute('data-ci'))); });
+    });
+
+    // backdrop close
+    modal.querySelector('.mcm-backdrop').addEventListener('click', closeCertModal);
+
+    // swipe
+    var sx = 0;
+    var imgWrap = modal.querySelector('.mcm-img-wrap');
+    imgWrap.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; }, {passive:true});
+    imgWrap.addEventListener('touchend', function(e){
+      var dx = sx - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) certGoTo(dx > 0 ? certCur + 1 : certCur - 1);
+    }, {passive:true});
+
+    // inject styles
+    var style = document.createElement('style');
+    style.textContent = [
+      '#mob-cert-modal{display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center}',
+      '#mob-cert-modal.open{display:flex}',
+      '.mcm-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.85)}',
+      '.mcm-box{position:relative;z-index:1;background:#12112a;border:1px solid rgba(139,92,246,0.3);border-radius:16px;overflow:hidden;width:92vw;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,0.7)}',
+      '.mcm-header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.07)}',
+      '.mcm-title-icon{color:#11b5d9;flex-shrink:0}',
+      '.mcm-title{flex:1;font-size:13px;font-weight:600;color:#e2e8f0}',
+      '.mcm-counter{font-size:11px;color:#94a3b8;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:20px}',
+      '.mcm-close{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:4px}',
+      '.mcm-img-wrap{overflow:hidden;background:#0a0918}',
+      '.mcm-img-wrap img{width:100%;height:auto;display:block;transition:opacity 0.25s ease}',
+      '.mcm-img-wrap img.fading{opacity:0}',
+      '.mcm-footer{padding:10px 14px;display:flex;align-items:center;justify-content:space-between}',
+      '.mcm-label{font-size:11px;color:#94a3b8}',
+      '.mcm-dots{display:flex;gap:6px}',
+      '.mcm-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:background 0.2s}',
+      '.mcm-dot.active{background:#8b5cf6;width:18px;border-radius:4px}',
+      '@keyframes mcmFadeIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}',
+      '#mob-cert-modal.open .mcm-box{animation:mcmFadeIn 0.25s ease}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  function certGoTo(idx) {
+    var total = CERT_IMAGES.length;
+    var next = (idx + total) % total;
+    if (next === certCur) return;
+    var img   = document.getElementById('mcm-img');
+    var title = document.getElementById('mcm-title');
+    var label = document.getElementById('mcm-label');
+    var counter = document.getElementById('mcm-counter');
+    var dots  = document.querySelectorAll('.mcm-dot');
+    img.classList.add('fading');
+    setTimeout(function() {
+      certCur = next;
+      img.src = CERT_IMAGES[certCur].src;
+      title.textContent = CERT_IMAGES[certCur].label;
+      label.textContent = CERT_IMAGES[certCur].label;
+      counter.textContent = (certCur + 1) + ' \xd7 ' + total;
+      dots.forEach(function(d, i) { d.classList.toggle('active', i === certCur); });
+      img.classList.remove('fading');
+    }, 220);
+  }
+
+  window.openCertModal = function() {
+    var modal = document.getElementById('mob-cert-modal');
+    if (!modal) return;
+    certCur = 0;
+    document.getElementById('mcm-img').src = CERT_IMAGES[0].src;
+    document.getElementById('mcm-title').textContent = CERT_IMAGES[0].label;
+    document.getElementById('mcm-label').textContent = CERT_IMAGES[0].label;
+    document.getElementById('mcm-counter').textContent = '1 \xd7 ' + CERT_IMAGES.length;
+    document.querySelectorAll('.mcm-dot').forEach(function(d, i){ d.classList.toggle('active', i === 0); });
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeCertModal = function() {
+    var modal = document.getElementById('mob-cert-modal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
   /* ── INIT ── */
   function init() {
     if (window.innerWidth <= 768) { buildMobileContent(); initMobSampleCarousel(); }
     initFAQ();
+    initCertModal();
   }
 
   if (document.readyState === 'loading') {
