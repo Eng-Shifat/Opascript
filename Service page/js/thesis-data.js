@@ -93,11 +93,11 @@ window.PAGE_DATA = {
 
 
   faq: [
-    { q: 'Is the content 100% original?',              a: 'হ্যাঁ, প্রতিটি থিসিস সম্পূর্ণ Original ও Plagiarism-free — Turnitin Report সহ Deliver করা হয়।' },
-    { q: 'Will I get Turnitin report?',                 a: 'Premium Package-এর সাথে Turnitin Report Include করা থাকে।' },
-    { q: 'Can you follow my university guidelines?',   a: 'অবশ্যই — আপনার University-র নির্দিষ্ট Guideline অনুযায়ী Format করা হয়।' },
-    { q: 'What if I need revisions?',                  a: 'Premium Package-এ Unlimited Revision Included।' },
-    { q: 'How long does it take to complete a thesis?', a: 'Package অনুযায়ী 10–20 দিনের মধ্যে Deliver করা হয়।' },
+    { q: 'Is the content 100% original?',              a: 'Absolutely. Every thesis is written from scratch — no templates, no AI-generated filler. We use only credible sources, properly cited, and deliver a full Turnitin similarity report so you can verify originality yourself.' },
+    { q: 'Will I get a Turnitin report?',              a: 'Yes — a Turnitin similarity report is included with every Premium Package order at no extra cost. On Standard or Recommended packages, just ask and we will arrange it for you.' },
+    { q: 'Can you follow my university guidelines?',   a: 'Yes, and we take this seriously. Share your university\'s formatting guide or supervisor feedback — we support APA, MLA, Harvard, Chicago, and custom institutional styles. Just upload your guideline document when placing your order.' },
+    { q: 'What if I need revisions?',                  a: 'We offer unlimited revisions on Premium Package orders until you are fully satisfied. For Standard and Recommended packages, revisions are covered within the agreed scope. Send feedback through the Client Dashboard and we will correct it promptly.' },
+    { q: 'How long does it take to complete a thesis?', a: 'Delivery time depends on the package and scope of work — typically 10 days for Premium, up to 20 days for larger projects. Urgent delivery may be available on request. Your timeline is confirmed before work begins.' },
   ],
 
   cta: {
