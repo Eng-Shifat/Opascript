@@ -107,7 +107,19 @@
 
   <!-- SHARED NAVBAR -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="../shared/supabaseClient.js"></script>
+  <script>
+  /* Scriptora Supabase Client — inlined to avoid 503 on shared/supabaseClient.js */
+  (function () {
+    if (window.scriptoraSupabase) return;
+    if (typeof supabase === 'undefined') {
+      console.error('[Scriptora] Supabase library not loaded. Check CDN script tag order.');
+      return;
+    }
+    const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
+    window.scriptoraSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  })();
+  </script>
   <script src="../shared/theme.js"></script>
   <script src="../shared/navbar.js"></script>
 
