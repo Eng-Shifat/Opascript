@@ -13,7 +13,7 @@ window.PAGE_DATA = {
     primaryBtn:      'Start Your Project',
     primaryOnClick:  'openThesisOrderPopup()',
     secondaryBtn:    'Talk to an Expert',
-    secondaryOnClick: "window.open('https://wa.me/8801XXXXXXXXX','_blank')",
+    secondaryOnClick: "window.open('https://wa.me/8801881870349','_blank')",
   },
 
   stats: [

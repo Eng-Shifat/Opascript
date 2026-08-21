@@ -1316,6 +1316,7 @@ body {
   cursor: pointer;
   font-family: inherit;
   transition: all .2s;
+  white-space: nowrap;
 }
 .mob-exp2-cert-btn:hover,
 .mob-exp2-cert-btn:active {
@@ -1377,3 +1378,87 @@ body {
   text-align: center; padding: 32px 16px;
   color: rgba(255,255,255,0.35); font-size: 12.5px; line-height: 1.8;
 }
+
+/* ══ Certificate Slider Modal ══ */
+.cert-modal-header {
+  display: flex; align-items: center; gap: 7px;
+  padding: 14px 16px;
+  font-size: 13px; font-weight: 700; color: #34d399;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.cert-modal-counter {
+  margin-left: auto;
+  font-size: 11px; font-weight: 500;
+  color: rgba(255,255,255,0.35);
+}
+
+/* Slider */
+.cert-slider-wrap {
+  overflow: hidden;
+  position: relative;
+  touch-action: pan-y;
+}
+.cert-slider-track {
+  display: flex;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+.cert-slide {
+  min-width: 100%;
+  padding: 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.cert-modal-img {
+  width: 100%;
+  max-height: 65vh;
+  border-radius: 8px;
+  display: block;
+  object-fit: contain;
+  background: rgba(0,0,0,0.2);
+}
+.cert-slide-caption {
+  text-align: center;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 8px;
+}
+.cert-no-img {
+  text-align: center; padding: 40px 16px;
+  color: rgba(255,255,255,0.35);
+  font-size: 12.5px; line-height: 1.8;
+}
+
+/* Dots */
+.cert-dots {
+  display: flex; justify-content: center;
+  gap: 6px; padding: 4px 0 12px;
+}
+.cert-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer; transition: all .2s;
+}
+.cert-dot.active {
+  background: #34d399;
+  transform: scale(1.3);
+}
+
+/* Arrows */
+.cert-arrow {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white; width: 32px; height: 32px;
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .2s, background .2s;
+  z-index: 2;
+}
+.cert-arrow:hover { background: rgba(0,0,0,0.7); }
+.cert-arrow-prev { left: 18px; }
+.cert-arrow-next { right: 18px; }
