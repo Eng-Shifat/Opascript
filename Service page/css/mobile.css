@@ -565,6 +565,8 @@ body {
 }
 
 .mob-exp2-card {
+  width: 100%;
+  box-sizing: border-box;
   background: var(--card2);
   border: 1px solid rgba(var(--color-violet2-rgb),0.25);
   border-radius: 18px;
@@ -573,13 +575,17 @@ body {
 }
 .mob-exp2-main {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
+  min-width: 0;
+  width: 100%;
   margin-bottom: 16px;
 }
 .mob-exp2-left {
-  flex: 1 1 0;
+  flex: 0 0 120px;
+  width: 120px;
   min-width: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -591,7 +597,7 @@ body {
   background: var(--border);
   flex-shrink: 0;
 }
-.mob-exp2-right { flex: 1; min-width: 0; }
+.mob-exp2-right { flex: 1; min-width: 0; overflow: hidden; display: flex; align-items: center; }
 .mob-exp2-avatar-wrap {
   position: relative;
   margin-bottom: 14px;
@@ -646,7 +652,8 @@ body {
 }
 .mob-exp2-ministats {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 5px;
   width: 100%;
 }
 .mob-exp2-ministat {
@@ -659,8 +666,9 @@ body {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 9px;
-  padding: 7px 6px;
+  padding: 6px;
   text-align: left;
+  box-sizing: border-box;
 }
 .mob-exp2-ministat-icon {
   width: 18px; height: 18px;
@@ -695,8 +703,8 @@ body {
 .mob-exp2-feature--blue .mob-exp2-feat-icon   { background: rgba(var(--color-blue2-rgb),0.15); color: var(--color-blue2); }
 .mob-exp2-feature--purple .mob-exp2-feat-icon { background: rgba(var(--color-violet2-rgb),0.15); color: var(--color-violet2); }
 .mob-exp2-feature--orange .mob-exp2-feat-icon { background: rgba(var(--color-orange-rgb),0.15); color: var(--color-orange); }
-.mob-exp2-feat-title { font-size: 10.5px; font-weight: 700; margin-bottom: 1px; line-height: 1.3; }
-.mob-exp2-feat-desc { font-size: 9px; color: var(--muted); line-height: 1.35; }
+.mob-exp2-feat-title { font-size: 10.5px; font-weight: 700; margin-bottom: 1px; line-height: 1.3; word-break: break-word; }
+.mob-exp2-feat-desc { font-size: 9px; color: var(--muted); line-height: 1.35; word-break: break-word; }
 
 /* Below 360px: the two-column composition gets too cramped to read, so
    this is the one place we fall back to a stacked layout (see media
@@ -753,7 +761,7 @@ body {
 }
 .mob-wf-step {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: flex-start;
 }
 .mob-wf-left {
@@ -761,7 +769,7 @@ body {
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
-  width: 36px;
+  width: 30px;
 }
 /* connector line between dots */
 .mob-wf-step:not(:last-child) .mob-wf-left::after {
@@ -769,28 +777,28 @@ body {
   display: block;
   width: 2px;
   flex: 1;
-  min-height: 20px;
+  min-height: 12px;
   background: rgba(var(--color-purple-deep-rgb),0.45);
-  margin: 4px 0;
+  margin: 3px 0;
 }
 .mob-wf-dot {
-  width: 36px; height: 36px;
-  min-width: 36px; min-height: 36px;
+  width: 30px; height: 30px;
+  min-width: 30px; min-height: 30px;
   border-radius: 50%;
   background: var(--accent);
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 800;
+  font-size: 13px; font-weight: 800;
   line-height: 1;
   color: var(--text-on-accent);
   flex-shrink: 0;
 }
 .mob-wf-right {
-  padding-bottom: 24px;
-  padding-top: 8px;
+  padding-bottom: 12px;
+  padding-top: 5px;
   flex: 1;
 }
-.mob-wf-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-.mob-wf-desc { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.mob-wf-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.mob-wf-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
 
 /* ── WHAT YOU RECEIVE ────────────────────────────────── */
 .mob-receive-grid {
@@ -1114,7 +1122,48 @@ body {
   .mob-stat-sub { font-size: 9px; }
   .mob-checklist li { font-size: 12.5px; }
   .mob-sec-title { font-size: 16px; }
-  .mob-receive-grid { grid-template-columns: 1fr; }
+  /* Expert card: two-column always, just scaled down */
+  .mob-exp2-card { padding: 12px 10px; }
+  .mob-exp2-main { gap: 8px; }
+  .mob-exp2-left { flex: 0 0 100px; width: 100px; }
+  .mob-exp2-avatar { width: 60px; height: 60px; }
+  .mob-exp2-lvl-badge { font-size: 6.5px; padding: 2px 6px; bottom: -7px; }
+  .mob-exp2-name { font-size: 10px; }
+  .mob-exp2-role { font-size: 7px; margin-bottom: 6px; }
+  .mob-exp2-ministats { gap: 4px; }
+  .mob-exp2-ministat { padding: 5px 4px; gap: 4px; }
+  .mob-exp2-ministat-icon { width: 14px; height: 14px; }
+  .mob-exp2-ministat-icon svg { width: 8px; height: 8px; }
+  .mob-exp2-ministat-val { font-size: 8.5px; }
+  .mob-exp2-ministat-label { font-size: 6px; }
+  .mob-exp2-cert-btn { font-size: 8.5px; padding: 6px 4px; }
+  .mob-exp2-features { gap: 7px; }
+  .mob-exp2-feat-icon { width: 22px; height: 22px; border-radius: 6px; }
+  .mob-exp2-feat-icon svg { width: 11px; height: 11px; }
+  .mob-exp2-feat-title { font-size: 9px; }
+  .mob-exp2-feat-desc { font-size: 7.5px; }
+}
+
+/* ── 391px – 480px (large phones: iPhone 16 Pro Max etc.) ── */
+@media (min-width: 391px) and (max-width: 480px) {
+  .mob-exp2-card { padding: 14px 12px; }
+  .mob-exp2-main { gap: 10px; }
+  .mob-exp2-left { flex: 0 0 115px; width: 115px; }
+  .mob-exp2-avatar { width: 68px; height: 68px; }
+  .mob-exp2-name { font-size: 11px; }
+  .mob-exp2-role { font-size: 7.5px; margin-bottom: 8px; }
+  .mob-exp2-lvl-badge { font-size: 7px; padding: 2px 7px; }
+  .mob-exp2-ministats { gap: 4px; }
+  .mob-exp2-ministat { padding: 5px 4px; gap: 4px; }
+  .mob-exp2-ministat-icon { width: 15px; height: 15px; }
+  .mob-exp2-ministat-val { font-size: 9px; }
+  .mob-exp2-ministat-label { font-size: 6px; }
+  .mob-exp2-features { gap: 8px; }
+  .mob-exp2-feat-icon { width: 24px; height: 24px; border-radius: 7px; }
+  .mob-exp2-feat-icon svg { width: 12px; height: 12px; }
+  .mob-exp2-feat-title { font-size: 9.5px; }
+  .mob-exp2-feat-desc { font-size: 8px; }
+  .mob-exp2-cert-btn { font-size: 9.5px; padding: 7px 5px; }
 }
 
 /* ── TABLET (481px – 768px) ── */
@@ -1134,25 +1183,26 @@ body {
 #mob-content { overflow-x: hidden; }
 #mob-content img { max-width: 100%; height: auto; }
 
-/* ── EXPERT CARD: stack only below 360px — the two-column layout above
-   is the default down to that width; this is the one exception. ── */
+/* ── EXPERT CARD: two-column even below 360px, just more compact ── */
 @media (max-width: 359px) {
-  .mob-exp2-main { flex-direction: column; align-items: stretch; gap: 0; }
-  .mob-exp2-divider { display: none; }
-  .mob-exp2-left { flex: none; max-width: 100%; margin-bottom: 16px; }
-  .mob-exp2-avatar { width: 76px; height: 76px; font-size: 22px; }
-  .mob-exp2-name { font-size: 15px; }
-  .mob-exp2-role { font-size: 11.5px; margin-bottom: 12px; }
-  .mob-exp2-ministat { padding: 9px 6px; }
-  .mob-exp2-ministat-icon { width: 24px; height: 24px; }
-  .mob-exp2-ministat-icon svg { width: 12px; height: 12px; }
-  .mob-exp2-ministat-val { font-size: 12px; }
-  .mob-exp2-ministat-label { font-size: 9px; }
-  .mob-exp2-features { gap: 14px; padding-top: 16px; border-top: 1px solid var(--border); }
-  .mob-exp2-feat-icon { width: 36px; height: 36px; }
-  .mob-exp2-feat-icon svg { width: 17px; height: 17px; }
-  .mob-exp2-feat-title { font-size: 12.5px; }
-  .mob-exp2-feat-desc { font-size: 11px; }
+  .mob-exp2-card { padding: 10px 8px; }
+  .mob-exp2-main { gap: 6px; }
+  .mob-exp2-left { flex: 0 0 90px; width: 90px; }
+  .mob-exp2-avatar { width: 54px; height: 54px; }
+  .mob-exp2-lvl-badge { font-size: 6px; padding: 2px 5px; }
+  .mob-exp2-name { font-size: 9.5px; }
+  .mob-exp2-role { font-size: 6.5px; margin-bottom: 5px; }
+  .mob-exp2-ministat { padding: 4px 3px; gap: 3px; }
+  .mob-exp2-ministat-icon { width: 13px; height: 13px; }
+  .mob-exp2-ministat-icon svg { width: 7px; height: 7px; }
+  .mob-exp2-ministat-val { font-size: 8px; }
+  .mob-exp2-ministat-label { font-size: 5.5px; }
+  .mob-exp2-cert-btn { font-size: 7.5px; padding: 5px 3px; }
+  .mob-exp2-features { gap: 6px; }
+  .mob-exp2-feat-icon { width: 20px; height: 20px; border-radius: 5px; }
+  .mob-exp2-feat-icon svg { width: 10px; height: 10px; }
+  .mob-exp2-feat-title { font-size: 8.5px; }
+  .mob-exp2-feat-desc { font-size: 7px; }
 }
 
 /* ══════════════════════════════════════════════
@@ -1297,26 +1347,32 @@ body {
 .mob-exp2-cert-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px 14px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 0 0;
+  margin-top: 8px;
   border-top: 1px solid rgba(255,255,255,0.06);
-  flex-wrap: wrap;
 }
 .mob-exp2-cert-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  box-sizing: border-box;
   background: linear-gradient(135deg, rgba(29,191,115,0.12), rgba(45,110,247,0.1));
   border: 1px solid rgba(29,191,115,0.3);
   color: #34d399;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 8px 16px;
+  padding: 7px 6px;
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   transition: all .2s;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .mob-exp2-cert-btn:hover,
 .mob-exp2-cert-btn:active {
