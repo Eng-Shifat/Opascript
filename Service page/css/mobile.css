@@ -497,16 +497,16 @@ body {
   gap: 14px;
 }
 .mob-why-icon-wrap {
-  width: 52px; height: 52px;
+  width: 44px; height: 44px;
   flex-shrink: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   background: linear-gradient(145deg, rgba(17,181,217,0.18), rgba(17,181,217,0.06));
   border: 1px solid rgba(17,181,217,0.25);
   box-shadow: 0 4px 14px rgba(17,181,217,0.15), inset 0 1px 0 rgba(255,255,255,0.07);
   display: flex; align-items: center; justify-content: center;
   color: var(--label);
 }
-.mob-why-icon-wrap svg { width: 24px; height: 24px; stroke-width: 1.8; }
+.mob-why-icon-wrap svg { width: 20px; height: 20px; stroke-width: 1.8; }
 
 .mob-why-item:nth-child(1) .mob-why-icon-wrap { background: linear-gradient(145deg,rgba(17,181,217,0.18),rgba(17,181,217,0.06)); border-color: rgba(17,181,217,0.28); color: #11b5d9; box-shadow: 0 4px 14px rgba(17,181,217,0.18); }
 .mob-why-item:nth-child(2) .mob-why-icon-wrap { background: linear-gradient(145deg,rgba(167,139,250,0.18),rgba(167,139,250,0.06)); border-color: rgba(167,139,250,0.28); color: #a78bfa; box-shadow: 0 4px 14px rgba(167,139,250,0.18); }

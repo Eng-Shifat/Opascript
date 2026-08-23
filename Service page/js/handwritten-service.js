@@ -26,10 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ── COMMON features present in ALL packages ── */
   var COMMON_FEATURES = [
     { icon: ICON.pen,       title: 'University-Standard Handwriting',       desc: 'Clean &amp; consistent presentation throughout' },
-    { icon: ICON.fileCheck, title: 'Proper Margins &amp; Formatting',        desc: 'Follows your university guidelines' },
     { icon: ICON.ink,       title: 'Blue / Black Ink Option',                desc: 'Choose your preferred ink colour' },
     { icon: ICON.barChart,  title: 'Dashboard Live Progress',                desc: 'Track your order in real-time' },
-    { icon: ICON.eye,       title: 'Scan Preview Before Final Delivery',     desc: 'Review scanned pages before handover' },
     { icon: ICON.truck,     title: 'Physical Delivery Option',               desc: 'Delivered safely to your address' },
     { icon: ICON.pen2,      title: 'Human-Written Academic Work',            desc: '100% handwritten — no printed text' },
     { icon: ICON.shield,    title: '100% Confidential Service',              desc: 'Your work stays completely private' },
@@ -105,8 +103,6 @@ document.addEventListener('DOMContentLoaded', function () {
       : ' (Base)';
 
     var differentiatingFeatures = [
-      { icon: ICON.clock, title: 'Delivery Priority',
-        desc: pkg.priority },
       { icon: ICON.clock, title: 'Estimated Delivery',
         desc: days + ' Days' + pageLabel },
       { icon: ICON.infinity, title: 'Free Revision',
@@ -133,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
     svcSubtitleEl.textContent = pkg.subtitle;
     if (svcPriceEl) svcPriceEl.textContent = pkg.price;
     svcBestValEl.innerHTML    = pkg.bestValue;
-    svcOrderTxtEl.textContent = 'Order ' + pkg.name + ' Handwritten Package';
+    svcOrderTxtEl.textContent = 'Order ' + pkg.name + ' Package';
 
     var features = buildFeatureList(pkg, pageCount || 0);
     svcFeaturesEl.innerHTML = features.map(function (f) {
