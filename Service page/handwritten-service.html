@@ -25,6 +25,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/service.css" />
   <link rel="stylesheet" href="css/handwritten-service.css" />
+  <link rel="stylesheet" href="css/nda-modal.css" />
   <link rel="stylesheet" href="css/mobile.css" media="(max-width: 768px)" />
 </head>
 
@@ -937,8 +938,8 @@
           </div>
 
           <!-- NDA button -->
-          <button class="safety-nda-btn" onclick="hwOpenNDA()">
-            <span class="safety-nda-label">Read Our Confidentiality Agreement</span>
+          <button class="safety-nda-btn" onclick="opOpenNDA(this)" aria-haspopup="dialog">
+            <span class="safety-nda-label">Read Our Non-Disclosure Agreement (NDA)</span>
             <span class="safety-arrow">→</span>
           </button>
         </div>
@@ -1109,318 +1110,94 @@
     }
   </script>
 
-<!-- ══ NDA / CONFIDENTIALITY MODAL ══ -->
-<style>
-/* Backdrop */
-.hw-nda-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: rgba(5, 4, 18, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  box-sizing: border-box;
-}
-.hw-nda-backdrop.active {
-  display: flex;
-  animation: hwNdaFadeIn 0.28s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-.hw-nda-backdrop.closing {
-  animation: hwNdaFadeOut 0.22s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-@keyframes hwNdaFadeIn  { from { opacity:0; } to { opacity:1; } }
-@keyframes hwNdaFadeOut { from { opacity:1; } to { opacity:0; } }
-
-/* Modal box */
-.hw-nda-modal {
-  position: relative;
-  width: 100%;
-  max-width: 700px;
-  max-height: 88vh;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(160deg, #0d0b1e 0%, #100e25 100%);
-  border: 1px solid rgba(139,92,246,0.28);
-  border-radius: 20px;
-  box-shadow: 0 0 0 1px rgba(139,92,246,0.10),
-              0 8px 40px rgba(0,0,0,0.55),
-              0 0 80px rgba(109,40,217,0.12);
-  overflow: hidden;
-  animation: hwNdaSlideIn 0.28s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-.hw-nda-backdrop.closing .hw-nda-modal {
-  animation: hwNdaSlideOut 0.22s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-@keyframes hwNdaSlideIn  { from { opacity:0; transform:translateY(14px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } }
-@keyframes hwNdaSlideOut { from { opacity:1; transform:translateY(0) scale(1); } to { opacity:0; transform:translateY(10px) scale(0.98); } }
-
-/* Header */
-.hw-nda-header {
-  flex-shrink: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 24px 24px 18px;
-  border-bottom: 1px solid rgba(139,92,246,0.15);
-}
-.hw-nda-header-left { display: flex; align-items: center; gap: 14px; }
-.hw-nda-header-icon {
-  width: 44px; height: 44px; flex-shrink: 0;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(139,92,246,0.22), rgba(109,40,217,0.3));
-  border: 1px solid rgba(139,92,246,0.3);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; line-height: 1;
-}
-.hw-nda-title {
-  font-size: 17px; font-weight: 700;
-  color: #f1f0ff;
-  margin: 0 0 3px;
-  line-height: 1.3;
-}
-.hw-nda-subtitle {
-  font-size: 12px;
-  color: rgba(167,139,250,0.85);
-  margin: 0;
-  font-weight: 500;
-}
-.hw-nda-close {
-  flex-shrink: 0;
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
-  color: rgba(200,195,230,0.8);
-  font-size: 18px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.18s, border-color 0.18s, color 0.18s;
-  line-height: 1;
-}
-.hw-nda-close:hover {
-  background: rgba(139,92,246,0.18);
-  border-color: rgba(139,92,246,0.4);
-  color: #e2d9f3;
-}
-
-/* Body */
-.hw-nda-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 22px 24px 0;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(139,92,246,0.3) transparent;
-}
-.hw-nda-body::-webkit-scrollbar { width: 4px; }
-.hw-nda-body::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.35); border-radius: 4px; }
-
-.hw-nda-intro {
-  font-size: 13px;
-  color: rgba(200,195,230,0.78);
-  line-height: 1.7;
-  margin: 0 0 20px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid rgba(139,92,246,0.1);
-}
-
-/* Sections */
-.hw-nda-section { margin-bottom: 16px; }
-.hw-nda-section-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(167,139,250,0.9);
-  margin: 0 0 6px;
-}
-.hw-nda-section-body {
-  font-size: 13px;
-  color: rgba(200,195,230,0.78);
-  line-height: 1.7;
-  margin: 0;
-}
-
-/* Trust block */
-.hw-nda-trust {
-  margin: 20px 0 0;
-  padding: 16px;
-  background: rgba(139,92,246,0.07);
-  border: 1px solid rgba(139,92,246,0.18);
-  border-radius: 12px;
-  text-align: center;
-}
-.hw-nda-trust-quote {
-  font-size: 13px;
-  font-style: italic;
-  color: rgba(220,215,245,0.9);
-  line-height: 1.6;
-  margin: 0 0 8px;
-}
-.hw-nda-trust-note {
-  font-size: 11.5px;
-  color: rgba(167,139,250,0.7);
-  margin: 0;
-}
-
-/* Footer */
-.hw-nda-footer {
-  flex-shrink: 0;
-  padding: 16px 24px 22px;
-  display: flex;
-  justify-content: flex-end;
-}
-.hw-nda-footer-btn {
-  padding: 10px 24px;
-  border-radius: 10px;
-  border: 1px solid rgba(139,92,246,0.35);
-  background: rgba(139,92,246,0.1);
-  color: rgba(200,195,230,0.9);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.18s, border-color 0.18s;
-  font-family: inherit;
-}
-.hw-nda-footer-btn:hover {
-  background: rgba(139,92,246,0.22);
-  border-color: rgba(139,92,246,0.55);
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .hw-nda-backdrop { padding: 12px; align-items: flex-end; }
-  .hw-nda-modal { max-width: 100%; max-height: 92vh; border-radius: 18px 18px 14px 14px; }
-  .hw-nda-header { padding: 18px 16px 14px; }
-  .hw-nda-body { padding: 16px 16px 0; }
-  .hw-nda-footer { padding: 12px 16px 18px; }
-  .hw-nda-title { font-size: 15px; }
-
-  /* Slide-up from bottom on mobile */
-  .hw-nda-backdrop.active .hw-nda-modal {
-    animation: hwNdaSlideUp 0.32s cubic-bezier(0.32,0.72,0,1) forwards;
-  }
-  .hw-nda-backdrop.closing .hw-nda-modal {
-    animation: hwNdaSlideDown 0.24s cubic-bezier(0.4,0,1,1) forwards;
-  }
-  @keyframes hwNdaSlideUp {
-    from { opacity: 0.6; transform: translateY(100%); }
-    to   { opacity: 1;   transform: translateY(0); }
-  }
-  @keyframes hwNdaSlideDown {
-    from { opacity: 1;   transform: translateY(0); }
-    to   { opacity: 0;   transform: translateY(100%); }
-  }
-}
-</style>
-
-<div id="hwNdaBackdrop"
-     class="hw-nda-backdrop"
+<!-- ══ NDA / CONFIDENTIALITY MODAL — Opascript Universal Policy ══ -->
+<div id="opNdaBackdrop"
+     class="op-nda-backdrop"
      role="dialog"
      aria-modal="true"
-     aria-labelledby="hwNdaTitle"
-     aria-describedby="hwNdaDesc">
-  <div class="hw-nda-modal" id="hwNdaModal">
+     aria-labelledby="opNdaTitle"
+     aria-describedby="opNdaDesc">
+
+  <div class="op-nda-modal" id="opNdaModal">
 
     <!-- Header -->
-    <div class="hw-nda-header">
-      <div class="hw-nda-header-left">
-        <div class="hw-nda-header-icon">🔒</div>
+    <div class="op-nda-header">
+      <div class="op-nda-header-left">
+        <div class="op-nda-header-icon">🔒</div>
         <div>
-          <div class="hw-nda-title" id="hwNdaTitle">Non-Disclosure &amp; Confidentiality Agreement</div>
-          <div class="hw-nda-subtitle">Your Work. Your Privacy. Our Responsibility.</div>
+          <div class="op-nda-title" id="opNdaTitle">Non-Disclosure &amp; Confidentiality Agreement</div>
+          <div class="op-nda-subtitle">Your Work. Your Privacy. Our Responsibility.</div>
         </div>
       </div>
-      <button class="hw-nda-close" onclick="hwCloseNDA()" aria-label="Close">&#x2715;</button>
+      <button class="op-nda-close" onclick="opCloseNDA()" aria-label="Close">&#x2715;</button>
     </div>
 
     <!-- Body -->
-    <div class="hw-nda-body" id="hwNdaDesc">
+    <div class="op-nda-body" id="opNdaDesc">
 
-      <p class="hw-nda-intro">At Opascript, we understand that your academic work may contain personal information, university details, research materials, and original ideas. Every project is handled with confidentiality and care.</p>
+      <p class="op-nda-intro">At Opascript, we understand that every project may contain personal information, academic materials, research data, documents, university details, project requirements, and other sensitive information. Regardless of which service you order, we treat your information and submitted materials with confidentiality and responsible handling.</p>
 
-      <div class="hw-nda-section">
-        <div class="hw-nda-section-title">Section 1 — Your Identity Stays Private</div>
-        <p class="hw-nda-section-body">Your name, contact information, university details, and other personal information provided for your order will not be disclosed to unauthorized individuals.</p>
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 01 — Your Identity Stays Private</div>
+        <p class="op-nda-section-body">Your name, contact information, university details, project information, and other personal information provided for your order should not be disclosed to unauthorized individuals.</p>
       </div>
 
-      <div class="hw-nda-section">
-        <div class="hw-nda-section-title">Section 2 — Your Academic Work Stays Confidential</div>
-        <p class="hw-nda-section-body">Your assignments, lab reports, practical notebooks, research materials, documents, and other files submitted for your order are used only for providing the requested service.</p>
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 02 — Your Files &amp; Documents Stay Confidential</div>
+        <p class="op-nda-section-body">Documents, assignments, thesis materials, research files, handwritten materials, reference documents, and other files submitted for your project are used only for providing the requested service.</p>
       </div>
 
-      <div class="hw-nda-section">
-        <div class="hw-nda-section-title">Section 3 — No Unauthorised Sharing or Reselling</div>
-        <p class="hw-nda-section-body">Your submitted files and project materials will not be intentionally shared, publicly posted, published, resold, or distributed to unauthorized third parties.</p>
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 03 — No Unauthorized Sharing or Reselling</div>
+        <p class="op-nda-section-body">Your submitted files, project information, and materials will not be intentionally shared, publicly posted, published, resold, or distributed to unauthorized third parties. Your materials should not be used as public examples, portfolio content, promotional content, or demonstrations without appropriate permission.</p>
       </div>
 
-      <div class="hw-nda-section">
-        <div class="hw-nda-section-title">Section 4 — Controlled Access</div>
-        <p class="hw-nda-section-body">Access to your order information and files is limited to the team members who reasonably need them to complete or support your project.</p>
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 04 — Controlled Access</div>
+        <p class="op-nda-section-body">Access to your order information and files should be limited to authorized team members who reasonably need access to complete, review, manage, or support your project.</p>
       </div>
 
-      <div class="hw-nda-section">
-        <div class="hw-nda-section-title">Section 5 — Confidential Communication</div>
-        <p class="hw-nda-section-body">Information shared through order requirements, dashboard updates, messages, uploaded files, and support conversations is treated as confidential.</p>
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 05 — Confidential Communication</div>
+        <p class="op-nda-section-body">Information shared through order requirements, dashboard updates, messages, uploaded files, support conversations, and other project-related communication should be treated as confidential.</p>
       </div>
 
-      <div class="hw-nda-section">
-        <div class="hw-nda-section-title">Section 6 — Data Handling</div>
-        <p class="hw-nda-section-body">Project files and related information are handled according to Opascript's storage, backup, and operational practices to support service delivery.</p>
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 06 — Responsible Data Handling</div>
+        <p class="op-nda-section-body">Opascript will handle submitted project information and files according to its actual technical, operational, storage, and backup practices to support service delivery.</p>
       </div>
 
-      <div class="hw-nda-trust">
-        <p class="hw-nda-trust-quote">"Your academic work deserves privacy, respect, and responsible handling."</p>
-        <p class="hw-nda-trust-note">If you have any concern about confidentiality or your order, please contact our support team.</p>
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 07 — Client Materials</div>
+        <p class="op-nda-section-body">Any documents, information, references, research materials, or other content supplied by the client remain the client's responsibility and ownership unless otherwise agreed. Opascript does not claim ownership of client-provided materials simply because they are submitted for a service.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 08 — Legal Disclosure</div>
+        <p class="op-nda-section-body">Confidentiality does not prevent disclosure where it is required by applicable law, regulation, court order, or another legally binding requirement.</p>
+      </div>
+
+      <div class="op-nda-trust">
+        <p class="op-nda-trust-quote">"Your work deserves privacy, respect, and responsible handling."</p>
+        <p class="op-nda-trust-note">We are committed to handling your information and project materials responsibly throughout the service.</p>
+      </div>
+
+      <div class="op-nda-support">
+        <p class="op-nda-support-text">If you have any concern about confidentiality, privacy, or your order, please contact our support team.</p>
+        <button class="op-nda-support-link" onclick="opCloseNDA(); if(window.scriptoraChat && typeof window.scriptoraChat.openLiveChat === 'function') window.scriptoraChat.openLiveChat();">Contact Support →</button>
       </div>
 
     </div>
 
     <!-- Footer -->
-    <div class="hw-nda-footer">
-      <button class="hw-nda-footer-btn" onclick="hwCloseNDA()">Close</button>
+    <div class="op-nda-footer">
+      <button class="op-nda-footer-btn" onclick="opCloseNDA()">Close</button>
     </div>
 
   </div>
 </div>
+<!-- ══ /NDA MODAL ══ -->
 
-<script>
-(function () {
-  var backdrop = document.getElementById('hwNdaBackdrop');
-
-  function hwOpenNDA() {
-    backdrop.classList.remove('closing');
-    backdrop.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    document.getElementById('hwNdaModal').querySelector('.hw-nda-close').focus();
-  }
-
-  function hwCloseNDA() {
-    backdrop.classList.add('closing');
-    setTimeout(function () {
-      backdrop.classList.remove('active', 'closing');
-      document.body.style.overflow = '';
-    }, 220);
-  }
-
-  // Outside click
-  backdrop.addEventListener('click', function (e) {
-    if (e.target === backdrop) hwCloseNDA();
-  });
-
-  // ESC key
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && backdrop.classList.contains('active')) hwCloseNDA();
-  });
-
-  // Expose globally
-  window.hwOpenNDA  = hwOpenNDA;
-  window.hwCloseNDA = hwCloseNDA;
-})();
-</script>
+<script src="js/nda-modal.js"></script>
 </body>
 </html>

@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
       features: [
         { icon: ICON.clock,      title: 'Delivery in 20 Days',   desc: 'Standard delivery timeline' },
         { icon: ICON.infinity,   title: '2 Free Revisions',      desc: 'Until requirements are met' },
-        { icon: ICON.fileCheck,  title: 'Turnitin Report',       desc: 'Included' },
+        { icon: ICON.fileCheck,  title: 'AI Plagiarism Report',  desc: 'Included' },
         { icon: ICON.userCheck,  title: 'Human Quality Check',   desc: 'Manual review by our editors' },
         { icon: ICON.fileText,   title: 'Editable Source File',  desc: 'Fully editable MS Word file' },
       ],
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
       features: [
         { icon: ICON.clock,      title: 'Delivery in 15 Days',        desc: 'Faster turnaround' },
         { icon: ICON.infinity,   title: '5 Free Revisions',           desc: 'Until you are satisfied' },
-        { icon: ICON.fileCheck,  title: 'Turnitin Report',            desc: 'Included' },
+        { icon: ICON.fileCheck,  title: 'AI Plagiarism Report',       desc: 'Included' },
         { icon: ICON.userCheck,  title: 'AI + Human Quality Check',   desc: 'Dual-layer quality assurance' },
         { icon: ICON.fileText,   title: 'Editable Source File',       desc: 'Fully editable MS Word file' },
         { icon: ICON.barChart,   title: 'Progress Dashboard Access',  desc: 'Track progress in real-time' },
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
       features: [
         { icon: ICON.clock,      title: 'Delivery in 10 Days',            desc: 'Guaranteed on-time delivery' },
         { icon: ICON.infinity,   title: 'Unlimited Revisions',            desc: 'Until you are 100% satisfied' },
-        { icon: ICON.fileCheck,  title: 'Turnitin Report',                desc: 'Included' },
+        { icon: ICON.fileCheck,  title: 'AI Plagiarism Report',           desc: 'Included' },
         { icon: ICON.userCheck,  title: 'AI + Human Quality Check',       desc: 'Dual-layer quality assurance' },
         { icon: ICON.fileText,   title: 'Editable Source File',           desc: 'Fully editable MS Word file' },
         { icon: ICON.barChart,   title: 'Progress Dashboard Access',      desc: 'Track progress in real-time' },

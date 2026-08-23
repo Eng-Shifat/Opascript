@@ -20,6 +20,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/service.css" />
   <link rel="stylesheet" href="css/mobile.css" media="(max-width: 768px)" />
+  <link rel="stylesheet" href="css/nda-modal.css" />
   <style>
 /* ── Thesis Sample Carousel ── */
 .ts-card { overflow: visible; }
@@ -196,7 +197,7 @@
               </div>
               <div class="svc-hero-fb-stat">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-                <div><div class="svc-hero-fb-stat-title">100% Plagiarism Free</div><div class="svc-hero-fb-stat-desc">Turnitin Report Included</div></div>
+                <div><div class="svc-hero-fb-stat-title">100% Plagiarism Free</div><div class="svc-hero-fb-stat-desc">AI Plagiarism Report Included</div></div>
               </div>
               <div class="svc-hero-fb-stat">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -442,7 +443,7 @@
               </div>
               <div class="exp2-hl-item">
                 <svg class="exp2-hl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Turnitin report included</span>
+                <span>AI plagiarism report included</span>
               </div>
               <div class="exp2-hl-item">
                 <svg class="exp2-hl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -787,11 +788,11 @@
           <div class="svc-faq">
             <div class="svc-faq-item">
               <button class="svc-faq-q">Is the content 100% original? <span class="svc-faq-plus">+</span></button>
-              <div class="svc-faq-a"><div class="svc-faq-a-inner">Absolutely. Every thesis and academic document is written from scratch — no templates, no AI-generated filler. We use only credible sources, properly cited, and deliver a full Turnitin similarity report with every completed order so you can verify originality yourself.</div></div>
+              <div class="svc-faq-a"><div class="svc-faq-a-inner">Absolutely. Every thesis and academic document is written from scratch — no templates, no AI-generated filler. We use only credible sources, properly cited, and deliver a full AI plagiarism report with every completed order so you can verify originality yourself.</div></div>
             </div>
             <div class="svc-faq-item">
-              <button class="svc-faq-q">Will I get a Turnitin report? <span class="svc-faq-plus">+</span></button>
-              <div class="svc-faq-a"><div class="svc-faq-a-inner">Yes — a Turnitin similarity report is included with every Premium Package order at no extra cost. If you are on a Standard or Recommended package and need one, just let us know and we will arrange it for you.</div></div>
+              <button class="svc-faq-q">Will I get a plagiarism report? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a"><div class="svc-faq-a-inner">Yes — an AI plagiarism report is included with every Premium Package order at no extra cost. If you are on a Standard or Recommended package and need one, just let us know and we will arrange it for you.</div></div>
             </div>
             <div class="svc-faq-item">
               <button class="svc-faq-q">Can you follow my university guidelines? <span class="svc-faq-plus">+</span></button>
@@ -1053,7 +1054,7 @@
               </div>
               <div class="safety-feat-text">
                 <div class="safety-feat-title">100% Original &amp; Plagiarism-Free</div>
-                <div class="safety-feat-desc">Includes official Turnitin/AI-detector reports for complete peace of mind.</div>
+                <div class="safety-feat-desc">Includes AI plagiarism reports for complete peace of mind.</div>
               </div>
               <div class="safety-feat-check">
                 <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
@@ -1068,7 +1069,7 @@
           </div>
 
           <!-- NDA button -->
-          <button class="safety-nda-btn" onclick="window.location.href='#'">
+          <button class="safety-nda-btn" onclick="opOpenNDA(this)" aria-haspopup="dialog">
             <span class="safety-nda-label">Read Our Non-Disclosure Agreement (NDA)</span>
             <span class="safety-arrow">→</span>
           </button>
@@ -1459,5 +1460,95 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { document.getElementById('sampleLightbox').style.display = 'none'; document.body.style.overflow = ''; }
 });
 </script>
+
+<!-- ══ NDA / CONFIDENTIALITY MODAL — Opascript Universal Policy ══ -->
+<div id="opNdaBackdrop"
+     class="op-nda-backdrop"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="opNdaTitle"
+     aria-describedby="opNdaDesc">
+
+  <div class="op-nda-modal" id="opNdaModal">
+
+    <!-- Header -->
+    <div class="op-nda-header">
+      <div class="op-nda-header-left">
+        <div class="op-nda-header-icon">🔒</div>
+        <div>
+          <div class="op-nda-title" id="opNdaTitle">Non-Disclosure &amp; Confidentiality Agreement</div>
+          <div class="op-nda-subtitle">Your Work. Your Privacy. Our Responsibility.</div>
+        </div>
+      </div>
+      <button class="op-nda-close" onclick="opCloseNDA()" aria-label="Close">&#x2715;</button>
+    </div>
+
+    <!-- Body -->
+    <div class="op-nda-body" id="opNdaDesc">
+
+      <p class="op-nda-intro">At Opascript, we understand that every project may contain personal information, academic materials, research data, documents, university details, project requirements, and other sensitive information. Regardless of which service you order, we treat your information and submitted materials with confidentiality and responsible handling.</p>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 01 — Your Identity Stays Private</div>
+        <p class="op-nda-section-body">Your name, contact information, university details, project information, and other personal information provided for your order should not be disclosed to unauthorized individuals.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 02 — Your Files &amp; Documents Stay Confidential</div>
+        <p class="op-nda-section-body">Documents, assignments, thesis materials, research files, handwritten materials, reference documents, and other files submitted for your project are used only for providing the requested service.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 03 — No Unauthorized Sharing or Reselling</div>
+        <p class="op-nda-section-body">Your submitted files, project information, and materials will not be intentionally shared, publicly posted, published, resold, or distributed to unauthorized third parties. Your materials should not be used as public examples, portfolio content, promotional content, or demonstrations without appropriate permission.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 04 — Controlled Access</div>
+        <p class="op-nda-section-body">Access to your order information and files should be limited to authorized team members who reasonably need access to complete, review, manage, or support your project.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 05 — Confidential Communication</div>
+        <p class="op-nda-section-body">Information shared through order requirements, dashboard updates, messages, uploaded files, support conversations, and other project-related communication should be treated as confidential.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 06 — Responsible Data Handling</div>
+        <p class="op-nda-section-body">Opascript will handle submitted project information and files according to its actual technical, operational, storage, and backup practices to support service delivery.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 07 — Client Materials</div>
+        <p class="op-nda-section-body">Any documents, information, references, research materials, or other content supplied by the client remain the client's responsibility and ownership unless otherwise agreed. Opascript does not claim ownership of client-provided materials simply because they are submitted for a service.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 08 — Legal Disclosure</div>
+        <p class="op-nda-section-body">Confidentiality does not prevent disclosure where it is required by applicable law, regulation, court order, or another legally binding requirement.</p>
+      </div>
+
+      <div class="op-nda-trust">
+        <p class="op-nda-trust-quote">"Your work deserves privacy, respect, and responsible handling."</p>
+        <p class="op-nda-trust-note">We are committed to handling your information and project materials responsibly throughout the service.</p>
+      </div>
+
+      <div class="op-nda-support">
+        <p class="op-nda-support-text">If you have any concern about confidentiality, privacy, or your order, please contact our support team.</p>
+        <button class="op-nda-support-link" onclick="opCloseNDA(); if(window.scriptoraChat && typeof window.scriptoraChat.openLiveChat === 'function') window.scriptoraChat.openLiveChat();">Contact Support →</button>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="op-nda-footer">
+      <button class="op-nda-footer-btn" onclick="opCloseNDA()">Close</button>
+    </div>
+
+  </div>
+</div>
+<!-- ══ /NDA MODAL ══ -->
+
+<script src="js/nda-modal.js"></script>
 </body>
 </html>

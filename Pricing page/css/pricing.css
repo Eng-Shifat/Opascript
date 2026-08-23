@@ -713,21 +713,29 @@ body {
    TRUST BAR
 ════════════════════════════════════════ */
 .trust-bar {
-  display: flex;
-  justify-content: center;
-  gap: 0;
   background: rgba(var(--text-rgb),0.03);
   border-top: 1px solid rgba(var(--text-rgb),0.07);
   border-bottom: 1px solid rgba(var(--text-rgb),0.07);
-  padding: 1.2rem 2rem;
+  padding: 0 1.5rem;
+}
+.trust-bar-inner {
+  display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  gap: 0;
 }
 .trust-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 2rem;
+  padding: 1.2rem 1rem;
   border-right: 1px solid rgba(var(--text-rgb),0.07);
+  flex: 1;
+  justify-content: center;
 }
 .trust-item:last-child { border-right: none; }
 .trust-icon { font-size: 22px; }
@@ -856,10 +864,12 @@ body {
 
   /* Trust bar — 2 column on mobile */
   .trust-bar {
+    padding: 0;
+  }
+  .trust-bar-inner {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
     gap: 0;
-    padding: 0;
     flex-direction: unset;
   }
   .trust-item {
