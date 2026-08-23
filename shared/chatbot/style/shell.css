@@ -379,8 +379,13 @@
   }
 }
 
-/* ================= Mobile — full-height bottom sheet ================= */
-@media (max-width: 480px) {
+/* ================= Mobile — full-height bottom sheet =================
+   Breakpoint widened from 480px to 640px: 480px only matched narrow
+   phones in portrait — phablets, larger phones, and narrow resized
+   browser windows fell through to the desktop floating-card panel
+   (fixed 640px height, 24px margins, rounded corners), which looks
+   cramped/unbalanced rather than like a proper mobile chat sheet. */
+@media (max-width: 640px) {
   #sca-root { bottom: 0; right: 0; }
   .sca-panel {
     bottom: 0; right: 0; width: 100vw; height: 100vh; max-height: 100vh;
