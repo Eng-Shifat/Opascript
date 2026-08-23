@@ -152,7 +152,7 @@
 .sca-header-close svg { width: 14px; height: 14px; }
 
 /* ---------- Body (module content mounts here) ---------- */
-.sca-body { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sca-space-5); overscroll-behavior: contain; }
+.sca-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: var(--sca-space-5); overscroll-behavior: contain; }
 .sca-body::-webkit-scrollbar { width: 5px; }
 .sca-body::-webkit-scrollbar-track { background: transparent; }
 .sca-body::-webkit-scrollbar-thumb { background: var(--sca-border-strong); border-radius: var(--sca-radius-pill); }
@@ -216,17 +216,22 @@
 
 /* ---------- Card ---------- */
 .ui-card {
-  width: 100%; height: 88px; text-align: left;
-  background: transparent; border: 1px solid transparent; border-radius: var(--sca-radius-lg);
-  padding: var(--sca-space-3); display: flex; flex-direction: column; gap: 4px;
-  transition: background var(--sca-duration-base) ease, border-color var(--sca-duration-base) ease, transform var(--sca-duration-fast) ease;
+  width: 100%; min-width: 0; height: 92px; text-align: left;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--sca-border); border-radius: var(--sca-radius-lg);
+  padding: var(--sca-space-3); display: flex; flex-direction: column; gap: 6px;
+  transition: background var(--sca-duration-base) ease, border-color var(--sca-duration-base) ease, transform var(--sca-duration-fast) ease, box-shadow var(--sca-duration-base) ease;
 }
-.ui-card:hover:not(:disabled) { background: rgba(255, 255, 255, 0.04); border-color: var(--sca-accent-border); transform: translateY(-1px); }
+.ui-card:hover:not(:disabled) { background: var(--sca-accent-soft); border-color: var(--sca-accent-border); transform: translateY(-1px); box-shadow: var(--sca-shadow-md); }
 .ui-card:active:not(:disabled) { transform: translateY(0) scale(0.98); }
 .ui-card:disabled { opacity: 0.5; cursor: default; }
-.ui-card-icon { width: 20px; height: 20px; color: var(--sca-accent); }
-.ui-card-title { color: var(--sca-text); font-size: var(--sca-fs-base); font-weight: 600; }
-.ui-card-desc { color: var(--sca-text-2); font-size: var(--sca-fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui-card-icon {
+  width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--sca-accent-soft); color: var(--sca-accent);
+}
+.ui-card-icon svg { width: 15px; height: 15px; }
+.ui-card-title { color: var(--sca-text); font-size: var(--sca-fs-base); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui-card-desc { color: var(--sca-text-2); font-size: var(--sca-fs-sm); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- Suggestion chip ---------- */
 .ui-chip {
@@ -377,8 +382,19 @@
 /* ================= Mobile — full-height bottom sheet ================= */
 @media (max-width: 480px) {
   #sca-root { bottom: 0; right: 0; }
-  .sca-panel { bottom: 0; right: 0; width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; border: none; }
-  .sca-toggle { position: fixed; bottom: 16px; right: 16px; }
+  .sca-panel {
+    bottom: 0; right: 0; width: 100vw; height: 100vh; max-height: 100vh;
+    max-height: 100dvh; height: 100dvh; /* dvh accounts for mobile browser chrome (address bar) so nothing gets clipped */
+    border-radius: 0; border: none;
+  }
+  .sca-header { padding-top: env(safe-area-inset-top, 0px); height: calc(72px + env(safe-area-inset-top, 0px)); }
+  .sca-input-row { padding-bottom: calc(var(--sca-space-3) + env(safe-area-inset-bottom, 0px)); }
+  .sca-footer { padding-bottom: calc(var(--sca-space-3) + env(safe-area-inset-bottom, 0px)); }
+  .sca-toggle {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+  }
   .sca-bubble { right: 14px; max-width: 190px; }
   #sca-root.sca-open .sca-toggle { display: none; }
   .ui-bubble { max-width: 90%; }

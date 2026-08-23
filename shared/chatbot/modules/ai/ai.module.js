@@ -121,6 +121,9 @@ function attachDelegatedListeners(bodyEl) {
 /* ---------- interactions ---------- */
 
 function onQuickAction(key) {
+  if (key.startsWith('svc_')) { onServiceSelect(key.replace('svc_', '')); return; }
+  if (key.startsWith('price_')) { onServiceSelect(key.replace('price_', ''), { fromPricing: true }); return; }
+
   const business = AiService.getBusiness();
   const action = AiTemplates.QUICK_ACTIONS.find((a) => a.key === key);
   if (action) State.pushMessage({ sender: 'user', type: 'text', text: action.title, module: 'ai' });
@@ -151,7 +154,27 @@ function onQuickAction(key) {
   render();
 }
 
+/* A service card was picked (from "Our Services" or "Pricing" grid) —
+   show its description with a direct "Talk to an Expert" CTA so every
+   service leads somewhere useful instead of a generic fallback reply. */
+function onServiceSelect(serviceKey, { fromPricing = false } = {}) {
+  const business = AiService.getBusiness();
+  const service = (business.services || []).find((s) => s.key === serviceKey);
+  if (!service) { pushAssistant('Tell me more about what you need.'); render(); return; }
+
+  State.pushMessage({ sender: 'user', type: 'text', text: service.name, module: 'ai' });
+  pushAssistant('', { html: AiTemplates.serviceDetailCard(service, { fromPricing }) });
+  render();
+}
+
 function onButton(id) {
+  if (id.startsWith('talk-expert_')) {
+    const key = id.replace('talk-expert_', '');
+    const business = AiService.getBusiness();
+    const service = (business.services || []).find((s) => s.key === key);
+    requestHandoff(service ? service.name : 'service');
+    return;
+  }
   if (id === 'show-topics') { AiState.set({ quickCardsCollapsed: false }); render(); return; }
   if (id === 'handoff-start') { requestHandoff('human'); return; }
   if (id === 'get-quote') { requestHandoff('pricing'); return; }
@@ -229,7 +252,7 @@ function render() {
       hash: (m.text || '') + (m.html || '') + (m.meta ? JSON.stringify(m.meta) : ''),
       html: messageToHtml(m),
     }));
-  if (aiState.typing) items.push({ key: 'typing', hash: 'typing', html: Components.typingIndicator({ label: 'Scriptora AI is typing' }) });
+  if (aiState.typing) items.push({ key: 'typing', hash: 'typing', html: Components.typingIndicator({ label: 'Opascript is typing' }) });
 
   Render.renderKeyedList(threadEl, items, { emptyHtml: '' });
   if (wasAtBottom) Render.scrollToBottom(bodyEl);
@@ -237,8 +260,8 @@ function render() {
 
 function messageToHtml(m) {
   if (m.type === 'handoff') return AiTemplates.handoffCard({ state: (m.meta && m.meta.state) || 'pending' });
-  if (m.type === 'html') return Components.bubble({ variant: m.sender === 'user' ? 'user' : 'assistant', html: m.html, label: m.sender === 'user' ? '' : 'Scriptora AI' });
-  return Components.bubble({ variant: m.sender === 'user' ? 'user' : 'assistant', text: m.text, label: m.sender === 'user' ? '' : 'Scriptora AI' });
+  if (m.type === 'html') return Components.bubble({ variant: m.sender === 'user' ? 'user' : 'assistant', html: m.html, label: m.sender === 'user' ? '' : 'Opascript' });
+  return Components.bubble({ variant: m.sender === 'user' ? 'user' : 'assistant', text: m.text, label: m.sender === 'user' ? '' : 'Opascript' });
 }
 
 export default { init, activate, deactivate, handleInput };

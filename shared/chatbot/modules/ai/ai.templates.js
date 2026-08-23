@@ -52,6 +52,23 @@ function serviceCards(services = []) {
   ).join('')}</div>`;
 }
 
+/* Shown after a single service card is picked — full description plus
+   a direct "Talk to an Expert" CTA, so every service leads somewhere
+   (previously fell through to a generic "tell me more" reply).
+   Single self-contained card (like handoffCard) instead of nesting
+   .ai-info-block inside the bubble — nesting two same-colored boxes
+   plus a detached button below looked like dead empty space. */
+function serviceDetailCard(service, { fromPricing = false } = {}) {
+  const desc = fromPricing
+    ? `${service.description || ''} Pricing depends on scope, level, and deadline — an expert can give you an exact quote.`
+    : (service.description || '');
+  return `
+  <div class="ai-service-card">
+    <p class="ai-service-text">${Components.escapeHtml(desc)}</p>
+    ${Components.button({ id: 'talk-expert_' + service.key, label: 'Talk to an Expert', variant: 'primary' })}
+  </div>`;
+}
+
 /* business.json-e kono fixed price nei (scope onujayi vary kore) —
    tai service list dekhiye ekta "get a quote" CTA jog kora hoy,
    ja handoff trigger kore. Kono price ai module nijei banay na. */
@@ -95,5 +112,5 @@ function handoffCard({ state = 'pending' } = {}) {
 export const AiTemplates = {
   QUICK_ACTIONS,
   welcome, quickActionCards, showTopicsButton,
-  serviceCards, pricingCards, sampleCards, citationHelpCard, handoffCard,
+  serviceCards, serviceDetailCard, pricingCards, sampleCards, citationHelpCard, handoffCard,
 };

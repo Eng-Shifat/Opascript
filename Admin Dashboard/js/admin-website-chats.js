@@ -192,6 +192,27 @@ async function openLead(leadId) {
 
   renderMessages(msgs || []);
   subscribeToLead(leadId);
+  await claimLead(leadId);
+}
+
+/* ── Claim a lead: without this, website_chat_leads.assigned_admin_id
+   stays NULL forever, and the visitor's widget (liveChat.module.js)
+   never fires its onAssigned() handler — so it never leaves the
+   "waiting in queue" screen and never shows the admin's replies, even
+   though those replies are correctly saved to website_chat_messages.
+   Opening a lead here is what actually connects the two sides. ───── */
+async function claimLead(leadId) {
+  const lead = leads.find(l => l.id === leadId);
+  if (!lead || lead.assigned_admin_id || lead.status === 'closed') return;
+
+  const { error } = await sb
+    .from('website_chat_leads')
+    .update({ assigned_admin_id: adminId })
+    .eq('id', leadId)
+    .is('assigned_admin_id', null); // no-op if another admin already claimed it first
+
+  if (error) { console.error('[admin-website-chats] claim failed:', error); return; }
+  lead.assigned_admin_id = adminId;
 }
 
 /* ── Render messages ──────────────────────────────────────────────────── */

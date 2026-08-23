@@ -487,12 +487,12 @@ function mountView(bodyEl, view, s) {
   switch (view) {
     case 'precontact': {
       selectedDepartment = '';
-      Render.mount(bodyEl, `<div id="lc-precontact-notice"></div>${LiveChatTemplates.preContactForm()}`);
+      Render.mount(bodyEl, `<div id="lc-precontact-notice"></div>${LiveChatTemplates.preContactForm()}${LiveChatTemplates.returnToAiButton()}`);
       patchOfflineNotice(bodyEl, s);
       break;
     }
     case 'queue': {
-      Render.mount(bodyEl, `<div class="lc-waiting-screen">${LiveChatTemplates.queueWaitingCard()}${LiveChatTemplates.queuePositionCard(s.queuePosition || 0)}</div>`);
+      Render.mount(bodyEl, `<div class="lc-waiting-screen">${LiveChatTemplates.queueWaitingCard()}${LiveChatTemplates.queuePositionCard(s.queuePosition || 0)}</div>${LiveChatTemplates.returnToAiButton()}`);
       break;
     }
     case 'chat': {

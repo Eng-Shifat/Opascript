@@ -42,7 +42,7 @@ function shellHtml() {
           </div>
           <div class="sca-header-text">
             <div class="sca-header-title-row">
-              <span class="sca-header-title">Scriptora AI</span>
+              <span class="sca-header-title">Opascript</span>
               <span class="sca-status-dot" id="sca-status-dot"></span>
             </div>
             <div class="sca-header-status">Academic Assistant</div>

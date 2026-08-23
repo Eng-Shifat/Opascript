@@ -132,7 +132,7 @@ function feedbackCard() {
 /* ---------- Return-to-AI button ---------- */
 
 function returnToAiButton() {
-  return Components.button({ id: 'lc-return-to-ai', label: 'Back to AI Assistant', variant: 'secondary' });
+  return Components.button({ id: 'lc-return-to-ai', label: '← Back to Opascript', variant: 'secondary' });
 }
 
 export const LiveChatTemplates = {

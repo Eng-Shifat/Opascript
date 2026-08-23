@@ -30,7 +30,7 @@ function userBubble(text) {
   return bubble({ variant: 'user', text });
 }
 
-function assistantBubble(text, label = 'Scriptora AI') {
+function assistantBubble(text, label = 'Opascript') {
   return bubble({ variant: 'assistant', text, label });
 }
 
