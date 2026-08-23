@@ -340,8 +340,8 @@
 
   /* ── CERTIFICATE MODAL ── */
   var CERT_IMAGES = [
-    { src: 'assets/fiverr-certificate.jpg', label: 'Fiverr Level 2 Seller Certificate' },
-    { src: 'assets/certificate-2.jpg',      label: 'Certificate of Excellence' }
+    { src: 'assets/Certification/fiverr-certificate.jpg', label: 'Fiverr Level 2 Seller Certificate' },
+    { src: 'assets/Certification/certificate-2.jpg',      label: 'Certificate of Excellence' }
   ];
   var certCur = 0;
 

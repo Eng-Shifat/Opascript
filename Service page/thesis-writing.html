@@ -30,8 +30,8 @@
 .ts-slide.ts-slide-left.active { animation: tsFadeLeft 0.35s ease; }
 @keyframes tsFadeIn  { from { opacity:0; transform:translateX(16px);  } to { opacity:1; transform:translateX(0); } }
 @keyframes tsFadeLeft { from { opacity:0; transform:translateX(-16px); } to { opacity:1; transform:translateX(0); } }
-.ts-img-wrap { width:100%; border-radius:14px; overflow:hidden; aspect-ratio:3/4; background:rgba(var(--svc-card-rgb),.5); border:1px solid rgba(var(--text-rgb),.08); }
-.ts-img-wrap img { width:100%; height:100%; object-fit:cover; object-position:top center; display:block; }
+.ts-img-wrap { width:100%; border-radius:14px; overflow:hidden; aspect-ratio:4/3; background:rgba(var(--svc-card-rgb),.5); border:1px solid rgba(var(--text-rgb),.08); }
+.ts-img-wrap img { width:100%; height:100%; object-fit:cover; object-position:center center; display:block; }
 .ts-img-placeholder { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:rgba(var(--text-rgb),.25); font-size:13px; }
 .ts-img-placeholder svg { opacity:.3; }
 .ts-info { display:flex; flex-direction:column; gap:16px; padding-top:4px; }
@@ -647,10 +647,7 @@
               <!-- Slide 1 -->
               <div class="ts-slide active" data-index="0">
                 <div class="ts-img-wrap">
-                  <div class="ts-img-placeholder">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-                    <span>Thesis Sample Image</span>
-                  </div>
+                  <img src="assets/Thesis writing/thesis-writing-for-bba.png" alt="BBA Marketing Strategy Thesis Sample" style="width:100%;height:100%;object-fit:cover;border-radius:12px;display:block;">
                 </div>
                 <div class="ts-info">
                   <div class="ts-badges">
@@ -692,7 +689,7 @@
 
 
                   <div class="ts-actions">
-                    <button class="ts-btn-primary">
+                    <button class="ts-btn-primary" onclick="openSampleLightbox('assets/Thesis writing/thesis-writing-for-bba.png','Marketing Strategy Thesis — BBA')">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                       Preview Full Sample
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -709,10 +706,7 @@
               <!-- Slide 2 -->
               <div class="ts-slide" data-index="1">
                 <div class="ts-img-wrap">
-                  <div class="ts-img-placeholder">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-                    <span>Thesis Sample Image</span>
-                  </div>
+                  <img src="assets/Thesis writing/thesis-writing-for-cse.png" alt="CSE Thesis Sample" style="width:100%;height:100%;object-fit:cover;border-radius:12px;display:block;">
                 </div>
                 <div class="ts-info">
                   <div class="ts-badges">
@@ -754,7 +748,7 @@
 
 
                   <div class="ts-actions">
-                    <button class="ts-btn-primary">
+                    <button class="ts-btn-primary" onclick="openSampleLightbox('assets/Thesis writing/thesis-writing-for-cse.png','CSE Attendance System Thesis')">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                       Preview Full Sample
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -1331,7 +1325,7 @@
     </div>
     <!-- Image -->
     <div id="dsk-cert-img-wrap" style="background:#0a0918;overflow:hidden;position:relative">
-      <img id="dsk-cert-img" src="assets/fiverr-certificate.jpg" alt="Certificate" style="width:100%;height:auto;display:block;transition:opacity 0.22s ease">
+      <img id="dsk-cert-img" src="assets/Certification/fiverr-certificate.jpg" alt="Certificate" style="width:100%;height:auto;display:block;transition:opacity 0.22s ease">
       <button id="dsk-cert-prev" onclick="dskCertNav(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background 0.2s" onmouseover="this.style.background='rgba(139,92,246,0.7)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">&#8249;</button>
       <button id="dsk-cert-next" onclick="dskCertNav(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background 0.2s" onmouseover="this.style.background='rgba(139,92,246,0.7)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">&#8250;</button>
     </div>
@@ -1354,8 +1348,8 @@
 <script>
 (function(){
   var CERTS = [
-    { src:'assets/fiverr-certificate.jpg', label:'Fiverr Level 2 Seller Certificate' },
-    { src:'assets/certificate-2.jpg',      label:'Certificate of Excellence' }
+    { src:'assets/Certification/fiverr-certificate.jpg', label:'Fiverr Level 2 Seller Certificate' },
+    { src:'assets/Certification/certificate-2.jpg',      label:'Certificate of Excellence' }
   ];
   var cur = 0;
 
@@ -1440,5 +1434,30 @@
 })();
 </script>
 
+<!-- ══ Sample Lightbox ══ -->
+<div id="sampleLightbox" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;box-sizing:border-box;" onclick="closeSampleLightbox(event)">
+  <div style="position:relative;max-width:900px;width:100%;max-height:90vh;display:flex;flex-direction:column;align-items:center;">
+    <button onclick="closeSampleLightbox()" style="position:absolute;top:-44px;right:0;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1;">&#x2715;</button>
+    <img id="sampleLightboxImg" src="" alt="" style="max-width:100%;max-height:85vh;object-fit:contain;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,0.6);">
+    <p id="sampleLightboxTitle" style="color:rgba(255,255,255,0.7);margin-top:12px;font-size:13px;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openSampleLightbox(src, title) {
+  var lb = document.getElementById('sampleLightbox');
+  document.getElementById('sampleLightboxImg').src = src;
+  document.getElementById('sampleLightboxTitle').textContent = title || '';
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeSampleLightbox(e) {
+  if (e && e.target !== document.getElementById('sampleLightbox') && !e.target.closest('button')) return;
+  document.getElementById('sampleLightbox').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { document.getElementById('sampleLightbox').style.display = 'none'; document.body.style.overflow = ''; }
+});
+</script>
 </body>
 </html>
