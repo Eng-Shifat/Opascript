@@ -249,6 +249,21 @@ async function submitFeedback(leadId, { rating, comment }) {
 }
 
 /* ---------------------------------------------------------------
+   CLOSE LEAD — visitor-side resolve (No answer on resolve prompt)
+   --------------------------------------------------------------- */
+
+async function closeLead(leadId) {
+  const sb = getSB();
+  if (!sb) return { error: new Error('Supabase client unavailable') };
+  const { error } = await sb
+    .from('website_chat_leads')
+    .update({ status: 'closed' })
+    .eq('id', leadId);
+  if (error) console.error('[liveChat.service] closeLead failed:', error);
+  return { error: error || null };
+}
+
+/* ---------------------------------------------------------------
    CLEANUP
    --------------------------------------------------------------- */
 
@@ -258,7 +273,7 @@ function unsubscribe(channel) {
   if (sb) sb.removeChannel(channel);
 }
 
-export const LiveChatService = {
+export const LiveChatService = { closeLead,
   createLead,
   getQueuePosition,
   leaveQueue,

@@ -109,3 +109,54 @@
   color: #9ca3af;
   font-style: italic;
 }
+
+/* ── Resolved summary card ──────────────────────────────────────────── */
+.wc-resolved-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 20px 16px 8px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.04));
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 14px;
+}
+.wc-resolved-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(16,185,129,0.18);
+  color: #10b981;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wc-resolved-body { flex: 1; min-width: 0; }
+.wc-resolved-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #10b981;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.wc-resolved-rating {
+  font-size: 1rem;
+  color: #f59e0b;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.wc-resolved-comment {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-style: italic;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+.wc-resolved-nofb {
+  font-size: 0.75rem;
+  color: #4b5563;
+}

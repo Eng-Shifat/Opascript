@@ -36,6 +36,7 @@ import { WidgetShell } from '../../core/widgetShell.js';
 import { Render } from '../../ui/render.js';
 import { Components } from '../../ui/components.js'; // see IMPORT NOTE above
 import { Config } from '../../config.js';
+import { Session } from '../../core/session.js';
 import { LiveChatState } from './liveChat.state.js';
 import { LiveChatService } from './liveChat.service.js';
 import { LiveChatTemplates } from './liveChat.templates.js';
@@ -180,7 +181,50 @@ function onChipClick(bodyEl, chipEl) {
 function onButtonClick(bodyEl, btnId) {
   if (btnId === 'lc-precontact-submit') { submitPrecontactForm(bodyEl); return; }
   if (btnId === 'lc-feedback-submit') { submitFeedback(bodyEl); return; }
+  if (btnId === 'lc-resolve-yes') { handleResolveYes(bodyEl); return; }
+  if (btnId === 'lc-resolve-no')  { handleResolveNo(bodyEl);  return; }
   if (btnId === 'lc-return-to-ai') { returnToAi(); }
+}
+
+async function handleResolveYes(bodyEl) {
+  // Remove the prompt card immediately so user can't click twice
+  const card = bodyEl.querySelector('#lc-resolve-prompt');
+  if (card) card.remove();
+
+  // Show the visitor's "Yes" reply as a user bubble
+  State.pushMessage({ sender: 'visitor', type: 'text', text: 'Yes', module: 'liveChat' });
+  render();
+
+  // Send "Yes" to Supabase so admin can see it
+  const s = LiveChatState.get();
+  await LiveChatService.sendMessage(s.leadId, 'Yes');
+
+  // Bot follow-up: invite further questions
+  State.pushMessage({
+    sender: 'bot',
+    type: 'text',
+    text: "Okay! Let me know how I can help you further.",
+    module: 'liveChat',
+  });
+  render();
+}
+
+async function handleResolveNo(bodyEl) {
+  // Remove the prompt card
+  const card = bodyEl.querySelector('#lc-resolve-prompt');
+  if (card) card.remove();
+
+  // Show the visitor's "No" reply as a user bubble
+  State.pushMessage({ sender: 'visitor', type: 'text', text: 'No', module: 'liveChat' });
+  render();
+
+  // Send "No" to Supabase so admin sees it
+  const s = LiveChatState.get();
+  await LiveChatService.sendMessage(s.leadId, 'No');
+
+  // Auto-close the lead
+  await LiveChatService.closeLead(s.leadId);
+  // onClosed realtime event will fire and show the closed screen automatically
 }
 
 /* ---------- pre-contact form ---------- */
@@ -304,6 +348,21 @@ function subscribeLead(leadId) {
   leadChannel = LiveChatService.subscribeToLead(leadId, {
     onMessage(row) {
       if (row.sender === 'visitor') return; // already shown optimistically on send
+
+      if (row.message_type === 'resolve_prompt') {
+        // Instead of a plain bubble, inject an interactive Yes/No card
+        const bodyEl = WidgetShell.getBodyEl();
+        if (bodyEl) {
+          // Remove any existing prompt card so we never duplicate it
+          const existing = bodyEl.querySelector('#lc-resolve-prompt');
+          if (existing) existing.remove();
+          bodyEl.insertAdjacentHTML('beforeend', LiveChatTemplates.resolvePromptCard());
+          bodyEl.scrollTop = bodyEl.scrollHeight;
+        }
+        EventBus.emit('livechat.message.received', { message: row });
+        return; // do NOT push a State message — card owns the UI
+      }
+
       State.pushMessage({ sender: row.sender, type: 'text', text: row.message, module: 'liveChat', dbId: row.id });
       EventBus.emit('livechat.message.received', { message: row });
       render();
@@ -323,9 +382,15 @@ function subscribeLead(leadId) {
       EventBus.emit('livechat.closed', { leadId });
       const closedBodyEl = WidgetShell.getBodyEl();
       if (closedBodyEl) Render.mount(closedBodyEl, LiveChatTemplates.chatClosedScreen());
+
+      // After a brief moment so the closed screen is visible, clear the
+      // session and close the widget — next open will start completely fresh.
       closedToFeedbackTimer = window.setTimeout(() => {
-        LiveChatState.set({ view: 'feedback' });
-        render();
+        unsubscribeAll();
+        LiveChatState.reset();
+        Session.clear();
+        State.replaceAll({ messages: [], activeModule: null, modules: {} });
+        WidgetShell.close();
       }, 1800);
     },
     onPresenceSync(presenceState) {
@@ -429,7 +494,13 @@ async function submitFeedback(bodyEl) {
 
   LiveChatState.set({ feedbackSubmitted: true });
   EventBus.emit('livechat.feedback.submitted', { leadId: s.leadId, rating: selectedRating, comment });
-  returnToAi();
+
+  // Clear the session so the next widget open starts fresh, then close.
+  unsubscribeAll();
+  LiveChatState.reset();
+  Session.clear();
+  State.replaceAll({ messages: [], activeModule: null, modules: {} });
+  WidgetShell.close();
 }
 
 /* Components.inputArea() (the feedback comment box) renders an

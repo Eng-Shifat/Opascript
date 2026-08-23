@@ -1222,6 +1222,31 @@ async function saveProfile() {
   else{currentClient.name=fullName;currentClient.first_name=firstName;currentClient.last_name=lastName;currentClient.gender=genderVal;localStorage.setItem('scriptora_name',fullName);const sfx=document.getElementById('headerSuffix');if(sfx)sfx.textContent=genderVal==='female'?'আপু':'ভাই';updateSidebarUser();showProfileMsg('profileMsg','✓ Profile save হয়েছে!','success');showToast('Profile update হয়েছে','success');}
 }
 
+function togglePassVis(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  const isHidden = inp.type === 'password';
+  inp.type = isHidden ? 'text' : 'password';
+  btn.querySelector('.eye-icon').style.display    = isHidden ? 'none' : '';
+  btn.querySelector('.eye-off-icon').style.display = isHidden ? ''     : 'none';
+}
+
+function checkPassMatch() {
+  const newPass = getVal('pNewPass');
+  const confirm = getVal('pConfirmPass');
+  const indicator = document.getElementById('passMatchIndicator');
+  if (!indicator) return;
+  if (!confirm) { indicator.style.display = 'none'; return; }
+  indicator.style.display = '';
+  if (newPass === confirm) {
+    indicator.textContent = '✓ Password মিলেছে';
+    indicator.style.color = '#10b981';
+  } else {
+    indicator.textContent = '✗ Password মিলছে না';
+    indicator.style.color = '#f87171';
+  }
+}
+
 async function changePassword() {
   const btn=document.getElementById('passChangeBtn');
   const current=getVal('pCurrentPass'),newPass=getVal('pNewPass'),confirm=getVal('pConfirmPass');
@@ -1230,7 +1255,7 @@ async function changePassword() {
   if(newPass!==confirm){showProfileMsg('passMsg','নতুন password মিলছে না','error');return;}
   btn.textContent='Updating...'; btn.disabled=true;
 
-  /* বর্তমান password দিয়ে re-verify */
+  /* current password verify করো */
   const {error:signInErr}=await sb.auth.signInWithPassword({email:currentUser.email,password:current});
   if(signInErr){
     showProfileMsg('passMsg','বর্তমান password ভুল','error');
@@ -1247,6 +1272,7 @@ async function changePassword() {
     showToast('Password update হয়েছে','success');
   }
 }
+
 
 async function uploadAvatar(e) {
   const file=e.target.files[0];

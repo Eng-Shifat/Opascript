@@ -129,6 +129,19 @@ function feedbackCard() {
   </div>`;
 }
 
+/* ---------- Resolve prompt card (Yes / No buttons) ---------- */
+
+function resolvePromptCard() {
+  return `
+  <div class="lc-resolve-prompt" id="lc-resolve-prompt">
+    ${Components.assistantBubble('Has your issue been resolved? Do you still need any further help from us?', 'Support')}
+    <div class="lc-resolve-actions">
+      ${Components.button({ id: 'lc-resolve-yes', label: 'Yes', variant: 'primary' })}
+      ${Components.button({ id: 'lc-resolve-no',  label: 'No',  variant: 'secondary' })}
+    </div>
+  </div>`;
+}
+
 /* ---------- Return-to-AI button ---------- */
 
 function returnToAiButton() {
@@ -147,4 +160,5 @@ export const LiveChatTemplates = {
   chatClosedScreen,
   feedbackCard,
   returnToAiButton,
+  resolvePromptCard,
 };

@@ -191,6 +191,7 @@ async function openLead(leadId) {
   }
 
   renderMessages(msgs || []);
+  if (lead && lead.status === 'closed') await appendResolvedCard(leadId);
   subscribeToLead(leadId);
   await claimLead(leadId);
 }
@@ -298,7 +299,16 @@ function subscribeGlobal() {
       /* status change মানেই client answer দিয়েছে বা admin manually কিছু
          করেছে — এখন আর কোনো prompt-এর জন্য অপেক্ষা করার দরকার নেই */
       lead.promptPending = false;
-      if (currentLeadId === updated.id) updateResolveBtnUI(lead);
+      if (currentLeadId === updated.id) {
+        updateResolveBtnUI(lead);
+        if (updated.status === 'closed') {
+          // Small delay so any final messages land first
+          setTimeout(() => appendResolvedCard(updated.id), 600);
+        } else {
+          // Reopened — remove the card
+          document.getElementById('adminChatBody')?.querySelector('.wc-resolved-card')?.remove();
+        }
+      }
       renderLeadList(applyFilter(leads));
     })
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'website_chat_messages' }, (payload) => {
@@ -419,6 +429,38 @@ async function forceCloseLead() {
   await setLeadStatus(currentLeadId, 'closed');
   resolveActionBusy = false;
   showToast('Chat force-close করা হয়েছে।');
+}
+
+/* ── Resolved summary card: fetch feedback + render at bottom of chat ─── */
+async function appendResolvedCard(leadId) {
+  const body = document.getElementById('adminChatBody');
+  if (!body) return;
+
+  // Remove any existing card first (prevent duplicates on re-open)
+  body.querySelector('.wc-resolved-card')?.remove();
+
+  const { data: fb } = await sb
+    .from('website_chat_feedback')
+    .select('rating, comment, created_at')
+    .eq('lead_id', leadId)
+    .maybeSingle();
+
+  const stars = fb?.rating
+    ? '★'.repeat(fb.rating) + '☆'.repeat(5 - fb.rating)
+    : null;
+
+  const card = document.createElement('div');
+  card.className = 'wc-resolved-card';
+  card.innerHTML = `
+    <div class="wc-resolved-icon">✓</div>
+    <div class="wc-resolved-body">
+      <div class="wc-resolved-title">Conversation Resolved</div>
+      ${stars ? `<div class="wc-resolved-rating" title="Client rating">${stars}</div>` : ''}
+      ${fb?.comment ? `<div class="wc-resolved-comment">"${escH(fb.comment)}"</div>` : ''}
+      ${!fb ? `<div class="wc-resolved-nofb">No feedback left by client.</div>` : ''}
+    </div>`;
+  body.appendChild(card);
+  scrollToBottom();
 }
 
 /* ── Shared helper: lead.status update + UI refresh ──────────────────── */

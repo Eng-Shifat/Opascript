@@ -1484,6 +1484,30 @@ input, select, textarea { font-family: inherit; }
 .profile-field input::placeholder { color: var(--text-muted); }
 .readonly-input { opacity: .6; cursor: not-allowed; }
 
+/* Password eye-toggle wrapper */
+.pass-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.pass-input-wrap input {
+  flex: 1;
+  padding-right: 38px !important;
+}
+.pass-eye-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color .15s;
+}
+.pass-eye-btn:hover { color: var(--text-primary); }
+
 .verified-badge {
   font-size: 10px;
   color: var(--green);
