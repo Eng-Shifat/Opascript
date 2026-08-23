@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=2" />
   <script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 
@@ -903,8 +903,14 @@
     const allAnimEls = [...fadeEls, ...headerEls];
 
     allAnimEls.forEach((el, i) => {
-      el.classList.add('fade-pending');
-      el.style.setProperty('--fade-delay', (i % 8) * 0.08 + 's');
+      if (el.classList.contains('service-card')) {
+        // service cards are always visible — just animate subtly
+        el.style.setProperty('--fade-delay', (i % 8) * 0.06 + 's');
+        el.classList.add('fade-in');
+      } else {
+        el.classList.add('fade-pending');
+        el.style.setProperty('--fade-delay', (i % 8) * 0.08 + 's');
+      }
     });
 
     const fadeObserver = new IntersectionObserver((entries) => {
@@ -915,7 +921,7 @@
           fadeObserver.unobserve(e.target);
         }
       });
-    }, { threshold: 0, rootMargin: '0px 0px 80px 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px 200px 0px' });
 
     allAnimEls.forEach(el => fadeObserver.observe(el));
 

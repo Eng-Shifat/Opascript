@@ -1161,18 +1161,25 @@ async function loadPaymentsPage() {
     const isApproved = pay.confirmed || pay.type === 'received';
     const isRejected = pay.type === 'rejected';
     const cls = isApproved ? 'confirmed' : isRejected ? 'rejected' : 'pending';
-    const lbl = isApproved ? '✓ Confirmed' : isRejected ? '✗ Rejected' : '⏳ Pending';
+    const lbl = isApproved ? 'Confirmed' : isRejected ? 'Rejected' : 'Pending';
     const orderTitle = pay.orders?.title || (pay.orders?.order_number ? '#'+pay.orders.order_number : 'Order');
-    const item=document.createElement('div'); item.className='payment-item';
+    const item=document.createElement('div'); item.className=`payment-item pi-${cls}`;
     item.innerHTML=`
-      <div class="pi-left">
-        <div class="pi-order">${escHtml(orderTitle)}</div>
-        <div class="pi-method">${escHtml(pay.method||'—')}${pay.txn_id?` · TXN: ${escHtml(pay.txn_id)}`:''}</div>
-        <div class="pi-txn">${fmtDateLong(pay.paid_at||pay.created_at||'')}</div>
-      </div>
-      <div class="pi-right">
-        <div class="pi-amount">৳${fmt(pay.amount)}</div>
-        <span class="pay-badge ${cls}">${lbl}</span>
+      <div class="pi-status-bar"></div>
+      <div class="pi-body">
+        <div class="pi-top-row">
+          <div class="pi-order">${escHtml(orderTitle)}</div>
+          <div class="pi-amount">৳${fmt(pay.amount)}</div>
+        </div>
+        <div class="pi-bottom-row">
+          <div class="pi-meta">
+            <span class="pi-method-label">${escHtml(pay.method||'—')}</span>
+            ${pay.txn_id?`<span class="pi-sep">·</span><span class="pi-txn">TXN: ${escHtml(pay.txn_id)}</span>`:''}
+            <span class="pi-sep">·</span>
+            <span class="pi-date">${fmtDateLong(pay.paid_at||pay.created_at||'')}</span>
+          </div>
+          <span class="pay-badge ${cls}">${lbl}</span>
+        </div>
       </div>`;
     container.appendChild(item);
   });

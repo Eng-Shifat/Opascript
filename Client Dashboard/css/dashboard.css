@@ -992,10 +992,7 @@ input, select, textarea { font-family: inherit; }
 }
   font-weight: 600;
 }
-.pay-badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-.pay-badge.confirmed { background: rgba(52,211,153,.12); color: #34d399; }
-.pay-badge.pending   { background: rgba(245,158,11,.12); color: #f59e0b; }
-.pay-badge.rejected  { background: rgba(248,113,113,.12); color: #f87171; }
+.pay-badge-legacy-removed { display: none; }
 
 /* File items */
 .file-item {
@@ -1377,27 +1374,112 @@ input, select, textarea { font-family: inherit; }
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color .18s, transform .15s, box-shadow .15s;
+  position: relative;
+}
+.payment-item:hover {
+  border-color: rgba(124,92,255,.35);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0,0,0,.25);
+}
+
+/* Left color strip by status */
+.pi-status-bar {
+  width: 4px;
+  flex-shrink: 0;
+  border-radius: 0;
+}
+.pi-confirmed .pi-status-bar { background: #10b981; }
+.pi-pending   .pi-status-bar { background: #f59e0b; }
+.pi-rejected  .pi-status-bar { background: #f87171; }
+
+/* Method icon circle */
+.pi-icon-wrap { display: none; }
+.pi-method-icon { display: none; }
+
+/* Body */
+.pi-body {
+  flex: 1;
+  min-width: 0;
   padding: 14px 16px;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-  transition: border-color .18s;
+  flex-direction: column;
+  gap: 8px;
 }
-.payment-item:hover { border-color: rgba(124,92,255,.3); }
-.pi-left { flex: 1; min-width: 0; }
-.pi-left .pi-order { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pi-left .pi-method { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
-.pi-left .pi-txn { font-size: 10px; color: var(--text-muted); font-family: monospace; margin-top: 3px; opacity: .8; }
-.pi-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; flex-shrink: 0; }
-.pi-amount { font-size: 16px; font-weight: 700; color: #fff; }
-.pi-date   { font-size: 10px; color: var(--text-muted); }
+.pi-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pi-order {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pi-amount {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: -0.3px;
+}
+.pi-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pi-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.pi-method-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+.pi-sep { font-size: 10px; color: var(--border); }
+.pi-txn {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: monospace;
+  opacity: .8;
+}
+.pi-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: .7;
+}
+
+/* badges */
+.pay-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.pay-badge.confirmed { background: rgba(16,185,129,.12); color: #10b981; border: 1px solid rgba(16,185,129,.2); }
+.pay-badge.confirmed::before { content: '✓'; }
+.pay-badge.pending   { background: rgba(245,158,11,.12); color: #f59e0b; border: 1px solid rgba(245,158,11,.2); }
+.pay-badge.pending::before { content: '⏳'; font-size: 9px; }
+.pay-badge.rejected  { background: rgba(248,113,113,.12); color: #f87171; border: 1px solid rgba(248,113,113,.2); }
+.pay-badge.rejected::before { content: '✗'; }
 
 @media (max-width: 480px) {
-  .payment-item { padding: 12px 14px; gap: 10px; }
-  .pi-left .pi-order { font-size: 12px; }
-  .pi-amount { font-size: 14px; }
+  .pi-icon-wrap { padding: 0 10px; }
+  .pi-method-icon { width: 34px; height: 34px; font-size: 1.1rem; }
+  .pi-body { padding: 12px 12px 12px 0; }
+  .pi-order { font-size: 12.5px; }
+  .pi-amount { font-size: 15px; }
 }
 
 /* ── PROFILE ──────────────────────────────────────────────────────────────── */
