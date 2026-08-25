@@ -10,6 +10,7 @@
     rel="stylesheet" />
   <link rel="stylesheet" href="css/dashboard.css?v=3" />
   <link rel="stylesheet" href="css/chat.css?v=8" />
+  <link rel="stylesheet" href="css/revision-client.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     /* ══ Payment Due Popup — Animated Icons ══ */
@@ -1491,6 +1492,7 @@
               </div>
               <!-- Delivery Review Banner — JS fills this when status=draft_ready -->
               <div id="deliveryReviewBannerWrap"></div>
+              <div id="revisionCenterWrap"></div>
             </div>
 
           </div><!-- end detail-two-col -->
@@ -2139,6 +2141,8 @@
   </div>
 
   <script src="js/cd-topbar.js?v=4"></script>
+  <script src="../shared/revision-service.js"></script>
+  <script src="js/revision-center.js"></script>
 </body>
 
 </html>

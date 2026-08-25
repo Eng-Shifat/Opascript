@@ -1,0 +1,186 @@
+/* ============================================================
+   SCRIPTORA — Revision System CSS
+   Add to: Client Dashboard/css/dashboard.css (bottom)
+           Admin Dashboard/css/order-detail-page.css (bottom)
+   ============================================================ */
+
+/* ══════════════════════════════════════════════════════════════
+   SHARED — Status Badges
+══════════════════════════════════════════════════════════════ */
+.rev-status-requested    { background: rgba(251,191,36,0.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.rev-status-accepted     { background: rgba(99,102,241,0.12);  color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+.rev-status-progress     { background: rgba(59,130,246,0.12);  color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.rev-status-ready        { background: rgba(16,185,129,0.12);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.rev-status-approved     { background: rgba(16,185,129,0.12);  color: #4ade80; border: 1px solid rgba(16,185,129,0.3); }
+.rev-status-clarify      { background: rgba(239,68,68,0.10);   color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+/* ══════════════════════════════════════════════════════════════
+   ADMIN — ODP Revision Tab
+══════════════════════════════════════════════════════════════ */
+.rev-loading {
+  padding: 24px; text-align: center;
+  font-size: 12px; color: var(--muted, #64748b);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.rev-loading span {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(99,102,241,0.2); border-top-color: #818cf8;
+  border-radius: 50%; animation: rcSpin 0.8s linear infinite;
+  display: inline-block;
+}
+.rev-error { padding: 16px; color: #f87171; font-size: 12px; }
+
+.rev-tab-root { display: flex; flex-direction: column; gap: 14px; padding: 4px 0; }
+
+.rev-section-title {
+  font-size: 11px; font-weight: 700; color: var(--muted,#64748b);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0 2px;
+}
+.rev-section-sep { margin-top: 8px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
+
+/* Revision card */
+.rev-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px; padding: 16px;
+}
+.rev-card-done { opacity: 0.7; }
+
+.rev-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.rev-card-num { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+
+.rev-status-badge {
+  font-size: 11px; font-weight: 600;
+  border-radius: 20px; padding: 2px 10px;
+}
+
+.rev-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.rev-meta-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; color: #94a3b8;
+  background: rgba(255,255,255,0.05); border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.rev-desc {
+  font-size: 12px; color: #cbd5e1; line-height: 1.6;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.03); border-radius: 8px;
+  padding: 10px 12px;
+}
+.rev-note         { font-size: 11px; color: #94a3b8; padding: 6px 10px; margin-bottom: 6px; }
+.rev-note span    { color: #64748b; font-weight: 600; }
+.rev-admin-note   { font-size: 11px; color: #fbbf24; padding: 6px 10px; background: rgba(251,191,36,0.06); border-radius: 6px; margin-bottom: 6px; }
+.rev-admin-note span { font-weight: 600; }
+.rev-admin-response { font-size: 11px; color: #818cf8; padding: 6px 10px; margin-bottom: 6px; }
+.rev-admin-response span { font-weight: 600; }
+
+.rev-timestamps {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  font-size: 10px; color: #475569; margin-bottom: 10px;
+}
+
+/* Admin action buttons */
+.rev-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.rev-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px; border: none;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.rev-btn:hover:not(:disabled) { opacity: 0.8; }
+.rev-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.rev-btn-primary { background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff; }
+.rev-btn-accent  { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+.rev-btn-warn    { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+.rev-btn-ghost   { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08); }
+
+.rev-client-review-notice {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: #94a3b8;
+  background: rgba(255,255,255,0.03); border-radius: 8px;
+  padding: 8px 12px; margin-top: 10px;
+}
+.rev-client-review-notice.rev-warn { color: #f87171; background: rgba(239,68,68,0.06); }
+
+/* Clarification / note forms */
+.rev-clarify-form, .rev-note-form {
+  margin-top: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 12px;
+}
+.rev-clarify-input {
+  width: 100%; box-sizing: border-box;
+  min-height: 70px; padding: 8px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; color: #e2e8f0;
+  font-size: 12px; font-family: inherit; resize: vertical;
+  margin-bottom: 8px;
+}
+.rev-clarify-btns { display: flex; gap: 6px; justify-content: flex-end; }
+
+/* Upload area */
+.rev-upload-area { margin-top: 12px; }
+.rev-upload-label { font-size: 11px; font-weight: 600; color: #94a3b8; margin-bottom: 7px; }
+.rev-upload-zone {
+  border: 1.5px dashed rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 12px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: #64748b; cursor: pointer;
+  transition: border-color 0.2s;
+}
+.rev-upload-zone:hover { border-color: rgba(99,102,241,0.35); }
+.rev-file-input { display: none; }
+.rev-uploaded-files { margin-top: 6px; }
+.rev-file-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; color: #94a3b8;
+  background: rgba(255,255,255,0.05); border-radius: 6px;
+  padding: 4px 10px;
+}
+.rev-file-link { color: #818cf8; text-decoration: none; margin-left: 4px; }
+.rev-file-link:hover { text-decoration: underline; }
+.rev-upload-progress { font-size: 11px; color: #818cf8; }
+.rev-upload-error    { font-size: 11px; color: #f87171; }
+.rev-mark-ready-btn  { margin-top: 8px; width: 100%; justify-content: center; }
+
+/* Empty */
+.rev-empty {
+  text-align: center; padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.rev-empty svg { color: rgba(255,255,255,0.12); }
+.rev-empty-title { font-size: 13px; font-weight: 600; color: #475569; }
+.rev-empty-sub   { font-size: 12px; color: rgba(255,255,255,0.25); max-width: 240px; line-height: 1.5; }
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .rc-stepper { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .rc-step { flex-direction: row; align-items: flex-start; gap: 10px; width: 100%; }
+  .rc-step-dot { flex-shrink: 0; }
+  .rc-step-label { text-align: left; margin-top: 3px; }
+  .rc-step-line {
+    position: absolute; left: 11px; top: 22px;
+    width: 1px; height: 100%; background: rgba(255,255,255,0.07);
+  }
+
+  .rc-detail-grid { grid-template-columns: 1fr; }
+  .rc-field-row   { grid-template-columns: 1fr; }
+
+  .rc-modal { border-radius: 14px 14px 0 0; position: fixed; bottom: 0; left: 0; right: 0; max-width: 100%; max-height: 85vh; }
+  .rc-modal-backdrop { align-items: flex-end; padding: 0; }
+
+  .rc-btn, .rev-btn { flex: 1; justify-content: center; }
+  .rc-actions, .rev-actions { flex-direction: column; }
+
+  .rev-card { padding: 12px; }
+  .rc-active-card { padding: 14px; }
+}

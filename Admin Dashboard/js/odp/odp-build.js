@@ -62,6 +62,7 @@ window._buildShell = function(order) {
       <button class="odp-tab"            data-odp-tab="payments"  onclick="odpSwitchTab('payments')"><i class="ti ti-credit-card"></i> Payments</button>
       <button class="odp-tab"            data-odp-tab="messages"  onclick="odpSwitchTab('messages')"><i class="ti ti-message-dots"></i> Messages</button>
       <button class="odp-tab"            data-odp-tab="activity"  onclick="odpSwitchTab('activity')"><i class="ti ti-timeline"></i> Activity</button>
+      <button class="odp-tab"            data-odp-tab="revisions" onclick="odpSwitchTab('revisions')"><i class="ti ti-git-pull-request"></i> Revisions</button>
     </div>
   </div>
 
@@ -135,6 +136,15 @@ window._buildShell = function(order) {
         <div class="odp-card-title"><i class="ti ti-activity"></i> Order Activity Timeline</div>
         <div id="odpActivityList">
           <div class="odp-loading"><div class="odp-spinner"></div> Loading activity…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="odp-pane" data-odp-pane="revisions">
+      <div class="odp-card">
+        <div class="odp-card-title"><i class="ti ti-git-pull-request"></i> Revision Center</div>
+        <div id="odpRevisionPane">
+          <div class="odp-loading"><div class="odp-spinner"></div> Loading revisions…</div>
         </div>
       </div>
     </div>

@@ -835,16 +835,32 @@ input, select, textarea { font-family: inherit; }
 }
 .cd-blocks { display: flex; align-items: center; gap: 8px; }
 .cd-block {
-  background: var(--bg-card2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 6px 12px;
   text-align: center;
-  min-width: 60px;
+  min-width: 44px;
 }
-.cd-num  { font-size: 26px; font-weight: 800; color: #fff; line-height: 1; }
-.cd-unit { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
-.cd-sep  { font-size: 22px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; }
+.cd-num  { font-size: 18px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.01em; }
+.cd-unit { font-size: 9px; color: rgba(255,255,255,0.35); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
+.cd-sep  { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.2); margin-bottom: 12px; flex-shrink: 0; }
+.cd-view-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.cd-view-btn:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.25);
+}
 /* Progress card */
 .progress-card {
   background: var(--bg-card);
@@ -1880,93 +1896,15 @@ input, select, textarea { font-family: inherit; }
   height: 2px;
   background: linear-gradient(90deg, var(--red), transparent);
 }
-.cd-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
 #cdActiveTimer[style*="display:none"],
-#cdActiveTimer[style*="display: none"] {
-  display: none !important;
-}
-.cd-left { flex: 1; }
-.cd-label {
-  font-size: 11px;
-  color: var(--red);
-  display: flex; align-items: center; gap: 6px;
-  margin-bottom: 14px;
-  font-weight: 600;
-}
-.cd-blocks { display: flex; align-items: center; gap: 8px; }
-.cd-block {
-  background: var(--bg-card2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 16px;
-  text-align: center;
-  min-width: 60px;
-}
-.cd-num  { font-size: 28px; font-weight: 800; color: #fff; line-height: 1; }
-.cd-unit { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
-.cd-sep  { font-size: 22px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; }
-.cd-footer {
-  margin-top: 10px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  display: flex; align-items: center; gap: 6px;
-}
-.cd-footer svg { vertical-align: -2px; margin-right: 2px; }
-.cd-footer strong { color: var(--text-primary); }
-
-/* Right side — hourglass + text */
-.cd-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
-}
-.cd-hourglass {
-  font-size: 52px;
-  line-height: 1;
-  filter: drop-shadow(0 0 18px rgba(124,58,237,0.5));
-  animation: hourglassPulse 2.5s ease-in-out infinite;
-}
-@keyframes hourglassPulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 22px rgba(124,58,237,0.75)) drop-shadow(0 0 8px rgba(180,100,255,0.3)); }
-  50% { transform: scale(1.07); filter: drop-shadow(0 0 38px rgba(124,58,237,1)) drop-shadow(0 0 16px rgba(200,120,255,0.6)); }
-}
+#cdActiveTimer[style*="display: none"] { display: none !important; }
+.cd-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.cd-hourglass { font-size: 52px; }
 .cd-right-text { display: flex; flex-direction: column; gap: 6px; }
-.cd-days-big {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
+.cd-days-big { font-size: 18px; font-weight: 800; color: var(--text-primary); }
 .cd-days-big span { color: var(--red); }
-.cd-days-sub {
-  font-size: 11px;
-  color: var(--text-secondary);
-  max-width: 180px;
-  line-height: 1.5;
-}
-.cd-view-btn {
-  margin-top: 4px;
-  background: rgba(37,99,235,0.15);
-  border: 1px solid rgba(59,130,246,0.3);
-  color: var(--accent-light);
-  padding: 7px 14px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  transition: all .2s;
-  white-space: nowrap;
-  align-self: flex-start;
-}
-.cd-view-btn:hover {
-  background: rgba(37,99,235,0.25);
-  border-color: rgba(59,130,246,0.5);
-}
+.cd-days-sub { font-size: 11px; color: var(--text-secondary); max-width: 180px; }
+.cd-footer { margin-top: 10px; font-size: 11px; color: var(--text-secondary); }
 
 /* ═══════════════════════════════════════════
    PAYMENT PANEL — REDESIGN
@@ -3863,10 +3801,10 @@ input, select, textarea { font-family: inherit; }
 
 /* ── Base (Desktop ≥ 900px) ── */
 .cd-blocks { display: flex !important; align-items: center !important; gap: 8px !important; flex-wrap: nowrap !important; }
-.cd-block  { background: var(--bg-card2) !important; border: 1px solid var(--border) !important; border-radius: 10px !important; padding: 10px 14px !important; text-align: center !important; min-width: 56px !important; flex: 1 !important; }
-.cd-num    { font-size: clamp(16px, 4vw, 28px) !important; font-weight: 800 !important; color: #fff !important; line-height: 1 !important; }
+.cd-block  { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 8px !important; padding: 6px 12px !important; text-align: center !important; min-width: 44px !important; flex: 1 !important; }
+.cd-num    { font-size: 18px !important; font-weight: 700 !important; color: #fff !important; line-height: 1 !important; }
 .cd-unit   { font-size: clamp(8px, 1.5vw, 10px) !important; color: var(--text-muted) !important; margin-top: 3px !important; }
-.cd-sep    { font-size: clamp(14px, 3vw, 22px) !important; font-weight: 700 !important; color: var(--text-muted) !important; margin-bottom: 10px !important; flex-shrink: 0 !important; }
+.cd-sep    { font-size: 13px !important; font-weight: 600 !important; color: rgba(255,255,255,0.2) !important; margin-bottom: 12px !important; flex-shrink: 0 !important; }
 
 /* ── Tablet / Small desktop (≤ 860px) ── */
 @media (max-width: 860px) {

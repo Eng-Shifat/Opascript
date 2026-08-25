@@ -633,6 +633,7 @@ async function openOrderDetail(orderId) {
   await loadLatestAdminMsg(orderId);
   await checkAndShowProofSection(order);
   await renderDeliveryReviewBanner(order);
+  if (window.initRevisionCenter) await window.initRevisionCenter(order);
 }
 
 document.getElementById('backToOrders').onclick=()=>{

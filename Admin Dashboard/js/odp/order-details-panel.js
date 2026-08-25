@@ -416,5 +416,6 @@ window.odpSwitchTab = function(name) {
   if (name === 'messages') window._loadMessages();
   if (name === 'files')    window._loadFiles();
   if (name === 'payments') { window._reloadPaymentFinancials(); window._loadPaymentHistory(); }
-  if (name === 'activity') window._loadActivity();
+  if (name === 'activity')  window._loadActivity();
+  if (name === 'revisions') window._loadRevisions();
 };
