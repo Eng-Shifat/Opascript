@@ -689,13 +689,13 @@ function startCountdown(deadlineStr, paymentStatus, livePaid, hasPendingRequest,
     function tick() {
       const diff = deadline - new Date();
       if (diff <= 0) {
-        ['cdDays','cdHours','cdMins','cdSecs'].forEach(id => setText(id,'00'));
+        ['cdDays','cdHours','cdMins','cdSecs'].forEach(id => flipCard(id,'00'));
         setText('cdDaysLeft','সময় শেষ!'); clearInterval(countdownTimer); return;
       }
       const d=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000);
       const m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
-      setText('cdDays',pad(d)); setText('cdHours',pad(h));
-      setText('cdMins',pad(m)); setText('cdSecs',pad(s));
+      flipCard('cdDays',pad(d)); flipCard('cdHours',pad(h));
+      flipCard('cdMins',pad(m)); flipCard('cdSecs',pad(s));
       setText('cdDeadline',fmtDateLong(deadlineStr));
       setText('cdDaysLeft',`আর মাত্র ${d} দিন বাকি`);
       const el2=document.getElementById('cdDaysLeft2'); if(el2) el2.textContent=d;
@@ -1761,6 +1761,35 @@ function showToast(msg,type='') {
 }
 
 function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val??'—';}
+
+/* Single-digit flip animation */
+function flipDigit(id, newChar) {
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  const topEl = wrap.querySelector('.cd-top span');
+  const botEl = wrap.querySelector('.cd-bottom span');
+  if (!topEl) return;
+  const cur = topEl.textContent;
+  if (cur === newChar) return;
+
+  // Animate: scale down → update → scale up
+  wrap.style.transition = 'transform 0.12s ease-in, opacity 0.12s ease-in';
+  wrap.style.transform = 'scaleY(0)';
+  wrap.style.opacity = '0.2';
+  setTimeout(() => {
+    topEl.textContent = newChar;
+    if (botEl) botEl.textContent = newChar;
+    wrap.style.transition = 'transform 0.12s ease-out, opacity 0.12s ease-out';
+    wrap.style.transform = 'scaleY(1)';
+    wrap.style.opacity = '1';
+  }, 120);
+}
+
+function flipCard(id, newVal) {
+  const str = String(newVal ?? '00').padStart(2, '0');
+  flipDigit(id + '0', str[0]);
+  flipDigit(id + '1', str[1]);
+}
 function setVal(id,val){const el=document.getElementById(id);if(el)el.value=val??'';}
 function getVal(id){return document.getElementById(id)?.value||'';}
 function escHtml(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}

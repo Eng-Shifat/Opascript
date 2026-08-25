@@ -493,11 +493,18 @@
         return;
       }
 
-      /* ── Order number ── */
-      const now         = new Date();
-      const datePart    = now.toISOString().slice(0,10).replace(/-/g,'');
-      const rand        = Math.floor(1000 + Math.random() * 9000);
-      const orderNumber = `SCR-${datePart}-${rand}`;
+      /* ── Order number — same sequential RPC as order.js to keep prefix consistent ── */
+      const now     = new Date();
+      const yyyymm  = now.toISOString().slice(0, 7).replace('-', '');   // e.g. "202608"
+      const { data: seqData, error: seqErr } = await supabase
+        .rpc('get_next_order_number', { p_yyyymm: yyyymm });
+      if (seqErr || !seqData) {
+        console.error('Order number RPC failed:', seqErr);
+        if (btn) { btn.disabled = false; btn.innerHTML = '📱 Confirm Order / অর্ডার নিশ্চিত করুন'; }
+        alert('Order number তৈরি করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+        return;
+      }
+      const orderNumber = seqData;   // e.g. "OPA-202608-004"
 
       /* ── Deadline ── */
       const urgencyDays = { normal:15, urgent:7, critical:3, standard:15, express:7, rush:3 };
