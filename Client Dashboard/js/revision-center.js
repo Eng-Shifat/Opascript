@@ -114,7 +114,7 @@ function renderActiveRevision(rev, order) {
           <span>❓</span>
           <div>
             <div class="rc-clarify-title">Additional Information Needed</div>
-            ${rev.admin_response ? `<div class="rc-clarify-text">${_esc(rev.admin_response)}</div>` : ''}
+            ${rev.admin_response ? `<div class="rc-clarify-label">Admin জানতে চেয়েছেন:</div><div class="rc-clarify-text">${_esc(rev.admin_response)}</div>` : ''}
           </div>
         </div>
       ` : ''}
@@ -212,7 +212,20 @@ function _buildClientActions(rev, order) {
     return `<div class="rc-approved-msg">✓ Revision সম্পন্ন হয়েছে</div>`;
   }
 
-  if (['requested', 'accepted', 'in_progress', 'needs_clarification'].includes(s)) {
+  if (s === 'needs_clarification') {
+    return `
+      <div class="rc-respond-box">
+        <div class="rc-respond-label">আপনার উত্তর লিখুন</div>
+        <textarea class="rc-respond-input" id="rcClarifyResponseText" placeholder="Admin যে তথ্য চেয়েছেন সেটা এখানে লিখুন…"></textarea>
+        <button class="rc-btn rc-btn-primary" id="rcClarifyRespondBtn" data-rev-id="${rev.id}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          উত্তর পাঠান
+        </button>
+      </div>
+    `;
+  }
+
+  if (['requested', 'accepted', 'in_progress'].includes(s)) {
     return `<div class="rc-waiting-msg">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       Admin কাজ করছেন…
@@ -253,6 +266,26 @@ function _bindClientActions(wrap, order, activeRev, revisions) {
   const anotherBtn = wrap.querySelector('#rcAnotherRevBtn');
   if (anotherBtn) {
     anotherBtn.onclick = () => openRevisionModal(order.id);
+  }
+
+  /* Respond to clarification request */
+  const respondBtn = wrap.querySelector('#rcClarifyRespondBtn');
+  if (respondBtn) {
+    respondBtn.onclick = async () => {
+      const textEl = wrap.querySelector('#rcClarifyResponseText');
+      const text = textEl ? textEl.value.trim() : '';
+      if (!text) {
+        textEl?.focus();
+        showToast('উত্তর লিখুন', 'error');
+        return;
+      }
+      await _withLoading(respondBtn, async () => {
+        await RevisionService.respondToClarification(activeRev.id, text);
+        showToast('✅ আপনার উত্তর Admin-কে পাঠানো হয়েছে', 'success');
+        await window.initRevisionCenter(order);
+        if (window.renderClientRevisionHistory) await window.renderClientRevisionHistory(order.id);
+      });
+    };
   }
 }
 
@@ -633,10 +666,122 @@ window._setRevHistFilter = function (val) {
   _drawRevHistList();
 };
 
-/* Scroll the existing Revision Center into view as the "detail" action —
-   keeps a single source of truth for full revision detail instead of
-   duplicating the whole active-card markup here. */
+/* Scroll to Revision Center kept as a fallback if the modal can't build */
 window._openRevHistDetail = function (revisionNumber) {
-  const el = document.getElementById('revisionCenterWrap');
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const rev = _revHistAllData.find(r => r.revision_number === revisionNumber);
+  if (!rev) {
+    const el = document.getElementById('revisionCenterWrap');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  _showRevDetailModal(rev);
 };
+
+/* ── Revision detail popup (used by "বিস্তারিত" in Revision History) ── */
+async function _showRevDetailModal(rev) {
+  document.getElementById('rcDetailModal')?.remove();
+
+  const SL   = RevisionService.STATUS_LABEL;
+  const meta = _REV_HIST_META[rev.status] || { color: '#9ca3af' };
+
+  const modal = document.createElement('div');
+  modal.id = 'rcDetailModal';
+  modal.className = 'rc-modal-backdrop';
+  modal.innerHTML = `
+    <div class="rc-modal" style="max-width:560px;">
+      <div class="rc-modal-header">
+        <div class="rc-modal-title">
+          Revision #${rev.revision_number}
+          <span class="rc-status-badge" style="margin-left:8px;color:${meta.color};border-color:${meta.color}44;background:${meta.color}15">${_esc(SL[rev.status] || rev.status)}</span>
+        </div>
+        <button class="rc-modal-close" id="rcDetailModalClose">×</button>
+      </div>
+      <div class="rc-modal-body">
+        ${(rev.status === 'needs_clarification' || rev.admin_response) ? `
+          <div class="rc-clarify-banner" style="margin-bottom:16px;">
+            <span>❓</span>
+            <div>
+              <div class="rc-clarify-title">${rev.status === 'needs_clarification' ? 'Additional Information Needed' : 'Admin Response'}</div>
+              ${rev.admin_response ? `<div class="rc-clarify-label">Admin জানতে চেয়েছিলেন / বলেছেন:</div><div class="rc-clarify-text">${_esc(rev.admin_response)}</div>` : ''}
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="rc-detail-grid">
+          ${rev.section ? `
+            <div class="rc-detail-item">
+              <div class="rc-detail-label">Section / Chapter</div>
+              <div class="rc-detail-val">${_esc(rev.section)}</div>
+            </div>` : ''}
+          ${rev.page_range ? `
+            <div class="rc-detail-item">
+              <div class="rc-detail-label">Page Range</div>
+              <div class="rc-detail-val">${_esc(rev.page_range)}</div>
+            </div>` : ''}
+          <div class="rc-detail-item rc-detail-full">
+            <div class="rc-detail-label">Revision Description</div>
+            <div class="rc-detail-val rc-detail-desc">${_esc(rev.description)}</div>
+          </div>
+          ${rev.additional_note ? `
+            <div class="rc-detail-item rc-detail-full">
+              <div class="rc-detail-label">Additional Note</div>
+              <div class="rc-detail-val rc-detail-desc">${_esc(rev.additional_note)}</div>
+            </div>` : ''}
+          <div class="rc-detail-item">
+            <div class="rc-detail-label">Submitted</div>
+            <div class="rc-detail-val">${_fmtDate(rev.created_at)}</div>
+          </div>
+          ${rev.approved_at ? `
+            <div class="rc-detail-item">
+              <div class="rc-detail-label">Approved</div>
+              <div class="rc-detail-val">${_fmtDate(rev.approved_at)}</div>
+            </div>` : ''}
+        </div>
+
+        <div class="rc-files-section" id="rcDetailModalFiles">
+          <div class="rc-files-loading" style="font-size:11px;color:var(--muted,#64748b);padding:6px 0">Loading files…</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const close = () => modal.remove();
+  modal.querySelector('#rcDetailModalClose').onclick = close;
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+  /* Load this revision's admin-uploaded files into the modal */
+  try {
+    const files = await RevisionService.getRevisionFiles(rev.id);
+    const visible = (files || []).filter(f => f.uploaded_by === 'admin' && f.is_client_visible !== false);
+    const filesEl = modal.querySelector('#rcDetailModalFiles');
+    if (!filesEl) return;
+    if (!visible.length) { filesEl.innerHTML = ''; return; }
+
+    const rows = await Promise.all(visible.map(async f => {
+      const ext  = (f.file_name || '').split('.').pop().toLowerCase();
+      const icon = ext === 'pdf' ? '📄' : (ext === 'docx' || ext === 'doc') ? '📝' : '📎';
+      let viewUrl = f.file_url || '';
+      if (f.storage_path) {
+        try { viewUrl = await RevisionService.getRevisionFileUrl(f.storage_path, 3600); }
+        catch (e) { /* fall back to stored url */ }
+      }
+      const escapedUrl  = viewUrl.replace(/"/g, '&quot;');
+      const escapedName = (f.file_name || 'file').replace(/"/g, '&quot;');
+      return `<div class="rc-file-row">
+        <span class="rc-file-icon">${icon}</span>
+        <span class="rc-file-name">${_esc(f.file_name || 'file')}</span>
+        <div class="rc-file-actions">
+          <a href="${escapedUrl}" target="_blank" class="rc-file-btn rc-file-view">View</a>
+          <a href="${escapedUrl}" download="${escapedName}" class="rc-file-btn rc-file-dl">Download</a>
+        </div>
+      </div>`;
+    }));
+
+    filesEl.innerHTML = `<div class="rc-files-title">Revised File${visible.length > 1 ? 's' : ''}</div><div class="rc-files-list">${rows.join('')}</div>`;
+  } catch (e) {
+    console.warn('[RevisionCenter] detail modal file load failed', e);
+    const filesEl = modal.querySelector('#rcDetailModalFiles');
+    if (filesEl) filesEl.innerHTML = '';
+  }
+}

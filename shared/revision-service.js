@@ -246,6 +246,61 @@
     });
   }
 
+  /* ── CLIENT: respond to a clarification request ────────────
+     Appends the client's answer into additional_note (so both
+     dashboards show it in one place) and moves the revision back
+     to 'requested' so admin sees it needs attention again. ─── */
+  async function respondToClarification(revisionId, responseText) {
+    const { data: rev, error: fetchErr } = await sb()
+      .from('revisions')
+      .select('*')
+      .eq('id', revisionId)
+      .single();
+    if (fetchErr) throw fetchErr;
+
+    if (rev.status !== 'needs_clarification') {
+      throw new Error('এই revision-টি এখন আর clarification-এর অপেক্ষায় নেই।');
+    }
+
+    const stamp = new Date().toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+    const mergedNote = (rev.additional_note ? rev.additional_note + '\n\n' : '')
+      + `📝 Client Response (${stamp}): ${responseText}`;
+
+    const { data, error } = await sb()
+      .from('revisions')
+      .update({ additional_note: mergedNote, status: 'requested' })
+      .eq('id', revisionId)
+      .select()
+      .single();
+    if (error) throw error;
+
+    /* Notify admin — same channel as a fresh revision request */
+    try {
+      await sb().from('messages').insert({
+        order_id:   rev.order_id,
+        text:       `[REVISION_CLIENT_RESPONSE] Revision #${rev.revision_number}: ${responseText}`,
+        from_admin: false,
+        read:       false,
+        sent_at:    new Date().toISOString(),
+      });
+      if (window.topbarPushNotif) {
+        window.topbarPushNotif({
+          id:      'revresp_' + revisionId + '_' + Date.now(),
+          icon:    '💬',
+          color:   'var(--accent)',
+          text:    `Client Responded — Revision #${rev.revision_number}`,
+          sub:     responseText.slice(0, 60),
+          time:    new Date().toISOString(),
+          onclick: `window.location.href='order-management.html'`,
+        });
+      }
+    } catch (e) { console.warn('[RevisionService] admin notify (clarify response) failed', e); }
+
+    return data;
+  }
+
   /* ── Internal: notify client ────────────────────────────── */
   async function _notifyClient(orderId, clientId, { type, message }) {
     try {
@@ -296,6 +351,7 @@
     uploadRevisionFile,
     transitionRevision,
     requestClarification,
+    respondToClarification,
     STATUS_LABEL,
     STATUS_CLASS,
     canTransition,
