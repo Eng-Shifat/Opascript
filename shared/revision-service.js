@@ -121,17 +121,20 @@
 
   /* ── Upload revision attachment (client or admin) ────────── */
   async function uploadRevisionFile(revisionId, orderId, file, uploadedBy) {
-    const ext  = file.name.split('.').pop();
-    const path = `revisions/${orderId}/${revisionId}/${uploadedBy}_${Date.now()}.${ext}`;
+    const ext         = file.name.split('.').pop();
+    const storagePath = `revisions/${orderId}/${revisionId}/${uploadedBy}_${Date.now()}.${ext}`;
 
     const { error: upErr } = await sb().storage
       .from('order-files')
-      .upload(path, file, { upsert: false });
+      .upload(storagePath, file, { upsert: false });
     if (upErr) throw upErr;
 
-    const { data: urlData } = sb().storage
+    /* Signed URL — 7 days. storage_path saved for re-signing later. */
+    const { data: signedData } = await sb().storage
       .from('order-files')
-      .getPublicUrl(path);
+      .createSignedUrl(storagePath, 60 * 60 * 24 * 7);
+
+    const fileUrl = signedData && signedData.signedUrl ? signedData.signedUrl : '';
 
     const { data, error } = await sb()
       .from('revision_files')
@@ -139,7 +142,8 @@
         revision_id:  revisionId,
         order_id:     orderId,
         file_name:    file.name,
-        file_url:     urlData.publicUrl,
+        file_url:     fileUrl,
+        storage_path: storagePath,
         file_size:    file.size,
         uploaded_by:  uploadedBy,
       })
@@ -148,6 +152,16 @@
 
     if (error) throw error;
     return data;
+  }
+
+  /* Re-generate a fresh signed URL for any revision file */
+  async function getRevisionFileUrl(storagePath, expiresIn) {
+    const secs = expiresIn || 3600;
+    const { data, error } = await sb().storage
+      .from('order-files')
+      .createSignedUrl(storagePath, secs);
+    if (error) throw error;
+    return data.signedUrl;
   }
 
   /* ── ADMIN: Transition revision status ──────────────────── */
@@ -277,6 +291,7 @@
   window.RevisionService = {
     getRevisions,
     getRevisionFiles,
+    getRevisionFileUrl,
     submitRevision,
     uploadRevisionFile,
     transitionRevision,

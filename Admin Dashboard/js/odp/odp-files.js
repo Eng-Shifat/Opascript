@@ -443,3 +443,194 @@ window._renderFileRow = function(f) {
     window._toast('File deleted', 'var(--red)');
   };
 
+
+/* ══════════════════════════════════════════════════════════════
+   REVISION FILES — Admin view with lock/unlock control
+   Shows files uploaded during revision workflow (from revision_files table)
+   Call window._loadRevisionFiles() to populate #odpRevisionFileList
+══════════════════════════════════════════════════════════════ */
+
+window._loadRevisionFiles = async function () {
+  const el = document.getElementById('odpRevisionFileList');
+  if (!el) return;
+
+  if (!window._sb() || !window._isRealUUID(window._currentOrderId)) {
+    el.innerHTML = '<div class="rev-file-section-empty">No revision files.</div>';
+    return;
+  }
+
+  el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">Loading revision files…</div>';
+
+  try {
+    /* Fetch all revision files for this order */
+    const { data: revFiles, error } = await window._sb()
+      .from('revision_files')
+      .select('*, revisions(revision_number, status)')
+      .eq('order_id', window._currentOrderId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!revFiles || !revFiles.length) {
+      el.innerHTML = '<div class="rev-file-section-empty"><i class="ti ti-files" style="font-size:18px;opacity:0.3;display:block;margin-bottom:6px"></i>কোনো revision file নেই।</div>';
+      return;
+    }
+
+    /* Fetch access meta for these files (storage_path = file_url for revision files) */
+    const filePaths = revFiles.map(f => `revisions/${window._currentOrderId}/${f.revision_id}/${f.uploaded_by}_${new Date(f.created_at).getTime()}.${f.file_name.split('.').pop()}`);
+
+    const header = `
+      <div class="odp-file-row-head">
+        <span>File Name</span>
+        <span>Revision</span>
+        <span>Uploaded By</span>
+        <span>Date</span>
+        <span>Size</span>
+        <span>Client Access</span>
+        <span>Actions</span>
+      </div>
+    `;
+
+    const rows = revFiles.map(f => _renderRevisionFileRow(f)).join('');
+    el.innerHTML = header + rows;
+
+  } catch (e) {
+    console.error('[RevisionFiles]', e);
+    el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">Could not load revision files.</div>';
+  }
+};
+
+function _renderRevisionFileRow(f) {
+  const ext       = (f.file_name || '').split('.').pop().toLowerCase();
+  const pillCls   = ext === 'pdf' ? 'pdf' : (ext === 'docx' || ext === 'doc') ? 'docx' : 'other';
+  const icon      = ext === 'pdf' ? 'ti-file-type-pdf' : (ext === 'docx' || ext === 'doc') ? 'ti-file-type-doc' : 'ti-file';
+  const size      = f.file_size ? (f.file_size / 1024 < 1024 ? (f.file_size / 1024).toFixed(0) + ' KB' : (f.file_size / 1024 / 1024).toFixed(1) + ' MB') : '—';
+  const date      = f.created_at ? new Date(f.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ' ' + new Date(f.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—';
+  const revNum    = f.revisions?.revision_number ? `#${f.revisions.revision_number}` : '—';
+  const uploader  = f.uploaded_by || 'Unknown';
+
+  /* Access state from cache keyed by file_url */
+  const meta       = window._fileMetaCache[f.file_url] || {};
+  const isVisible  = meta.is_visible !== undefined ? meta.is_visible : false; /* default hidden for revision files */
+  const dlAllowed  = meta.download_allowed !== undefined ? meta.download_allowed : true;
+  const escapedUrl = window._esc(f.file_url);
+  const escapedName = window._esc(f.file_name);
+
+  return `
+    <div class="odp-file-row${isVisible ? '' : ' client-hidden'}"
+         data-rev-file-id="${window._esc(f.id)}"
+         data-file-url="${escapedUrl}"
+         data-vis="${isVisible}"
+         data-dl="${dlAllowed}">
+      <div class="odp-file-name-cell">
+        <i class="ti ${icon}"></i>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapedName}</span>
+      </div>
+      <span style="color:var(--muted2);font-size:11.5px;font-weight:600">Rev ${revNum}</span>
+      <span style="color:var(--muted2);font-size:11.5px">${window._esc(uploader)}</span>
+      <span style="color:var(--muted2);font-size:11px">${date}</span>
+      <span style="color:var(--muted2);font-size:11.5px">${size}</span>
+      <div class="odp-access-cell">
+        <span class="odp-access-badge ${isVisible ? 'viewable' : 'hidden'}" id="revFileBadge_${window._esc(f.id)}">${isVisible ? '● Viewable' : '○ Hidden'}</span>
+        <label class="odp-mini-toggle" title="Toggle client visibility">
+          <input type="checkbox" ${isVisible ? 'checked' : ''}
+            onchange="revFileToggleVisibility('${window._esc(f.id)}', '${escapedUrl}', '${escapedName}', this)">
+          <div class="odp-mini-track"></div>
+          <div class="odp-mini-thumb"></div>
+        </label>
+      </div>
+      <div class="odp-file-actions">
+        <button class="odp-file-action-btn" title="View file"
+          onclick="window.open('${escapedUrl}','_blank')">
+          <i class="ti ti-eye"></i>
+        </button>
+        <button class="odp-file-action-btn${dlAllowed ? '' : ' locked-dl'}"
+          title="${dlAllowed ? 'Client download allowed — click to lock' : 'Client download locked — click to unlock'}"
+          onclick="revFileToggleDownload('${window._esc(f.id)}', '${escapedUrl}', this)">
+          <i class="ti ${dlAllowed ? 'ti-lock-open' : 'ti-lock'}"></i>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/* Toggle revision file visibility for client */
+window.revFileToggleVisibility = async function (fileId, fileUrl, fileName, checkbox) {
+  const isVisible = checkbox.checked;
+  const row   = checkbox.closest('.odp-file-row');
+  const badge = document.getElementById(`revFileBadge_${fileId}`);
+
+  /* Optimistic UI */
+  if (badge) {
+    badge.className   = 'odp-access-badge ' + (isVisible ? 'viewable' : 'hidden');
+    badge.textContent = isVisible ? '● Viewable' : '○ Hidden';
+  }
+  if (row) {
+    row.classList.toggle('client-hidden', !isVisible);
+    row.dataset.vis = isVisible;
+  }
+
+  /* Update revision_files table */
+  try {
+    await window._sb()
+      .from('revision_files')
+      .update({ is_client_visible: isVisible })
+      .eq('id', fileId);
+  } catch (e) {
+    console.warn('[RevisionFiles] visibility update error', e);
+  }
+
+  /* Update local cache */
+  if (!window._fileMetaCache[fileUrl]) window._fileMetaCache[fileUrl] = {};
+  window._fileMetaCache[fileUrl].is_visible = isVisible;
+
+  /* Notify client when made visible */
+  if (isVisible && window._sb() && window._isRealUUID(window._currentOrderId)) {
+    try {
+      await window._sb().from('client_notifications').insert({
+        order_id:   window._currentOrderId,
+        client_id:  window._currentOrder?.clientId || null,
+        type:       'file_uploaded',
+        message:    `📄 Revised file available: "${fileName}"`,
+        is_read:    false,
+        created_at: new Date().toISOString(),
+      });
+    } catch (_) {}
+  }
+
+  window._toast(
+    isVisible ? `✓ "${fileName}" client কে দেখানো হচ্ছে` : `"${fileName}" client থেকে hide করা হয়েছে`,
+    isVisible ? 'var(--green)' : 'var(--muted)'
+  );
+};
+
+/* Toggle revision file download lock */
+window.revFileToggleDownload = async function (fileId, fileUrl, btn) {
+  const row             = btn.closest('.odp-file-row');
+  const currentlyAllowed = row ? row.dataset.dl === 'true' : true;
+  const nowAllowed       = !currentlyAllowed;
+
+  /* Optimistic UI */
+  btn.classList.toggle('locked-dl', !nowAllowed);
+  btn.title = nowAllowed ? 'Client download allowed — click to lock' : 'Client download locked — click to unlock';
+  btn.querySelector('i').className = 'ti ' + (nowAllowed ? 'ti-lock-open' : 'ti-lock');
+  if (row) row.dataset.dl = nowAllowed;
+
+  /* Update DB */
+  try {
+    await window._sb()
+      .from('revision_files')
+      .update({ download_allowed: nowAllowed })
+      .eq('id', fileId);
+  } catch (e) {
+    console.warn('[RevisionFiles] download toggle error', e);
+  }
+
+  if (!window._fileMetaCache[fileUrl]) window._fileMetaCache[fileUrl] = {};
+  window._fileMetaCache[fileUrl].download_allowed = nowAllowed;
+
+  window._toast(
+    nowAllowed ? '🔓 Download unlocked for client' : '🔒 Download locked for client',
+    nowAllowed ? 'var(--green)' : 'var(--yellow)'
+  );
+};

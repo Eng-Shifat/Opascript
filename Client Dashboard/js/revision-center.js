@@ -64,6 +64,11 @@ function renderRevisionCenter(wrap, order, revisions) {
 
   /* Bind action buttons */
   _bindClientActions(wrap, order, activeRev, revisions);
+
+  /* Load files for all non-approved revisions */
+  for (const rev of revisions) {
+    _loadClientRevisionFiles(rev.id);
+  }
 }
 
 /* ── Active revision card ───────────────────────────────────── */
@@ -147,6 +152,11 @@ function renderActiveRevision(rev, order) {
             <div class="rc-detail-label">Admin Response</div>
             <div class="rc-detail-val">${_esc(rev.admin_response)}</div>
           </div>` : ''}
+      </div>
+
+      <!-- Revision Files (admin uploaded) -->
+      <div class="rc-files-section" id="rcRevFiles_${rev.id}">
+        <div class="rc-files-loading" style="font-size:11px;color:var(--muted,#64748b);padding:6px 0">Loading files…</div>
       </div>
 
       <div class="rc-actions" id="rcActionWrap" data-rev-id="${rev.id}" data-order-id="${order.id}" data-status="${rev.status}">
@@ -414,6 +424,76 @@ window.openRevisionModal = function (orderId) {
     });
   };
 };
+
+/* ── Load & render revision files for client ────────────────── */
+async function _loadClientRevisionFiles(revisionId) {
+  const el = document.getElementById('rcRevFiles_' + revisionId);
+  if (!el) return;
+
+  try {
+    /* Fetch files from revision_files table */
+    const { data: files, error } = await window.scriptoraSupabase
+      .from('revision_files')
+      .select('*')
+      .eq('revision_id', revisionId)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    /* Show admin-uploaded files (is_client_visible not explicitly false) */
+    const visible = (files || []).filter(function(f) {
+      return f.uploaded_by === 'admin' && f.is_client_visible !== false;
+    });
+
+    if (!visible.length) {
+      el.innerHTML = '';
+      return;
+    }
+
+    /* Generate fresh signed URLs for each file (1-hour validity) */
+    const rows = await Promise.all(visible.map(async function(f) {
+      const ext   = (f.file_name || '').split('.').pop().toLowerCase();
+      const icon  = ext === 'pdf' ? '📄' : (ext === 'docx' || ext === 'doc') ? '📝' : '📎';
+      const dlOk  = f.download_allowed !== false;
+
+      let viewUrl = f.file_url || '';
+      /* If storage_path exists, get a fresh signed URL so it always works */
+      if (f.storage_path) {
+        try {
+          viewUrl = await RevisionService.getRevisionFileUrl(f.storage_path, 3600);
+        } catch(e) {
+          console.warn('[RevisionCenter] sign url failed, falling back', e);
+        }
+      }
+
+      const escapedUrl  = viewUrl.replace(/"/g, '&quot;');
+      const escapedName = (f.file_name || 'file').replace(/"/g, '&quot;');
+
+      return '<div class="rc-file-row">'
+        + '<span class="rc-file-icon">' + icon + '</span>'
+        + '<span class="rc-file-name">' + _esc(f.file_name || 'file') + '</span>'
+        + '<div class="rc-file-actions">'
+        + '<a href="' + escapedUrl + '" target="_blank" class="rc-file-btn rc-file-view">'
+        + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+        + ' View</a>'
+        + (dlOk
+          ? '<a href="' + escapedUrl + '" download="' + escapedName + '" class="rc-file-btn rc-file-dl">'
+            + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'
+            + ' Download</a>'
+          : '<span class="rc-file-locked">🔒 Locked</span>')
+        + '</div></div>';
+    }));
+
+    el.innerHTML = '<div class="rc-files-title">'
+      + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>'
+      + ' Revised File' + (visible.length > 1 ? 's' : '') + '</div>'
+      + '<div class="rc-files-list">' + rows.join('') + '</div>';
+
+  } catch (e) {
+    console.warn('[RevisionCenter] file load error', e);
+    el.innerHTML = '';
+  }
+}
 
 /* ── Helpers ────────────────────────────────────────────────── */
 function _esc(str) {

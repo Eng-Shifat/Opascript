@@ -41,10 +41,42 @@ window._loadRevisions = async function () {
 
     el.innerHTML = _buildRevisionTabHTML(revisions);
     _bindAdminRevisionActions(el, revisions);
+
+    /* Pre-load existing uploaded files for in_progress revisions */
+    for (const rev of revisions) {
+      if (rev.status === 'in_progress') {
+        _loadExistingRevFiles(rev.id, el);
+      }
+    }
   } catch (e) {
     el.innerHTML = `<div class="rev-error">Revisions লোড হয়নি: ${_esc(e.message)}</div>`;
   }
 };
+
+/* ── Load already-uploaded files for a revision card ────────── */
+async function _loadExistingRevFiles(revId, el) {
+  const listEl   = el.querySelector(`#revFiles_${revId}`);
+  const readyBtn = el.querySelector(`.rev-mark-ready-btn[data-rev-id="${revId}"]`);
+  if (!listEl) return;
+
+  try {
+    const files = await RevisionService.getRevisionFiles(revId);
+    if (!files.length) return;
+
+    listEl.innerHTML = files.map(f => `
+      <div class="rev-file-chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+        ${_esc(f.file_name)}
+        <a href="${_esc(f.file_url)}" target="_blank" class="rev-file-link">View</a>
+      </div>
+    `).join('');
+
+    /* Enable ready button since file already exists */
+    if (readyBtn) readyBtn.disabled = false;
+  } catch (e) {
+    console.warn('[ODP Revisions] existing files load error', e);
+  }
+}
 
 /* ── Build tab HTML ─────────────────────────────────────────── */
 function _buildRevisionTabHTML(revisions) {
@@ -118,10 +150,10 @@ function _buildRevCard(rev, isCompleted) {
       ${rev.status === 'in_progress' ? `
         <div class="rev-upload-area" id="revUpload_${rev.id}">
           <div class="rev-upload-label">Revised File Upload</div>
-          <div class="rev-upload-zone" data-rev-id="${rev.id}">
+          <div class="rev-upload-zone" data-rev-id="${rev.id}" onclick="document.getElementById('revFileInput_${rev.id}').click()" style="cursor:pointer;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <span>Revised file upload করুন</span>
-            <input type="file" class="rev-file-input" data-rev-id="${rev.id}" accept=".pdf,.doc,.docx">
+            <input type="file" id="revFileInput_${rev.id}" class="rev-file-input" data-rev-id="${rev.id}" accept=".pdf,.doc,.docx">
           </div>
           <div class="rev-uploaded-files" id="revFiles_${rev.id}"></div>
           <button class="rev-btn rev-btn-accent rev-mark-ready-btn" data-rev-id="${rev.id}" disabled>
@@ -129,6 +161,14 @@ function _buildRevCard(rev, isCompleted) {
             Mark Ready for Review
           </button>
         </div>
+      ` : ''}
+
+      <!-- Show uploaded files for completed/other statuses -->
+      ${rev.status !== 'in_progress' && !isCompleted ? `
+        <div class="rev-uploaded-files" id="revFiles_${rev.id}"></div>
+      ` : ''}
+      ${isCompleted ? `
+        <div class="rev-uploaded-files" id="revFiles_${rev.id}"></div>
       ` : ''}
 
       <!-- Clarification form -->
@@ -150,6 +190,17 @@ function _buildRevCard(rev, isCompleted) {
           <button class="rev-btn rev-btn-accent" id="revNoteSave_${rev.id}" data-rev-id="${rev.id}">Note সেভ করুন</button>
         </div>
       </div>
+
+      <!-- Admin message form (for ready_for_review) -->
+      ${rev.status === 'ready_for_review' ? `
+        <div class="rev-note-form" id="revAdminMsgForm_${rev.id}" style="display:none;margin-top:8px;">
+          <textarea class="rev-clarify-input" id="revAdminMsgText_${rev.id}" placeholder="Client কে কী message পাঠাতে চান?…"></textarea>
+          <div class="rev-clarify-btns">
+            <button class="rev-btn rev-btn-ghost" id="revAdminMsgCancel_${rev.id}">বাতিল</button>
+            <button class="rev-btn rev-btn-accent" id="revAdminMsgSend_${rev.id}" data-rev-id="${rev.id}">Message পাঠান</button>
+          </div>
+        </div>
+      ` : ''}
     </div>
   `;
 }
@@ -187,6 +238,11 @@ function _buildAdminActions(rev) {
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       Client review করছেন…
     </div>
+    <button class="rev-btn rev-btn-ghost rev-note-btn" data-rev-id="${rev.id}" style="margin-top:8px">+ Internal Note</button>
+    <button class="rev-btn rev-btn-accent rev-admin-msg-btn" data-rev-id="${rev.id}" style="margin-top:8px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Client কে Message পাঠান
+    </button>
   `;
 
   if (s === 'needs_clarification') return `
@@ -280,12 +336,11 @@ function _bindAdminRevisionActions(el, revisions) {
     };
   });
 
-  /* File upload for in_progress revisions */
+  /* ── File upload for in_progress revisions ────────────────── */
   el.querySelectorAll('.rev-file-input').forEach(input => {
-    const revId   = input.dataset.revId;
-    const listEl  = document.getElementById(`revFiles_${revId}`);
+    const revId    = input.dataset.revId;
+    const listEl   = document.getElementById(`revFiles_${revId}`);
     const readyBtn = el.querySelector(`.rev-mark-ready-btn[data-rev-id="${revId}"]`);
-    let uploadedFileRec = null;
 
     input.onchange = async () => {
       const file = input.files[0];
@@ -294,21 +349,24 @@ function _bindAdminRevisionActions(el, revisions) {
 
       listEl.innerHTML = '<span class="rev-upload-progress">Uploading…</span>';
       try {
-        uploadedFileRec = await RevisionService.uploadRevisionFile(
+        const rec = await RevisionService.uploadRevisionFile(
           revId, window._currentOrderId, file, 'admin'
         );
         listEl.innerHTML = `
           <div class="rev-file-chip">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
             ${_esc(file.name)}
-            <a href="${uploadedFileRec.file_url}" target="_blank" class="rev-file-link">View</a>
+            <a href="${_esc(rec.file_url)}" target="_blank" class="rev-file-link">View</a>
           </div>
         `;
         if (readyBtn) readyBtn.disabled = false;
         window._toast('✓ File upload হয়েছে', 'var(--green)');
         window._logActivity('revision', `Revised file uploaded: ${file.name}`);
+
+        /* Refresh admin files tab if visible */
+        if (typeof window._loadFiles === 'function') window._loadFiles();
       } catch (e) {
-        listEl.innerHTML = '<span class="rev-upload-error">Upload failed</span>';
+        listEl.innerHTML = '<span class="rev-upload-error">Upload failed: ' + _esc(e.message) + '</span>';
         window._toast('⚠ Upload failed: ' + e.message, 'var(--red)');
         input.disabled = false;
       }
@@ -325,6 +383,64 @@ function _bindAdminRevisionActions(el, revisions) {
         });
       };
     }
+  });
+
+  /* ── Admin message button (ready_for_review state) ────────── */
+  el.querySelectorAll('.rev-admin-msg-btn').forEach(btn => {
+    btn.onclick = () => {
+      const form = document.getElementById(`revAdminMsgForm_${btn.dataset.revId}`);
+      if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    };
+  });
+
+  /* Send admin message */
+  el.querySelectorAll('[id^="revAdminMsgSend_"]').forEach(btn => {
+    btn.onclick = async () => {
+      const revId = btn.dataset.revId;
+      const text  = document.getElementById(`revAdminMsgText_${revId}`)?.value.trim();
+      if (!text) { window._toast('Message লিখুন', 'var(--red)'); return; }
+      await _withLoading(btn, async () => {
+        /* Insert into messages table so client sees it in chat */
+        await window._sb().from('messages').insert({
+          order_id:   window._currentOrderId,
+          text:       text,
+          from_admin: true,
+          read:       false,
+          sent_at:    new Date().toISOString(),
+        });
+        /* Also save as admin_response on revision */
+        await window._sb().from('revisions')
+          .update({ admin_response: text })
+          .eq('id', revId);
+        /* Notify client */
+        const rev = revisions.find(r => r.id === revId) || {};
+        if (window._isRealUUID(window._currentOrderId)) {
+          await window._sb().from('client_notifications').insert({
+            order_id:   window._currentOrderId,
+            client_id:  rev.client_id || null,
+            type:       'revision_message',
+            message:    `💬 Admin message (Revision #${rev.revision_number || ''}): ${text.slice(0, 80)}${text.length > 80 ? '…' : ''}`,
+            is_read:    false,
+            created_at: new Date().toISOString(),
+          });
+        }
+        window._toast('✓ Message পাঠানো হয়েছে', 'var(--green)');
+        const form = document.getElementById(`revAdminMsgForm_${revId}`);
+        if (form) { form.style.display = 'none'; }
+        const ta = document.getElementById(`revAdminMsgText_${revId}`);
+        if (ta) ta.value = '';
+        window._loadRevisions();
+      });
+    };
+  });
+
+  /* Admin message cancel */
+  el.querySelectorAll('[id^="revAdminMsgCancel_"]').forEach(btn => {
+    btn.onclick = () => {
+      const id   = btn.id.replace('revAdminMsgCancel_', '');
+      const form = document.getElementById(`revAdminMsgForm_${id}`);
+      if (form) form.style.display = 'none';
+    };
   });
 }
 
