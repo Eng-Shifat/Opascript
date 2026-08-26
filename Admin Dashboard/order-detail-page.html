@@ -57,6 +57,7 @@
       <button class="odp-tab" onclick="switchTab('payments', this)"><i class="ti ti-credit-card"></i> Payments</button>
       <button class="odp-tab" onclick="switchTab('messages', this)"><i class="ti ti-message-dots"></i> Messages</button>
       <button class="odp-tab" onclick="switchTab('activity', this)"><i class="ti ti-timeline"></i> Activity</button>
+      <button class="odp-tab" onclick="switchTab('revisions', this)"><i class="ti ti-git-pull-request"></i> Revisions</button>
     </div>
   </div>
 
@@ -369,6 +370,13 @@
       <div class="odp-card">
         <div class="odp-card-title"><i class="ti ti-activity"></i> Order Activity Timeline</div>
         <p style="color:var(--muted);font-size:12.5px;text-align:center;padding:30px 0">No activity recorded yet.</p>
+      </div>
+    </div>
+
+    <!-- REVISIONS -->
+    <div class="odp-pane" id="pane-revisions">
+      <div id="odpRevisionPane">
+        <div class="rev-loading"><span></span> Loading revisions…</div>
       </div>
     </div>
 

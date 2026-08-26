@@ -1919,7 +1919,7 @@ input, select, textarea { font-family: inherit; }
 .cd-hourglass { font-size: 52px; }
 .cd-right-text { display: flex; flex-direction: column; gap: 6px; }
 .cd-days-big { font-size: 17px; font-weight: 800; color: var(--text-primary); }
-.cd-days-big span { color: rgba(139,92,246,0.9); }
+.cd-days-big span { color: #ef4444; }
 .cd-days-sub { font-size: 11px; color: rgba(160,170,200,0.65); max-width: 180px; }
 .cd-view-btn {
   background: rgba(109,56,224,0.14) !important;
