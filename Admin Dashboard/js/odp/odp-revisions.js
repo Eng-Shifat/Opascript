@@ -13,7 +13,32 @@ window._loadRevisions = async function () {
   el.innerHTML = '<div class="rev-loading"><span></span> Loading revisions…</div>';
 
   try {
-    const revisions = await RevisionService.getRevisions(window._currentOrderId);
+    const orderId = window._currentOrderId;
+    if (!orderId) {
+      el.innerHTML = '<div class="rev-error">Order ID পাওয়া যায়নি। Panel আবার খুলুন।</div>';
+      return;
+    }
+
+    const revisions = await RevisionService.getRevisions(orderId);
+
+    if (!revisions.length) {
+      const { data: allRevs, error: allErr } = await window._sb()
+        .from('revisions')
+        .select('id, order_id, revision_number')
+        .limit(10);
+
+      const dbIds = (allRevs || []).map(r => r.order_id).join('<br>');
+      const errMsg = allErr ? 'DB Error: ' + allErr.message : '';
+      el.innerHTML = '<div class="rev-error" style="font-size:12px;line-height:1.8">'
+        + '<b>Debug — order_id mismatch check</b><br>'
+        + 'Panel order_id: <code style="color:#f97316;word-break:break-all">' + _esc(orderId) + '</code><br><br>'
+        + (errMsg ? errMsg + '<br>' : '')
+        + 'DB revisions order_id গুলো:<br>'
+        + '<code style="color:#22c55e;word-break:break-all">' + (dbIds || '(table খালি বা RLS block)') + '</code>'
+        + '</div>';
+      return;
+    }
+
     el.innerHTML = _buildRevisionTabHTML(revisions);
     _bindAdminRevisionActions(el, revisions);
   } catch (e) {
