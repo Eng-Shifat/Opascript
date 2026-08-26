@@ -1050,6 +1050,22 @@ input, select, textarea { font-family: inherit; }
 .file-info { flex: 1; overflow: hidden; }
 .file-name { font-size: 12px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .file-meta { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.file-revised-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #34d399;
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 999px;
+  padding: 1px 7px;
+  white-space: nowrap;
+  vertical-align: middle;
+  margin-left: 4px;
+}
 .file-locked-label { font-size: 10px; color: var(--gold); font-style: italic; }
 
 .file-dl-btn {
@@ -2730,6 +2746,239 @@ input, select, textarea { font-family: inherit; }
   color: #6b7280;
   text-align: center;
   padding: 14px 0;
+}
+
+/* ═══════════════════════════════════════════
+   CLIENT REVISION HISTORY CARD — standalone
+   (mirrors .client-pay-history-card design)
+═══════════════════════════════════════════ */
+.client-rev-history-card {
+  background: linear-gradient(145deg, #0c0e1a 0%, #10082a 45%, #190a3e 100%);
+  border: 1px solid rgba(124,58,237,0.22);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-top: 16px;
+  margin-bottom: 0;
+  position: relative;
+  overflow: hidden;
+}
+.client-rev-history-card::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.rev-hist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 10px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+.rev-hist-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rev-hist-header-icon {
+  width: 24px; height: 24px;
+  background: rgba(124,58,237,0.18);
+  border: 1px solid rgba(124,58,237,0.35);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: #a78bfa;
+}
+.rev-hist-header-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #a78bfa;
+}
+.rev-hist-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rev-hist-filter {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 5px 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  color-scheme: dark;
+}
+.rev-hist-filter:focus { border-color: #7c3aed; }
+.rev-hist-filter option {
+  background: #17102e;
+  color: #e2e8f0;
+}
+
+.client-rev-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.rev-hist-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.rev-hist-card:hover {
+  border-color: rgba(124,58,237,0.3);
+  background: rgba(255,255,255,0.05);
+}
+
+.rev-hist-icon-circle {
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.rev-hist-card-body {
+  flex: 1;
+  min-width: 0;
+}
+.rev-hist-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.rev-hist-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+.rev-hist-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 10.5px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+.rev-hist-meta-dot {
+  width: 3px; height: 3px;
+  background: #374151;
+  border-radius: 50%;
+  display: inline-block;
+}
+.rev-hist-card-desc {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 10.5px;
+  color: #9ca3af;
+  font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rev-hist-card-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.rev-hist-card-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.rev-hist-view-btn {
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.25);
+  border-radius: 6px;
+  color: #818cf8;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.rev-hist-view-btn:hover { background: rgba(99,102,241,0.18); }
+
+.rev-hist-viewall-wrap {
+  text-align: center;
+  margin-top: 12px;
+  position: relative;
+  z-index: 1;
+}
+.rev-hist-viewall-btn {
+  background: none;
+  border: none;
+  color: #7c3aed;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.rev-hist-viewall-btn:hover { color: #a78bfa; text-decoration: underline; }
+
+.rev-hist-loading,
+.rev-hist-empty {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+  padding: 14px 0;
+}
+
+@media (max-width: 480px) {
+  .rev-hist-card { gap: 10px; padding: 12px; }
+  .rev-hist-icon-circle { width: 34px; height: 34px; }
+  .rev-hist-icon-circle svg { width: 15px; height: 15px; }
+  .rev-hist-card-title { font-size: 12px; }
+  .rev-hist-card-meta { font-size: 9.5px; gap: 6px; margin-bottom: 5px; }
+  .rev-hist-card-desc { font-size: 9.5px; padding: 2px 7px; }
+  .rev-hist-card-right { gap: 4px; }
+  .rev-hist-card-badge { font-size: 9px; padding: 3px 7px; }
+  .rev-hist-view-btn { font-size: 8.5px; padding: 3px 7px; }
+  .rev-hist-header-right { gap: 6px; }
+  .rev-hist-filter { font-size: 10px; padding: 5px 8px; }
 }
 
 @media (max-width: 480px) {

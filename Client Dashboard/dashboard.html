@@ -1461,6 +1461,36 @@
               <div id="clientPayHistoryViewAll" class="pay-hist-viewall-wrap" style="display:none"></div>
             </div>
 
+            <!-- Revision History — left col, below Payment History -->
+            <div class="client-rev-history-card" id="clientRevHistoryCard" style="display:none">
+              <div class="rev-hist-header">
+                <div class="rev-hist-header-left">
+                  <div class="rev-hist-header-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 2H3v16h5l3 3 3-3h7V2z" />
+                      <path d="M12 8v4" />
+                      <path d="M12 16h.01" />
+                    </svg>
+                  </div>
+                  <span class="rev-hist-header-title">REVISION HISTORY</span>
+                </div>
+                <div class="rev-hist-header-right">
+                  <select class="rev-hist-filter" id="revHistFilterSelect"
+                    onchange="window._setRevHistFilter(this.value)">
+                    <option value="all">All Status</option>
+                    <option value="ready_for_review">Ready for Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="requested">Requested</option>
+                    <option value="needs_clarification">Clarification Needed</option>
+                  </select>
+                </div>
+              </div>
+              <div id="clientRevHistoryList" class="client-rev-history-list"></div>
+              <div id="clientRevHistoryViewAll" class="rev-hist-viewall-wrap" style="display:none"></div>
+            </div>
+
             <!-- Right col — Files -->
             <div class="detail-panel files-panel">
               <div class="pps-header">

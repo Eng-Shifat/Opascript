@@ -57,8 +57,6 @@ function renderRevisionCenter(wrap, order, revisions) {
       </div>
 
       ${activeRev ? renderActiveRevision(activeRev, order) : renderNoActiveRevision(order)}
-
-      ${renderRevisionHistory(revisions)}
     </div>
   `;
 
@@ -182,51 +180,31 @@ function renderNoActiveRevision(order) {
   `;
 }
 
-/* ── Revision History ───────────────────────────────────────── */
-function renderRevisionHistory(revisions) {
-  if (!revisions.length) return '';
-  const SL = RevisionService.STATUS_LABEL;
-
-  const items = revisions.map(r => {
-    const done = r.status === 'approved';
-    return `
-      <div class="rc-hist-item">
-        <div class="rc-hist-dot ${done ? 'done' : 'active'}">
-          ${done ? `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
-        </div>
-        <div class="rc-hist-body">
-          <div class="rc-hist-title">Revision #${r.revision_number}
-            <span class="rc-hist-badge ${RevisionService.STATUS_CLASS[r.status] || ''}">${_esc(SL[r.status] || r.status)}</span>
-          </div>
-          <div class="rc-hist-meta">Submitted: ${_fmtDate(r.created_at)}</div>
-          ${r.approved_at ? `<div class="rc-hist-meta rc-hist-done">✓ Approved: ${_fmtDate(r.approved_at)}</div>` : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  return `
-    <div class="rc-history">
-      <div class="rc-history-title">Revision History</div>
-      <div class="rc-hist-list">${items}</div>
-    </div>
-  `;
-}
-
 /* ── Build contextual action buttons ───────────────────────── */
 function _buildClientActions(rev, order) {
   const s = rev.status;
 
   if (s === 'ready_for_review') {
     return `
-      <button class="rc-btn rc-btn-success" id="rcApproveBtn" data-rev-id="${rev.id}">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Approve করুন
-      </button>
-      <button class="rc-btn rc-btn-secondary" id="rcAnotherRevBtn" data-rev-id="${rev.id}" data-order-id="${order.id}">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
-        আরেকটি Revision চাই
-      </button>
+      <div class="rc-ready-banner">
+        <div class="rc-ready-banner-top">
+          <span class="rc-ready-banner-icon">🔁</span>
+          <div>
+            <div class="rc-ready-banner-title">Revision ফাইল পাঠানো হয়েছে!</div>
+            <div class="rc-ready-banner-sub">ফাইলগুলো দেখুন (উপরে ও My Files-এ) এবং আপনার সিদ্ধান্ত জানান।</div>
+          </div>
+        </div>
+        <div class="rc-ready-banner-btns">
+          <button class="rc-btn rc-btn-success" id="rcApproveBtn" data-rev-id="${rev.id}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            সব ঠিক আছে, Approve করুন
+          </button>
+          <button class="rc-btn rc-btn-warn-outline" id="rcAnotherRevBtn" data-rev-id="${rev.id}" data-order-id="${order.id}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            সমস্যা আছে, আরেকটি Revision চাই
+          </button>
+        </div>
+      </div>
     `;
   }
 
@@ -522,3 +500,143 @@ async function _withLoading(btn, fn) {
     btn.innerHTML = orig;
   }
 }
+
+/* ============================================================
+   STANDALONE REVISION HISTORY CARD  (mirrors Payment History card)
+   Renders into #clientRevHistoryCard / #clientRevHistoryList
+   Call window.renderClientRevisionHistory(orderId) after order load.
+   ============================================================ */
+let _revHistAllData  = [];
+let _revHistFilter   = 'all';
+let _revHistExpanded = false;
+const REV_HIST_COLLAPSED_COUNT = 3;
+
+const _REV_HIST_META = {
+  requested:           { color: '#fbbf24', icon: 'hourglass' },
+  accepted:            { color: '#818cf8', icon: 'hourglass' },
+  in_progress:         { color: '#60a5fa', icon: 'hourglass' },
+  ready_for_review:    { color: '#34d399', icon: 'check' },
+  approved:            { color: '#4ade80', icon: 'check' },
+  needs_clarification: { color: '#f87171', icon: 'x' },
+};
+
+function _revHistIconSvg(icon, color) {
+  if (icon === 'check') {
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5"><circle cx="12" cy="12" r="10" fill="${color}22"/><polyline points="8 12 11 15 16 9"/></svg>`;
+  }
+  if (icon === 'x') {
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5"><circle cx="12" cy="12" r="10" fill="${color}22"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+  }
+  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><circle cx="12" cy="12" r="10" fill="${color}22"/><path d="M8 7h8M8 17h8M9 7c0 3 3 3.5 3 5s-3 2-3 5M15 7c0-3-3-3.5-3-5"/></svg>`;
+}
+
+window.renderClientRevisionHistory = async function (orderId) {
+  const wrap = document.getElementById('clientRevHistoryList');
+  const card = document.getElementById('clientRevHistoryCard');
+  if (!wrap || !card) return;
+
+  wrap.innerHTML = '<div class="rev-hist-loading">লোড হচ্ছে...</div>';
+  _revHistExpanded = false;
+  _revHistFilter   = 'all';
+  const filterSel = document.getElementById('revHistFilterSelect');
+  if (filterSel) filterSel.value = 'all';
+
+  try {
+    const revisions = await RevisionService.getRevisions(orderId);
+    if (!revisions.length) {
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = 'block';
+    /* newest first, like payment history */
+    _revHistAllData = [...revisions].reverse();
+    _drawRevHistList();
+  } catch (e) {
+    console.error('[RevisionHistoryCard] load error', e);
+    card.style.display = 'block';
+    wrap.innerHTML = '<div class="rev-hist-empty">Revision history লোড করতে সমস্যা হয়েছে।</div>';
+  }
+};
+
+function _drawRevHistList() {
+  const wrap = document.getElementById('clientRevHistoryList');
+  if (!wrap) return;
+
+  const SL = RevisionService.STATUS_LABEL;
+
+  let list = _revHistAllData;
+  if (_revHistFilter !== 'all') {
+    list = list.filter(r => r.status === _revHistFilter);
+  }
+
+  if (!list.length) {
+    wrap.innerHTML = `<div class="rev-hist-empty">${_revHistFilter === 'all' ? 'এখনো কোনো revision request করা হয়নি।' : 'এই status এ কোনো revision নেই।'}</div>`;
+    _updateRevHistViewAllLink(0, 0);
+    return;
+  }
+
+  const visibleList = _revHistExpanded ? list : list.slice(0, REV_HIST_COLLAPSED_COUNT);
+
+  wrap.innerHTML = visibleList.map(r => {
+    const meta = _REV_HIST_META[r.status] || { color: '#9ca3af', icon: 'hourglass' };
+    const dateStr = _fmtDate(r.created_at);
+
+    return `
+      <div class="rev-hist-card">
+        <div class="rev-hist-icon-circle" style="background:${meta.color}18;border-color:${meta.color}30">
+          ${_revHistIconSvg(meta.icon, meta.color)}
+        </div>
+        <div class="rev-hist-card-body">
+          <div class="rev-hist-card-top">
+            <span class="rev-hist-card-title">Revision #${r.revision_number}</span>
+          </div>
+          <div class="rev-hist-card-meta">
+            <span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:3px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${dateStr}</span>
+          </div>
+          <div class="rev-hist-card-desc" title="${_esc(r.description || '')}">${_esc(r.description || '—')}</div>
+        </div>
+        <div class="rev-hist-card-right">
+          <span class="rev-hist-card-badge" style="color:${meta.color};border-color:${meta.color}44;background:${meta.color}12">
+            ${_esc(SL[r.status] || r.status)}
+          </span>
+          <button class="rev-hist-view-btn" onclick="_openRevHistDetail(${r.revision_number})">বিস্তারিত</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  _updateRevHistViewAllLink(list.length, visibleList.length);
+}
+
+function _updateRevHistViewAllLink(totalCount, shownCount) {
+  const linkWrap = document.getElementById('clientRevHistoryViewAll');
+  if (!linkWrap) return;
+
+  if (totalCount <= REV_HIST_COLLAPSED_COUNT) {
+    linkWrap.style.display = 'none';
+    return;
+  }
+
+  linkWrap.style.display = 'block';
+  linkWrap.innerHTML = _revHistExpanded
+    ? `<button class="rev-hist-viewall-btn" onclick="_toggleRevHistExpand()">কম দেখান ↑</button>`
+    : `<button class="rev-hist-viewall-btn" onclick="_toggleRevHistExpand()">সব Revision দেখুন (${totalCount}) →</button>`;
+}
+
+window._toggleRevHistExpand = function () {
+  _revHistExpanded = !_revHistExpanded;
+  _drawRevHistList();
+};
+
+window._setRevHistFilter = function (val) {
+  _revHistFilter   = val;
+  _revHistExpanded = false;
+  _drawRevHistList();
+};
+
+/* Scroll the existing Revision Center into view as the "detail" action —
+   keeps a single source of truth for full revision detail instead of
+   duplicating the whole active-card markup here. */
+window._openRevHistDetail = function (revisionNumber) {
+  const el = document.getElementById('revisionCenterWrap');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};

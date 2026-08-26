@@ -634,6 +634,7 @@ async function openOrderDetail(orderId) {
   await checkAndShowProofSection(order);
   await renderDeliveryReviewBanner(order);
   if (window.initRevisionCenter) await window.initRevisionCenter(order);
+  if (window.renderClientRevisionHistory) await window.renderClientRevisionHistory(order.id);
 }
 
 document.getElementById('backToOrders').onclick=()=>{
@@ -961,18 +962,72 @@ async function loadOrderFiles(orderId, hasDue) {
 
     if (error) throw error;
 
-    if (!accessRows || !accessRows.length) {
+    /* Also load admin-uploaded Revision files so a delivered revision
+       shows up here too, tagged as "Revised" so it's clear where it's from. */
+    let revFileRows = [];
+    try {
+      const { data: revFiles, error: revErr } = await sb
+        .from('revision_files')
+        .select('storage_path, file_name, uploaded_by, is_client_visible, created_at, revision_id')
+        .eq('order_id', orderId)
+        .eq('uploaded_by', 'admin');
+      if (!revErr && revFiles) {
+        revFileRows = revFiles.filter(f => f.is_client_visible !== false);
+      }
+    } catch (e) {
+      console.warn('loadOrderFiles: revision files fetch failed', e);
+    }
+
+    /* Look up revision_number for each revision_id so the badge can say
+       "Revised • Revision #2" instead of just "Revised". */
+    let revNumberById = {};
+    if (revFileRows.length) {
+      try {
+        const revIds = [...new Set(revFileRows.map(f => f.revision_id))];
+        const { data: revRows } = await sb
+          .from('revisions')
+          .select('id, revision_number')
+          .in('id', revIds);
+        (revRows || []).forEach(r => { revNumberById[r.id] = r.revision_number; });
+      } catch (e) { /* non-fatal — badge just omits the number */ }
+    }
+
+    /* Normalize both sources into one shape and sort newest-first */
+    const normalDelivery = (accessRows || []).map(row => {
+      const parts = row.storage_path.split('/');
+      return {
+        storage_path:    row.storage_path,
+        file_name:       parts[parts.length - 1],
+        date:            row.updated_at,
+        download_allowed: row.download_allowed,
+        isRevision:      false,
+      };
+    });
+    const revisionDelivery = revFileRows.map(f => ({
+      storage_path:     f.storage_path,
+      file_name:        f.file_name,
+      date:             f.created_at,
+      download_allowed: true, /* revision deliverables aren't due-gated */
+      isRevision:       true,
+      revisionNumber:   revNumberById[f.revision_id],
+    }));
+
+    const combined = [...normalDelivery, ...revisionDelivery]
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (!combined.length) {
       list.innerHTML = '<div class="empty-note">কোনো file পাঠানো হয়নি</div>';
+      const viewAllWrap = document.getElementById('filesViewAllWrap');
+      if (viewAllWrap) viewAllWrap.style.display = 'none';
       return;
     }
 
     list.innerHTML = '';
     const PREVIEW_LIMIT = 4;
-    const totalCount = accessRows.length;
-    const previewRows = accessRows.slice(0, PREVIEW_LIMIT);
+    const totalCount = combined.length;
+    const previewRows = combined.slice(0, PREVIEW_LIMIT);
     for (const row of previewRows) {
-      const parts = row.storage_path.split('/');
-      const fileName = parts[parts.length - 1];
+      const fileName = row.file_name;
       const ext = fileName.split('.').pop().toUpperCase();
       const iconCls = {'PDF':'fi-pdf','PNG':'fi-png','JPG':'fi-jpg','JPEG':'fi-jpeg','DOC':'fi-doc','DOCX':'fi-docx'}[ext]||'fi-doc';
       /* Download: admin manually unlock করলে সবসময় পারবে
@@ -981,6 +1036,10 @@ async function loadOrderFiles(orderId, hasDue) {
 
       const div = document.createElement('div');
       div.className = 'file-item';
+
+      const revisedBadge = row.isRevision
+        ? `<span class="file-revised-badge">🔁 Revised${row.revisionNumber ? ' • Revision #' + row.revisionNumber : ''}</span>`
+        : '';
 
       const actionsHtml = `<button class="file-view-btn cdv-btn"
           data-path="${escHtml(row.storage_path)}"
@@ -1000,7 +1059,7 @@ async function loadOrderFiles(orderId, hasDue) {
         <div class="file-icon ${iconCls}">${ext}</div>
         <div class="file-info">
           <div class="file-name">${escHtml(fileName)}</div>
-          <div class="file-meta">${fmtDate(row.updated_at)}</div>
+          <div class="file-meta">${fmtDate(row.date)}${revisedBadge}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">${actionsHtml}</div>`;
 
@@ -1448,6 +1507,53 @@ function setupRealtime() {
     })
     .subscribe();
   realtimeSubs.push(fileSub);
+
+  /* Realtime revisions — admin accept/start/ready/clarify updates,
+     and admin-uploaded revision files, reflect instantly for the client. */
+  const revSub = sb.channel('client-revisions-realtime')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'revisions',
+    }, async payload => {
+      const myOrderIds = allOrders.map(o => String(o.id));
+      if (!myOrderIds.includes(String(payload.new?.order_id))) return;
+      if (currentOrderId && String(payload.new?.order_id) === String(currentOrderId)) {
+        const order = allOrders.find(o => String(o.id) === String(currentOrderId));
+        if (order && window.initRevisionCenter) await window.initRevisionCenter(order);
+        if (window.renderClientRevisionHistory) await window.renderClientRevisionHistory(currentOrderId);
+      }
+    })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'revisions',
+    }, async payload => {
+      const myOrderIds = allOrders.map(o => String(o.id));
+      if (!myOrderIds.includes(String(payload.new?.order_id))) return;
+      if (currentOrderId && String(payload.new?.order_id) === String(currentOrderId)) {
+        const order = allOrders.find(o => String(o.id) === String(currentOrderId));
+        if (order && window.initRevisionCenter) await window.initRevisionCenter(order);
+        if (window.renderClientRevisionHistory) await window.renderClientRevisionHistory(currentOrderId);
+      }
+    })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'revision_files',
+    }, async payload => {
+      /* Admin-uploaded revision file → refresh My Files + revision center */
+      if (payload.new?.uploaded_by !== 'admin') return;
+      const myOrderIds = allOrders.map(o => String(o.id));
+      if (!myOrderIds.includes(String(payload.new?.order_id))) return;
+      if (currentOrderId && String(payload.new?.order_id) === String(currentOrderId)) {
+        const order = allOrders.find(o => String(o.id) === String(currentOrderId));
+        await loadOrderFiles(currentOrderId, (order?.due_amount || 0) > 0);
+        if (order && window.initRevisionCenter) await window.initRevisionCenter(order);
+      }
+    })
+    .subscribe();
+  realtimeSubs.push(revSub);
 }
 
 function updateMsgBadge(n) {
