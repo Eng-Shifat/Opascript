@@ -786,7 +786,8 @@ function renderStepper(status, paymentStatus, livePaid) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   DELIVERY REVIEW BANNER — draft_ready status এ দেখায়
+   DELIVERY REVIEW BANNER — draft_ready (first draft) or delivered
+   (final delivery after all revisions approved) status এ দেখায়
    Client: "সব ঠিক" → completed | "সমস্যা আছে" → in_review
 ═══════════════════════════════════════════════════════════════ */
 async function renderDeliveryReviewBanner(order) {
@@ -794,15 +795,16 @@ async function renderDeliveryReviewBanner(order) {
   if (!wrap) return;
   wrap.innerHTML = '';
 
-  if (order.status !== 'draft_ready') return;
+  const isFinalDelivery = order.status === 'delivered';
+  if (order.status !== 'draft_ready' && !isFinalDelivery) return;
 
-  /* If there's an active (non-approved) revision, the Revision Center's
-     own "ready for review" banner already covers this decision — showing
-     both at once is confusing, so skip the main delivery banner. */
+  /* If there's an active (non-approved, non-superseded) revision, the
+     Revision Center's own "ready for review" banner already covers this
+     decision — showing both at once is confusing, so skip this one. */
   if (window.RevisionService) {
     try {
       const revisions = await window.RevisionService.getRevisions(order.id);
-      if (revisions.some(r => r.status !== 'approved')) return;
+      if (revisions.some(r => !['approved', 'superseded'].includes(r.status))) return;
     } catch (e) {
       console.warn('[DeliveryBanner] revision check failed', e);
     }
@@ -817,9 +819,9 @@ async function renderDeliveryReviewBanner(order) {
       margin-top: 16px;
     ">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <span style="font-size:22px;">📦</span>
+        <span style="font-size:22px;">${isFinalDelivery ? '🏁' : '📦'}</span>
         <div>
-          <div style="font-size:14px;font-weight:700;color:#e2e8f0;">Delivery পাঠানো হয়েছে!</div>
+          <div style="font-size:14px;font-weight:700;color:#e2e8f0;">${isFinalDelivery ? 'Final Delivery পাঠানো হয়েছে!' : 'Delivery পাঠানো হয়েছে!'}</div>
           <div style="font-size:12px;color:#94a3b8;margin-top:2px;">ফাইলগুলো দেখুন এবং আপনার সিদ্ধান্ত জানান।</div>
         </div>
       </div>
@@ -1407,6 +1409,7 @@ const STATUS_LABELS_CLIENT = {
   'draft_ready': 'Waiting for Review — ফাইল দেখুন এবং সিদ্ধান্ত নিন',
   'overdue':     'Overdue — সময় পার হয়ে গেছে',
   'hold':        'On Hold — বিরতিতে আছে',
+  'delivered':   'Final Delivery — ফাইল দেখুন এবং সিদ্ধান্ত নিন',
 };
 
 function setupRealtime() {
@@ -1955,7 +1958,7 @@ function tickLiveCountdowns() {
   });
 }
 setInterval(tickLiveCountdowns, 1000);
-function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'Waiting for Review'},'in_review':{cls:'badge-revision',label:'Revision Requested'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision চলছে'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
+function getStatusBadge(status){const map={'pending':{cls:'badge-pending',label:'Pending'},'confirmed':{cls:'badge-confirmed',label:'Confirmed'},'payment_done':{cls:'badge-confirmed',label:'Payment Done'},'writing':{cls:'badge-writing',label:'Writing চলছে'},'draft_sent':{cls:'badge-writing',label:'Draft Sent'},'draft_ready':{cls:'badge-review',label:'Waiting for Review'},'in_review':{cls:'badge-revision',label:'Revision Requested'},'final_payment':{cls:'badge-pending',label:'Final Payment'},'completed':{cls:'badge-completed',label:'Completed'},'revision':{cls:'badge-revision',label:'Revision চলছে'},'delivered':{cls:'badge-review',label:'Final Delivery'}};return map[status]||{cls:'badge-pending',label:status||'Pending'};}
 function showProfileMsg(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className=`profile-msg ${type}`;setTimeout(()=>{el.textContent='';el.className='profile-msg';},4000);}
 /* ═══════════════════════════════════════════
    PAYMENT PROOF SUBMIT — Client Side

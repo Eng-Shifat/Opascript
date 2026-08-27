@@ -16,6 +16,7 @@
     'overdue':     'Overdue',
     'hold':        'On Hold',
     'revision':    'Revision in Progress',
+    'delivered':   'Final Delivery Sent',
   };
 
   const STATUS_EMOJI = {
@@ -27,6 +28,7 @@
     'overdue':     '🔴',
     'hold':        '⚫',
     'revision':    '✏️',
+    'delivered':   '🚚',
   };
 
   window.odpMarkCompleted = function() {
@@ -49,7 +51,7 @@
     /* Mock order — শুধু UI update, DB skip */
     if (!window._isRealUUID(window._currentOrderId)) {
       const label = STATUS_LABELS[val] || val;
-      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
+      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', delivered:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
       document.querySelectorAll('.odp-status-pill').forEach(pill => {
         pill.className = 'odp-status-pill ' + cls;
         pill.textContent = label;
@@ -58,7 +60,7 @@
       if (window.ORDERS && window._currentOrder) {
         const o = window.ORDERS.find(x => x.id === window._currentOrderId);
         if (o) {
-          const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', overdue:'s-overdue', hold:'s-pending' };
+          const clsMap = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', delivered:'s-review', overdue:'s-overdue', hold:'s-pending' };
           const lblMap = STATUS_LABELS;
           o.status = lblMap[val] || val;
           o.statusClass = clsMap[val] || 's-pending';
@@ -81,7 +83,7 @@
       if (orderErr) throw orderErr;
 
       /* 2. Update ALL status pills in the panel immediately */
-      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', in_review:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
+      const cls = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', delivered:'s-review', in_review:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
       document.querySelectorAll('.odp-status-pill').forEach(pill => {
         pill.className = 'odp-status-pill ' + cls;
         pill.textContent = STATUS_LABELS[val] || val;
@@ -127,7 +129,7 @@
       /* Refresh ORDER PROGRESS sidebar immediately */
       if (window._currentOrder) {
         window._currentOrder.status = val;
-        window._currentOrder.statusClass = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', in_review:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
+        window._currentOrder.statusClass = { writing:'s-inprogress', completed:'s-completed', pending:'s-pending', draft_ready:'s-review', delivered:'s-review', in_review:'s-review', revision:'s-revision', overdue:'s-overdue', hold:'s-pending' }[val] || 's-pending';
         if (window._currentOrder._rawDB) window._currentOrder._rawDB.status = val;
       }
       if (typeof _refreshOverviewSidebar === 'function') _refreshOverviewSidebar();

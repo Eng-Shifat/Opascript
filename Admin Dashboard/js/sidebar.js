@@ -85,6 +85,10 @@
       <a class="s-nav-item" href="admin-services.html" data-page="services" data-tooltip="Service Management">
         <i class="ti ti-toggle-right"></i><span class="s-nav-item-label">Service Management</span>
       </a>
+      <a class="s-nav-item" href="admin-affiliates.html" data-page="affiliates" data-tooltip="Affiliate Applications">
+        <i class="ti ti-users-plus"></i><span class="s-nav-item-label">Affiliates</span>
+        <span class="s-badge" id="affBadge" style="display:none">0</span>
+      </a>
 
       <div class="s-nav-label">System</div>
       <a class="s-nav-item" href="admin-settings.html" data-page="settings" data-tooltip="Settings">
@@ -171,6 +175,7 @@
     /* Check unread messages badge */
     loadUnreadBadge();
     loadWebsiteChatBadge();
+    loadAffiliatePendingBadge();
     if (window.scriptoraSupabase) setupAdminPresence(window.scriptoraSupabase);
   });
 
@@ -268,6 +273,22 @@
         await ch.track({ online: true, ts: Date.now() });
       }
     });
+  }
+
+  async function loadAffiliatePendingBadge() {
+    try {
+      if (!window.scriptoraSupabase) return;
+      const sb = window.scriptoraSupabase;
+      const { count } = await sb
+        .from('affiliate_applications')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      const badge = document.getElementById('affBadge');
+      if (badge && count > 0) {
+        badge.textContent = count;
+        badge.style.display = '';
+      }
+    } catch(e) { /* silently ignore */ }
   }
 
 })();

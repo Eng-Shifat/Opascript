@@ -345,6 +345,7 @@ window._buildOverviewHTML = function(order, statusClass) {
                 <option value="" disabled selected>Update Order Status</option>
                 <option value="writing"     ${order.statusClass==='s-inprogress'?'selected':''}>🔵 In Progress</option>
                 <option value="draft_ready" ${order.status==='draft_ready'?'selected':''}>📦 Delivered (Waiting Review)</option>
+                <option value="delivered"   ${order.status==='delivered'?'selected':''}>🚚 Final Delivery Sent</option>
                 <option value="in_review"   ${order.status==='in_review'?'selected':''}>🔶 Revision Requested</option>
                 <option value="revision"    ${order.status==='revision'?'selected':''}>✏️ Revision in Progress</option>
                 <option value="completed"   ${order.statusClass==='s-completed' ?'selected':''}>🟢 Completed</option>

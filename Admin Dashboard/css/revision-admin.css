@@ -182,6 +182,30 @@
 .rev-empty-sub   { font-size: 12px; color: rgba(255,255,255,0.25); max-width: 240px; line-height: 1.5; }
 
 /* ══════════════════════════════════════════════════════════════
+   FINAL DELIVERY
+══════════════════════════════════════════════════════════════ */
+.rev-final-delivery-card {
+  background: linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(99,102,241,0.06) 100%);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.rev-final-delivery-header {
+  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px;
+}
+.rev-final-delivery-icon { font-size: 20px; line-height: 1; }
+.rev-final-delivery-title { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+.rev-final-delivery-sub   { font-size: 11px; color: #94a3b8; margin-top: 2px; line-height: 1.5; }
+.rev-final-delivery-sent-badge {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  color: #34d399; background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.3); border-radius: 999px;
+  padding: 3px 9px; white-space: nowrap;
+}
+.rev-final-delivery-btn { margin-top: 8px; width: 100%; justify-content: center; }
+
+/* ══════════════════════════════════════════════════════════════
    MOBILE
 ══════════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {

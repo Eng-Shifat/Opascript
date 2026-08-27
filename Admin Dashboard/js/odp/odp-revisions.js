@@ -97,8 +97,10 @@ window._loadRevisions = async function () {
       return;
     }
 
-    el.innerHTML = _buildRevisionTabHTML(revisions);
+    el.innerHTML = _buildFinalDeliverySectionHTML(orderId) + _buildRevisionTabHTML(revisions);
     _bindAdminRevisionActions(el, revisions);
+    _bindFinalDeliveryActions(orderId);
+    _loadFinalDeliveryFiles(orderId);
 
     /* Pre-load existing uploaded files for in_progress revisions */
     for (const rev of revisions) {
@@ -110,6 +112,126 @@ window._loadRevisions = async function () {
     el.innerHTML = `<div class="rev-error">Revisions লোড হয়নি: ${_esc(e.message)}</div>`;
   }
 };
+
+/* ── Final Delivery — the definitive, post-revision file to the client ──
+   Separate from per-revision uploads: this is what client sees as
+   "Final Delivery পাঠানো হয়েছে!" and approving it completes the order. */
+const FINAL_DELIVERY_PREFIX = 'final_delivery';
+
+function _buildFinalDeliverySectionHTML(orderId) {
+  const alreadySent = window._currentOrder?.status === 'delivered' || window._currentOrder?.status === 'completed';
+  return `
+    <div class="rev-final-delivery-card">
+      <div class="rev-final-delivery-header">
+        <span class="rev-final-delivery-icon">🚚</span>
+        <div>
+          <div class="rev-final-delivery-title">Final Delivery</div>
+          <div class="rev-final-delivery-sub">Client-এর সব revision দেখে নেওয়ার পর, চূড়ান্ত file এখানে পাঠান — client approve করলে order complete হয়ে যাবে।</div>
+        </div>
+        ${alreadySent ? `<span class="rev-final-delivery-sent-badge">✓ পাঠানো হয়েছে</span>` : ''}
+      </div>
+      <div class="rev-upload-zone" id="finalDeliveryZone" onclick="document.getElementById('finalDeliveryInput').click()" style="cursor:pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Final file upload করুন</span>
+        <input type="file" id="finalDeliveryInput" class="rev-file-input" accept=".pdf,.doc,.docx">
+      </div>
+      <div class="rev-uploaded-files" id="finalDeliveryFiles"></div>
+      <button class="rev-btn rev-btn-accent rev-final-delivery-btn" id="sendFinalDeliveryBtn" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
+        Send Final Delivery
+      </button>
+    </div>
+  `;
+}
+
+async function _loadFinalDeliveryFiles(orderId) {
+  const listEl = document.getElementById('finalDeliveryFiles');
+  const sendBtn = document.getElementById('sendFinalDeliveryBtn');
+  if (!listEl) return;
+  try {
+    const { data, error } = await window._sb()
+      .from('order_file_access')
+      .select('*')
+      .eq('order_id', orderId)
+      .eq('uploaded_by', 'admin')
+      .ilike('storage_path', `%/${FINAL_DELIVERY_PREFIX}/%`)
+      .order('updated_at', { ascending: false });
+    if (error) throw error;
+    if (!data || !data.length) { listEl.innerHTML = ''; return; }
+
+    listEl.innerHTML = data.map(f => {
+      const name = f.storage_path.split('/').pop();
+      return `
+      <div class="rev-file-chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+        ${_esc(name)}
+      </div>`;
+    }).join('');
+    if (sendBtn) sendBtn.disabled = false;
+  } catch (e) {
+    console.warn('[FinalDelivery] load error', e);
+  }
+}
+
+function _bindFinalDeliveryActions(orderId) {
+  const input   = document.getElementById('finalDeliveryInput');
+  const listEl  = document.getElementById('finalDeliveryFiles');
+  const sendBtn = document.getElementById('sendFinalDeliveryBtn');
+  if (!input) return;
+
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    input.disabled = true;
+    listEl.innerHTML = '<span class="rev-upload-progress">Uploading…</span>';
+    try {
+      const safeOrderId = (orderId || '').replace(/[#?&=\s]/g, '_');
+      const storagePath = `orders/${safeOrderId}/${FINAL_DELIVERY_PREFIX}/${Date.now()}_${file.name}`;
+
+      const { error: upErr } = await window._sb().storage
+        .from('order-files')
+        .upload(storagePath, file, { upsert: false });
+      if (upErr) throw upErr;
+
+      const { error: rowErr } = await window._sb()
+        .from('order_file_access')
+        .upsert({
+          order_id:         orderId,
+          storage_path:     storagePath,
+          is_visible:       true,
+          download_allowed: true,
+          uploaded_by:       'admin',
+          updated_at:        new Date().toISOString(),
+        });
+      if (rowErr) throw rowErr;
+
+      window._toast('✓ Final file uploaded', 'var(--green)');
+      await _loadFinalDeliveryFiles(orderId);
+    } catch (e) {
+      console.error('[FinalDelivery] upload error', e);
+      listEl.innerHTML = `<span class="rev-upload-error">Upload ব্যর্থ: ${_esc(e.message || '')}</span>`;
+      window._toast('⚠ Final file upload ব্যর্থ হয়েছে', 'var(--red)');
+    } finally {
+      input.disabled = false;
+      input.value = '';
+    }
+  };
+
+  if (sendBtn) {
+    sendBtn.onclick = async () => {
+      if (!confirm('Final Delivery পাঠাবেন? এটা client-কে notify করবে এবং তাদের approve করার জন্য অপেক্ষা করবে।')) return;
+      sendBtn.disabled = true;
+      try {
+        await window.odpUpdateStatus('delivered');
+        if (typeof window._loadRevisions === 'function') await window._loadRevisions();
+      } catch (e) {
+        console.error('[FinalDelivery] send error', e);
+        window._toast('⚠ পাঠানো যায়নি', 'var(--red)');
+        sendBtn.disabled = false;
+      }
+    };
+  }
+}
 
 /* ── Load already-uploaded files for a revision card ────────── */
 async function _loadExistingRevFiles(revId, el) {
@@ -192,7 +314,57 @@ function _buildRevisionTabHTML(revisions) {
        ${done.reverse().map(r => _buildRevCard(r, true)).join('')}`
     : '';
 
-  return `<div class="rev-tab-root">${queueHTML}${histHTML}</div>`;
+  const finalDeliveryHTML = _buildFinalDeliverySection(revisions);
+
+  return `<div class="rev-tab-root">${finalDeliveryHTML}${queueHTML}${histHTML}</div>`;
+}
+
+/* ── Final Delivery section ─────────────────────────────────────
+   Shows once at least one revision is approved and none are still
+   active — i.e. the client has signed off on all requested changes
+   and admin can now send the definitive final file. Uploading here
+   uses the same order_file_access mechanism as the normal Files tab
+   (so it shows in My Files automatically) but sets order.status to
+   'delivered' instead of 'draft_ready', which is what unlocks the
+   "Delivery" step on the client's Progress Status stepper. */
+function _buildFinalDeliverySection(revisions) {
+  const order = window._currentOrder;
+  if (!order) return '';
+
+  const hasApproved = revisions.some(r => r.status === 'approved');
+  const hasActive   = revisions.some(r => !['approved', 'superseded'].includes(r.status));
+  const alreadySent = ['delivered', 'completed'].includes(order.status);
+
+  if (!hasApproved || hasActive) return '';
+
+  if (alreadySent) {
+    return `
+      <div class="rev-final-delivery rev-final-delivery-sent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Final Delivery ${order.status === 'completed' ? 'client Approve করেছেন — Order Completed' : 'পাঠানো হয়েছে — Client review করছেন…'}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="rev-final-delivery">
+      <div class="rev-final-delivery-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        সব Revision approved — Final Delivery পাঠান
+      </div>
+      <div class="rev-final-delivery-sub">Client সব revision approve করেছেন। এখন চূড়ান্ত file upload করে Final Delivery পাঠান — client approve করলে Order Completed হয়ে যাবে।</div>
+      <div class="rev-upload-zone" data-final="1" onclick="document.getElementById('revFinalFileInput').click()" style="cursor:pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Final file upload করুন</span>
+        <input type="file" id="revFinalFileInput" accept=".pdf,.doc,.docx">
+      </div>
+      <div class="rev-uploaded-files" id="revFinalFileChip"></div>
+      <button class="rev-btn rev-btn-accent" id="revSendFinalBtn" disabled style="width:100%;justify-content:center;margin-top:8px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
+        Send Final Delivery
+      </button>
+    </div>
+  `;
 }
 
 /* ── Individual revision card ───────────────────────────────── */
@@ -349,9 +521,99 @@ function _buildAdminActions(rev) {
 }
 
 /* ── Bind admin event listeners ─────────────────────────────── */
+/* ── Bind Final Delivery upload + send ──────────────────────── */
+let _finalDeliveryFile = null;
+
+function _bindFinalDeliveryActions(el) {
+  const input   = el.querySelector('#revFinalFileInput');
+  const chipEl  = el.querySelector('#revFinalFileChip');
+  const sendBtn = el.querySelector('#revSendFinalBtn');
+  if (!input || !sendBtn) return;
+
+  _finalDeliveryFile = null;
+
+  input.onchange = () => {
+    const file = input.files[0];
+    if (!file) return;
+    _finalDeliveryFile = file;
+    if (chipEl) {
+      chipEl.innerHTML = `
+        <div class="rev-file-chip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          ${_esc(file.name)}
+        </div>
+      `;
+    }
+    sendBtn.disabled = false;
+  };
+
+  sendBtn.onclick = async () => {
+    if (!_finalDeliveryFile) return;
+    if (!confirm('Final Delivery পাঠাবেন? এর পর client approve করলেই Order Completed হয়ে যাবে।')) return;
+
+    const orderId = window._currentOrderId;
+    const orig = sendBtn.innerHTML;
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<span class="rev-upload-progress">পাঠানো হচ্ছে…</span>';
+
+    try {
+      const safeOrderId = (orderId || 'unknown').replace(/[#?&=\s]/g, '_');
+      const safeName    = _finalDeliveryFile.name.replace(/[#?&=]/g, '_');
+      const path         = `orders/${safeOrderId}/final_${Date.now()}_${safeName}`;
+
+      const { error: upErr } = await window._sb().storage
+        .from('order-files')
+        .upload(path, _finalDeliveryFile, { upsert: true });
+      if (upErr) throw upErr;
+
+      const dlAllowed = window._revLiveDue <= 0;
+      const { error: metaErr } = await window._sb()
+        .from('order_file_access')
+        .upsert({
+          order_id:         orderId,
+          storage_path:     path,
+          is_visible:       true,
+          download_allowed: dlAllowed,
+          client_notified:  true,
+          uploaded_by:      'Admin',
+          updated_at:       new Date().toISOString(),
+        }, { onConflict: 'order_id,storage_path' });
+      if (metaErr) throw metaErr;
+
+      const { error: statusErr } = await window._sb()
+        .from('orders')
+        .update({ status: 'delivered' })
+        .eq('id', orderId);
+      if (statusErr) throw statusErr;
+      if (window._currentOrder) window._currentOrder.status = 'delivered';
+
+      await window._sb().from('messages').insert({
+        order_id:   orderId,
+        text:       `📦 Final Delivery পাঠানো হয়েছে: ${_finalDeliveryFile.name}`,
+        from_admin: true,
+        read:       false,
+        sent_at:    new Date().toISOString(),
+      });
+
+      window._toast('✅ Final Delivery পাঠানো হয়েছে!', 'var(--green)');
+      _finalDeliveryFile = null;
+      await window._loadRevisions();
+      if (typeof window._loadFiles === 'function') await window._loadFiles();
+    } catch (e) {
+      console.error('[Final Delivery] send error', e);
+      window._toast('⚠ পাঠানো যায়নি: ' + (e.message || ''), 'var(--red)');
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = orig;
+    }
+  };
+}
+
+/* ── Bind admin revision card actions ───────────────────────── */
 function _bindAdminRevisionActions(el, revisions) {
   const revMap = {};
   revisions.forEach(r => revMap[r.id] = r);
+
+  _bindFinalDeliveryActions(el);
 
   /* Accept */
   el.querySelectorAll('.rev-accept-btn').forEach(btn => {

@@ -613,6 +613,15 @@
           </svg>
           Profile
         </a>
+        <a class="sb-item" data-page="affiliate" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="7" r="4" />
+            <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+            <path d="M19 8v6M16 11h6" />
+          </svg>
+          Affiliate
+        </a>
       </nav>
 
       <div class="sb-bottom">
@@ -1484,7 +1493,6 @@
                     <option value="accepted">Accepted</option>
                     <option value="requested">Requested</option>
                     <option value="needs_clarification">Clarification Needed</option>
-                    <option value="superseded">Superseded</option>
                   </select>
                 </div>
               </div>
@@ -1873,6 +1881,98 @@
           <div class="profile-msg" id="passMsg"></div>
         </div>
       </section>
+
+      <!-- ══ AFFILIATE PAGE ══════════════════════════════════════════════ -->
+      <section class="page" id="page-affiliate">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Affiliate Program</h1>
+            <p class="page-sub">Refer করুন, আয় করুন</p>
+          </div>
+        </div>
+
+        <!-- State: loading -->
+        <div id="aff-loading" style="display:flex;align-items:center;gap:10px;color:var(--text-secondary);font-size:13px;padding:8px 0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.5;animation:spin 1s linear infinite;">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          লোড হচ্ছে…
+        </div>
+
+        <!-- State: no application yet -->
+        <div id="aff-cta" style="display:none;">
+          <div class="profile-card" style="gap:20px;">
+            <div class="profile-section-label">Affiliate Program</div>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;font-family:'Noto Sans Bengali',sans-serif;">
+              আমাদের Affiliate Program এ যোগ দিন। আপনার Referral Code শেয়ার করুন — বন্ধু বা সহপাঠী Order করলে আপনি Commission পাবেন।
+            </p>
+            <ul style="padding-left:16px;font-size:13px;color:var(--text-secondary);line-height:1.9;font-family:'Noto Sans Bengali',sans-serif;">
+              <li>প্রতিটি Verified Order এ <strong style="color:var(--accent-light);">১০%</strong> Commission</li>
+              <li>Affiliate Dashboard এ সব কিছু Track করুন</li>
+              <li>Withdrawal সরাসরি আপনার বিকাশ / নগদে</li>
+            </ul>
+            <button class="profile-save-btn" id="affApplyBtn" onclick="affiliateApply()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Apply করুন
+            </button>
+            <div class="profile-msg" id="affApplyMsg"></div>
+          </div>
+        </div>
+
+        <!-- State: application pending -->
+        <div id="aff-pending" style="display:none;">
+          <div class="profile-card" style="gap:16px;">
+            <div class="profile-section-label">আবেদনের অবস্থা</div>
+            <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--gold-bg);border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" flex-shrink="0" style="flex-shrink:0;">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--gold);">Review চলছে</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;font-family:'Noto Sans Bengali',sans-serif;">আপনার আবেদন Admin এর কাছে পাঠানো হয়েছে। অনুমোদন হলে জানানো হবে।</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- State: approved affiliate -->
+        <div id="aff-approved" style="display:none;">
+          <div class="profile-card" style="gap:16px;">
+            <div class="profile-section-label">Affiliate Account</div>
+            <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--green-bg);border:1px solid rgba(34,197,94,0.25);border-radius:var(--radius);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="flex-shrink:0;">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--green);">Approved — Active</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;font-family:'Noto Sans Bengali',sans-serif;">আপনার Affiliate Account চালু আছে।</div>
+              </div>
+            </div>
+            <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+              <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">আপনার Referral Code</div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span id="affReferralCode" style="font-size:20px;font-weight:700;letter-spacing:3px;color:var(--accent-light);font-family:'Sora',monospace;">—</span>
+                <button onclick="affiliateCopyCode()" title="Copy" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text-secondary);cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--border-hover)'" onmouseout="this.style.borderColor='var(--border)'">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+                <span id="affCopyMsg" style="font-size:11px;color:var(--green);opacity:0;transition:opacity .3s;">Copied!</span>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);font-family:'Noto Sans Bengali',sans-serif;">
+              Commission, Wallet এবং Withdrawal — শীঘ্রই আসছে।
+            </div>
+          </div>
+        </div>
+
+      </section>
+      <!-- ══ END AFFILIATE PAGE ══════════════════════════════════════════ -->
 
     </main>
   </div>

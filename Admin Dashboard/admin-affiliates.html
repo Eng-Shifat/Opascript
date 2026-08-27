@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Affiliate Applications — Scriptora Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/admin.css"/>
+  <link rel="stylesheet" href="css/sidebar.css"/>
+  <link rel="stylesheet" href="css/admin-clients.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<script src="js/supabaseClient.js"></script>
+<script src="js/topbar.js" data-title="Affiliate Applications" data-sub="Client-দের affiliate আবেদন review ও approve করুন"></script>
+<script src="js/sidebar.js" data-page="affiliates"></script>
+
+<div class="main">
+  <div class="content cl-page">
+
+    <!-- Header -->
+    <div class="cl-header">
+      <div class="cl-header-left">
+        <h2>Affiliate Applications</h2>
+        <p id="aff-subtitle">Loading...</p>
+      </div>
+      <button class="cl-add-btn" onclick="loadApplications()" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">
+        <i class="ti ti-refresh"></i> Refresh
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="cl-stats">
+      <div class="cl-stat">
+        <div class="cl-stat-label">Total Applications</div>
+        <div class="cl-stat-val purple" id="st-total">—</div>
+        <div class="cl-stat-sub">সব মিলিয়ে</div>
+      </div>
+      <div class="cl-stat">
+        <div class="cl-stat-label">Pending Review</div>
+        <div class="cl-stat-val yellow" id="st-pending">—</div>
+        <div class="cl-stat-sub">সিদ্ধান্ত বাকি</div>
+      </div>
+      <div class="cl-stat">
+        <div class="cl-stat-label">Approved</div>
+        <div class="cl-stat-val green" id="st-approved">—</div>
+        <div class="cl-stat-sub">Active affiliates</div>
+      </div>
+      <div class="cl-stat">
+        <div class="cl-stat-label">Rejected</div>
+        <div class="cl-stat-val red" id="st-rejected">—</div>
+        <div class="cl-stat-sub">Declined</div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="cl-filters">
+      <button class="cl-filter-chip active" data-filter="all"     onclick="setAffFilter('all',this)">সব</button>
+      <button class="cl-filter-chip"        data-filter="pending"  onclick="setAffFilter('pending',this)">Pending</button>
+      <button class="cl-filter-chip"        data-filter="approved" onclick="setAffFilter('approved',this)">Approved</button>
+      <button class="cl-filter-chip"        data-filter="rejected" onclick="setAffFilter('rejected',this)">Rejected</button>
+    </div>
+
+    <!-- Table -->
+    <div class="cl-table-wrap">
+      <table class="cl-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Applied At</th>
+            <th>Status</th>
+            <th>Reviewed At</th>
+            <th>Admin Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="aff-tbody">
+          <tr>
+            <td colspan="6" class="cl-empty">
+              <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
+              <p>Loading applications...</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast container (same pattern as admin-clients.html) -->
+<div id="toastContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+<script src="js/admin-affiliates.js"></script>
+</body>
+</html>
