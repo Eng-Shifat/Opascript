@@ -31,10 +31,29 @@ window.initRevisionCenter = async function (order) {
   }
 };
 
+/* ── Live due-amount (order.due_amount on the cached order object is
+   never synced by admin's payment flow — always recompute from the
+   payments table, same way dashboard.js does for the main panel). ── */
+async function _getLiveDueAmount(order) {
+  try {
+    const { data: approvedPays } = await window.scriptoraSupabase
+      .from('payments')
+      .select('amount')
+      .eq('order_id', order.id)
+      .eq('confirmed', true)
+      .in('type', ['received', 'approval']);
+    const paid = (approvedPays || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+    return Math.max(0, Number(order.total_price || 0) - paid);
+  } catch (e) {
+    console.warn('[RevisionCenter] live due fetch failed, falling back to cached value', e);
+    return order.due_amount || 0;
+  }
+}
+
 /* ── Main renderer ──────────────────────────────────────────── */
-function renderRevisionCenter(wrap, order, revisions) {
+async function renderRevisionCenter(wrap, order, revisions) {
   const active = revisions.filter(r =>
-    !['approved'].includes(r.status)
+    !['approved', 'superseded'].includes(r.status)
   );
   const activeRev = active[active.length - 1] || null;
   const approved  = revisions.filter(r => r.status === 'approved');
@@ -63,9 +82,11 @@ function renderRevisionCenter(wrap, order, revisions) {
   /* Bind action buttons */
   _bindClientActions(wrap, order, activeRev, revisions);
 
-  /* Load files for all non-approved revisions */
+  /* Load files for all non-approved revisions — using the live due amount,
+     not the (unreliable) cached order.due_amount field */
+  const liveDue = await _getLiveDueAmount(order);
   for (const rev of revisions) {
-    _loadClientRevisionFiles(rev.id);
+    _loadClientRevisionFiles(rev.id, liveDue, rev.status);
   }
 }
 
@@ -258,6 +279,7 @@ function _bindClientActions(wrap, order, activeRev, revisions) {
         await RevisionService.transitionRevision(activeRev.id, 'approved');
         showToast('✅ Revision approved!', 'success');
         await window.initRevisionCenter(order);
+        if (typeof renderDeliveryReviewBanner === 'function') await renderDeliveryReviewBanner(order);
       });
     };
   }
@@ -420,7 +442,7 @@ window.openRevisionModal = function (orderId) {
       /* Upload attachments */
       for (const file of selectedFiles) {
         try {
-          await RevisionService.uploadRevisionFile(rev.id, orderId, file, 'client');
+          await RevisionService.uploadRevisionFile(rev.id, orderId, file, 'client', true);
         } catch (e) {
           console.warn('File upload failed:', e);
         }
@@ -437,9 +459,21 @@ window.openRevisionModal = function (orderId) {
 };
 
 /* ── Load & render revision files for client ────────────────── */
-async function _loadClientRevisionFiles(revisionId) {
+const REV_FILES_DELIVERED_STATUSES = ['ready_for_review', 'approved', 'superseded'];
+
+async function _loadClientRevisionFiles(revisionId, orderDueAmount, revStatus) {
   const el = document.getElementById('rcRevFiles_' + revisionId);
   if (!el) return;
+
+  /* Admin may upload a file while still working (in_progress) — that's a
+     work-in-progress attachment, not a delivery. Only surface files to the
+     client once the revision is actually marked Ready for Review (or later:
+     approved / superseded), matching "Mark Ready for Review" as the real
+     hand-off moment. */
+  if (revStatus && !REV_FILES_DELIVERED_STATUSES.includes(revStatus)) {
+    el.innerHTML = '';
+    return;
+  }
 
   try {
     /* Fetch files from revision_files table */
@@ -465,7 +499,11 @@ async function _loadClientRevisionFiles(revisionId) {
     const rows = await Promise.all(visible.map(async function(f) {
       const ext   = (f.file_name || '').split('.').pop().toLowerCase();
       const icon  = ext === 'pdf' ? '📄' : (ext === 'docx' || ext === 'doc') ? '📝' : '📎';
-      const dlOk  = f.download_allowed !== false;
+      /* Admin's explicit choice at upload time always wins; if never set,
+         fall back to the same due-amount gating normal files use. */
+      const dlOk  = (f.download_allowed === true || f.download_allowed === false)
+        ? f.download_allowed
+        : !((orderDueAmount || 0) > 0);
 
       let viewUrl = f.file_url || '';
       /* If storage_path exists, get a fresh signed URL so it always works */
@@ -551,6 +589,7 @@ const _REV_HIST_META = {
   ready_for_review:    { color: '#34d399', icon: 'check' },
   approved:            { color: '#4ade80', icon: 'check' },
   needs_clarification: { color: '#f87171', icon: 'x' },
+  superseded:          { color: '#94a3b8', icon: 'check' },
 };
 
 function _revHistIconSvg(icon, color) {
@@ -750,17 +789,27 @@ async function _showRevDetailModal(rev) {
   modal.querySelector('#rcDetailModalClose').onclick = close;
   modal.addEventListener('click', e => { if (e.target === modal) close(); });
 
-  /* Load this revision's admin-uploaded files into the modal */
+  /* Load this revision's admin-uploaded files into the modal — same
+     "delivered" gate as the active card: don't show work-in-progress
+     uploads before the revision is actually marked Ready for Review. */
   try {
-    const files = await RevisionService.getRevisionFiles(rev.id);
-    const visible = (files || []).filter(f => f.uploaded_by === 'admin' && f.is_client_visible !== false);
     const filesEl = modal.querySelector('#rcDetailModalFiles');
     if (!filesEl) return;
+    if (!REV_FILES_DELIVERED_STATUSES.includes(rev.status)) { filesEl.innerHTML = ''; return; }
+
+    const files = await RevisionService.getRevisionFiles(rev.id);
+    const visible = (files || []).filter(f => f.uploaded_by === 'admin' && f.is_client_visible !== false);
     if (!visible.length) { filesEl.innerHTML = ''; return; }
+
+    const order = allOrders.find(o => String(o.id) === String(currentOrderId));
+    const dueAmount = order?.due_amount || 0;
 
     const rows = await Promise.all(visible.map(async f => {
       const ext  = (f.file_name || '').split('.').pop().toLowerCase();
       const icon = ext === 'pdf' ? '📄' : (ext === 'docx' || ext === 'doc') ? '📝' : '📎';
+      const dlOk = (f.download_allowed === true || f.download_allowed === false)
+        ? f.download_allowed
+        : !(dueAmount > 0);
       let viewUrl = f.file_url || '';
       if (f.storage_path) {
         try { viewUrl = await RevisionService.getRevisionFileUrl(f.storage_path, 3600); }
@@ -773,7 +822,9 @@ async function _showRevDetailModal(rev) {
         <span class="rc-file-name">${_esc(f.file_name || 'file')}</span>
         <div class="rc-file-actions">
           <a href="${escapedUrl}" target="_blank" class="rc-file-btn rc-file-view">View</a>
-          <a href="${escapedUrl}" download="${escapedName}" class="rc-file-btn rc-file-dl">Download</a>
+          ${dlOk
+            ? `<a href="${escapedUrl}" download="${escapedName}" class="rc-file-btn rc-file-dl">Download</a>`
+            : `<span class="rc-file-locked">🔒 Locked</span>`}
         </div>
       </div>`;
     }));

@@ -22,6 +22,7 @@
     ready_for_review:    ['approved', 'requested'],   // "requested" = client requests another
     needs_clarification: ['requested'],
     approved:            [],
+    superseded:          [],
   };
 
   function canTransition(from, to) {
@@ -36,6 +37,7 @@
     ready_for_review:    'Ready for Your Review',
     approved:            'Approved',
     needs_clarification: 'Clarification Needed',
+    superseded:           'Superseded',
   };
 
   const STATUS_CLASS = {
@@ -45,6 +47,7 @@
     ready_for_review:    'rev-status-ready',
     approved:            'rev-status-approved',
     needs_clarification: 'rev-status-clarify',
+    superseded:           'rev-status-superseded',
   };
 
   /* ── FETCH revisions for an order ───────────────────────── */
@@ -120,7 +123,7 @@
   }
 
   /* ── Upload revision attachment (client or admin) ────────── */
-  async function uploadRevisionFile(revisionId, orderId, file, uploadedBy) {
+  async function uploadRevisionFile(revisionId, orderId, file, uploadedBy, downloadAllowed) {
     const ext         = file.name.split('.').pop();
     const storagePath = `revisions/${orderId}/${revisionId}/${uploadedBy}_${Date.now()}.${ext}`;
 
@@ -139,13 +142,14 @@
     const { data, error } = await sb()
       .from('revision_files')
       .insert({
-        revision_id:  revisionId,
-        order_id:     orderId,
-        file_name:    file.name,
-        file_url:     fileUrl,
-        storage_path: storagePath,
-        file_size:    file.size,
-        uploaded_by:  uploadedBy,
+        revision_id:      revisionId,
+        order_id:         orderId,
+        file_name:        file.name,
+        file_url:         fileUrl,
+        storage_path:     storagePath,
+        file_size:        file.size,
+        uploaded_by:      uploadedBy,
+        download_allowed: downloadAllowed === undefined ? true : downloadAllowed,
       })
       .select()
       .single();
@@ -189,14 +193,30 @@
     if (opts.adminResponse)               update.admin_response = opts.adminResponse;
     if (opts.adminNote)                   update.admin_note   = opts.adminNote;
 
-    /* If client requests another revision from ready_for_review → create new revision */
+    /* If client requests another revision from ready_for_review → the OLD
+       revision is done (client already reviewed & moved past it), so close
+       it out as "superseded" instead of leaving it stuck on "ready_for_review"
+       forever (which admin would misread as still awaiting client action). */
     if (newStatus === 'requested' && rev.status === 'ready_for_review') {
-      return await submitRevision(rev.order_id, rev.client_id, {
+      const newRev = await submitRevision(rev.order_id, rev.client_id, {
         description:     opts.description || 'Further revision requested',
         section:         opts.section,
         page_range:      opts.page_range,
         additional_note: opts.additional_note,
       });
+      try {
+        /* Prefer storing which revision superseded this one, if that
+           column exists; fall back to just the status if it doesn't. */
+        const { error: supErr } = await sb()
+          .from('revisions')
+          .update({ status: 'superseded', superseded_by: newRev.id })
+          .eq('id', revisionId);
+        if (supErr) throw supErr;
+      } catch (e) {
+        console.warn('[RevisionService] superseded_by column missing, retrying without it', e);
+        await sb().from('revisions').update({ status: 'superseded' }).eq('id', revisionId);
+      }
+      return newRev;
     }
 
     const { data, error } = await sb()

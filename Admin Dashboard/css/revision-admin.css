@@ -13,6 +13,7 @@
 .rev-status-ready        { background: rgba(16,185,129,0.12);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
 .rev-status-approved     { background: rgba(16,185,129,0.12);  color: #4ade80; border: 1px solid rgba(16,185,129,0.3); }
 .rev-status-clarify      { background: rgba(239,68,68,0.10);   color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+.rev-status-superseded   { background: rgba(148,163,184,0.10); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25); }
 
 /* ══════════════════════════════════════════════════════════════
    ADMIN — ODP Revision Tab
@@ -149,6 +150,27 @@
 .rev-upload-progress { font-size: 11px; color: #818cf8; }
 .rev-upload-error    { font-size: 11px; color: #f87171; }
 .rev-mark-ready-btn  { margin-top: 8px; width: 100%; justify-content: center; }
+
+/* Client download lock/unlock toggle at upload time */
+.rev-dl-toggle-row {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; color: #94a3b8;
+  margin-top: 8px; cursor: pointer; user-select: none;
+}
+.rev-dl-toggle-row input[type="checkbox"] { accent-color: #7c3aed; width: 14px; height: 14px; cursor: pointer; }
+.rev-file-dl-badge {
+  font-size: 9.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+  margin-left: 4px;
+}
+.rev-file-dl-badge.unlocked { color: #34d399; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); }
+.rev-file-dl-badge.locked   { color: #fbbf24; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); }
+.rev-file-dl-toggle {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; padding: 0 2px; margin-left: 2px;
+  line-height: 1; opacity: 0.85; transition: opacity 0.15s;
+}
+.rev-file-dl-toggle:hover { opacity: 1; }
+.rev-file-dl-toggle:disabled { cursor: wait; opacity: 0.5; }
 
 /* Empty */
 .rev-empty {

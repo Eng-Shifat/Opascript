@@ -277,6 +277,7 @@ window._loadFullOrderData = async function() {
     }
 
     window._subscribePaymentsRealtime();
+    if (typeof window._subscribeRevisionsRealtime === 'function') window._subscribeRevisionsRealtime();
     window._loadClientOrderCount();
 
     /* Re-render Overview sidebar (ORDER PROGRESS + QUICK ACTIONS) now that _rawDB and financials are loaded */
@@ -295,6 +296,7 @@ window.closeOrderDetailsPanel = function() {
   if (window._timerInterval) { clearInterval(window._timerInterval); window._timerInterval = null; }
   if (window._payRealtimeChannel && window._sb()) { window._sb().removeChannel(window._payRealtimeChannel); window._payRealtimeChannel = null; }
   if (window._msgChannel && window._sb()) { window._sb().removeChannel(window._msgChannel); window._msgChannel = null; }
+  if (window._revRealtimeChannel && window._sb()) { window._sb().removeChannel(window._revRealtimeChannel); window._revRealtimeChannel = null; }
   window._currentOrderId = null;
   window._currentOrder   = null;
   window._fileMetaCache  = {};

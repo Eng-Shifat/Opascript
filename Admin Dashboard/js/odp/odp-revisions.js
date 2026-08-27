@@ -5,6 +5,62 @@
    ============================================================ */
 'use strict';
 
+/* ── Live due amount for the currently open order ────────────
+   window._currentOrder is a display-transformed object (order-management.js)
+   that does NOT carry a raw numeric due_amount/total_price — only
+   pre-formatted strings — so reading it directly under-detects due
+   amount. Compute the real due straight from the DB, the same way
+   the client dashboard does (total_price − sum of confirmed payments). */
+window._revLiveDue = 0;
+async function _fetchLiveDueAmount(orderId) {
+  if (!orderId || !window._sb) return 0;
+  try {
+    const { data: orderRow } = await window._sb()
+      .from('orders')
+      .select('total_price')
+      .eq('id', orderId)
+      .single();
+    const total = Number(orderRow?.total_price || 0);
+
+    const { data: pays } = await window._sb()
+      .from('payments')
+      .select('amount')
+      .eq('order_id', orderId)
+      .eq('confirmed', true)
+      .in('type', ['received', 'approval']);
+    const paid = (pays || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+
+    return Math.max(0, total - paid);
+  } catch (e) {
+    console.warn('[Revisions] live due fetch failed', e);
+    return 0;
+  }
+}
+
+/* ── Realtime: auto-refresh when client acts on a revision ────
+   (submits a new request, responds to clarification, approves, etc.)
+   so admin sees it live without reopening the tab. */
+window._revRealtimeChannel = null;
+window._subscribeRevisionsRealtime = function () {
+  if (!window._sb() || !window._isRealUUID(window._currentOrderId)) return;
+  if (window._revRealtimeChannel) {
+    window._sb().removeChannel(window._revRealtimeChannel);
+    window._revRealtimeChannel = null;
+  }
+  window._revRealtimeChannel = window._sb()
+    .channel(`odp_rev_${window._currentOrderId}`)
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'revisions', filter: `order_id=eq.${window._currentOrderId}` },
+      async () => {
+        /* Only refresh if the Revisions tab is actually the visible pane —
+           avoids wasted work / DOM churn while admin is on another tab. */
+        const pane = document.getElementById('odpRevisionPane');
+        if (pane) await window._loadRevisions();
+      }
+    )
+    .subscribe();
+};
+
 /* ── Load revision tab ─────────────────────────────────────── */
 window._loadRevisions = async function () {
   const el = document.getElementById('odpRevisionPane');
@@ -18,6 +74,8 @@ window._loadRevisions = async function () {
       el.innerHTML = '<div class="rev-error">Order ID পাওয়া যায়নি। Panel আবার খুলুন।</div>';
       return;
     }
+
+    window._revLiveDue = await _fetchLiveDueAmount(orderId);
 
     const revisions = await RevisionService.getRevisions(orderId);
 
@@ -63,13 +121,19 @@ async function _loadExistingRevFiles(revId, el) {
     const files = await RevisionService.getRevisionFiles(revId);
     if (!files.length) return;
 
-    listEl.innerHTML = files.map(f => `
+    listEl.innerHTML = files.map(f => {
+      const dlOk = f.download_allowed !== false;
+      return `
       <div class="rev-file-chip">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
         ${_esc(f.file_name)}
         <a href="${_esc(f.file_url)}" target="_blank" class="rev-file-link">View</a>
+        <button type="button" class="rev-file-dl-toggle" data-dl="${dlOk ? '1' : '0'}"
+          title="${dlOk ? 'Client download allowed — click to lock' : 'Client download locked — click to unlock'}"
+          onclick="odpToggleRevFileDownload('${f.id}', this)">${dlOk ? '🔓' : '🔒'}</button>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     /* Enable ready button since file already exists */
     if (readyBtn) readyBtn.disabled = false;
@@ -77,6 +141,31 @@ async function _loadExistingRevFiles(revId, el) {
     console.warn('[ODP Revisions] existing files load error', e);
   }
 }
+
+/* ── Toggle lock/unlock on an already-uploaded revision file ──── */
+window.odpToggleRevFileDownload = async function (fileId, btn) {
+  const nowAllowed = btn.dataset.dl !== '1';
+  const prevHTML = btn.innerHTML;
+  btn.disabled = true;
+  try {
+    const { error } = await window._sb()
+      .from('revision_files')
+      .update({ download_allowed: nowAllowed })
+      .eq('id', fileId);
+    if (error) throw error;
+
+    btn.dataset.dl = nowAllowed ? '1' : '0';
+    btn.title = nowAllowed ? 'Client download allowed — click to lock' : 'Client download locked — click to unlock';
+    btn.innerHTML = nowAllowed ? '🔓' : '🔒';
+    window._toast(nowAllowed ? '✓ Client-এর জন্য Unlocked' : '✓ Client-এর জন্য Locked', 'var(--green)');
+  } catch (e) {
+    console.error('[ODP Revisions] toggle download error', e);
+    btn.innerHTML = prevHTML;
+    window._toast('⚠ Toggle failed: ' + (e.message || ''), 'var(--red)');
+  } finally {
+    btn.disabled = false;
+  }
+};
 
 /* ── Build tab HTML ─────────────────────────────────────────── */
 function _buildRevisionTabHTML(revisions) {
@@ -90,17 +179,17 @@ function _buildRevisionTabHTML(revisions) {
     `;
   }
 
-  const active   = revisions.filter(r => r.status !== 'approved');
-  const approved = revisions.filter(r => r.status === 'approved');
+  const active   = revisions.filter(r => r.status !== 'approved' && r.status !== 'superseded');
+  const done     = revisions.filter(r => r.status === 'approved' || r.status === 'superseded');
 
   const queueHTML = active.length
     ? `<div class="rev-section-title">Active Revisions (${active.length})</div>
        ${active.reverse().map(r => _buildRevCard(r, false)).join('')}`
     : '';
 
-  const histHTML = approved.length
-    ? `<div class="rev-section-title rev-section-sep">Completed Revisions (${approved.length})</div>
-       ${approved.reverse().map(r => _buildRevCard(r, true)).join('')}`
+  const histHTML = done.length
+    ? `<div class="rev-section-title rev-section-sep">Completed Revisions (${done.length})</div>
+       ${done.reverse().map(r => _buildRevCard(r, true)).join('')}`
     : '';
 
   return `<div class="rev-tab-root">${queueHTML}${histHTML}</div>`;
@@ -155,6 +244,10 @@ function _buildRevCard(rev, isCompleted) {
             <span>Revised file upload করুন</span>
             <input type="file" id="revFileInput_${rev.id}" class="rev-file-input" data-rev-id="${rev.id}" accept=".pdf,.doc,.docx">
           </div>
+          <label class="rev-dl-toggle-row" title="Due amount থাকলে default lock থাকবে, due 0 হলে default unlock — চাইলে এখানে override করুন">
+            <input type="checkbox" id="revDlAllowed_${rev.id}" ${(window._revLiveDue <= 0) ? 'checked' : ''}>
+            <span>Client-কে এখনই download করতে দিন (Unlock)</span>
+          </label>
           <div class="rev-uploaded-files" id="revFiles_${rev.id}"></div>
           <button class="rev-btn rev-btn-accent rev-mark-ready-btn" data-rev-id="${rev.id}" disabled>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -347,19 +440,26 @@ function _bindAdminRevisionActions(el, revisions) {
       if (!file) return;
       input.disabled = true;
 
+      const dlToggle = document.getElementById(`revDlAllowed_${revId}`);
+      const downloadAllowed = dlToggle ? dlToggle.checked : (window._revLiveDue <= 0);
+
       listEl.innerHTML = '<span class="rev-upload-progress">Uploading…</span>';
       try {
         const rec = await RevisionService.uploadRevisionFile(
-          revId, window._currentOrderId, file, 'admin'
+          revId, window._currentOrderId, file, 'admin', downloadAllowed
         );
         listEl.innerHTML = `
           <div class="rev-file-chip">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
             ${_esc(file.name)}
             <a href="${_esc(rec.file_url)}" target="_blank" class="rev-file-link">View</a>
+            <button type="button" class="rev-file-dl-toggle" data-dl="${downloadAllowed ? '1' : '0'}"
+              title="${downloadAllowed ? 'Client download allowed — click to lock' : 'Client download locked — click to unlock'}"
+              onclick="odpToggleRevFileDownload('${rec.id}', this)">${downloadAllowed ? '🔓' : '🔒'}</button>
           </div>
         `;
         if (readyBtn) readyBtn.disabled = false;
+        if (dlToggle) dlToggle.disabled = true;
         window._toast('✓ File upload হয়েছে', 'var(--green)');
         window._logActivity('revision', `Revised file uploaded: ${file.name}`);
 

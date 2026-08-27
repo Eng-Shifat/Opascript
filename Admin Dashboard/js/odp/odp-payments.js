@@ -350,6 +350,10 @@
         await window._sb().from('order_file_access')
           .update({ download_allowed: true, updated_at: new Date().toISOString() })
           .eq('order_id', window._currentOrderId);
+        /* Revision-delivered files use the same due-based lock — unlock those too */
+        await window._sb().from('revision_files')
+          .update({ download_allowed: true })
+          .eq('order_id', window._currentOrderId);
         await window._sb().from('orders').update({
           payment_status: 'paid',
           advance_paid:   newTotalPaid,

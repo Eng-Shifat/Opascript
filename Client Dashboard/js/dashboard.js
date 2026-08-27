@@ -533,6 +533,12 @@ async function openOrderDetail(orderId) {
     hasPendingPaymentRequest = order.payment_status === 'under_review';
   }
 
+  /* Keep order.due_amount in sync with the live-computed value so every
+     downstream consumer (Revision Center, My Files lock state, etc.)
+     that reads order.due_amount sees the authoritative due, not a
+     possibly-stale cached column. */
+  order.due_amount = liveDue;
+
   /* ── Re-render stepper now that we have real livePaid ── */
   renderStepper(order.status, order.payment_status, livePaid);
 
@@ -790,6 +796,18 @@ async function renderDeliveryReviewBanner(order) {
 
   if (order.status !== 'draft_ready') return;
 
+  /* If there's an active (non-approved) revision, the Revision Center's
+     own "ready for review" banner already covers this decision — showing
+     both at once is confusing, so skip the main delivery banner. */
+  if (window.RevisionService) {
+    try {
+      const revisions = await window.RevisionService.getRevisions(order.id);
+      if (revisions.some(r => r.status !== 'approved')) return;
+    } catch (e) {
+      console.warn('[DeliveryBanner] revision check failed', e);
+    }
+  }
+
   wrap.innerHTML = `
     <div style="
       background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%);
@@ -968,7 +986,7 @@ async function loadOrderFiles(orderId, hasDue) {
     try {
       const { data: revFiles, error: revErr } = await sb
         .from('revision_files')
-        .select('storage_path, file_name, uploaded_by, is_client_visible, created_at, revision_id')
+        .select('storage_path, file_name, uploaded_by, is_client_visible, created_at, revision_id, download_allowed')
         .eq('order_id', orderId)
         .eq('uploaded_by', 'admin');
       if (!revErr && revFiles) {
@@ -978,19 +996,29 @@ async function loadOrderFiles(orderId, hasDue) {
       console.warn('loadOrderFiles: revision files fetch failed', e);
     }
 
-    /* Look up revision_number for each revision_id so the badge can say
-       "Revised • Revision #2" instead of just "Revised". */
+    /* Look up revision_number + status for each revision_id: the badge
+       needs the number, and the status decides whether this file has
+       actually been "delivered" yet — a file uploaded while the revision
+       is still in_progress is work-in-progress, not ready to show the
+       client, until admin clicks "Mark Ready for Review". */
     let revNumberById = {};
+    let revStatusById = {};
     if (revFileRows.length) {
       try {
         const revIds = [...new Set(revFileRows.map(f => f.revision_id))];
         const { data: revRows } = await sb
           .from('revisions')
-          .select('id, revision_number')
+          .select('id, revision_number, status')
           .in('id', revIds);
-        (revRows || []).forEach(r => { revNumberById[r.id] = r.revision_number; });
+        (revRows || []).forEach(r => {
+          revNumberById[r.id] = r.revision_number;
+          revStatusById[r.id] = r.status;
+        });
       } catch (e) { /* non-fatal — badge just omits the number */ }
     }
+
+    const REV_FILES_DELIVERED_STATUSES = ['ready_for_review', 'approved', 'superseded'];
+    revFileRows = revFileRows.filter(f => REV_FILES_DELIVERED_STATUSES.includes(revStatusById[f.revision_id]));
 
     /* Normalize both sources into one shape and sort newest-first */
     const normalDelivery = (accessRows || []).map(row => {
@@ -1007,7 +1035,12 @@ async function loadOrderFiles(orderId, hasDue) {
       storage_path:     f.storage_path,
       file_name:        f.file_name,
       date:             f.created_at,
-      download_allowed: true, /* revision deliverables aren't due-gated */
+      /* Revision files respect the same due-based lock as normal delivery
+         files: admin's explicit choice (set at upload time) always wins;
+         if it was never set, fall back to due-amount gating. */
+      download_allowed: (f.download_allowed === true || f.download_allowed === false)
+        ? f.download_allowed
+        : !hasDue,
       isRevision:       true,
       revisionNumber:   revNumberById[f.revision_id],
     }));
@@ -1522,6 +1555,10 @@ function setupRealtime() {
         const order = allOrders.find(o => String(o.id) === String(currentOrderId));
         if (order && window.initRevisionCenter) await window.initRevisionCenter(order);
         if (window.renderClientRevisionHistory) await window.renderClientRevisionHistory(currentOrderId);
+        if (order) await renderDeliveryReviewBanner(order);
+        /* Status change (e.g. in_progress → ready_for_review) can flip
+           whether an already-uploaded file is now visible — refresh My Files too. */
+        if (order) await loadOrderFiles(currentOrderId, (order.due_amount || 0) > 0);
       }
     })
     .on('postgres_changes', {
@@ -1535,6 +1572,7 @@ function setupRealtime() {
         const order = allOrders.find(o => String(o.id) === String(currentOrderId));
         if (order && window.initRevisionCenter) await window.initRevisionCenter(order);
         if (window.renderClientRevisionHistory) await window.renderClientRevisionHistory(currentOrderId);
+        if (order) await renderDeliveryReviewBanner(order);
       }
     })
     .on('postgres_changes', {
