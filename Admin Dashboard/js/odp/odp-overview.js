@@ -13,6 +13,21 @@ window._renderThesisDetailsCard = function(ord, client) {
 window._renderClientInfoFromDB = function(ord, client) {
     if (!client && !ord) return;
 
+    /* ── Sync _currentOrder so Summary tab rebuild uses correct values ── */
+    if (client && window._currentOrder) {
+      if (client.name)  window._currentOrder.client = client.name;
+      if (client.email && window._currentOrder.detail) window._currentOrder.detail.email = client.email;
+      const phone = client.phone || client.whatsapp || ord.phone || ord.whatsapp || '';
+      if (phone && window._currentOrder.detail) window._currentOrder.detail.phone = phone;
+      const uni = client.University || client.university || ord.university || '';
+      if (uni) window._currentOrder.uni = uni;
+      /* initials + avatarColor */
+      const parts = client.name ? client.name.trim().split(/\s+/) : [];
+      if (parts.length) {
+        window._currentOrder.initials = parts.map(w => w[0]).join('').substring(0,2).toUpperCase();
+      }
+    }
+
     /* ── Client name ── */
     if (client && client.name) {
       document.querySelectorAll('.odp-cc-name').forEach(el => {

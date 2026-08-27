@@ -388,7 +388,8 @@ window._buildOrderSummaryHTML = function(order) {
     /* Deadline countdown */
     const dlParts = [order.deadline, order.deadlineTime].filter(Boolean).join(' ');
     let dlCountdown = '';
-    if (order.deadline) {
+    const _noCountdownStatuses = ['delivered', 'completed'];
+    if (order.deadline && !_noCountdownStatuses.includes((order.status || '').toLowerCase())) {
       const dlTarget = window._parseDeadline(order.deadline, order.deadlineTime);
       if (dlTarget && !isNaN(dlTarget)) {
         const diff = dlTarget - Date.now();

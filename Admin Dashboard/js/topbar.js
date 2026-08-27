@@ -246,6 +246,27 @@
             onclick: `window.location.href='order-management.html'`,
           });
         }
+
+        /* Client rating submitted */
+        if (o.rating && !old.rating) {
+          const starStr = '★'.repeat(o.rating) + ' (' + o.rating + '*)';
+          let clientName = 'Client';
+          try {
+            if (o.client_id) {
+              const { data: cl } = await sb.from('clients').select('name,email').eq('id', o.client_id).single();
+              if (cl) clientName = cl.name || cl.email || 'Client';
+            }
+          } catch (_) {}
+          _addNotif({
+            id:      'rating-' + o.id,
+            icon:    'ti-star',
+            color:   'dp-yellow',
+            text:    `${clientName} রেটিং দিয়েছেন: ${starStr}`,
+            sub:     o.order_number || o.id,
+            time:    new Date().toISOString(),
+            onclick: `window.location.href='order-management.html'`,
+          });
+        }
       })
       .subscribe((status, err) => {
         console.log('[Realtime] topbar-orders status:', status, err || '');

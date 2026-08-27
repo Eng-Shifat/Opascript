@@ -3987,9 +3987,11 @@ input, select, textarea { font-family: inherit; }
 .cd-star.filled {
   color: #fbbf24;
 }
+.cd-star:disabled.filled { color: #fbbf24; }
 .cd-star:not(:disabled):active { transform: scale(1.2); }
 .cd-star:disabled { cursor: default; }
 .cd-star.unfilled { color: rgba(255,255,255,0.12); }
+.cd-star:disabled.unfilled { color: rgba(255,255,255,0.12); }
 
 .cd-rating-saved {
   display: flex;
@@ -4000,6 +4002,43 @@ input, select, textarea { font-family: inherit; }
   font-weight: 600;
 }
 .cd-rating-saved svg { flex-shrink: 0; }
+
+.cd-review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 4px;
+}
+.cd-review-textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: .75rem;
+  padding: 8px 10px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+.cd-review-textarea::placeholder { color: rgba(255,255,255,0.3); }
+.cd-review-textarea:focus { border-color: rgba(124,92,255,0.5); }
+.cd-review-submit-btn {
+  align-self: flex-end;
+  background: rgba(124,92,255,0.25);
+  border: 1px solid rgba(124,92,255,0.4);
+  color: #b69dfd;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.cd-review-submit-btn:hover { background: rgba(124,92,255,0.4); }
 
 /* Mobile: star size বাড়াও — আঙুলে সহজে tap হবে */
 @media (max-width: 600px) {

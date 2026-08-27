@@ -37,7 +37,7 @@ const STATUS_STEP_MAP = {
   /* Step 3 — Writing চলছে */
   'writing':2, 'in_progress':2, 'overdue':2,
   /* Step 4 — File in Review */
-  'in_review':3, 'draft_ready':3, 'draft_sent':3, 's-review':3, 'revision':2,
+  'in_review':3, 'draft_ready':3, 'draft_sent':3, 's-review':3, 'revision':3,
   /* Step 5 — Delivery */
   'delivered':4,
   /* Step 6 — Completed */
@@ -2580,14 +2580,19 @@ window.closePaymentDuePopup = function() {
    Supabase orders table এ 'rating' column দরকার (int2, nullable)
 ══════════════════════════════════════════ */
 function initStarRating(orderId, existingRating) {
-  const stars   = document.querySelectorAll('#cdStars .cd-star');
-  const savedEl = document.getElementById('cdRatingSaved');
+  const stars      = document.querySelectorAll('#cdStars .cd-star');
+  const savedEl    = document.getElementById('cdRatingSaved');
+  const reviewForm = document.getElementById('cdReviewForm');
+  const reviewText = document.getElementById('cdReviewText');
+  const reviewBtn  = document.getElementById('cdReviewSubmit');
   if (!stars.length) return;
+
+  let currentVal = 0;
 
   function highlight(val) {
     stars.forEach(s => {
       const sv = parseInt(s.dataset.val);
-      s.classList.toggle('filled',  sv <= val);
+      s.classList.toggle('filled',   sv <= val);
       s.classList.toggle('unfilled', sv > val);
     });
   }
@@ -2597,25 +2602,41 @@ function initStarRating(orderId, existingRating) {
     highlight(existingRating);
     stars.forEach(s => s.disabled = true);
     if (savedEl) savedEl.style.display = 'flex';
+    if (reviewForm) reviewForm.style.display = 'none';
     return;
   }
 
-  // hover effects
+  // hover + click effects
   stars.forEach(s => {
     s.addEventListener('mouseenter', () => highlight(parseInt(s.dataset.val)));
-    s.addEventListener('mouseleave', () => highlight(0));
-    s.addEventListener('click', async () => {
-      const val = parseInt(s.dataset.val);
-      highlight(val);
-      stars.forEach(st => st.disabled = true);
-      if (savedEl) savedEl.style.display = 'flex';
-      // Supabase save
-      const sb = window.scriptoraSupabase;
-      if (sb && orderId) {
-        const { error } = await sb.from('orders').update({ rating: val }).eq('id', orderId);
-        if (error) console.warn('[Rating] save error:', error.message);
-      }
+    s.addEventListener('mouseleave', () => highlight(currentVal));
+    s.addEventListener('click', () => {
+      currentVal = parseInt(s.dataset.val);
+      highlight(currentVal);
+      if (reviewForm) reviewForm.style.display = 'flex';
     });
   });
   highlight(0);
+
+  // review submit
+  if (reviewBtn) {
+    reviewBtn.addEventListener('click', async () => {
+      if (!currentVal) return;
+      stars.forEach(st => st.disabled = true);
+      reviewBtn.disabled = true;
+      reviewBtn.textContent = 'সংরক্ষণ হচ্ছে…';
+
+      const sb = window.scriptoraSupabase;
+      if (sb && orderId) {
+        const updateData = { rating: currentVal };
+        const text = reviewText ? reviewText.value.trim() : '';
+        if (text) updateData.review_text = text;
+        const { error } = await sb.from('orders').update(updateData).eq('id', orderId);
+        if (error) console.warn('[Rating] save error:', error.message);
+      }
+
+      if (reviewForm) reviewForm.style.display = 'none';
+      if (savedEl) savedEl.style.display = 'flex';
+    });
+  }
 }
