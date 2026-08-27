@@ -99,7 +99,7 @@ window._loadRevisions = async function () {
 
     el.innerHTML = _buildFinalDeliverySectionHTML(orderId) + _buildRevisionTabHTML(revisions);
     _bindAdminRevisionActions(el, revisions);
-    _bindFinalDeliveryActions(orderId);
+    _bindFinalDeliveryActions(el);
     _loadFinalDeliveryFiles(orderId);
 
     /* Pre-load existing uploaded files for in_progress revisions */

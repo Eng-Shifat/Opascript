@@ -86,7 +86,7 @@
         <i class="ti ti-toggle-right"></i><span class="s-nav-item-label">Service Management</span>
       </a>
       <a class="s-nav-item" href="admin-affiliates.html" data-page="affiliates" data-tooltip="Affiliate Applications">
-        <i class="ti ti-users-plus"></i><span class="s-nav-item-label">Affiliates</span>
+        <i class="ti ti-affiliate"></i><span class="s-nav-item-label">Affiliates</span>
         <span class="s-badge" id="affBadge" style="display:none">0</span>
       </a>
 
