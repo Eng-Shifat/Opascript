@@ -209,6 +209,54 @@
         }
       }
 
+      /* ── Affiliate Commission Button ──────────────────────────────
+         Show only when: order has referred_by_code AND no commission exists yet.
+         This is a MANUAL admin action — no automatic recording.
+      ── */
+      const rawDB = window._currentOrder?._rawDB;
+      if (rawDB?.referred_by_code && window._isRealUUID(window._currentOrderId)) {
+        try {
+          const { data: existingComm } = await window._sb()
+            .from('affiliate_commissions')
+            .select('id')
+            .eq('order_id', window._currentOrderId)
+            .maybeSingle();
+
+          /* Remove any existing commission button before re-rendering */
+          const oldBtn = document.getElementById('odpCommissionBtnWrap');
+          if (oldBtn) oldBtn.remove();
+
+          const commBtnWrap = document.createElement('div');
+          commBtnWrap.id = 'odpCommissionBtnWrap';
+          commBtnWrap.style.cssText = 'margin-top:14px;';
+
+          if (existingComm) {
+            commBtnWrap.innerHTML = `
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:8px;font-size:12px;color:#34d399;">
+                <i class="ti ti-circle-check"></i>
+                Affiliate commission already recorded &mdash; Ref: <strong>${window._esc ? window._esc(rawDB.referred_by_code) : rawDB.referred_by_code}</strong>
+              </div>`;
+          } else {
+            commBtnWrap.innerHTML = `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:8px;">
+                <i class="ti ti-affiliate" style="color:#a78bfa;font-size:15px;flex-shrink:0;"></i>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:12px;font-weight:600;color:#a78bfa;">Affiliate Referral Detected</div>
+                  <div style="font-size:11px;color:var(--muted2);margin-top:1px;">Ref code: <strong>${window._esc ? window._esc(rawDB.referred_by_code) : rawDB.referred_by_code}</strong></div>
+                </div>
+                <button
+                  id="odpCommissionRecordBtn"
+                  onclick="odpRecordCommission()"
+                  style="flex-shrink:0;padding:6px 14px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;transition:opacity .15s;"
+                  onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                  Record Commission
+                </button>
+              </div>`;
+          }
+          el.after(commBtnWrap);
+        } catch (_) { /* commission check is non-fatal */ }
+      }
+
     } catch(e) {
       el.innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:8px 0">Could not load payment history.</div>';
       console.error('_loadPaymentHistory:', e);
@@ -438,6 +486,41 @@
     } catch(e) {
       console.error('odpApprovePayment error:', e);
       window._toast('⚠ Error: ' + (e.message || 'Unknown'), 'var(--red)');
+    }
+  };
+
+  /* ── Record Affiliate Commission — manual admin action ─────────── */
+  window.odpRecordCommission = async function() {
+    if (!window._currentOrderId || !window._isRealUUID(window._currentOrderId)) return;
+
+    const btn = document.getElementById('odpCommissionRecordBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Recording…'; }
+
+    try {
+      const { data, error } = await window._sb().rpc('record_affiliate_commission', {
+        p_order_id: window._currentOrderId
+      });
+
+      if (error) throw error;
+
+      if (data?.success === false) {
+        window._toast('❌ ' + (data.message || 'Commission record failed'), 'var(--red)');
+        if (btn) { btn.disabled = false; btn.textContent = 'Record Commission'; }
+        return;
+      }
+
+      const amt = data?.commission_amount
+        ? ' — ৳' + Number(data.commission_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })
+        : '';
+      window._toast('✅ Commission Recorded' + amt, 'var(--green)');
+
+      /* Refresh payment history panel so button changes to "already recorded" state */
+      await window._loadPaymentHistory();
+
+    } catch(e) {
+      console.error('odpRecordCommission error:', e);
+      window._toast('⚠ Error: ' + (e.message || 'Unknown'), 'var(--red)');
+      if (btn) { btn.disabled = false; btn.textContent = 'Record Commission'; }
     }
   };
 

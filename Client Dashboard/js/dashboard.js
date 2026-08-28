@@ -123,6 +123,7 @@ async function loadAllData() {
   loadPaymentsPage();
   loadFilesPage();
   loadProfileData();
+  loadAffiliateState();
 }
 
 async function loadOrders() {
@@ -1660,6 +1661,199 @@ function initNav() {
   });
 }
 
+/* ── AFFILIATE STATE ─────────────────────────────────────────── */
+let _affStateLoaded = false; /* একবার load হলে আর reload দরকার নেই, unless forced */
+
+async function loadAffiliateState(force = false) {
+  if (_affStateLoaded && !force) return;
+
+  const show = id => {
+    ['aff-loading','aff-cta','aff-pending','aff-approved'].forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.style.display = (s === id) ? (id === 'aff-loading' ? 'flex' : 'block') : 'none';
+    });
+  };
+
+  show('aff-loading');
+
+  try {
+    /* 1. Affiliate record আছে কিনা দেখো (approved হলে থাকবে) */
+    const { data: aff } = await sb
+      .from('affiliates')
+      .select('id, referral_code, status')
+      .eq('client_id', currentUser.id)
+      .maybeSingle();
+
+    if (aff && aff.status === 'active') {
+      const codeEl = document.getElementById('affReferralCode');
+      if (codeEl) codeEl.textContent = aff.referral_code;
+      show('aff-approved');
+      _affStateLoaded = true;
+      /* Load earnings data for approved affiliate */
+      loadAffiliateEarnings(aff.id);
+      return;
+    }
+
+    /* 2. Application আছে কিনা দেখো */
+    const { data: app } = await sb
+      .from('affiliate_applications')
+      .select('id, status')
+      .eq('client_id', currentUser.id)
+      .in('status', ['pending', 'approved'])
+      .maybeSingle();
+
+    if (app && app.status === 'pending') {
+      show('aff-pending');
+      _affStateLoaded = true;
+      return;
+    }
+
+    /* 3. কিছুই নেই — Apply CTA দেখাও */
+    show('aff-cta');
+    _affStateLoaded = true;
+
+  } catch (err) {
+    console.error('[Affiliate] loadAffiliateState error:', err);
+    show('aff-cta'); /* error হলেও loading এ আটকে না রেখে CTA দেখাও */
+  }
+}
+
+async function affiliateApply() {
+  const btn = document.getElementById('affApplyBtn');
+  const msg = document.getElementById('affApplyMsg');
+  if (btn) { btn.disabled = true; btn.textContent = 'Applying…'; }
+  if (msg) { msg.textContent = ''; msg.className = 'profile-msg'; }
+
+  try {
+    const { error } = await sb
+      .from('affiliate_applications')
+      .insert({ client_id: currentUser.id, status: 'pending' });
+
+    if (error) {
+      /* Unique constraint violation — already applied */
+      if (error.code === '23505') {
+        if (msg) { msg.textContent = 'আপনার আবেদন ইতিমধ্যে জমা আছে।'; msg.className = 'profile-msg'; }
+      } else {
+        throw error;
+      }
+    }
+
+    /* Reload state to show pending UI */
+    _affStateLoaded = false;
+    await loadAffiliateState();
+
+  } catch (err) {
+    console.error('[Affiliate] apply error:', err);
+    if (msg) { msg.textContent = 'সমস্যা হয়েছে। আবার চেষ্টা করুন।'; msg.className = 'profile-msg error'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Apply করুন'; }
+  }
+}
+
+function affiliateCopyCode() {
+  const code = document.getElementById('affReferralCode')?.textContent || '';
+  if (!code || code === '—') return;
+  navigator.clipboard.writeText(code).then(() => {
+    const msg = document.getElementById('affCopyMsg');
+    if (msg) { msg.style.opacity = '1'; setTimeout(() => { msg.style.opacity = '0'; }, 1800); }
+  }).catch(() => {
+    /* Fallback for older browsers */
+    const ta = document.createElement('textarea');
+    ta.value = code; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    const msg = document.getElementById('affCopyMsg');
+    if (msg) { msg.style.opacity = '1'; setTimeout(() => { msg.style.opacity = '0'; }, 1800); }
+  });
+}
+
+/* ── AFFILIATE EARNINGS ──────────────────────────────────────── */
+async function loadAffiliateEarnings(affiliateId) {
+  const earningsEl = document.getElementById('affEarningsTotal');
+  const pendingEl  = document.getElementById('affEarningsPending');
+  const tbodyEl    = document.getElementById('affCommTbody');
+
+  /* Show skeleton state */
+  if (earningsEl) earningsEl.textContent = '…';
+  if (pendingEl)  pendingEl.textContent  = '…';
+  if (tbodyEl)    tbodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">লোড হচ্ছে…</td></tr>';
+
+  try {
+    const { data: comms, error } = await sb
+      .from('affiliate_commissions')
+      .select('id, order_id, order_amount, commission_amount, status, created_at')
+      .eq('affiliate_id', affiliateId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const earned = (comms || []).filter(c => c.status === 'earned');
+    const totalEarned = earned.reduce((s, c) => s + Number(c.commission_amount || 0), 0);
+
+    /* For Phase 3: Pending Withdrawal = same as Total Earned (withdrawal not yet implemented) */
+    if (earningsEl) earningsEl.textContent = '৳' + totalEarned.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (pendingEl)  pendingEl.textContent  = '৳' + totalEarned.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    /* Commission history table */
+    if (!tbodyEl) return;
+
+    if (!comms || comms.length === 0) {
+      tbodyEl.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align:center;padding:28px 12px;">
+            <div style="color:var(--text-muted);font-size:12px;font-family:'Noto Sans Bengali',sans-serif;">
+              এখনো কোনো commission নেই। আপনার referral code শেয়ার করুন।
+            </div>
+          </td>
+        </tr>`;
+      return;
+    }
+
+    /* Fetch order numbers for display */
+    const orderIds = [...new Set(comms.map(c => c.order_id))];
+    const { data: orders } = await sb
+      .from('orders')
+      .select('id, order_number')
+      .in('id', orderIds);
+
+    const orderMap = {};
+    (orders || []).forEach(o => {
+      orderMap[o.id] = o.order_number || o.id.slice(0, 8).toUpperCase();
+    });
+
+    tbodyEl.innerHTML = comms.map(c => {
+      const orderNum   = orderMap[c.order_id] || c.order_id?.slice(0, 8).toUpperCase() || '—';
+      const date       = c.created_at
+        ? new Date(c.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+        : '—';
+      const orderAmt   = '৳' + Number(c.order_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      const commAmt    = '৳' + Number(c.commission_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      const statusMap  = {
+        earned:    { color: '#34d399', label: 'Earned' },
+        withdrawn: { color: '#f59e0b', label: 'Withdrawn' },
+        cancelled: { color: '#f87171', label: 'Cancelled' },
+      };
+      const st = statusMap[c.status] || { color: 'var(--text-muted)', label: c.status };
+
+      return `
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 8px;font-size:12px;font-weight:600;color:var(--accent-light);font-family:'Sora',monospace;">${orderNum}</td>
+          <td style="padding:10px 8px;font-size:11px;color:var(--text-muted);">${date}</td>
+          <td style="padding:10px 8px;font-size:12px;color:var(--text-secondary);">${orderAmt}</td>
+          <td style="padding:10px 8px;font-size:12px;font-weight:700;color:#34d399;">${commAmt}</td>
+          <td style="padding:10px 8px;">
+            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${st.color}20;color:${st.color};">${st.label}</span>
+          </td>
+        </tr>`;
+    }).join('');
+
+  } catch (err) {
+    console.error('[Affiliate] loadAffiliateEarnings error:', err);
+    if (earningsEl) earningsEl.textContent = '—';
+    if (pendingEl)  pendingEl.textContent  = '—';
+    if (tbodyEl) tbodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Earnings load করতে সমস্যা হয়েছে।</td></tr>';
+  }
+}
+
 function showPage(pageId,clickedItem) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const target=document.getElementById('page-'+pageId);
@@ -1679,6 +1873,9 @@ function showPage(pageId,clickedItem) {
       document.getElementById('orderDetailView').style.display='none';
       clearInterval(countdownTimer);
     }
+  }
+  if(pageId==='affiliate'){
+    loadAffiliateState();
   }
 }
 

@@ -1969,8 +1969,45 @@
                 <span id="affCopyMsg" style="font-size:11px;color:var(--green);opacity:0;transition:opacity .3s;">Copied!</span>
               </div>
             </div>
-            <div style="font-size:12px;color:var(--text-muted);font-family:'Noto Sans Bengali',sans-serif;">
-              Commission, Wallet এবং Withdrawal — শীঘ্রই আসছে।
+            <!-- Earnings Summary -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;">
+                <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">মোট উপার্জন</div>
+                <div id="affEarningsTotal" style="font-size:20px;font-weight:700;color:#34d399;font-family:'Sora',sans-serif;">…</div>
+              </div>
+              <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;">
+                <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Pending Withdrawal</div>
+                <div id="affEarningsPending" style="font-size:20px;font-weight:700;color:#f59e0b;font-family:'Sora',sans-serif;">…</div>
+              </div>
+            </div>
+
+            <!-- Commission History -->
+            <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+              <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;">Commission History</div>
+              </div>
+              <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;">
+                  <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;letter-spacing:.06em;text-transform:uppercase;">Order #</th>
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;letter-spacing:.06em;text-transform:uppercase;">Date</th>
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;letter-spacing:.06em;text-transform:uppercase;">Order Amt</th>
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;letter-spacing:.06em;text-transform:uppercase;">Commission</th>
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;letter-spacing:.06em;text-transform:uppercase;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="affCommTbody">
+                    <tr>
+                      <td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">লোড হচ্ছে…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="font-size:11px;color:var(--text-muted);font-family:'Noto Sans Bengali',sans-serif;text-align:center;">
+              Withdrawal — শীঘ্রই আসছে।
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Affiliate Applications — Scriptora Admin</title>
+  <title>Affiliate Management — Scriptora Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
   <link rel="stylesheet" href="css/admin.css"/>
@@ -14,84 +14,185 @@
 <body>
 
 <script src="js/supabaseClient.js"></script>
-<script src="js/topbar.js" data-title="Affiliate Applications" data-sub="Client-দের affiliate আবেদন review ও approve করুন"></script>
+<script src="js/topbar.js" data-title="Affiliate Management" data-sub="Applications ও Commission সব এক জায়গায়"></script>
 <script src="js/sidebar.js" data-page="affiliates"></script>
 
 <div class="main">
   <div class="content cl-page">
 
-    <!-- Header -->
-    <div class="cl-header">
-      <div class="cl-header-left">
-        <h2>Affiliate Applications</h2>
-        <p id="aff-subtitle">Loading...</p>
+    <!-- ── Page-level Tab Nav ────────────────────────────────── -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;gap:4px;background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:4px;">
+        <button id="tabBtnApplications" class="aff-tab-btn aff-tab-active" onclick="switchTab('applications')">
+          <i class="ti ti-users"></i> Applications
+        </button>
+        <button id="tabBtnCommissions" class="aff-tab-btn" onclick="switchTab('commissions')">
+          <i class="ti ti-coins"></i> Commissions
+        </button>
       </div>
-      <button class="cl-add-btn" onclick="loadApplications()" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">
+      <button class="cl-add-btn" onclick="refreshCurrentTab()" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">
         <i class="ti ti-refresh"></i> Refresh
       </button>
     </div>
 
-    <!-- Stats -->
-    <div class="cl-stats">
-      <div class="cl-stat">
-        <div class="cl-stat-label">Total Applications</div>
-        <div class="cl-stat-val purple" id="st-total">—</div>
-        <div class="cl-stat-sub">সব মিলিয়ে</div>
-      </div>
-      <div class="cl-stat">
-        <div class="cl-stat-label">Pending Review</div>
-        <div class="cl-stat-val yellow" id="st-pending">—</div>
-        <div class="cl-stat-sub">সিদ্ধান্ত বাকি</div>
-      </div>
-      <div class="cl-stat">
-        <div class="cl-stat-label">Approved</div>
-        <div class="cl-stat-val green" id="st-approved">—</div>
-        <div class="cl-stat-sub">Active affiliates</div>
-      </div>
-      <div class="cl-stat">
-        <div class="cl-stat-label">Rejected</div>
-        <div class="cl-stat-val red" id="st-rejected">—</div>
-        <div class="cl-stat-sub">Declined</div>
-      </div>
-    </div>
+    <!-- ══ APPLICATIONS TAB ══════════════════════════════════════ -->
+    <div id="tabApplications">
 
-    <!-- Filter chips -->
-    <div class="cl-filters">
-      <button class="cl-filter-chip active" data-filter="all"     onclick="setAffFilter('all',this)">সব</button>
-      <button class="cl-filter-chip"        data-filter="pending"  onclick="setAffFilter('pending',this)">Pending</button>
-      <button class="cl-filter-chip"        data-filter="approved" onclick="setAffFilter('approved',this)">Approved</button>
-      <button class="cl-filter-chip"        data-filter="rejected" onclick="setAffFilter('rejected',this)">Rejected</button>
-    </div>
+      <!-- Stats -->
+      <div class="cl-stats">
+        <div class="cl-stat">
+          <div class="cl-stat-label">Total Applications</div>
+          <div class="cl-stat-val purple" id="st-total">—</div>
+          <div class="cl-stat-sub">সব মিলিয়ে</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Pending Review</div>
+          <div class="cl-stat-val yellow" id="st-pending">—</div>
+          <div class="cl-stat-sub">সিদ্ধান্ত বাকি</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Approved</div>
+          <div class="cl-stat-val green" id="st-approved">—</div>
+          <div class="cl-stat-sub">Active affiliates</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Rejected</div>
+          <div class="cl-stat-val red" id="st-rejected">—</div>
+          <div class="cl-stat-sub">Declined</div>
+        </div>
+      </div>
 
-    <!-- Table -->
-    <div class="cl-table-wrap">
-      <table class="cl-table">
-        <thead>
-          <tr>
-            <th>Client</th>
-            <th>Applied At</th>
-            <th>Status</th>
-            <th>Reviewed At</th>
-            <th>Admin Note</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="aff-tbody">
-          <tr>
-            <td colspan="6" class="cl-empty">
-              <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
-              <p>Loading applications...</p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <!-- Subtitle -->
+      <p id="aff-subtitle" style="font-size:.8rem;color:var(--muted2);margin:0 0 12px;">Loading...</p>
+
+      <!-- Filter chips -->
+      <div class="cl-filters">
+        <button class="cl-filter-chip active" data-filter="all"      onclick="setAffFilter('all',this)">সব</button>
+        <button class="cl-filter-chip"        data-filter="pending"   onclick="setAffFilter('pending',this)">Pending</button>
+        <button class="cl-filter-chip"        data-filter="approved"  onclick="setAffFilter('approved',this)">Approved</button>
+        <button class="cl-filter-chip"        data-filter="rejected"  onclick="setAffFilter('rejected',this)">Rejected</button>
+      </div>
+
+      <!-- Applications Table -->
+      <div class="cl-table-wrap">
+        <table class="cl-table">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Applied At</th>
+              <th>Status</th>
+              <th>Reviewed At</th>
+              <th>Admin Note</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="aff-tbody">
+            <tr>
+              <td colspan="6" class="cl-empty">
+                <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
+                <p>Loading applications...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /tabApplications -->
+
+    <!-- ══ COMMISSIONS TAB ════════════════════════════════════════ -->
+    <div id="tabCommissions" style="display:none;">
+
+      <!-- Commission Stats -->
+      <div class="cl-stats">
+        <div class="cl-stat">
+          <div class="cl-stat-label">Total Commissions</div>
+          <div class="cl-stat-val purple" id="cm-total">—</div>
+          <div class="cl-stat-sub">সব records</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Total Earned (BDT)</div>
+          <div class="cl-stat-val green" id="cm-earned-amount">—</div>
+          <div class="cl-stat-sub">status = earned</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Withdrawn</div>
+          <div class="cl-stat-val yellow" id="cm-withdrawn">—</div>
+          <div class="cl-stat-sub">paid out</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Cancelled</div>
+          <div class="cl-stat-val red" id="cm-cancelled">—</div>
+          <div class="cl-stat-sub">voided</div>
+        </div>
+      </div>
+
+      <p id="cm-subtitle" style="font-size:.8rem;color:var(--muted2);margin:0 0 12px;">Loading...</p>
+
+      <!-- Commission Filter chips -->
+      <div class="cl-filters">
+        <button class="cl-filter-chip active" data-cm-filter="all"       onclick="setCmFilter('all',this)">সব</button>
+        <button class="cl-filter-chip"        data-cm-filter="earned"    onclick="setCmFilter('earned',this)">Earned</button>
+        <button class="cl-filter-chip"        data-cm-filter="withdrawn" onclick="setCmFilter('withdrawn',this)">Withdrawn</button>
+        <button class="cl-filter-chip"        data-cm-filter="cancelled" onclick="setCmFilter('cancelled',this)">Cancelled</button>
+      </div>
+
+      <!-- Commissions Table -->
+      <div class="cl-table-wrap">
+        <table class="cl-table">
+          <thead>
+            <tr>
+              <th>Affiliate</th>
+              <th>Order #</th>
+              <th>Referred Client</th>
+              <th>Order Amount</th>
+              <th>Rate</th>
+              <th>Commission</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="cm-tbody">
+            <tr>
+              <td colspan="8" class="cl-empty">
+                <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
+                <p>Loading commissions...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /tabCommissions -->
 
   </div>
 </div>
 
-<!-- Toast container (same pattern as admin-clients.html) -->
+<!-- Toast container -->
 <div id="toastContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+<style>
+/* Tab button styles — inline since admin-clients.css doesn't have these */
+.aff-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted2);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s;
+  font-family: 'Sora', sans-serif;
+}
+.aff-tab-btn:hover { color: var(--text); }
+.aff-tab-active {
+  background: var(--accent);
+  color: #fff !important;
+}
+</style>
 
 <script src="js/admin-affiliates.js"></script>
 </body>
