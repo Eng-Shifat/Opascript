@@ -4,6 +4,12 @@
 
 (function () {
 
+  // ── Capture ?ref=CODE from any page and persist for registration ──────
+  const _refParam = new URLSearchParams(window.location.search).get('ref');
+  if (_refParam && _refParam.trim()) {
+    sessionStorage.setItem('scriptora_ref_code', _refParam.trim().toUpperCase());
+  }
+
   const path       = window.location.pathname;
   const isHome     = path.includes('Homepage') || path.endsWith('index.html');
   const isLogin    = path.includes('Login');
@@ -19,7 +25,8 @@
     ? `<img src="${clientAvatar}" alt="${firstName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
     : initials;
 
-  function pricingLink() { return '../Pricing page/pricing.html'; }
+  function pricingLink()    { return '../Pricing page/pricing.html'; }
+  function affiliateLink()  { return isHome ? './affiliate/index.html' : '../affiliate/index.html'; }
   function homeLink(anchor) {
     if (isHome) return anchor || '#';
     return '../Homepage/index.html' + (anchor || '');
@@ -68,6 +75,7 @@
       <a href="${homeLink('#how-it-works')}">How it Works</a>
       <a href="${homeLink('#faq')}">FAQ</a>
       <a href="${homeLink('#contact')}">Contact</a>
+      <a href="${affiliateLink()}" style="color:var(--color-green);font-weight:600;">💰 Earn</a>
     </div>
     <div class="nav-btns">
       <button class="theme-toggle-btn" id="theme-toggle" title="থিম পরিবর্তন করুন" aria-label="থিম পরিবর্তন করুন">☀️</button>
@@ -82,6 +90,7 @@
     <a href="${homeLink('#how-it-works')}">How it Works</a>
     <a href="${homeLink('#faq')}">FAQ</a>
     <a href="${homeLink('#contact')}">Contact</a>
+    <a href="${affiliateLink()}" style="color:var(--color-green);font-weight:600;">💰 Affiliate Program — Earn করুন</a>
     ${mobileAuthButtons}
   </div>`;
 

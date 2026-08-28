@@ -29,6 +29,12 @@
         <button id="tabBtnCommissions" class="aff-tab-btn" onclick="switchTab('commissions')">
           <i class="ti ti-coins"></i> Commissions
         </button>
+        <button id="tabBtnWithdrawals" class="aff-tab-btn" onclick="switchTab('withdrawals')">
+          <i class="ti ti-cash"></i> Withdrawals
+        </button>
+        <button id="tabBtnReferrals" class="aff-tab-btn" onclick="switchTab('referrals')">
+          <i class="ti ti-users-group"></i> Referred Clients
+        </button>
       </div>
       <button class="cl-add-btn" onclick="refreshCurrentTab()" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">
         <i class="ti ti-refresh"></i> Refresh
@@ -163,6 +169,117 @@
       </div>
 
     </div><!-- /tabCommissions -->
+
+    <!-- ══ WITHDRAWALS TAB ═══════════════════════════════════════ -->
+    <div id="tabWithdrawals" style="display:none;">
+
+      <div class="cl-stats">
+        <div class="cl-stat">
+          <div class="cl-stat-label">Pending Review</div>
+          <div class="cl-stat-val yellow" id="wd-pending">—</div>
+          <div class="cl-stat-sub">Awaiting approval</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Approved</div>
+          <div class="cl-stat-val purple" id="wd-approved">—</div>
+          <div class="cl-stat-sub">Ready for payout</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Paid Out</div>
+          <div class="cl-stat-val green" id="wd-paid">—</div>
+          <div class="cl-stat-sub">Completed</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Rejected</div>
+          <div class="cl-stat-val red" id="wd-rejected">—</div>
+          <div class="cl-stat-sub">Declined</div>
+        </div>
+      </div>
+
+      <p id="wd-subtitle" style="font-size:.8rem;color:var(--muted2);margin:0 0 12px;">Loading...</p>
+
+      <div class="cl-filters">
+        <button class="cl-filter-chip active" data-wd-filter="all"      onclick="setWdFilter('all',this)">সব</button>
+        <button class="cl-filter-chip"        data-wd-filter="pending"   onclick="setWdFilter('pending',this)">Pending</button>
+        <button class="cl-filter-chip"        data-wd-filter="approved"  onclick="setWdFilter('approved',this)">Approved</button>
+        <button class="cl-filter-chip"        data-wd-filter="paid"      onclick="setWdFilter('paid',this)">Paid</button>
+        <button class="cl-filter-chip"        data-wd-filter="rejected"  onclick="setWdFilter('rejected',this)">Rejected</button>
+      </div>
+
+      <div class="cl-table-wrap">
+        <table class="cl-table">
+          <thead>
+            <tr>
+              <th>Affiliate</th>
+              <th>Amount</th>
+              <th>Payment Info</th>
+              <th>Status</th>
+              <th>Requested</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="wd-tbody">
+            <tr>
+              <td colspan="6" class="cl-empty">
+                <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
+                <p>Loading withdrawals...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /tabWithdrawals -->
+
+    <!-- ══ REFERRED CLIENTS TAB ══════════════════════════════ -->
+    <div id="tabReferrals" style="display:none;">
+
+      <!-- Stats -->
+      <div class="cl-stats">
+        <div class="cl-stat">
+          <div class="cl-stat-label">Total Referred</div>
+          <div class="cl-stat-val blue" id="ref-total">—</div>
+          <div class="cl-stat-sub">Referral code দিয়ে Register</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Total Orders</div>
+          <div class="cl-stat-val green" id="ref-orders">—</div>
+          <div class="cl-stat-sub">Referred clients-এর order</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Total Order Value</div>
+          <div class="cl-stat-val yellow" id="ref-value">—</div>
+          <div class="cl-stat-sub">Referred clients-এর মোট</div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div style="margin:18px 0 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input id="refSearch" type="text" placeholder="Client বা Affiliate নাম / code দিয়ে খুঁজুন…"
+          oninput="filterReferrals()"
+          style="flex:1;min-width:200px;background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 14px;font-size:.85rem;outline:none;font-family:inherit;">
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+          <thead>
+            <tr style="background:var(--bg-card2);text-align:left;">
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Referred Client</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Referred By</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Ref Code</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Registered</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Orders</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Order Value</th>
+            </tr>
+          </thead>
+          <tbody id="refTbody">
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">লোড হচ্ছে…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /tabReferrals -->
 
   </div>
 </div>

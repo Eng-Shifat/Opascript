@@ -24,6 +24,15 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// ── Referral Code Persistence ───────────────────────────────────────────────
+// ?ref=CODE যদি URL-এ থাকে, sessionStorage-এ সেভ করা হয় যাতে পরবর্তী পেজেও কাজ করে
+(function () {
+  const refParam = new URLSearchParams(window.location.search).get('ref');
+  if (refParam && refParam.trim()) {
+    sessionStorage.setItem('scriptora_ref_code', refParam.trim().toUpperCase());
+  }
+})();
+
 // ── Email Confirmation Setting ──────────────────────────────────────────────
 // Supabase Dashboard → Authentication → Email → "Confirm email" ON/OFF
 // নিচের value আপনার Supabase setting এর সাথে মিলিয়ে সেট করুন
@@ -306,17 +315,23 @@ async function handleRegister() {
     }
 
     // ── STEP 4: clients table এ insert ────────────────────────────────
+    // Referral code: URL ?ref=CODE অথবা sessionStorage থেকে নেওয়া হবে
+    const refCode = (new URLSearchParams(window.location.search).get('ref') || sessionStorage.getItem('scriptora_ref_code') || '').trim().toUpperCase() || null;
+
+    const insertPayload = {
+      id:    authUser.id,  // Auth UUID = clients.id
+      name:  fullName,
+      email: email,
+      phone: phone,
+      // password column নেই — Supabase Auth নিজেই manage করে
+      // created_at → Supabase default now() বা নিজে দিন
+      created_at: new Date().toISOString(),
+    };
+    if (refCode) insertPayload.referred_by_code = refCode;
+
     const { error: dbError } = await sb
       .from('clients')
-      .insert({
-        id:    authUser.id,  // Auth UUID = clients.id
-        name:  fullName,
-        email: email,
-        phone: phone,
-        // password column নেই — Supabase Auth নিজেই manage করে
-        // created_at → Supabase default now() বা নিজে দিন
-        created_at: new Date().toISOString(),
-      });
+      .insert(insertPayload);
 
     if (dbError) {
       console.error('DB insert error:', dbError.message);

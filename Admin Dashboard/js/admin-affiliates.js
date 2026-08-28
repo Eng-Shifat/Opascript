@@ -12,6 +12,12 @@
      Record: calls public.record_affiliate_commission(order_id) RPC
      Filter: all / earned / withdrawn / cancelled
 
+   TAB 3 — Withdrawals
+     Reads: public.affiliate_withdrawals
+     Approve: admin_approve_affiliate_withdrawal(id)
+     Reject:  admin_reject_affiliate_withdrawal(id)
+     Payout:  admin_confirm_affiliate_payout(id, txn_id)
+
    Toast: same showToast() pattern as admin-clients.js
 ══════════════════════════════════════════════════════════ */
 'use strict';
@@ -27,6 +33,13 @@ let REFERRED_CLIENT_MAP= {};  /* client_id → { name, email } — referred clie
 let CM_FILTER          = 'all';
 let CURRENT_TAB        = 'applications';
 
+let ALL_WITHDRAWALS    = [];
+let WD_AFF_MAP         = {};  /* client_id → { name, email } */
+let WD_FILTER          = 'all';
+
+let ALL_REFERRALS      = [];
+let REF_SEARCH         = '';
+
 /* ── Init ─────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
   await waitForSession();
@@ -40,18 +53,24 @@ window.switchTab = function(tab) {
 
   document.getElementById('tabApplications').style.display  = tab === 'applications' ? '' : 'none';
   document.getElementById('tabCommissions').style.display   = tab === 'commissions'  ? '' : 'none';
+  document.getElementById('tabWithdrawals').style.display   = tab === 'withdrawals'  ? '' : 'none';
+  document.getElementById('tabReferrals').style.display     = tab === 'referrals'    ? '' : 'none';
 
   document.getElementById('tabBtnApplications').classList.toggle('aff-tab-active', tab === 'applications');
   document.getElementById('tabBtnCommissions').classList.toggle('aff-tab-active',  tab === 'commissions');
+  document.getElementById('tabBtnWithdrawals').classList.toggle('aff-tab-active',  tab === 'withdrawals');
+  document.getElementById('tabBtnReferrals').classList.toggle('aff-tab-active',    tab === 'referrals');
 
-  if (tab === 'commissions' && ALL_COMMISSIONS.length === 0) {
-    loadCommissions();
-  }
+  if (tab === 'commissions' && ALL_COMMISSIONS.length === 0) loadCommissions();
+  if (tab === 'withdrawals' && ALL_WITHDRAWALS.length === 0) loadWithdrawals();
+  if (tab === 'referrals'   && ALL_REFERRALS.length   === 0) loadReferrals();
 };
 
 window.refreshCurrentTab = function() {
-  if (CURRENT_TAB === 'applications') loadApplications();
-  else loadCommissions();
+  if      (CURRENT_TAB === 'applications') loadApplications();
+  else if (CURRENT_TAB === 'commissions')  loadCommissions();
+  else if (CURRENT_TAB === 'referrals')    { ALL_REFERRALS = []; loadReferrals(); }
+  else                                     loadWithdrawals();
 };
 
 /* ── Session helper ───────────────────────────────────────── */
@@ -207,6 +226,7 @@ function buildStatusBadge(status) {
     earned:    { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  icon: 'ti-circle-check', label: 'Earned'    },
     withdrawn: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: 'ti-cash',         label: 'Withdrawn' },
     cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', icon: 'ti-circle-x',     label: 'Cancelled' },
+    paid:      { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  icon: 'ti-circle-check', label: 'Paid'      },
   };
   const s = map[status] || { color: 'var(--muted2)', bg: 'transparent', icon: 'ti-help-circle', label: status };
   return `<span class="cl-badge" style="background:${s.bg};color:${s.color};">
@@ -458,6 +478,223 @@ window.adminRecordCommission = async function(orderId) {
   }
 };
 
+/* ══════════════════════════════════════════════════════════
+   TAB 3 — WITHDRAWALS
+══════════════════════════════════════════════════════════ */
+
+async function loadWithdrawals() {
+  const sb = window.scriptoraSupabase;
+  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+
+  setTbodyLoading('wd-tbody', 6);
+
+  try {
+    const { data: rows, error } = await sb
+      .from('affiliate_withdrawals')
+      .select('id, affiliate_id, client_id, amount, status, payment_method, payment_number, payment_name, admin_note, payout_txn_id, requested_at, reviewed_at, paid_at')
+      .order('requested_at', { ascending: false });
+
+    if (error) throw error;
+    ALL_WITHDRAWALS = rows || [];
+
+    const clientIds = [...new Set(ALL_WITHDRAWALS.map(w => w.client_id))];
+    WD_AFF_MAP = {};
+    if (clientIds.length > 0) {
+      const { data: clients } = await sb
+        .from('clients')
+        .select('id, name, email')
+        .in('id', clientIds);
+      (clients || []).forEach(c => { WD_AFF_MAP[c.id] = c; });
+    }
+
+    updateWdStats();
+    renderWdTable();
+
+  } catch (err) {
+    console.error('loadWithdrawals error:', err);
+    showToast('❌ Withdrawal data load হয়নি: ' + err.message, '#f87171');
+    setTbodyError('wd-tbody', 6);
+  }
+}
+
+function updateWdStats() {
+  const pending  = ALL_WITHDRAWALS.filter(w => w.status === 'pending').length;
+  const approved = ALL_WITHDRAWALS.filter(w => w.status === 'approved').length;
+  const paid     = ALL_WITHDRAWALS.filter(w => w.status === 'paid').length;
+  const rejected = ALL_WITHDRAWALS.filter(w => w.status === 'rejected').length;
+
+  document.getElementById('wd-pending').textContent  = pending;
+  document.getElementById('wd-approved').textContent = approved;
+  document.getElementById('wd-paid').textContent     = paid;
+  document.getElementById('wd-rejected').textContent = rejected;
+  document.getElementById('wd-subtitle').textContent =
+    `${ALL_WITHDRAWALS.length} টি withdrawal — ${pending} টি pending review`;
+}
+
+window.setWdFilter = function(filter, btn) {
+  WD_FILTER = filter;
+  document.querySelectorAll('.cl-filter-chip[data-wd-filter]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWdTable();
+};
+
+function renderWdTable() {
+  const tbody = document.getElementById('wd-tbody');
+  const rows = WD_FILTER === 'all'
+    ? ALL_WITHDRAWALS
+    : ALL_WITHDRAWALS.filter(w => w.status === WD_FILTER);
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="cl-empty">
+          <i class="ti ti-inbox"></i>
+          <p>${WD_FILTER === 'all' ? 'কোনো withdrawal নেই' : `কোনো ${WD_FILTER} withdrawal নেই`}</p>
+        </td>
+      </tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(w => buildWdRow(w)).join('');
+}
+
+function buildWdRow(w) {
+  const client   = WD_AFF_MAP[w.client_id] || {};
+  const name     = client.name  || '—';
+  const email    = client.email || w.client_id?.slice(0, 8) + '…';
+  const initials = name !== '—' ? name.slice(0, 2).toUpperCase() : '??';
+  const avatarBg = stringToColor(w.client_id);
+
+  const amt    = '৳' + Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+  const method = (w.payment_method || '—').toUpperCase();
+  const payInfo = `
+    <div style="font-size:.78rem;">
+      <strong>${esc(method)}</strong>
+      <div style="font-family:monospace;color:var(--accent2);margin-top:2px;">${esc(w.payment_number || '—')}</div>
+      ${w.payment_name ? `<div style="color:var(--muted2);font-size:.72rem;margin-top:2px;">${esc(w.payment_name)}</div>` : ''}
+      ${w.payout_txn_id ? `<div style="color:var(--green);font-size:.72rem;margin-top:4px;">TXN: ${esc(w.payout_txn_id)}</div>` : ''}
+    </div>`;
+
+  const requested = fmtDate(w.requested_at);
+
+  let actions = '<span style="color:var(--muted);font-size:.75rem;">—</span>';
+  if (w.status === 'pending') {
+    actions = `<div class="cl-actions">
+      <button class="cl-act-btn" title="Approve" onclick="confirmWdApprove('${w.id}')"
+        style="color:#34d399;border-color:rgba(52,211,153,.3);"><i class="ti ti-check"></i></button>
+      <button class="cl-act-btn" title="Reject" onclick="confirmWdReject('${w.id}')"
+        style="color:#f87171;border-color:rgba(248,113,113,.3);"><i class="ti ti-x"></i></button>
+    </div>`;
+  } else if (w.status === 'approved') {
+    actions = `<button class="cl-act-btn" title="Confirm Payout" onclick="confirmWdPayout('${w.id}')"
+      style="color:#60a5fa;border-color:rgba(96,165,250,.3);padding:4px 10px;font-size:.72rem;font-weight:700;">
+      <i class="ti ti-cash"></i> Pay Out
+    </button>`;
+  }
+
+  return `
+    <tr>
+      <td>
+        <div class="cl-name-cell">
+          <div class="cl-avatar" style="background:${avatarBg}20;color:${avatarBg};">${initials}</div>
+          <div>
+            <strong>${esc(name)}</strong>
+            <span>${esc(email)}</span>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:.85rem;font-weight:700;color:#34d399;">${amt}</td>
+      <td>${payInfo}</td>
+      <td>${buildStatusBadge(w.status)}</td>
+      <td style="color:var(--muted2);font-size:.78rem;">${requested}</td>
+      <td>${actions}</td>
+    </tr>`;
+}
+
+window.confirmWdApprove = function(id) {
+  const note = prompt('Admin note (optional):');
+  if (note === null) return; // Cancel pressed → abort
+  doWdApprove(id, note);
+};
+
+async function doWdApprove(id, note) {
+  const sb = window.scriptoraSupabase;
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.rpc('admin_approve_affiliate_withdrawal', {
+      p_withdrawal_id: id,
+      p_admin_note: note || null,
+    });
+    if (error) throw error;
+    if (data?.success === false) {
+      showToast('❌ ' + (data.message || 'Approval failed'), '#f87171');
+      return;
+    }
+    showToast('✅ Withdrawal Approved', '#34d399');
+    await loadWithdrawals();
+  } catch (err) {
+    showToast('❌ Error: ' + err.message, '#f87171');
+  }
+}
+
+window.confirmWdReject = function(id) {
+  const note = prompt('Reject reason (optional):');
+  if (note === null) return; // Cancel pressed → abort
+  if (!confirm('এই withdrawal request reject করবেন?')) return;
+  doWdReject(id, note);
+};
+
+async function doWdReject(id, note) {
+  const sb = window.scriptoraSupabase;
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.rpc('admin_reject_affiliate_withdrawal', {
+      p_withdrawal_id: id,
+      p_admin_note: note || null,
+    });
+    if (error) throw error;
+    if (data?.success === false) {
+      showToast('❌ ' + (data.message || 'Reject failed'), '#f87171');
+      return;
+    }
+    showToast('🚫 Withdrawal Rejected', '#f59e0b');
+    await loadWithdrawals();
+  } catch (err) {
+    showToast('❌ Error: ' + err.message, '#f87171');
+  }
+}
+
+window.confirmWdPayout = function(id) {
+  const txn = prompt('Payout Transaction ID (required):');
+  if (txn === null) return;
+  if (!txn.trim()) { showToast('❌ Transaction ID দিন', '#f87171'); return; }
+  const note = prompt('Admin note (optional):');
+  if (note === null) return; // Cancel pressed → abort
+  if (!confirm(`৳ payout confirm করবেন?\n\nTXN: ${txn.trim()}`)) return;
+  doWdPayout(id, txn.trim(), note);
+};
+
+async function doWdPayout(id, txn, note) {
+  const sb = window.scriptoraSupabase;
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.rpc('admin_confirm_affiliate_payout', {
+      p_withdrawal_id: id,
+      p_payout_txn_id: txn,
+      p_admin_note: note || null,
+    });
+    if (error) throw error;
+    if (data?.success === false) {
+      showToast('❌ ' + (data.message || 'Payout failed'), '#f87171');
+      return;
+    }
+    showToast('✅ Payout Confirmed', '#34d399');
+    await loadWithdrawals();
+    if (ALL_COMMISSIONS.length > 0) await loadCommissions();
+  } catch (err) {
+    showToast('❌ Error: ' + err.message, '#f87171');
+  }
+}
+
 /* ── Toast ────────────────────────────────────────────────── */
 function showToast(msg, color = '#34d399') {
   const c = document.getElementById('toastContainer');
@@ -516,3 +753,91 @@ function stringToColor(str) {
   const h = Math.abs(hash) % 360;
   return `hsl(${h},55%,65%)`;
 }
+
+/* ══════════════════════════════════════════════════════════
+   TAB 4 — REFERRED CLIENTS
+══════════════════════════════════════════════════════════ */
+
+async function loadReferrals() {
+  const tbody = document.getElementById('refTbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">লোড হচ্ছে…</td></tr>';
+
+  const sb = window.scriptoraSupabase;
+  if (!sb) { tbody.innerHTML = errorRow(6); return; }
+
+  try {
+    const { data, error } = await sb
+      .from('v_referred_clients')
+      .select('*')
+      .order('registered_at', { ascending: false });
+
+    if (error) throw error;
+
+    ALL_REFERRALS = data || [];
+    renderReferrals();
+    updateRefStats();
+
+  } catch (err) {
+    console.error('loadReferrals error:', err);
+    tbody.innerHTML = errorRow(6);
+  }
+}
+
+function updateRefStats() {
+  const total      = ALL_REFERRALS.length;
+  const orders     = ALL_REFERRALS.reduce((s, r) => s + Number(r.order_count || 0), 0);
+  const value      = ALL_REFERRALS.reduce((s, r) => s + Number(r.total_order_value || 0), 0);
+  const fmt        = v => '৳' + Number(v).toLocaleString('en-IN', { minimumFractionDigits: 0 });
+
+  const el = id => document.getElementById(id);
+  if (el('ref-total'))  el('ref-total').textContent  = total;
+  if (el('ref-orders')) el('ref-orders').textContent = orders;
+  if (el('ref-value'))  el('ref-value').textContent  = fmt(value);
+}
+
+function renderReferrals() {
+  const tbody  = document.getElementById('refTbody');
+  if (!tbody) return;
+
+  const q      = (REF_SEARCH || '').toLowerCase();
+  const rows   = q
+    ? ALL_REFERRALS.filter(r =>
+        (r.client_name  || '').toLowerCase().includes(q) ||
+        (r.client_email || '').toLowerCase().includes(q) ||
+        (r.affiliate_name  || '').toLowerCase().includes(q) ||
+        (r.affiliate_email || '').toLowerCase().includes(q) ||
+        (r.referral_code   || '').toLowerCase().includes(q)
+      )
+    : ALL_REFERRALS;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">কোনো referred client নেই।</td></tr>`;
+    return;
+  }
+
+  const fmt = v => '৳' + Number(v).toLocaleString('en-IN', { minimumFractionDigits: 0 });
+
+  tbody.innerHTML = rows.map(r => `
+    <tr style="border-bottom:1px solid var(--border);transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
+      <td style="padding:12px 14px;">
+        <div style="font-weight:600;font-size:.88rem;">${esc(r.client_name || '—')}</div>
+        <div style="color:var(--muted2);font-size:.75rem;">${esc(r.client_email || '')}</div>
+      </td>
+      <td style="padding:12px 14px;">
+        <div style="font-weight:600;font-size:.88rem;">${esc(r.affiliate_name || '—')}</div>
+        <div style="color:var(--muted2);font-size:.75rem;">${esc(r.affiliate_email || '')}</div>
+      </td>
+      <td style="padding:12px 14px;">
+        <span style="background:rgba(52,211,153,.12);color:#34d399;font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:6px;font-family:monospace;letter-spacing:.04em;">${esc(r.referral_code || '—')}</span>
+      </td>
+      <td style="padding:12px 14px;color:var(--muted2);font-size:.8rem;">${fmtDate(r.registered_at)}</td>
+      <td style="padding:12px 14px;font-weight:700;text-align:center;">${r.order_count || 0}</td>
+      <td style="padding:12px 14px;font-weight:700;color:#34d399;">${fmt(r.total_order_value || 0)}</td>
+    </tr>`).join('');
+}
+
+window.filterReferrals = function() {
+  REF_SEARCH = (document.getElementById('refSearch')?.value || '').trim();
+  renderReferrals();
+};

@@ -72,6 +72,7 @@
       <a href="#">Reviews</a>
       <a href="#">FAQ</a>
       <a href="#">Contact</a>
+      <a href="${homePath}../affiliate/index.html" style="color:var(--color-green,#34d399);font-weight:600;">💰 Affiliate Program</a>
     </div>
 
     <!-- Contact -->

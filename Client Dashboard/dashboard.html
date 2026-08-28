@@ -1970,14 +1970,81 @@
               </div>
             </div>
             <!-- Earnings Summary -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
               <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;">
                 <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">মোট উপার্জন</div>
                 <div id="affEarningsTotal" style="font-size:20px;font-weight:700;color:#34d399;font-family:'Sora',sans-serif;">…</div>
               </div>
               <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;">
+                <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Available Balance</div>
+                <div id="affAvailableBalance" style="font-size:20px;font-weight:700;color:#60a5fa;font-family:'Sora',sans-serif;">…</div>
+              </div>
+              <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;">
                 <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Pending Withdrawal</div>
                 <div id="affEarningsPending" style="font-size:20px;font-weight:700;color:#f59e0b;font-family:'Sora',sans-serif;">…</div>
+              </div>
+            </div>
+
+            <!-- Withdrawal Request -->
+            <div id="affWithdrawSection" style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:none;gap:14px;flex-direction:column;">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;">Withdrawal Request</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="profile-field">
+                  <label style="font-size:11px;color:var(--text-muted);">Amount (৳)</label>
+                  <input type="number" id="affWithdrawAmount" min="500" step="1" placeholder="Minimum ৳500" style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;">
+                </div>
+                <div class="profile-field">
+                  <label style="font-size:11px;color:var(--text-muted);">Payment Method</label>
+                  <select id="affWithdrawMethod" style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;">
+                    <option value="bkash">bKash</option>
+                    <option value="nagad">Nagad</option>
+                    <option value="rocket">Rocket</option>
+                    <option value="upay">Upay</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="profile-field">
+                  <label style="font-size:11px;color:var(--text-muted);">Account Number</label>
+                  <input type="text" id="affWithdrawNumber" placeholder="01XXXXXXXXX" style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;">
+                </div>
+                <div class="profile-field">
+                  <label style="font-size:11px;color:var(--text-muted);">Account Name (optional)</label>
+                  <input type="text" id="affWithdrawName" placeholder="Account holder name" style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;">
+                </div>
+              </div>
+              <button class="profile-save-btn" id="affWithdrawBtn" onclick="affiliateRequestWithdrawal()" style="align-self:flex-start;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Withdrawal Request করুন
+              </button>
+              <div class="profile-msg" id="affWithdrawMsg"></div>
+            </div>
+
+            <!-- Pending withdrawal notice -->
+            <div id="affWithdrawPendingNotice" style="display:none;background:var(--gold-bg);border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius);padding:14px 16px;">
+              <div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px;">Withdrawal Pending</div>
+              <div id="affWithdrawPendingText" style="font-size:12px;color:var(--text-secondary);font-family:'Noto Sans Bengali',sans-serif;"></div>
+            </div>
+
+            <!-- Withdrawal History -->
+            <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+              <div style="padding:12px 16px;border-bottom:1px solid var(--border);">
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;">Withdrawal History</div>
+              </div>
+              <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;">
+                  <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;">Date</th>
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;">Amount</th>
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;">Method</th>
+                      <th style="padding:8px 8px;font-size:10px;font-weight:700;color:var(--text-muted);text-align:left;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="affWithdrawTbody">
+                    <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">লোড হচ্ছে…</td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -2006,9 +2073,6 @@
               </div>
             </div>
 
-            <div style="font-size:11px;color:var(--text-muted);font-family:'Noto Sans Bengali',sans-serif;text-align:center;">
-              Withdrawal — শীঘ্রই আসছে।
-            </div>
           </div>
         </div>
 

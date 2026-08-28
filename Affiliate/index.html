@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Affiliate Program — Opascript | Refer করুন, Earn করুন</title>
+  <meta name="description" content="Opascript Affiliate Program-এ যোগ দিন। প্রতিটি সফল referral-এ ১০% commission earn করুন। বাংলাদেশের সেরা academic writing service-এর affiliate হন।"/>
+
+  <!-- Theme bootstrap (prevents flash) -->
+  <script>
+    (function () {
+      if (localStorage.getItem('scriptora_theme') === 'light' || localStorage.getItem('opascript_theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../shared/variables.css"/>
+  <link rel="stylesheet" href="css/affiliate.css"/>
+</head>
+<body>
+
+<!-- SHARED NAVBAR -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../shared/supabaseClient.js"></script>
+<script src="../shared/theme.js"></script>
+<script src="../shared/navbar.js"></script>
+
+<!-- ══ HERO ══════════════════════════════════════════════════ -->
+<section class="aff-hero">
+  <div class="aff-badge">
+    <span class="aff-badge-dot"></span>
+    Affiliate Program — এখন Open
+  </div>
+
+  <h1 class="aff-hero-title">
+    Refer করুন,<br>
+    <span class="green">Earn করুন</span> —
+    <span class="blue">প্রতিটি Order-এ</span>
+  </h1>
+
+  <p class="aff-hero-desc">
+    Opascript-এর Affiliate হন এবং আপনার Referral Link শেয়ার করুন।
+    প্রতিটি সফল Order-এ <strong style="color:var(--color-green,#34d399);">১০% Commission</strong> পাবেন —
+    সরাসরি আপনার বাংলাদেশি Mobile Banking-এ।
+  </p>
+
+  <div class="aff-hero-cta">
+    <a href="../Register page/register.html" class="aff-btn-primary" id="heroJoinBtn">
+      🚀 এখনই Join করুন
+    </a>
+    <a href="#how-it-works" class="aff-btn-secondary">
+      কীভাবে কাজ করে?
+    </a>
+  </div>
+</section>
+
+<!-- ══ STATS BAR ══════════════════════════════════════════════ -->
+<div class="aff-stats">
+  <div class="aff-stat-item">
+    <div class="aff-stat-val">১০%</div>
+    <div class="aff-stat-lbl">Commission Rate</div>
+  </div>
+  <div class="aff-stat-item">
+    <div class="aff-stat-val">৳৫০০</div>
+    <div class="aff-stat-lbl">Minimum Withdrawal</div>
+  </div>
+  <div class="aff-stat-item">
+    <div class="aff-stat-val">৩টি</div>
+    <div class="aff-stat-lbl">Payment Method (bKash, Nagad, Rocket)</div>
+  </div>
+  <div class="aff-stat-item">
+    <div class="aff-stat-val">Unlimited</div>
+    <div class="aff-stat-lbl">Referral — কোনো সীমা নেই</div>
+  </div>
+</div>
+
+<!-- ══ HOW IT WORKS ═══════════════════════════════════════════ -->
+<section class="aff-section" id="how-it-works">
+  <h2 class="aff-section-title">কীভাবে কাজ করে?</h2>
+  <p class="aff-section-sub">মাত্র ৪টি সহজ ধাপে আপনার Earning শুরু হয়</p>
+
+  <div class="aff-steps">
+    <div class="aff-step">
+      <div class="aff-step-num">১</div>
+      <span class="aff-step-icon">📝</span>
+      <h3>Apply করুন</h3>
+      <p>Dashboard-এ Login করে Affiliate Application জমা দিন। Admin Approval সাধারণত ২৪ ঘণ্টার মধ্যে হয়।</p>
+    </div>
+    <div class="aff-step">
+      <div class="aff-step-num">২</div>
+      <span class="aff-step-icon">🔗</span>
+      <h3>Referral Link পান</h3>
+      <p>Approval-এর পরে আপনার unique Referral Code ও Link তৈরি হবে। Dashboard থেকে copy করুন।</p>
+    </div>
+    <div class="aff-step">
+      <div class="aff-step-num">৩</div>
+      <span class="aff-step-icon">📤</span>
+      <h3>Share করুন</h3>
+      <p>Facebook, WhatsApp, বা যেকোনো জায়গায় আপনার Referral Link শেয়ার করুন। বন্ধু বা ক্লাসমেটদের জানান।</p>
+    </div>
+    <div class="aff-step">
+      <div class="aff-step-num">৪</div>
+      <span class="aff-step-icon">💰</span>
+      <h3>Commission Earn করুন</h3>
+      <p>আপনার Link দিয়ে কেউ Register করে Order দিলে তার মোট Order-এর ১০% আপনার Wallet-এ যোগ হবে।</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ COMMISSION CALCULATOR ══════════════════════════════════ -->
+<section style="background:var(--bg-card-alt,#0d1830);padding:72px 1.5rem;border-top:1px solid rgba(255,255,255,.06);">
+  <div style="max-width:1060px;margin:0 auto;">
+    <h2 class="aff-section-title">Commission Calculator</h2>
+    <p class="aff-section-sub">আপনি কত Earn করতে পারবেন — এখনই দেখুন</p>
+
+    <div class="aff-calc-wrap">
+      <div class="aff-calc-label">প্রতি মাসে কতজন Refer করবেন?</div>
+      <input type="range" class="aff-calc-range" id="calcRef" min="1" max="50" value="5" oninput="calcUpdate()">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:rgba(255,255,255,.35);margin-bottom:20px;">
+        <span>১ জন</span><span id="calcRefVal" style="color:var(--color-green,#34d399);font-weight:700;">৫ জন</span><span>৫০ জন</span>
+      </div>
+
+      <div class="aff-calc-label">গড় Order মূল্য (টাকায়)</div>
+      <input type="number" class="aff-calc-input" id="calcAmt" value="3000" min="500" max="50000" placeholder="৳ Order মূল্য" oninput="calcUpdate()">
+
+      <div class="aff-calc-result">
+        <div style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">মাসিক আনুমানিক Commission</div>
+        <div class="aff-calc-result-val" id="calcResult">৳ ১,৫০০</div>
+        <div class="aff-calc-result-note">১০% × <span id="calcRefVal2">৫</span> জন × ৳<span id="calcAmtShow">৩,০০০</span> = ৳<span id="calcBreakdown">১,৫০০</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ EARNING EXAMPLES ════════════════════════════════════════ -->
+<section class="aff-section">
+  <h2 class="aff-section-title">Real Earnings — উদাহরণ</h2>
+  <p class="aff-section-sub">বিভিন্ন ধরনের Affiliates কত Earn করতে পারেন</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;">
+
+    <div style="background:var(--bg-card,#111e3f);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 24px;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🎓</div>
+      <div style="font-weight:700;font-size:1rem;margin-bottom:6px;">University Student</div>
+      <div style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:16px;">ক্লাসমেটদের কাছে Share করেন</div>
+      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;">৳৩,০০০</div>
+      <div style="color:rgba(255,255,255,.4);font-size:.78rem;">মাসে ১০ জন Refer × ৳৩,০০০ avg</div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,rgba(var(--accent-rgb,45,110,247),.08),rgba(var(--color-green-rgb,52,211,153),.08));border:1px solid rgba(var(--color-green-rgb,52,211,153),.2);border-radius:16px;padding:28px 24px;text-align:center;position:relative;">
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--color-green,#34d399);color:#000;font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:50px;">Most Popular</div>
+      <div style="font-size:2.5rem;margin-bottom:12px;">📱</div>
+      <div style="font-weight:700;font-size:1rem;margin-bottom:6px;">Facebook / YouTube Creator</div>
+      <div style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:16px;">Audience-কে Refer করেন</div>
+      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;">৳১৫,০০০</div>
+      <div style="color:rgba(255,255,255,.4);font-size:.78rem;">মাসে ৫০ জন Refer × ৳৩,০০০ avg</div>
+    </div>
+
+    <div style="background:var(--bg-card,#111e3f);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 24px;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🏫</div>
+      <div style="font-weight:700;font-size:1rem;margin-bottom:6px;">Coaching Teacher</div>
+      <div style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:16px;">Students-দের Refer করেন</div>
+      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;">৳৩০,০০০</div>
+      <div style="color:rgba(255,255,255,.4);font-size:.78rem;">মাসে ১০০ জন Refer × ৳৩,০০০ avg</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ FAQ ════════════════════════════════════════════════════ -->
+<section style="background:var(--bg-card-alt,#0d1830);padding:72px 1.5rem;border-top:1px solid rgba(255,255,255,.06);">
+  <div style="max-width:1060px;margin:0 auto;">
+    <h2 class="aff-section-title">সাধারণ প্রশ্ন (FAQ)</h2>
+    <p class="aff-section-sub">Affiliate Program সম্পর্কে যা জানতে চান</p>
+
+    <div class="aff-faq">
+
+      <div class="aff-faq-item">
+        <button class="aff-faq-q" onclick="toggleFaq(this)">
+          Affiliate Program-এ কীভাবে Apply করবো?
+          <span class="aff-faq-arrow">▼</span>
+        </button>
+        <div class="aff-faq-a">
+          প্রথমে Opascript-এ একটি Account তৈরি করুন। তারপর Client Dashboard-এ Login করে "Affiliate Program" সেকশনে যান এবং Application জমা দিন। Admin Approval সাধারণত ২৪ ঘণ্টার মধ্যে হয়।
+        </div>
+      </div>
+
+      <div class="aff-faq-item">
+        <button class="aff-faq-q" onclick="toggleFaq(this)">
+          Commission কখন Earn হয়?
+          <span class="aff-faq-arrow">▼</span>
+        </button>
+        <div class="aff-faq-a">
+          আপনার Referral Link দিয়ে কেউ Register করলে, এবং পরে সে একটি Order সফলভাবে Place ও Pay করলে, Admin সেই Order-এর জন্য Commission Record করেন। Commission তখনই আপনার Wallet-এ যোগ হয়।
+        </div>
+      </div>
+
+      <div class="aff-faq-item">
+        <button class="aff-faq-q" onclick="toggleFaq(this)">
+          Minimum Withdrawal কত?
+          <span class="aff-faq-arrow">▼</span>
+        </button>
+        <div class="aff-faq-a">
+          Minimum ৳৫০০ হলে Withdrawal Request করা যাবে। Payment করা হয় bKash, Nagad, Rocket, বা Upay-এর মাধ্যমে।
+        </div>
+      </div>
+
+      <div class="aff-faq-item">
+        <button class="aff-faq-q" onclick="toggleFaq(this)">
+          আমার Referral Link কোথায় পাবো?
+          <span class="aff-faq-arrow">▼</span>
+        </button>
+        <div class="aff-faq-a">
+          Affiliate Approval-এর পরে Client Dashboard-এর "Affiliate Program" সেকশনে আপনার unique Referral Code ও shareable Link পাবেন। Link-টি Copy করে যেকোনো জায়গায় Share করুন।
+        </div>
+      </div>
+
+      <div class="aff-faq-item">
+        <button class="aff-faq-q" onclick="toggleFaq(this)">
+          Referral Link-এ কতদিনের জন্য কাজ করে?
+          <span class="aff-faq-arrow">▼</span>
+        </button>
+        <div class="aff-faq-a">
+          আপনার Referral Code আপনার Account Active থাকা পর্যন্ত কাজ করবে। কেউ যখনই আপনার Link দিয়ে Register করবে, তার সব ভবিষ্যত Order-এর Commission আপনি পাবেন।
+        </div>
+      </div>
+
+      <div class="aff-faq-item">
+        <button class="aff-faq-q" onclick="toggleFaq(this)">
+          Commission Rate কি পরিবর্তন হতে পারে?
+          <span class="aff-faq-arrow">▼</span>
+        </button>
+        <div class="aff-faq-a">
+          বর্তমানে Commission Rate ১০%। ভবিষ্যতে Top Affiliates-দের জন্য বিশেষ Rate বা Bonus দেওয়ার পরিকল্পনা আছে। যেকোনো পরিবর্তন আগে থেকে জানানো হবে।
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA BOTTOM ══════════════════════════════════════════════ -->
+<section class="aff-cta-bottom">
+  <h2>আজই শুরু করুন</h2>
+  <p>Opascript Affiliate হিসেবে যোগ দিন এবং আপনার Network থেকে Passive Income শুরু করুন।</p>
+  <a href="../Register page/register.html" class="aff-btn-primary" id="ctaJoinBtn" style="display:inline-block;">
+    🚀 Free-তে Join করুন
+  </a>
+  <div id="loggedInMsg" style="display:none;margin-top:16px;">
+    <a href="../Client Dashboard/dashboard.html#affiliate" class="aff-btn-primary" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">
+      Dashboard-এ Apply করুন →
+    </a>
+  </div>
+</section>
+
+<!-- SHARED FOOTER -->
+<script src="../shared/footer.js"></script>
+
+<script>
+/* ── Calculator ────────────────────────────────────────────── */
+function calcUpdate() {
+  const refs  = parseInt(document.getElementById('calcRef').value, 10);
+  const amt   = parseFloat(document.getElementById('calcAmt').value) || 0;
+  const comm  = Math.round(refs * amt * 0.10);
+  const fmt   = v => Number(v).toLocaleString('en-IN');
+
+  document.getElementById('calcRefVal').textContent  = refs + ' জন';
+  document.getElementById('calcRefVal2').textContent  = refs;
+  document.getElementById('calcAmtShow').textContent  = fmt(amt);
+  document.getElementById('calcBreakdown').textContent = fmt(comm);
+  document.getElementById('calcResult').textContent   = '৳ ' + fmt(comm);
+}
+calcUpdate();
+
+/* ── FAQ accordion ─────────────────────────────────────────── */
+function toggleFaq(btn) {
+  const item = btn.closest('.aff-faq-item');
+  const isOpen = item.classList.contains('open');
+  // close all
+  document.querySelectorAll('.aff-faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ── Auth-aware CTA ────────────────────────────────────────── */
+(function () {
+  const role = localStorage.getItem('scriptora_role');
+  if (role === 'client' || role === 'admin') {
+    const heroBtn  = document.getElementById('heroJoinBtn');
+    const ctaBtn   = document.getElementById('ctaJoinBtn');
+    const loggedIn = document.getElementById('loggedInMsg');
+    if (heroBtn)  { heroBtn.href = '../Client Dashboard/dashboard.html'; heroBtn.textContent = '📊 Dashboard খুলুন'; }
+    if (ctaBtn)   ctaBtn.style.display = 'none';
+    if (loggedIn) loggedIn.style.display = '';
+  }
+})();
+
+/* ── Smooth scroll for anchor link ─────────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+
+</body>
+</html>

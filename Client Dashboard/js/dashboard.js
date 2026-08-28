@@ -1663,6 +1663,7 @@ function initNav() {
 
 /* ── AFFILIATE STATE ─────────────────────────────────────────── */
 let _affStateLoaded = false; /* একবার load হলে আর reload দরকার নেই, unless forced */
+let _currentAffiliateId = null;
 
 async function loadAffiliateState(force = false) {
   if (_affStateLoaded && !force) return;
@@ -1687,10 +1688,11 @@ async function loadAffiliateState(force = false) {
     if (aff && aff.status === 'active') {
       const codeEl = document.getElementById('affReferralCode');
       if (codeEl) codeEl.textContent = aff.referral_code;
+      _currentAffiliateId = aff.id;
       show('aff-approved');
       _affStateLoaded = true;
-      /* Load earnings data for approved affiliate */
       loadAffiliateEarnings(aff.id);
+      loadAffiliateWithdrawals(aff.id);
       return;
     }
 
@@ -1768,16 +1770,28 @@ function affiliateCopyCode() {
 
 /* ── AFFILIATE EARNINGS ──────────────────────────────────────── */
 async function loadAffiliateEarnings(affiliateId) {
-  const earningsEl = document.getElementById('affEarningsTotal');
-  const pendingEl  = document.getElementById('affEarningsPending');
-  const tbodyEl    = document.getElementById('affCommTbody');
+  const earningsEl  = document.getElementById('affEarningsTotal');
+  const availableEl = document.getElementById('affAvailableBalance');
+  const pendingEl   = document.getElementById('affEarningsPending');
+  const tbodyEl     = document.getElementById('affCommTbody');
+  const withdrawSec = document.getElementById('affWithdrawSection');
+  const pendingNote = document.getElementById('affWithdrawPendingNotice');
 
-  /* Show skeleton state */
-  if (earningsEl) earningsEl.textContent = '…';
-  if (pendingEl)  pendingEl.textContent  = '…';
-  if (tbodyEl)    tbodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">লোড হচ্ছে…</td></tr>';
+  if (earningsEl)  earningsEl.textContent  = '…';
+  if (availableEl) availableEl.textContent = '…';
+  if (pendingEl)   pendingEl.textContent   = '…';
+  if (tbodyEl) tbodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">লোড হচ্ছে…</td></tr>';
 
   try {
+    const { data: wallet, error: wErr } = await sb.rpc('get_affiliate_wallet');
+    if (wErr) throw wErr;
+    if (wallet?.success === false) throw new Error(wallet.message || 'Wallet load failed');
+
+    const fmt = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (earningsEl)  earningsEl.textContent  = fmt(wallet.total_earned);
+    if (availableEl) availableEl.textContent = fmt(wallet.available_balance);
+    if (pendingEl)   pendingEl.textContent   = fmt(wallet.pending_withdrawal);
+
     const { data: comms, error } = await sb
       .from('affiliate_commissions')
       .select('id, order_id, order_amount, commission_amount, status, created_at')
@@ -1786,12 +1800,33 @@ async function loadAffiliateEarnings(affiliateId) {
 
     if (error) throw error;
 
-    const earned = (comms || []).filter(c => c.status === 'earned');
-    const totalEarned = earned.reduce((s, c) => s + Number(c.commission_amount || 0), 0);
+    /* Show/hide withdrawal form based on balance & pending requests */
+    const { data: openReq } = await sb
+      .from('affiliate_withdrawals')
+      .select('id, amount, status, payment_method, requested_at')
+      .eq('affiliate_id', affiliateId)
+      .in('status', ['pending', 'approved'])
+      .order('requested_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    /* For Phase 3: Pending Withdrawal = same as Total Earned (withdrawal not yet implemented) */
-    if (earningsEl) earningsEl.textContent = '৳' + totalEarned.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    if (pendingEl)  pendingEl.textContent  = '৳' + totalEarned.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (openReq) {
+      if (withdrawSec) withdrawSec.style.display = 'none';
+      if (pendingNote) {
+        pendingNote.style.display = 'block';
+        const stLabel = openReq.status === 'approved' ? 'Approved — payout pending' : 'Pending admin review';
+        const dt = openReq.requested_at
+          ? new Date(openReq.requested_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+          : '—';
+        document.getElementById('affWithdrawPendingText').textContent =
+          `${fmt(openReq.amount)} (${openReq.payment_method}) — ${stLabel} · ${dt}`;
+      }
+    } else {
+      if (pendingNote) pendingNote.style.display = 'none';
+      if (withdrawSec) {
+        withdrawSec.style.display = Number(wallet.available_balance) >= 500 ? 'flex' : 'none';
+      }
+    }
 
     /* Commission history table */
     if (!tbodyEl) return;
@@ -1848,9 +1883,120 @@ async function loadAffiliateEarnings(affiliateId) {
 
   } catch (err) {
     console.error('[Affiliate] loadAffiliateEarnings error:', err);
-    if (earningsEl) earningsEl.textContent = '—';
-    if (pendingEl)  pendingEl.textContent  = '—';
+    if (earningsEl)  earningsEl.textContent  = '—';
+    if (availableEl) availableEl.textContent = '—';
+    if (pendingEl)   pendingEl.textContent   = '—';
     if (tbodyEl) tbodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Earnings load করতে সমস্যা হয়েছে।</td></tr>';
+  }
+}
+
+async function loadAffiliateWithdrawals(affiliateId) {
+  const tbody = document.getElementById('affWithdrawTbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">লোড হচ্ছে…</td></tr>';
+
+  try {
+    const { data: rows, error } = await sb
+      .from('affiliate_withdrawals')
+      .select('id, amount, status, payment_method, payment_number, requested_at, paid_at')
+      .eq('affiliate_id', affiliateId)
+      .order('requested_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+
+    if (!rows || rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted);font-size:12px;">কোনো withdrawal request নেই।</td></tr>';
+      return;
+    }
+
+    const statusMap = {
+      pending:  { color: '#f59e0b', label: 'Pending' },
+      approved: { color: '#60a5fa', label: 'Approved' },
+      rejected: { color: '#f87171', label: 'Rejected' },
+      paid:     { color: '#34d399', label: 'Paid' },
+    };
+
+    tbody.innerHTML = rows.map(w => {
+      const st = statusMap[w.status] || { color: 'var(--text-muted)', label: w.status };
+      const dt = w.requested_at
+        ? new Date(w.requested_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+        : '—';
+      const amt = '৳' + Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      const method = (w.payment_method || '—').toUpperCase();
+      return `
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 8px;font-size:11px;color:var(--text-muted);">${dt}</td>
+          <td style="padding:10px 8px;font-size:12px;font-weight:700;color:#34d399;">${amt}</td>
+          <td style="padding:10px 8px;font-size:11px;color:var(--text-secondary);">${method}</td>
+          <td style="padding:10px 8px;">
+            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${st.color}20;color:${st.color};">${st.label}</span>
+          </td>
+        </tr>`;
+    }).join('');
+
+  } catch (err) {
+    console.error('[Affiliate] loadAffiliateWithdrawals error:', err);
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Withdrawal history load করতে সমস্যা হয়েছে।</td></tr>';
+  }
+}
+
+async function affiliateRequestWithdrawal() {
+  const btn    = document.getElementById('affWithdrawBtn');
+  const msgEl  = document.getElementById('affWithdrawMsg');
+  const amount = parseFloat(document.getElementById('affWithdrawAmount')?.value || '0');
+  const method = document.getElementById('affWithdrawMethod')?.value || '';
+  const number = document.getElementById('affWithdrawNumber')?.value?.trim() || '';
+  const name   = document.getElementById('affWithdrawName')?.value?.trim() || '';
+
+  if (msgEl) { msgEl.textContent = ''; msgEl.className = 'profile-msg'; }
+
+  if (!amount || amount < 500) {
+    if (msgEl) { msgEl.textContent = 'Minimum withdrawal ৳500'; msgEl.className = 'profile-msg error'; }
+    return;
+  }
+  if (!number || number.replace(/\s/g, '').length < 11) {
+    if (msgEl) { msgEl.textContent = 'Valid account number দিন'; msgEl.className = 'profile-msg error'; }
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+  try {
+    const { data, error } = await sb.rpc('request_affiliate_withdrawal', {
+      p_amount: amount,
+      p_payment_method: method,
+      p_payment_number: number,
+      p_payment_name: name || null,
+    });
+
+    if (error) throw error;
+    if (data?.success === false) {
+      if (msgEl) { msgEl.textContent = data.message || 'Request failed'; msgEl.className = 'profile-msg error'; }
+      return;
+    }
+
+    const finalAmt = data?.amount ? Number(data.amount).toLocaleString('en-IN') : amount;
+    showToast(`✅ Withdrawal request submitted — ৳${finalAmt}`, 'success');
+    if (msgEl) { msgEl.textContent = '✓ Withdrawal request submitted'; msgEl.className = 'profile-msg success'; }
+
+    document.getElementById('affWithdrawAmount').value = '';
+    document.getElementById('affWithdrawNumber').value = '';
+
+    if (_currentAffiliateId) {
+      await loadAffiliateEarnings(_currentAffiliateId);
+      await loadAffiliateWithdrawals(_currentAffiliateId);
+    }
+
+  } catch (err) {
+    console.error('[Affiliate] withdrawal error:', err);
+    if (msgEl) { msgEl.textContent = err.message || 'সমস্যা হয়েছে'; msgEl.className = 'profile-msg error'; }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Withdrawal Request করুন`;
+    }
   }
 }
 

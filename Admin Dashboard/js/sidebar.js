@@ -279,13 +279,18 @@
     try {
       if (!window.scriptoraSupabase) return;
       const sb = window.scriptoraSupabase;
-      const { count } = await sb
+      const { count: appCount } = await sb
         .from('affiliate_applications')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'pending');
+      const { count: wdCount } = await sb
+        .from('affiliate_withdrawals')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      const total = (appCount || 0) + (wdCount || 0);
       const badge = document.getElementById('affBadge');
-      if (badge && count > 0) {
-        badge.textContent = count;
+      if (badge && total > 0) {
+        badge.textContent = total;
         badge.style.display = '';
       }
     } catch(e) { /* silently ignore */ }
