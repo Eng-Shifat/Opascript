@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Professional Assignment Writing Service – Scriptora</title>
+
+  <!-- থিম বুটস্ট্র্যাপ: পেজ রেন্ডার হওয়ার আগেই সংরক্ষিত থিম বসিয়ে দেয়, যাতে রিলোডে রং ফ্ল্যাশ না করে -->
+  <script>
+    (function () {
+      if (localStorage.getItem('scriptora_theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/service.css" />
+  <link rel="stylesheet" href="css/mobile.css" media="(max-width: 768px)" />
+  <link rel="stylesheet" href="css/nda-modal.css" />
+  <style>
+/* ── Assignment Sample Carousel ── */
+.ts-card { overflow: visible; }
+.ts-carousel { position: relative; width: 100%; overflow: hidden; border-radius: 14px; }
+.ts-track { width: 100%; }
+.ts-slide { visibility: hidden; position: absolute; pointer-events: none; width: 100%; display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; align-items: flex-start; }
+.ts-slide.active { visibility: visible; position: relative; pointer-events: auto; animation: tsFadeIn 0.35s ease; }
+.ts-slide.ts-slide-left.active { animation: tsFadeLeft 0.35s ease; }
+@keyframes tsFadeIn  { from { opacity:0; transform:translateX(16px);  } to { opacity:1; transform:translateX(0); } }
+@keyframes tsFadeLeft { from { opacity:0; transform:translateX(-16px); } to { opacity:1; transform:translateX(0); } }
+.ts-img-wrap { width:100%; border-radius:14px; overflow:hidden; aspect-ratio:4/3; background:rgba(var(--svc-card-rgb),.5); border:1px solid rgba(var(--text-rgb),.08); }
+.ts-img-wrap img { width:100%; height:100%; object-fit:cover; object-position:center center; display:block; }
+.ts-img-placeholder { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:rgba(var(--text-rgb),.25); font-size:13px; }
+.ts-img-placeholder svg { opacity:.3; }
+.ts-info { display:flex; flex-direction:column; gap:16px; padding-top:4px; }
+.ts-badges { display:flex; gap:8px; flex-wrap:wrap; }
+.ts-badge { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:4px 12px; border-radius:999px; background:rgba(var(--color-violet2-rgb),.15); color:var(--color-violet2); border:1px solid rgba(var(--color-violet2-rgb),.25); }
+.ts-badge.blue   { background:rgba(96,165,250,.12);  color:#60a5fa; border-color:rgba(96,165,250,.25); }
+.ts-badge.purple { background:rgba(167,139,250,.12); color:#a78bfa; border-color:rgba(167,139,250,.25); }
+.ts-badge.cyan   { background:rgba(34,211,238,.12);  color:#22d3ee; border-color:rgba(34,211,238,.25); }
+.ts-badge.green  { background:rgba(52,211,153,.12);  color:#34d399; border-color:rgba(52,211,153,.25); }
+.ts-title { font-size:22px; font-weight:700; color:var(--text-main); line-height:1.3; margin:0; position:relative; }
+.ts-title::after { content:''; display:block; width:40px; height:3px; margin-top:10px; border-radius:2px; background:linear-gradient(90deg, var(--color-violet2, #a78bfa), transparent); }
+.ts-desc  { font-size:14px; line-height:1.8; color:rgba(var(--text-rgb),.6); margin:0; }
+.ts-feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.ts-feat { display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:10px; background:rgba(var(--text-rgb),.04); border:1px solid rgba(var(--text-rgb),.08); font-size:13px; font-weight:500; color:rgba(var(--text-rgb),.75); transition:background .2s,border-color .2s; }
+.ts-feat svg { flex-shrink:0; opacity:.6; }
+.ts-feat:hover { background:rgba(var(--text-rgb),.07); border-color:rgba(var(--text-rgb),.15); }
+.ts-mini-stats { display:flex; align-items:center; padding:14px 18px; border-radius:12px; background:rgba(var(--text-rgb),.04); border:1px solid rgba(var(--text-rgb),.08); }
+.ts-mini-stat { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center; }
+.ts-mini-val   { font-size:14px; font-weight:700; color:var(--text-main); }
+.ts-mini-label { font-size:11px; color:rgba(var(--text-rgb),.45); }
+.ts-mini-divider { width:1px; height:32px; background:rgba(var(--text-rgb),.1); flex-shrink:0; }
+.ts-actions { display:flex; gap:12px; flex-wrap:wrap; }
+.ts-btn-primary { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--color-purple-deep),var(--color-purple-deep2)); color:#fff; font-size:14px; font-weight:600; cursor:pointer; transition:opacity .2s,transform .2s; white-space:nowrap; }
+.ts-btn-primary:hover  { opacity:.88; transform:translateY(-1px); }
+.ts-btn-primary:active { transform:scale(.97); }
+.ts-btn-secondary { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:12px; border:1px solid rgba(var(--text-rgb),.18); background:rgba(var(--text-rgb),.04); color:var(--text-main); font-size:14px; font-weight:600; cursor:pointer; transition:background .2s,border-color .2s,transform .2s; white-space:nowrap; }
+.ts-btn-secondary:hover  { background:rgba(var(--text-rgb),.09); border-color:rgba(var(--text-rgb),.3); transform:translateY(-1px); }
+.ts-btn-secondary:active { transform:scale(.97); }
+.ts-nav-btn { position:absolute; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:1px solid rgba(var(--text-rgb),.15); background:rgba(var(--svc-card-rgb),.85); backdrop-filter:blur(8px); color:var(--text-main); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s,border-color .2s; z-index:10; }
+.ts-nav-btn:hover { background:rgba(var(--color-purple-deep-rgb),.25); border-color:rgba(var(--color-purple-deep-rgb),.4); }
+.ts-prev { left:10px; }
+.ts-next { left:calc(40% - 48px); }
+.ts-dots-wrap { display:flex; justify-content:center; gap:8px; margin-top:20px; }
+.ts-dot { width:8px; height:8px; border-radius:50%; border:none; background:rgba(var(--text-rgb),.2); cursor:pointer; transition:background .2s,width .2s; padding:0; }
+.ts-dot.active { background:var(--color-purple-deep); width:24px; border-radius:4px; }
+@media (max-width:900px) { .ts-slide { grid-template-columns:1fr 1fr; gap:20px; } .ts-feature-grid { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:640px) { .ts-slide { grid-template-columns:1fr; gap:16px; } .ts-img-wrap { aspect-ratio:4/3; } .ts-feature-grid { grid-template-columns:repeat(2,1fr); gap:8px; } .ts-feat { font-size:12px; padding:8px 10px; } .ts-title { font-size:18px; } .ts-actions { flex-direction:column; } .ts-btn-primary,.ts-btn-secondary { flex:unset; width:100%; } .ts-prev { left:8px; } .ts-next { left:unset; right:8px; } }
+/* ── Shared Sample Header (matches handwritten page) ── */
+.hw-samples-heading { display: flex; align-items: center; gap: 12px; }
+.hw-samples-icon {
+  width: 40px; height: 40px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  background: rgba(var(--color-violet2-rgb), 0.14);
+  border: 1px solid rgba(var(--color-violet2-rgb), 0.28);
+  color: var(--color-violet2);
+}
+.hw-samples-header .svc-h2 { margin-bottom: 2px; }
+.hw-samples-sub { font-size: 12.5px; color: rgba(var(--text-rgb), 0.55); margin: 0; }
+.hw-samples-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 11px;
+  border: 1px solid rgba(var(--text-rgb), 0.16);
+  background: rgba(var(--text-rgb), 0.04);
+  color: var(--text); font-size: 13px; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.hw-samples-cta:hover {
+  background: rgba(var(--color-violet2-rgb), 0.1);
+  border-color: rgba(var(--color-violet2-rgb), 0.3);
+  transform: translateY(-1px);
+}
+[data-theme="light"] .hw-samples-icon { background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.25); color: #7c3aed; }
+[data-theme="light"] .hw-samples-sub  { color: rgba(0,0,0,0.55); }
+[data-theme="light"] .hw-samples-cta  { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.14); color: #1a1a2e; }
+[data-theme="light"] .hw-samples-cta:hover { background: rgba(124,58,237,0.07); border-color: rgba(124,58,237,0.25); }
+@media (max-width: 560px) { .hw-samples-header { flex-wrap: wrap; gap: 12px; } .hw-samples-cta { width: 100%; justify-content: center; } }
+  </style>
+</head>
+
+<body>
+
+  <!-- SHARED NAVBAR -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  /* Scriptora Supabase Client — inlined to avoid 503 on shared/supabaseClient.js */
+  (function () {
+    if (window.scriptoraSupabase) return;
+    if (typeof supabase === 'undefined') {
+      console.error('[Scriptora] Supabase library not loaded. Check CDN script tag order.');
+      return;
+    }
+    const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
+    window.scriptoraSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  })();
+  </script>
+  <script src="../shared/theme.js"></script>
+  <script src="../shared/navbar.js"></script>
+
+  <!-- LIVE CHAT WIDGET -->
+  <script type="module" src="../shared/chatbot/main.js"></script>
+
+  <!-- ═══════════════════════════════════════════
+       SERVICE PAGE TEMPLATE
+       Reusable for: Thesis / Assignment / Research Proposal / SPSS / Proofreading
+       Only swap: hero title+desc, deliverables grid, workflow steps, samples, pricing.
+       Everything else (sidebar, FAQ, reviews, CTA, structure) stays identical.
+  ════════════════════════════════════════════ -->
+  <section class="svc-page">
+
+    <!-- Breadcrumb -->
+    <div class="svc-breadcrumb">
+      <a href="../Homepage/index.html">Home</a>
+      <span class="svc-crumb-sep">/</span>
+      <a href="../Homepage/index.html#services">Services</a>
+      <span class="svc-crumb-sep">/</span>
+      <span class="svc-crumb-current">Assignment Writing</span>
+    </div>
+
+    <div class="svc-grid">
+
+      <!-- MAIN COLUMN -->
+      <div class="svc-main">
+
+        <!-- HERO (background-image style card, sits back in the 2-column layout) -->
+        <div class="svc-card svc-hero-fb-card">
+          <div class="svc-hero-fb-overlay"></div>
+          <div class="svc-hero-fb-inner">
+
+            <div class="svc-hero-fb-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span>Professional Assignment Writing Service</span>
+            </div>
+
+            <h1 class="svc-hero-fb-title">
+              <span>Never Miss an</span>
+              <span>Assignment Deadline Again</span>
+            </h1>
+
+            <div class="svc-hero-fb-desc">
+              <p>
+                Whether it's a short essay, a case study, or a full course assignment for
+                <strong>School, Undergraduate, or Master's</strong> level, Opa Script turns tight deadlines
+                into a seamless, stress-free experience. Led by a <strong>Fiverr Level-2 Certified Writer</strong>,
+                we deliver premium, high-quality assignment support tailored strictly to your course and
+                university guidelines. We strictly commit to a <strong>zero-delay policy</strong>—delivering
+                flawless, AI-free, and 100% plagiarism-free work well before your deadline.
+              </p>
+              <p>
+                What truly makes us unique is our transparency. Through our <strong>Smart Client Dashboard</strong>,
+                you can track every update in real-time with your own eyes, collaborate directly with your writer,
+                and inspect drafts seamlessly.
+              </p>
+            </div>
+
+            <div class="svc-hero-fb-cta">
+              <button class="svc-hero-fb-btn-primary" onclick="window.location.href='../Order page/order.html?service=assignment-writing'">
+                Start Your Project
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+              <button class="svc-hero-fb-btn-outline" onclick="openExpertChat()">Talk to an Expert</button>
+            </div>
+
+            <div class="svc-hero-fb-stats">
+              <div class="svc-hero-fb-stat">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+                <div><div class="svc-hero-fb-stat-title">Expert Writers</div><div class="svc-hero-fb-stat-desc">Led by Level-2 Certified Writer</div></div>
+              </div>
+              <div class="svc-hero-fb-stat">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+                <div><div class="svc-hero-fb-stat-title">100% Plagiarism Free</div><div class="svc-hero-fb-stat-desc">AI Plagiarism Report Included</div></div>
+              </div>
+              <div class="svc-hero-fb-stat">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <div><div class="svc-hero-fb-stat-title">On-Time Delivery</div><div class="svc-hero-fb-stat-desc">Zero-Delay Commitment</div></div>
+              </div>
+              <div class="svc-hero-fb-stat">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.1l4 4-4 4"/><path d="M3 12.6v-2a4 4 0 014-4h14"/><path d="M7 21.9l-4-4 4-4"/><path d="M21 11.4v2a4 4 0 01-4 4H3"/></svg>
+                <div><div class="svc-hero-fb-stat-title">Unlimited Revisions</div><div class="svc-hero-fb-stat-desc">Until 100% Satisfied</div></div>
+              </div>
+              <div class="svc-hero-fb-stat">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div><div class="svc-hero-fb-stat-title">Risk-Free Guarantee</div><div class="svc-hero-fb-stat-desc">Hassle-Free Refund</div></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ABOUT -->
+        <div class="svc-card svc-about-card">
+          <h2 class="svc-h2">About This Assignment Writing Service</h2>
+
+          <!-- Intro paragraph -->
+          <p class="svc-text svc-about-intro">
+            Assignments test your understanding, but tight deadlines and multiple courses running at once
+            make it hard to give every one the attention it deserves. Whether it's a short essay, a case
+            study, a lab-based report, or a full <strong>course assignment</strong>, every submission
+            deserves accurate research, clean structure, and on-time delivery.
+          </p>
+
+          <!-- 3 highlight blocks -->
+          <div class="svc-about-highlights">
+            <div class="svc-about-hl">
+              <div class="svc-about-hl-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+                </svg>
+              </div>
+              <div>
+                <div class="svc-about-hl-title">Expert-Led Team</div>
+                <div class="svc-about-hl-desc">Led by a <strong>Fiverr Level-2 Certified Writer</strong> and supported by experienced academic researchers from diverse disciplines. Every project is developed with meticulous attention to detail.</div>
+              </div>
+            </div>
+            <div class="svc-about-hl">
+              <div class="svc-about-hl-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+              </div>
+              <div>
+                <div class="svc-about-hl-title">Zero-Delay Commitment</div>
+                <div class="svc-about-hl-desc">Course deadlines leave no room for uncertainty. Our workflow ensures your assignment is completed <strong>well ahead of schedule</strong> — without sacrificing quality or accuracy.</div>
+              </div>
+            </div>
+            <div class="svc-about-hl">
+              <div class="svc-about-hl-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                </svg>
+              </div>
+              <div>
+                <div class="svc-about-hl-title">Smart Client Dashboard</div>
+                <div class="svc-about-hl-desc">Monitor your project's progress in real time, review drafts, communicate with your writer, and provide feedback — <strong>complete visibility</strong> from first draft to final submission.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="svc-about-divider"></div>
+
+          <!-- Quality promise -->
+          <p class="svc-text">
+            Every assignment strictly follows your course's <strong>formatting guidelines, citation style,
+            and academic requirements</strong>. The result is a well-structured, original,
+            <strong>AI-free and plagiarism-free</strong> assignment delivered with uncompromising quality.
+          </p>
+
+          <!-- Mission statement -->
+          <div class="svc-about-mission">
+            <span class="svc-about-mission-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+            </svg>
+          </span>
+            <p>
+              Our mission extends beyond delivering a completed assignment. We aim to build long-term relationships
+              founded on <strong>trust, professionalism, and academic integrity</strong> — backed by a
+              straightforward satisfaction guarantee and a customer-friendly refund policy.
+              <br><br>
+              <em style="color:rgba(167,139,250,0.9)">At Opascript, we don't simply help you finish your assignment — we help you submit it with confidence.</em>
+            </p>
+          </div>
+        </div>
+
+        <!-- WHY CHOOSE SCRIPTORA -->
+        <div class="svc-card svc-why-section">
+          <div class="svc-why-header">
+            <span class="svc-why-pill">
+              <span class="svc-why-pill-dot"></span>
+              WHY CHOOSE OPASCRIPT
+              <span class="svc-why-pill-dot"></span>
+            </span>
+            <h2 class="svc-why-title-big">Built for Your <span class="grad">Academic Excellence</span></h2>
+            <p class="svc-why-subtitle">Every assignment we deliver is backed by expert researchers, complete transparency, and a commitment to academic excellence—giving you the confidence to submit your work with pride.</p>
+          </div>
+
+          <div class="svc-why-grid">
+            <div class="svc-why-card svc-why-card--violet">
+              <span class="svc-why-num">01</span>
+              <span class="svc-why-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+                <span class="svc-why-icon-dot"></span>
+              </span>
+              <div class="svc-why-title">On-Time Delivery</div>
+              <div class="svc-why-desc">Your deadline is our top priority. Every project follows a carefully planned workflow, delivered ahead of schedule so you always have time to review and revise.</div>
+              <div class="svc-why-tags">
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="svc-why-tag-text">Zero Delay</span></span>
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg><span class="svc-why-tag-text">Early Delivery</span></span>
+              </div>
+            </div>
+
+            <div class="svc-why-card svc-why-card--blue">
+              <span class="svc-why-num">02</span>
+              <span class="svc-why-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg>
+                <span class="svc-why-icon-dot"></span>
+              </span>
+              <div class="svc-why-title">Original Research</div>
+              <div class="svc-why-desc">Every assignment is built from scratch through genuine research and passes multiple quality reviews — covering structure, citations, grammar, and originality.</div>
+              <div class="svc-why-tags">
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M2 13l10 5 10-5"/></svg><span class="svc-why-tag-text">AI-Free</span></span>
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg><span class="svc-why-tag-text">Quality Review</span></span>
+              </div>
+            </div>
+
+            <div class="svc-why-card svc-why-card--emerald">
+              <span class="svc-why-num">03</span>
+              <span class="svc-why-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span class="svc-why-icon-dot"></span>
+              </span>
+              <div class="svc-why-title">Complete Privacy</div>
+              <div class="svc-why-desc">Your personal details, research files, and conversations stay completely confidential. We never share or disclose your work to anyone, ever.</div>
+              <div class="svc-why-tags">
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/></svg><span class="svc-why-tag-text">NDA Protected</span></span>
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="svc-why-tag-text">End-to-End Privacy</span></span>
+              </div>
+            </div>
+
+            <div class="svc-why-card svc-why-card--amber">
+              <span class="svc-why-num">04</span>
+              <span class="svc-why-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/><circle cx="8" cy="10" r="1"/><circle cx="12" cy="10" r="1"/><circle cx="16" cy="10" r="1"/></svg>
+                <span class="svc-why-icon-dot"></span>
+              </span>
+              <div class="svc-why-title">Smart Dashboard</div>
+              <div class="svc-why-desc">Track every stage of your assignment in real time. Review drafts, chat directly with your writer, and stay connected from start to final delivery.</div>
+              <div class="svc-why-tags">
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/></svg><span class="svc-why-tag-text">Live Tracking</span></span>
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4H4l2.4-3.6A8.4 8.4 0 1 1 21 11.5Z"/></svg><span class="svc-why-tag-text">Direct Chat</span></span>
+              </div>
+            </div>
+
+            <div class="svc-why-card svc-why-card--cyan">
+              <span class="svc-why-num">05</span>
+              <span class="svc-why-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+                <span class="svc-why-icon-dot"></span>
+              </span>
+              <div class="svc-why-title">University Formatting</div>
+              <div class="svc-why-desc">Formatted precisely to your university's requirements and recognized citation styles — polished, consistent, and ready for submission.</div>
+              <div class="svc-why-tags">
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/></svg><span class="svc-why-tag-text">APA • IEEE • MLA</span></span>
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg><span class="svc-why-tag-text">Submission Ready</span></span>
+              </div>
+            </div>
+
+            <div class="svc-why-card svc-why-card--fuchsia">
+              <span class="svc-why-num">06</span>
+              <span class="svc-why-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-5.5"/><path d="M22 8v6"/></svg>
+                <span class="svc-why-icon-dot"></span>
+              </span>
+              <div class="svc-why-title">Academic Experts</div>
+              <div class="svc-why-desc">Handled by experienced academic researchers under a Fiverr Level-2 Certified Writer, backed by transparent revisions and a satisfaction-first approach.</div>
+              <div class="svc-why-tags">
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg><span class="svc-why-tag-text">Subject Experts</span></span>
+                <span class="svc-why-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><span class="svc-why-tag-text">Free Revisions</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+<!-- ACADEMIC EXPERT -->
+        <div class="svc-card" style="padding: 28px;">
+          <div class="svc-card-header" style="margin-bottom: 20px;">
+            <div class="svc-ch-left">
+              <span class="svc-ch-icon" style="background:rgba(124,92,255,0.15)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <span class="svc-ch-title">Meet Your <span class="grad">Academic Expert</span></span>
+            </div>
+          </div>
+          <div class="exp2-wrap">
+
+          <!-- LEFT: Profile Card -->
+          <div class="exp2-profile-card">
+            <div class="exp2-avatar-wrap">
+              <div class="exp2-avatar-ring">
+                <div class="exp2-avatar"><img src="assets/expert-photo.jpg" alt="Yeasin Kabir"></div>
+              </div>
+              <span class="exp2-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg>
+              </span>
+
+            </div>
+            <div class="exp2-name">Yeasin Kabir Shifat</div>
+            <div class="exp2-title">Ghostwriter · Academic Writer · KDP Specialist</div>
+            <div class="exp2-divider"><span>&#10022;</span></div>
+
+            <!-- Stats row -->
+            <div class="exp2-stats-row">
+              <div class="exp2-stat-box">
+                <div class="exp2-stat-val">8+</div>
+                <div class="exp2-stat-lbl">Years Exp.</div>
+              </div>
+              <div class="exp2-stat-divider"></div>
+              <div class="exp2-stat-box">
+                <div class="exp2-stat-val">500+</div>
+                <div class="exp2-stat-lbl">Projects</div>
+              </div>
+              <div class="exp2-stat-divider"></div>
+              <div class="exp2-stat-box">
+                <div class="exp2-stat-val">Lvl 2</div>
+                <div class="exp2-stat-lbl">Fiverr Expert</div>
+              </div>
+            </div>
+
+            <!-- Highlights -->
+            <div class="exp2-highlights">
+              <div class="exp2-hl-item">
+                <svg class="exp2-hl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Zero AI — 100% original content</span>
+              </div>
+              <div class="exp2-hl-item">
+                <svg class="exp2-hl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>AI plagiarism report included</span>
+              </div>
+              <div class="exp2-hl-item">
+                <svg class="exp2-hl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Full confidentiality guaranteed</span>
+              </div>
+            </div>
+
+            <!-- View Certification -->
+            <button class="exp2-cert-btn-visible" onclick="openDesktopCertModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
+              View Certification
+            </button>
+          </div>
+
+          <!-- RIGHT: Feature List -->
+          <div class="exp2-right">
+            <div class="exp2-header">
+              <div class="exp2-header-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="exp2-header-text">
+                <h2 class="exp2-heading">Meet Your <span class="grad">Academic Expert</span></h2>
+                <p class="exp2-subheading">8+ years of professional experience in ghostwriting, academic writing, proofreading, and Amazon KDP publishing — delivering original, high-impact work every time.</p>
+              </div>
+              <div class="exp2-quote-icon">&#8220;</div>
+            </div>
+            <div class="exp2-features">
+              <div class="exp2-feature">
+                <span class="exp2-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span class="exp2-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                <div><div class="exp2-feat-title">Expert Ghostwriter</div><div class="exp2-feat-desc">8+ years crafting books, essays, and academic content — your ideas, delivered in your voice with full confidentiality.</div></div>
+              </div>
+              <div class="exp2-feature">
+                <span class="exp2-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span class="exp2-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+                <div><div class="exp2-feat-title">Academic Writing Specialist</div><div class="exp2-feat-desc">Assignments, case studies, lab reports, and course papers — well-researched, properly structured, and plagiarism-free.</div></div>
+              </div>
+              <div class="exp2-feature">
+                <span class="exp2-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span class="exp2-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+                <div><div class="exp2-feat-title">Proofreading &amp; Editing</div><div class="exp2-feat-desc">Grammar, clarity, flow, and formatting — your document polished to submission-ready standard.</div></div>
+              </div>
+              <div class="exp2-feature">
+                <span class="exp2-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span class="exp2-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+                <div><div class="exp2-feat-title">Renewed KDP Writer for Amazon</div><div class="exp2-feat-desc">Experienced in self-publishing on Amazon Kindle — from manuscript formatting to KDP-ready content that sells.</div></div>
+              </div>
+              <div class="exp2-feature">
+                <span class="exp2-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span class="exp2-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg></span>
+                <div><div class="exp2-feat-title">Zero AI &amp; 100% Original Content</div><div class="exp2-feat-desc">Every document written from scratch — no AI tools, fully plagiarism-free, with authenticity guarantee.</div></div>
+              </div>
+            </div>
+          </div>
+
+          </div>
+        </div>
+
+        <!-- WORKFLOW / PROCESS -->
+        <div class="proc-section">
+
+          <!-- Header: one row, no trust box -->
+          <div class="proc-header-simple">
+            <div class="proc-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#11b5d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>OUR PROCESS</span>
+            </div>
+            <h2 class="proc-heading">How Your Assignment Will Be <span class="grad">Completed</span></h2>
+            <p class="proc-sub-full">A transparent, research-focused workflow from idea to final submission.</p>
+          </div>
+
+          <!-- Timeline: 5 cards, no connecting line -->
+          <div class="proc-timeline-grid" id="procTimeline">
+
+            <!-- Card 01 -->
+            <div class="proc-card proc-card--active" data-step="1">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num proc-num--active">01</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap proc-icon-wrap--active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </div>
+              <h3 class="proc-title proc-title--active">Share Your Topic</h3>
+              <p class="proc-desc">Submit your topic, university guidelines and all requirements.</p>
+              <div class="proc-tag proc-tag--default">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                2 min
+              </div>
+            </div>
+
+            <!-- Card 02 -->
+            <div class="proc-card" data-step="2">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num">02</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <h3 class="proc-title">Planning &amp; Research</h3>
+              <p class="proc-desc">We conduct in-depth research, literature review and create a solid outline.</p>
+              <div class="proc-tag proc-tag--blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                Research Phase
+              </div>
+            </div>
+
+            <!-- Card 03 -->
+            <div class="proc-card" data-step="3">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num">03</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+              </div>
+              <h3 class="proc-title">Professional Writing</h3>
+              <p class="proc-desc">Our expert writers craft original, well-researched content tailored to your needs.</p>
+              <div class="proc-tag proc-tag--green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                Progress Tracking Enabled
+              </div>
+            </div>
+
+            <!-- Card 04 -->
+            <div class="proc-card" data-step="4">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num">04</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg>
+              </div>
+              <h3 class="proc-title">Review &amp; Formatting</h3>
+              <p class="proc-desc">We review, edit and format your assignment with plagiarism check and proper citations.</p>
+              <div class="proc-tag proc-tag--purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-3.8"/></svg>
+                AI + Human Review
+              </div>
+            </div>
+
+            <!-- Card 05 — active by default -->
+            <div class="proc-card" data-step="5">
+              <div class="proc-card-glow"></div>
+              <div class="proc-active-top">
+                <span class="proc-num">05</span>
+                <span class="proc-in-progress"><span class="proc-pulse-dot"></span>In Progress</span>
+              </div>
+              <div class="proc-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              </div>
+              <h3 class="proc-title">Final Delivery</h3>
+              <p class="proc-desc">Get notified on your dashboard. Download final files and submit with confidence.</p>
+              <div class="proc-tag proc-tag--green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
+                Delivered
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Mobile dots -->
+          <div class="proc-mobile-dots" id="procMobileDots">
+            <button class="proc-mobile-dot proc-mobile-dot--active" data-dot="1"></button>
+            <button class="proc-mobile-dot" data-dot="2"></button>
+            <button class="proc-mobile-dot" data-dot="3"></button>
+            <button class="proc-mobile-dot" data-dot="4"></button>
+            <button class="proc-mobile-dot" data-dot="5"></button>
+          </div>
+
+        </div>
+
+                <!-- SAMPLE PREVIEW -->
+        <!-- ══════════════════════════════════════
+             ASSIGNMENT SAMPLE CAROUSEL
+             (image placeholders — drop real sample photos into
+             "assets/Assignment writing/" and swap the two ts-img-wrap
+             blocks below from placeholder to <img src="...">)
+             ══════════════════════════════════════ -->
+        <div class="svc-card ts-card">
+          <div class="svc-card-header hw-samples-header">
+            <div class="hw-samples-heading">
+              <div class="hw-samples-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+              </div>
+              <div>
+                <h2 class="svc-h2">Assignment Samples</h2>
+                <p class="hw-samples-sub">Real assignment work by our expert writers</p>
+              </div>
+            </div>
+            <button class="hw-samples-cta" onclick="window.location.href='../Order page/order.html'">
+              Request a Free Sample
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+
+          <div class="ts-carousel" id="tsCarousel">
+            <div class="ts-track" id="tsTrack">
+
+              <!-- Slide 1 -->
+              <div class="ts-slide active" data-index="0">
+                <div class="ts-img-wrap">
+                  <div class="ts-img-placeholder">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                    <span>Sample preview coming soon</span>
+                  </div>
+                </div>
+                <div class="ts-info">
+                  <div class="ts-badges">
+                    <span class="ts-badge">BBA</span>
+                    <span class="ts-badge purple">Marketing</span>
+                    <span class="ts-badge blue">Case Study</span>
+                  </div>
+                  <h3 class="ts-title">Marketing Case Study Assignment</h3>
+                  <p class="ts-desc">
+                    সম্পূর্ণ BBA course assignment — Introduction থেকে Conclusion পর্যন্ত properly structured। Situation Analysis, SWOT, Recommendation সহ university guideline অনুযায়ী তৈরি। APA format, proper citation এবং plagiarism-free content।
+                  </p>
+
+                  <div class="ts-feature-grid">
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      <span>APA Format</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      <span>University Format</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Plagiarism Free</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      <span>Data Table</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <span>Full References</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/></svg>
+                      <span>Original Work</span>
+                    </div>
+                  </div>
+
+
+                  <div class="ts-actions">
+                    <button class="ts-btn-secondary" style="flex:1" onclick="window.location.href='../Order page/order.html?service=assignment-writing'">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      Order This Style
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 2 -->
+              <div class="ts-slide" data-index="1">
+                <div class="ts-img-wrap">
+                  <div class="ts-img-placeholder">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                    <span>Sample preview coming soon</span>
+                  </div>
+                </div>
+                <div class="ts-info">
+                  <div class="ts-badges">
+                    <span class="ts-badge">CSE</span>
+                    <span class="ts-badge cyan">Technical</span>
+                    <span class="ts-badge blue">Lab Report</span>
+                  </div>
+                  <h3 class="ts-title">CSE Programming Assignment Report</h3>
+                  <p class="ts-desc">
+                    Algorithm ও Data Structure ভিত্তিক programming assignment report — Problem Statement, Code, Output এবং Explanation সহ সম্পূর্ণ। IEEE format, figure এবং code snippet সহ properly structured। Plagiarism-free ও university-ready।
+                  </p>
+
+                  <div class="ts-feature-grid">
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                      <span>IEEE Format</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                      <span>Code Included</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                      <span>Output Analysis</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      <span>Figures & Tables</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Plagiarism Free</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/></svg>
+                      <span>Original Work</span>
+                    </div>
+                  </div>
+
+
+                  <div class="ts-actions">
+                    <button class="ts-btn-secondary" style="flex:1" onclick="window.location.href='../Order page/order.html?service=assignment-writing'">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      Order This Style
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- end ts-track -->
+
+            <!-- Arrows -->
+            <button class="ts-nav-btn ts-prev" id="tsPrev" aria-label="Previous">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="ts-nav-btn ts-next" id="tsNext" aria-label="Next">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+
+            <!-- Dots -->
+            <div class="ts-dots-wrap">
+              <button class="ts-dot active" data-idx="0"></button>
+              <button class="ts-dot" data-idx="1"></button>
+            </div>
+
+          </div><!-- end ts-carousel -->
+        </div>
+
+        <!-- FAQ -->
+        <div class="svc-card">
+          <h2 class="svc-h2">Frequently Asked Questions</h2>
+          <div class="svc-faq">
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">Is the content 100% original? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a"><div class="svc-faq-a-inner">Absolutely. Every assignment is written from scratch — no templates, no AI-generated filler. We use only credible sources, properly cited, and deliver a Turnitin plagiarism report with every completed order so you can verify originality yourself.</div></div>
+            </div>
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">Will I get a plagiarism report? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a"><div class="svc-faq-a-inner">Yes — an AI plagiarism report is included with every Premium Package order at no extra cost. If you are on a Standard or Recommended package and need one, just let us know and we will arrange it for you.</div></div>
+            </div>
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">Can you follow my university guidelines? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a"><div class="svc-faq-a-inner">Yes, and this is something we take seriously. Share your university's formatting guide, department requirements, or supervisor feedback — we follow APA, MLA, Harvard, Chicago, and custom institutional styles. Just upload your guideline document when placing your order.</div></div>
+            </div>
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">What if I need revisions? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a"><div class="svc-faq-a-inner">We offer unlimited revisions on Premium Package orders until you are fully satisfied. For Standard and Recommended packages, revisions are included within the agreed scope. Simply send your feedback through the Client Dashboard and we will get it corrected promptly.</div></div>
+            </div>
+            <div class="svc-faq-item">
+              <button class="svc-faq-q">How will we communicate during the project? <span class="svc-faq-plus">+</span></button>
+              <div class="svc-faq-a"><div class="svc-faq-a-inner">Once your order is confirmed, you get access to a dedicated Client Dashboard where you can send messages, share files, track progress in real time, and receive updates directly from your assigned writer. You are never left wondering about the status of your work.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVIEWS -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <h2 class="svc-h2">What Our Clients Say</h2>
+            <a href="#" class="svc-link">View All Reviews →</a>
+          </div>
+          <div class="svc-reviews-grid">
+            <div class="svc-review-card">
+              <div class="svc-stars">★★★★★</div>
+              <p class="svc-review-text">Excellent service! My assignment was delivered before the deadline and the quality exceeded my expectations.</p>
+              <div class="svc-review-author">
+                <div class="svc-avatar-sm">FT</div>
+                <div>
+                  <div class="svc-author-name">Farhan T.</div>
+                  <div class="svc-author-uni">University of Dhaka</div>
+                </div>
+              </div>
+            </div>
+            <div class="svc-review-card">
+              <div class="svc-stars">★★★★★</div>
+              <p class="svc-review-text">Very professional team. They understood my requirements perfectly and helped a lot.</p>
+              <div class="svc-review-author">
+                <div class="svc-avatar-sm">AR</div>
+                <div>
+                  <div class="svc-author-name">Ahmed R.</div>
+                  <div class="svc-author-uni">BRAC University</div>
+                </div>
+              </div>
+            </div>
+            <div class="svc-review-card">
+              <div class="svc-stars">★★★★★</div>
+              <p class="svc-review-text">The work was original and well-structured. Highly recommended for assignment writing.</p>
+              <div class="svc-review-author">
+                <div class="svc-avatar-sm">NJ</div>
+                <div>
+                  <div class="svc-author-name">Nusrat J.</div>
+                  <div class="svc-author-uni">North South University</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STICKY SIDEBAR -->
+      <aside class="svc-sidebar">
+
+        <div class="svc-card svc-package-card">
+          <div class="svc-pkg-badge"><span>★</span> MOST POPULAR</div>
+
+          <h3 class="svc-pkg-title" id="svc-pkg-title">Premium Assignment Package</h3>
+          <p class="svc-pkg-subtitle" id="svc-pkg-subtitle">Everything you need for a complete assignment — professionally done.</p>
+
+          <div class="svc-package-tabs">
+            <button class="svc-tab" data-pkg="standard">Standard</button>
+            <button class="svc-tab" data-pkg="recommended">Recommended</button>
+            <button class="svc-tab active" data-pkg="premium">Premium</button>
+          </div>
+
+          <div class="svc-pkg-bestvalue" id="svc-pkg-bestvalue">
+            <span class="svc-pkg-bestvalue-icon">◆</span>
+            <span id="svc-pkg-bestvalue-text">Best value for Master's &amp; PhD students</span>
+          </div>
+
+          <ul class="svc-pkg-feature-list" id="svc-pkg-features"></ul>
+
+          <button class="svc-btn-order" id="svc-pkg-order-btn" onclick="orderAssignmentPackage()">
+            <svg class="svc-btn-order-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span id="svc-pkg-order-text">Order Premium Package</span>
+            <span class="svc-btn-order-arrow">→</span>
+          </button>
+        </div>
+
+        <!-- ═══ SAFETY CARD — shared template across all service pages ═══ -->
+        <div class="svc-card svc-safety-card">
+
+          <!-- SVG defs: gradients shared across all icons in this card -->
+          <svg width="0" height="0" style="position:absolute">
+            <defs>
+              <linearGradient id="sf-purple-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#c4b5fd"/>
+                <stop offset="100%" stop-color="#7c3aed"/>
+              </linearGradient>
+              <linearGradient id="sf-shield-fill" x1="20%" y1="0%" x2="80%" y2="100%">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#6d28d9"/>
+              </linearGradient>
+              <linearGradient id="sf-green-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4ade80"/>
+                <stop offset="100%" stop-color="#16a34a"/>
+              </linearGradient>
+              <filter id="sf-glow-purple" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="sf-glow-green" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+          </svg>
+
+          <!-- Header -->
+          <div class="safety-header">
+            <div class="safety-shield-wrap">
+              <!-- Premium layered shield -->
+              <svg class="safety-shield-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <!-- Outer glow halo -->
+                <ellipse cx="32" cy="58" rx="16" ry="3.5" fill="rgba(167,139,250,0.2)"/>
+                <!-- Shadow layer -->
+                <path d="M32 6L9 16v15c0 13.5 10 25.5 23 29 13-3.5 23-15.5 23-29V16L32 6z"
+                      fill="rgba(109,40,217,0.25)" transform="translate(1,2)"/>
+                <!-- Main shield body -->
+                <path d="M32 6L9 16v15c0 13.5 10 25.5 23 29 13-3.5 23-15.5 23-29V16L32 6z"
+                      fill="url(#sf-shield-fill)" opacity="0.9"/>
+                <!-- Inner highlight -->
+                <path d="M32 10L13 19v12c0 10.5 7.8 20 19 23 11.2-3 19-12.5 19-23V19L32 10z"
+                      fill="rgba(255,255,255,0.08)"/>
+                <!-- Top shine -->
+                <path d="M20 14 Q32 8 44 14" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <!-- Checkmark with glow -->
+                <path d="M21 33l8 8 14-14" stroke="white" stroke-width="3.5" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round" filter="url(#sf-glow-purple)" opacity="0.5"/>
+                <path d="M21 33l8 8 14-14" stroke="white" stroke-width="3" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="safety-shield-ring"></div>
+            </div>
+            <div class="safety-title-block">
+              <div class="safety-title-highlight safety-title-oneline">Guaranteed 100% Privacy &amp; Safety</div>
+              <div class="safety-subtitle">Bank-grade security and strict non-disclosure protocols to protect your identity and research.</div>
+            </div>
+          </div>
+
+          <!-- Feature rows -->
+          <div class="safety-features">
+
+            <!-- 1. Complete Confidentiality — padlock -->
+            <div class="safety-feature-row">
+              <div class="safety-feat-icon">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Lock body -->
+                  <rect x="8" y="17" width="20" height="14" rx="3.5" fill="url(#sf-purple-grad)" opacity="0.95"/>
+                  <!-- Lock body inner shine -->
+                  <rect x="8" y="17" width="20" height="6" rx="3.5" fill="rgba(255,255,255,0.12)"/>
+                  <!-- Shackle -->
+                  <path d="M12 17v-5a6 6 0 0112 0v5" fill="none" stroke="url(#sf-purple-grad)" stroke-width="2.5" stroke-linecap="round"/>
+                  <!-- Keyhole circle -->
+                  <circle cx="18" cy="25" r="2.5" fill="rgba(255,255,255,0.6)"/>
+                  <!-- Keyhole stem -->
+                  <rect x="16.5" y="25" width="3" height="3.5" rx="1" fill="rgba(255,255,255,0.6)"/>
+                </svg>
+              </div>
+              <div class="safety-feat-text">
+                <div class="safety-feat-title">Strict NDA &amp; Confidentiality</div>
+                <div class="safety-feat-desc">Your name, identity, and academic details are never revealed—even to writers.</div>
+              </div>
+              <div class="safety-feat-check">
+                <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="10" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+                  <circle cx="11" cy="11" r="7" fill="rgba(34,197,94,0.2)"/>
+                  <path d="M7 11.5l3 3 5-6" stroke="url(#sf-green-grad)" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 2. Secure File Delivery — file with shield -->
+            <div class="safety-feature-row">
+              <div class="safety-feat-icon">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <!-- File body -->
+                  <rect x="7" y="4" width="16" height="20" rx="2.5" fill="url(#sf-purple-grad)" opacity="0.85"/>
+                  <!-- File corner fold -->
+                  <path d="M18 4l5 5h-4a1 1 0 01-1-1V4z" fill="rgba(255,255,255,0.25)"/>
+                  <!-- File lines -->
+                  <rect x="10" y="13" width="8" height="1.5" rx="0.75" fill="rgba(255,255,255,0.5)"/>
+                  <rect x="10" y="16.5" width="6" height="1.5" rx="0.75" fill="rgba(255,255,255,0.35)"/>
+                  <!-- Mini shield badge -->
+                  <path d="M22 22l-6 3-6-3v-4.5l6-2.5 6 2.5V22z" fill="rgba(167,139,250,0.3)" stroke="url(#sf-purple-grad)" stroke-width="1.2"/>
+                  <path d="M16 19.5l1.5 1.5 2.5-2.5" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="safety-feat-text">
+                <div class="safety-feat-title">Encrypted Vault Delivery</div>
+                <div class="safety-feat-desc">Files are shared through secure, end-to-end encrypted channels only.</div>
+              </div>
+              <div class="safety-feat-check">
+                <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="10" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+                  <circle cx="11" cy="11" r="7" fill="rgba(34,197,94,0.2)"/>
+                  <path d="M7 11.5l3 3 5-6" stroke="url(#sf-green-grad)" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 3. Only You Can Access — person + key -->
+            <div class="safety-feature-row">
+              <div class="safety-feat-icon">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Person head -->
+                  <circle cx="15" cy="10" r="5" fill="url(#sf-purple-grad)" opacity="0.9"/>
+                  <!-- Person body -->
+                  <path d="M6 28c0-5 4-8 9-8s9 3 9 8" fill="url(#sf-purple-grad)" opacity="0.75"/>
+                  <!-- Key badge -->
+                  <circle cx="27" cy="25" r="5" fill="rgba(124,58,237,0.3)" stroke="url(#sf-purple-grad)" stroke-width="1.2"/>
+                  <circle cx="25.5" cy="23.5" r="1.8" fill="none" stroke="#c4b5fd" stroke-width="1.2"/>
+                  <path d="M27 25l2.5 2.5M28 26.5l1 1" stroke="#c4b5fd" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="safety-feat-text">
+                <div class="safety-feat-title">Zero Repository / No Reselling</div>
+                <div class="safety-feat-desc">Your paper is 100% custom-written, never published online, and never resold to anyone else.</div>
+              </div>
+              <div class="safety-feat-check">
+                <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="10" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+                  <circle cx="11" cy="11" r="7" fill="rgba(34,197,94,0.2)"/>
+                  <path d="M7 11.5l3 3 5-6" stroke="url(#sf-green-grad)" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 4. Data Never Shared — shield with X block -->
+            <div class="safety-feature-row">
+              <div class="safety-feat-icon">
+                <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Main shield -->
+                  <path d="M18 3L5 9v9c0 8.5 5.5 16 13 18.5C25.5 34 31 26.5 31 18V9L18 3z"
+                        fill="url(#sf-purple-grad)" opacity="0.9"/>
+                  <!-- Inner shine -->
+                  <path d="M18 5L7 10.5V18c0 6.5 4.2 12.5 11 15 6.8-2.5 11-8.5 11-15V10.5L18 5z"
+                        fill="rgba(255,255,255,0.08)"/>
+                  <!-- Check mark -->
+                  <path d="M12 18.5l4.5 4.5 8-9" stroke="white" stroke-width="2.8" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Top shine -->
+                  <path d="M12 7.5 Q18 4.5 24 7.5" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="safety-feat-text">
+                <div class="safety-feat-title">100% Original &amp; Plagiarism-Free</div>
+                <div class="safety-feat-desc">Includes AI plagiarism reports for complete peace of mind.</div>
+              </div>
+              <div class="safety-feat-check">
+                <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="10" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+                  <circle cx="11" cy="11" r="7" fill="rgba(34,197,94,0.2)"/>
+                  <path d="M7 11.5l3 3 5-6" stroke="url(#sf-green-grad)" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- NDA button -->
+          <button class="safety-nda-btn" onclick="opOpenNDA(this)" aria-haspopup="dialog">
+            <span class="safety-nda-label">Read Our Non-Disclosure Agreement (NDA)</span>
+            <span class="safety-arrow">→</span>
+          </button>
+        </div>
+        <!-- ═══ /SAFETY CARD ═══ -->
+
+        <div class="svc-card svc-side-card">
+          <div class="svc-side-header">
+            <span class="svc-side-title">Need Help Before Order?</span>
+          </div>
+          <p class="svc-side-text">Chat with our academic experts</p>
+          <button class="svc-btn-secondary svc-btn-live-chat">Start Live Chat</button>
+        </div>
+
+        <div class="svc-card svc-trust-card">
+          <div class="svc-trust-header">
+            <div class="svc-trust-badge">
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="13" height="13">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" fill="currentColor"/>
+              </svg>
+              Trusted Platform
+            </div>
+            <h3 class="svc-trust-title">Trusted by <span>500+</span> Students</h3>
+            <p class="svc-trust-sub">Across Bangladesh & beyond</p>
+          </div>
+          <div class="svc-trust-grid">
+            <div class="svc-trust-item">
+              <div class="svc-trust-icon svc-trust-icon--cyan">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" fill="currentColor"/>
+                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="svc-trust-num">500+</div>
+              <div class="svc-trust-label">Projects Completed</div>
+            </div>
+            <div class="svc-trust-item">
+              <div class="svc-trust-icon svc-trust-icon--green">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="svc-trust-num">98%</div>
+              <div class="svc-trust-label">On-Time Delivery</div>
+            </div>
+            <div class="svc-trust-item">
+              <div class="svc-trust-icon svc-trust-icon--purple">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="svc-trust-num">100%</div>
+              <div class="svc-trust-label">Confidential</div>
+            </div>
+            <div class="svc-trust-item">
+              <div class="svc-trust-icon svc-trust-icon--yellow">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="svc-trust-num">4.9<span class="svc-trust-unit">/5</span></div>
+              <div class="svc-trust-label">Client Satisfaction</div>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+    <!-- FINAL CTA -->
+    <div class="svc-cta-wrap">
+      <div class="svc-cta">
+        <div class="svc-cta-text">
+          <h2>Ready to Start Your Assignment?</h2>
+          <p>Let our experts help you achieve academic success.</p>
+        </div>
+        <div class="svc-cta-buttons">
+          <button class="svc-btn-primary svc-btn-lg" onclick="window.location.href='../Order page/order.html?service=assignment-writing'">Start Your Project Today →</button>
+          <button class="svc-btn-outline-lg">Talk to Expert</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <script src="js/assignment-service.js"></script>
+  <script src="../shared/footer.js"></script>
+  <script src="js/assignment-data.js"></script>
+  <script src="js/mobile.js"></script>
+
+  <!-- Order Popup — assignment "Start Your Project" বাটনের জন্য -->
+  <link rel="stylesheet" href="../Pricing page/css/order-popup.css" />
+  <script src="../Pricing page/js/pricing-config.js"></script>
+  <script src="../Pricing page/js/order-popup.js"></script>
+  <script>
+    /* ── Talk to an Expert — chatbot liveChat mode এ খোলে ── */
+    function openExpertChat() {
+      if (window.scriptoraChat && typeof window.scriptoraChat.openLiveChat === 'function') {
+        window.scriptoraChat.openLiveChat();
+      }
+    }
+
+    /* ── Assignment Order Popup opener ── */
+    function openAssignmentOrderPopup() {
+      /* Mobile-এ সবসময় 5-step order page-এ যাবে */
+      if (window.innerWidth <= 768) {
+        window.location.href = '../Order page/order.html?service=assignment-writing';
+        return;
+      }
+      if (typeof window.opOpen !== 'function') {
+        window.location.href = '../Order page/order.html?service=assignment-writing';
+        return;
+      }
+
+      var services = (window.SCRIPTORA_CONFIG || {}).services || [];
+      var AC        = services.filter(function (s) { return s.id === 'assignment-writing'; })[0] || {};
+      var qty       = AC.defaultQty || 500;
+      var rate      = AC.rate || 200;
+      var perUnit   = AC.perUnit || 500;
+      var price     = Math.round((qty / perUnit) * rate);   /* ৳200 for 500 words @ Standard */
+
+      window.opOpen({
+        serviceId:    'assignment-writing',
+        title:        'Assignment Writing',
+        titleBn:      'অ্যাসাইনমেন্ট রাইটিং',
+        icon:         AC.icon || '📝',
+        iconBg:       AC.iconBg || 'rgba(45,110,247,0.18)',
+        unitType:     AC.unitType || 'words',
+        qty:          qty,
+        unitLabel:    AC.unitLabel || 'words',
+        urgencyLabel: 'Standard',
+        rate:         rate,
+        perUnit:      perUnit,
+        tiers:        null,
+        tierIndex:    0,
+        price:        price,
+      });
+    }
+  </script>
+
+  <script>
+    /* Disable auto-cycle completely. Hover highlight works normally. */
+    (function () {
+      /* Block the 1800ms cycle interval before service.js sets it */
+      var _orig = window.setInterval;
+      window.setInterval = function (fn, delay) {
+        if (delay === 1800) return -1;
+        return _orig.apply(this, arguments);
+      };
+
+      document.addEventListener('DOMContentLoaded', function () {
+        /* Restore setInterval for everything else */
+        window.setInterval = _orig;
+
+        /* Clear any active state set by service.js on load */
+        document.querySelectorAll('.proc-card').forEach(function (card) {
+          card.classList.remove('proc-card--active');
+          var num      = card.querySelector('.proc-num');
+          var iconWrap = card.querySelector('.proc-icon-wrap');
+          var title    = card.querySelector('.proc-title');
+          if (num)      num.classList.remove('proc-num--active');
+          if (iconWrap) iconWrap.classList.remove('proc-icon-wrap--active');
+          if (title)    title.classList.remove('proc-title--active');
+        });
+
+        /* Re-bind hover — highlight on enter, clear on leave */
+        document.querySelectorAll('.proc-card').forEach(function (card) {
+          card.addEventListener('mouseenter', function () {
+            /* Clear all first */
+            document.querySelectorAll('.proc-card').forEach(function (c) {
+              c.classList.remove('proc-card--active');
+              var n = c.querySelector('.proc-num');
+              var iw = c.querySelector('.proc-icon-wrap');
+              var t = c.querySelector('.proc-title');
+              if (n)  n.classList.remove('proc-num--active');
+              if (iw) iw.classList.remove('proc-icon-wrap--active');
+              if (t)  t.classList.remove('proc-title--active');
+            });
+            /* Highlight hovered card */
+            card.classList.add('proc-card--active');
+            var num      = card.querySelector('.proc-num');
+            var iconWrap = card.querySelector('.proc-icon-wrap');
+            var title    = card.querySelector('.proc-title');
+            if (num)      num.classList.add('proc-num--active');
+            if (iconWrap) iconWrap.classList.add('proc-icon-wrap--active');
+            if (title)    title.classList.add('proc-title--active');
+          });
+
+          card.addEventListener('mouseleave', function () {
+            /* Clear on leave — no cycle restart */
+            card.classList.remove('proc-card--active');
+            var num      = card.querySelector('.proc-num');
+            var iconWrap = card.querySelector('.proc-icon-wrap');
+            var title    = card.querySelector('.proc-title');
+            if (num)      num.classList.remove('proc-num--active');
+            if (iconWrap) iconWrap.classList.remove('proc-icon-wrap--active');
+            if (title)    title.classList.remove('proc-title--active');
+          });
+        });
+      });
+    })();
+  </script>
+<script>
+/* ── Assignment Sample Carousel ── */
+(function () {
+  var slides  = document.querySelectorAll('.ts-slide');
+  var dots    = document.querySelectorAll('.ts-dot');
+  var prev    = document.getElementById('tsPrev');
+  var next    = document.getElementById('tsNext');
+  var current = 0;
+  var total   = slides.length;
+
+  function goTo(idx, dir) {
+    slides[current].classList.remove('active', 'ts-slide-left');
+    dots[current].classList.remove('active');
+    current = (idx + total) % total;
+    slides[current].classList.remove('ts-slide-left');
+    if (dir === 'left') slides[current].classList.add('ts-slide-left');
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+
+  if (prev) prev.addEventListener('click', function () { goTo(current - 1, 'left'); });
+  if (next) next.addEventListener('click', function () { goTo(current + 1, 'right'); });
+  dots.forEach(function (d) {
+    d.addEventListener('click', function () {
+      var idx = parseInt(d.getAttribute('data-idx'));
+      goTo(idx, idx > current ? 'right' : 'left');
+    });
+  });
+
+  var startX = 0;
+  var carousel = document.getElementById('tsCarousel');
+  if (carousel) {
+    carousel.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
+    carousel.addEventListener('touchend', function (e) {
+      var diff = startX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1, diff > 0 ? 'right' : 'left');
+    }, { passive: true });
+  }
+})();
+</script>
+
+<!-- Desktop Certificate Modal -->
+<div id="desk-cert-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,0.88)">
+  <div style="position:relative;z-index:1;background:#12112a;border:1px solid rgba(139,92,246,0.3);border-radius:16px;overflow:hidden;width:min(380px,88vw);box-shadow:0 8px 40px rgba(0,0,0,0.7)">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.07)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#11b5d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      <span id="dsk-cert-title" style="flex:1;font-size:13px;font-weight:600;color:#e2e8f0">Fiverr Level 2 Seller Certificate</span>
+      <span id="dsk-cert-counter" style="font-size:11px;color:#94a3b8;background:rgba(255,255,255,0.07);padding:2px 9px;border-radius:20px">1 × 2</span>
+      <button onclick="closeDesktopCertModal()" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;color:#94a3b8;font-size:14px;cursor:pointer;margin-left:6px">&#x2715;</button>
+    </div>
+    <!-- Image -->
+    <div id="dsk-cert-img-wrap" style="background:#0a0918;overflow:hidden;position:relative">
+      <img id="dsk-cert-img" src="assets/Certification/fiverr-certificate.jpg" alt="Certificate" style="width:100%;height:auto;display:block;transition:opacity 0.22s ease">
+      <button id="dsk-cert-prev" onclick="dskCertNav(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background 0.2s" onmouseover="this.style.background='rgba(139,92,246,0.7)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">&#8249;</button>
+      <button id="dsk-cert-next" onclick="dskCertNav(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background 0.2s" onmouseover="this.style.background='rgba(139,92,246,0.7)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">&#8250;</button>
+    </div>
+    <!-- Footer -->
+    <div style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span id="dsk-cert-label" style="font-size:11px;color:#94a3b8">Fiverr Level 2 Seller Certificate</span>
+      <div style="display:flex;gap:6px" id="dsk-cert-dots">
+        <span class="dsk-dot active" data-ci="0" style="width:18px;height:7px;border-radius:4px;background:#8b5cf6;cursor:pointer;transition:all 0.2s"></span>
+        <span class="dsk-dot" data-ci="1" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.2s"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+#desk-cert-modal.open { display:flex !important; animation:dskCertFadeIn 0.25s ease; }
+@keyframes dskCertFadeIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
+</style>
+
+<script>
+(function(){
+  var CERTS = [
+    { src:'assets/Certification/fiverr-certificate.jpg', label:'Fiverr Level 2 Seller Certificate' },
+    { src:'assets/Certification/certificate-2.jpg',      label:'Certificate of Excellence' }
+  ];
+  var cur = 0;
+
+  function updateDots(){
+    document.querySelectorAll('.dsk-dot').forEach(function(d,i){
+      d.style.background    = i===cur ? '#8b5cf6' : 'rgba(255,255,255,0.2)';
+      d.style.width         = i===cur ? '18px' : '7px';
+      d.style.borderRadius  = i===cur ? '4px' : '50%';
+    });
+  }
+
+  function goTo(idx){
+    var total = CERTS.length;
+    var next  = (idx + total) % total;
+    if(next === cur) return;
+    var img = document.getElementById('dsk-cert-img');
+    img.style.opacity = '0';
+    setTimeout(function(){
+      cur = next;
+      img.src = CERTS[cur].src;
+      document.getElementById('dsk-cert-title').textContent   = CERTS[cur].label;
+      document.getElementById('dsk-cert-label').textContent   = CERTS[cur].label;
+      document.getElementById('dsk-cert-counter').textContent = (cur+1) + ' \u00d7 ' + CERTS.length;
+      updateDots();
+      img.style.opacity = '1';
+    }, 210);
+  }
+
+  // Use event delegation on modal — works regardless of timing
+  document.addEventListener('click', function(e){
+    var dot = e.target.closest('.dsk-dot');
+    if(dot) goTo(parseInt(dot.getAttribute('data-ci')));
+
+    var modal = document.getElementById('desk-cert-modal');
+    if(modal && e.target === modal) closeDesktopCertModal();
+  });
+
+  document.addEventListener('keydown', function(e){
+    var modal = document.getElementById('desk-cert-modal');
+    if(!modal || !modal.classList.contains('open')) return;
+    if(e.key==='Escape')      closeDesktopCertModal();
+    if(e.key==='ArrowRight')  goTo(cur+1);
+    if(e.key==='ArrowLeft')   goTo(cur-1);
+  });
+
+  function updateArrows(){
+    var show = CERTS.length > 1;
+    var prev = document.getElementById('dsk-cert-prev');
+    var next = document.getElementById('dsk-cert-next');
+    if(prev) prev.style.display = show ? 'flex' : 'none';
+    if(next) next.style.display = show ? 'flex' : 'none';
+  }
+  var touchStartX = 0;
+  var wrap = document.getElementById('dsk-cert-img-wrap');
+  if(wrap){
+    wrap.addEventListener('touchstart', function(e){ touchStartX = e.changedTouches[0].clientX; }, {passive:true});
+    wrap.addEventListener('touchend', function(e){
+      var diff = touchStartX - e.changedTouches[0].clientX;
+      if(Math.abs(diff) > 40) goTo(diff > 0 ? cur+1 : cur-1);
+    }, {passive:true});
+  }
+  window.dskCertNav = function(dir){ goTo(cur + dir); };
+
+  window.openDesktopCertModal = function(){
+    cur = 0;
+    var img = document.getElementById('dsk-cert-img');
+    img.src           = CERTS[0].src;
+    img.style.opacity = '1';
+    document.getElementById('dsk-cert-title').textContent   = CERTS[0].label;
+    document.getElementById('dsk-cert-label').textContent   = CERTS[0].label;
+    document.getElementById('dsk-cert-counter').textContent = '1 \u00d7 ' + CERTS.length;
+    updateDots();
+    updateArrows();
+    document.getElementById('desk-cert-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeDesktopCertModal = function(){
+    document.getElementById('desk-cert-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  };
+})();
+</script>
+
+<!-- ══ Sample Lightbox ══ -->
+<div id="sampleLightbox" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;box-sizing:border-box;" onclick="closeSampleLightbox(event)">
+  <div style="position:relative;max-width:900px;width:100%;max-height:90vh;display:flex;flex-direction:column;align-items:center;">
+    <button onclick="closeSampleLightbox()" style="position:absolute;top:-44px;right:0;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1;">&#x2715;</button>
+    <img id="sampleLightboxImg" src="" alt="" style="max-width:100%;max-height:85vh;object-fit:contain;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,0.6);">
+    <p id="sampleLightboxTitle" style="color:rgba(255,255,255,0.7);margin-top:12px;font-size:13px;text-align:center;"></p>
+  </div>
+</div>
+<script>
+function openSampleLightbox(src, title) {
+  var lb = document.getElementById('sampleLightbox');
+  document.getElementById('sampleLightboxImg').src = src;
+  document.getElementById('sampleLightboxTitle').textContent = title || '';
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeSampleLightbox(e) {
+  if (e && e.target !== document.getElementById('sampleLightbox') && !e.target.closest('button')) return;
+  document.getElementById('sampleLightbox').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { document.getElementById('sampleLightbox').style.display = 'none'; document.body.style.overflow = ''; }
+});
+</script>
+
+<!-- ══ NDA / CONFIDENTIALITY MODAL — Opascript Universal Policy ══ -->
+<div id="opNdaBackdrop"
+     class="op-nda-backdrop"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="opNdaTitle"
+     aria-describedby="opNdaDesc">
+
+  <div class="op-nda-modal" id="opNdaModal">
+
+    <!-- Header -->
+    <div class="op-nda-header">
+      <div class="op-nda-header-left">
+        <div class="op-nda-header-icon">🔒</div>
+        <div>
+          <div class="op-nda-title" id="opNdaTitle">Non-Disclosure &amp; Confidentiality Agreement</div>
+          <div class="op-nda-subtitle">Your Work. Your Privacy. Our Responsibility.</div>
+        </div>
+      </div>
+      <button class="op-nda-close" onclick="opCloseNDA()" aria-label="Close">&#x2715;</button>
+    </div>
+
+    <!-- Body -->
+    <div class="op-nda-body" id="opNdaDesc">
+
+      <p class="op-nda-intro">At Opascript, we understand that every project may contain personal information, academic materials, research data, documents, university details, project requirements, and other sensitive information. Regardless of which service you order, we treat your information and submitted materials with confidentiality and responsible handling.</p>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 01 — Your Identity Stays Private</div>
+        <p class="op-nda-section-body">Your name, contact information, university details, project information, and other personal information provided for your order should not be disclosed to unauthorized individuals.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 02 — Your Files &amp; Documents Stay Confidential</div>
+        <p class="op-nda-section-body">Documents, assignments, thesis materials, research files, handwritten materials, reference documents, and other files submitted for your project are used only for providing the requested service.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 03 — No Unauthorized Sharing or Reselling</div>
+        <p class="op-nda-section-body">Your submitted files, project information, and materials will not be intentionally shared, publicly posted, published, resold, or distributed to unauthorized third parties. Your materials should not be used as public examples, portfolio content, promotional content, or demonstrations without appropriate permission.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 04 — Controlled Access</div>
+        <p class="op-nda-section-body">Access to your order information and files should be limited to authorized team members who reasonably need access to complete, review, manage, or support your project.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 05 — Confidential Communication</div>
+        <p class="op-nda-section-body">Information shared through order requirements, dashboard updates, messages, uploaded files, support conversations, and other project-related communication should be treated as confidential.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 06 — Responsible Data Handling</div>
+        <p class="op-nda-section-body">Opascript will handle submitted project information and files according to its actual technical, operational, storage, and backup practices to support service delivery.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 07 — Client Materials</div>
+        <p class="op-nda-section-body">Any documents, information, references, research materials, or other content supplied by the client remain the client's responsibility and ownership unless otherwise agreed. Opascript does not claim ownership of client-provided materials simply because they are submitted for a service.</p>
+      </div>
+
+      <div class="op-nda-section">
+        <div class="op-nda-section-title">Section 08 — Legal Disclosure</div>
+        <p class="op-nda-section-body">Confidentiality does not prevent disclosure where it is required by applicable law, regulation, court order, or another legally binding requirement.</p>
+      </div>
+
+      <div class="op-nda-trust">
+        <p class="op-nda-trust-quote">"Your work deserves privacy, respect, and responsible handling."</p>
+        <p class="op-nda-trust-note">We are committed to handling your information and project materials responsibly throughout the service.</p>
+      </div>
+
+      <div class="op-nda-support">
+        <p class="op-nda-support-text">If you have any concern about confidentiality, privacy, or your order, please contact our support team.</p>
+        <button class="op-nda-support-link" onclick="opCloseNDA(); if(window.scriptoraChat && typeof window.scriptoraChat.openLiveChat === 'function') window.scriptoraChat.openLiveChat();">Contact Support →</button>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="op-nda-footer">
+      <button class="op-nda-footer-btn" onclick="opCloseNDA()">Close</button>
+    </div>
+
+  </div>
+</div>
+<!-- ══ /NDA MODAL ══ -->
+
+<script src="js/nda-modal.js"></script>
+</body>
+</html>
