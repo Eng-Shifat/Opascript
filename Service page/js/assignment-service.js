@@ -126,15 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /* -------- ORDER BUTTON -------- */
 function orderAssignmentPackage() {
-  var pkg = window._scriptoraSelectedAssignmentPkg;
-  if (!pkg) return;
-
-  var params = new URLSearchParams({
-    service: 'assignment-writing',
-    urgency: 'normal',
-    tier:    pkg.name,
-  });
-  window.location.href = '../Order page/order.html?' + params.toString();
+  if (typeof window.openAssignmentOrderPopup === 'function') {
+    window.openAssignmentOrderPopup();
+  } else {
+    window.location.href = '../Order page/order.html?service=assignment-writing';
+  }
 }
 
 /* ── Process Timeline — Hover + Auto-Cycle Interaction ── */

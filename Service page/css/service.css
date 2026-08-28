@@ -2001,6 +2001,19 @@ body {
   .svc-cta-wrap { padding: 0 12px; }
 
   /* Hero card */
+  .svc-hero-fb-card {
+    min-height: 420px;
+    background-position: center top !important;
+  }
+  .svc-hero-fb-overlay {
+    background:
+      linear-gradient(180deg,
+        rgba(var(--svc-bg-rgb),0.82) 0%,
+        rgba(var(--svc-bg-rgb),0.75) 40%,
+        rgba(var(--svc-bg-rgb),0.90) 75%,
+        rgba(var(--svc-bg-rgb),0.98) 100%
+      ) !important;
+  }
   .svc-hero-fb-inner { padding: 22px 16px 20px; }
   .svc-hero-fb-title { font-size: 22px; line-height: 1.3; }
   .svc-hero-fb-desc { font-size: 13px; }

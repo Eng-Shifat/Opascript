@@ -10,6 +10,7 @@ window.PAGE_DATA = {
     badge:           'Professional Assignment Writing Service',
     title:           'Never Miss an Assignment Deadline Again',
     desc:            'Led by a Fiverr Level-2 Certified Writer, we deliver 100% flawless, AI-free, and plagiarism-free assignment support tailored to your course and university guidelines—delivered right on time.',
+    image:           'assets/Assignment writing.png',
     primaryBtn:      'Start Your Project',
     primaryOnClick:  'openAssignmentOrderPopup()',
     secondaryBtn:    'Talk to an Expert',

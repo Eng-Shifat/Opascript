@@ -24,7 +24,43 @@
     /* Summary rows */
     let summaryRows = '';
 
-    if (opts.unitType === 'words' || opts.unitType === 'slides' || opts.unitType === 'pages') {
+    if (opts.serviceId === 'assignment-writing') {
+      /* ── Interactive calculator for assignment writing ── */
+      const initQty   = opts.qty   || 500;
+      const initRate  = opts.rate  || 200;
+      const initPer   = opts.perUnit || 500;
+      const initPrice = Math.round((initQty / initPer) * initRate);
+      summaryRows = `
+        <div class="op-calc-block">
+          <div class="op-calc-label">Word Count / শব্দ সংখ্যা</div>
+          <div class="op-calc-stepper">
+            <button class="op-calc-btn" onclick="opCalcStep(-500)" aria-label="কমাও">−</button>
+            <span class="op-calc-qty" id="opCalcQty">${fmtNum(initQty)}</span>
+            <span class="op-calc-unit">words</span>
+            <button class="op-calc-btn" onclick="opCalcStep(500)" aria-label="বাড়াও">+</button>
+          </div>
+          <div class="op-calc-hint">সর্বনিম্ন ৫০০ শব্দ · প্রতি ৫০০ শব্দে ৳${fmtNum(initRate)}</div>
+        </div>
+        <div class="op-calc-block" style="margin-top:14px;">
+          <div class="op-calc-label">Deadline / সময়সীমা</div>
+          <div class="op-calc-urgency">
+            <button class="op-urg-btn active" data-urg="normal"   data-mul="1.0" onclick="opCalcUrgency(this)">
+              <span class="op-urg-name">Standard</span>
+              <span class="op-urg-days">৪ দিন</span>
+            </button>
+            <button class="op-urg-btn" data-urg="urgent"   data-mul="1.4" onclick="opCalcUrgency(this)">
+              <span class="op-urg-name">Express</span>
+              <span class="op-urg-days">২ দিন</span>
+            </button>
+            <button class="op-urg-btn" data-urg="critical" data-mul="1.8" onclick="opCalcUrgency(this)">
+              <span class="op-urg-name">Rush</span>
+              <span class="op-urg-days">১ দিন</span>
+            </button>
+          </div>
+        </div>
+        <div class="op-divider" style="margin:16px 0 12px;"></div>
+        <div class="op-row"><span>Rate / রেট</span><strong>৳${fmtNum(initRate)}/${initPer} words</strong></div>`;
+    } else if (opts.unitType === 'words' || opts.unitType === 'slides' || opts.unitType === 'pages') {
       const labelMap = { words: 'Word Count / শব্দ সংখ্যা', slides: 'Slide Count / স্লাইড', pages: 'Page Count / পৃষ্ঠা' };
       summaryRows += `
         <div class="op-row"><span>${labelMap[opts.unitType]||'Quantity'}</span><strong>${fmtNum(opts.qty)} ${esc(opts.unitLabel)}</strong></div>
@@ -100,7 +136,7 @@
           <div class="op-divider"></div>
           <div class="op-row op-total-row">
             <span>Total Price / মোট মূল্য</span>
-            <strong class="op-total-price">৳ ${fmtNum(opts.price)}</strong>
+            <strong class="op-total-price" id="opTotalPrice">৳ ${fmtNum(opts.price)}</strong>
           </div>
         </div>
 
@@ -377,6 +413,15 @@
     document.body.appendChild(div);
 
     window._opOpts = opts;
+
+    /* Reset calculator state for assignment-writing */
+    if (opts.serviceId === 'assignment-writing') {
+      window._opCalcQty      = opts.qty          || 500;
+      window._opCalcMul      = 1.0;
+      window._opCalcUrgLabel = 'Standard';
+      window._opCalcUrgKey   = 'normal';
+    }
+
     document.body.style.overflow = 'hidden';
 
     requestAnimationFrame(() => {
@@ -399,6 +444,51 @@
       const mpSheet = document.querySelector('.mp-sheet.open');
       if (!mpSheet) document.body.style.overflow = '';
     }, 340);
+  };
+
+  /* ── Assignment Writing Calculator ── */
+  window._opCalcQty = 500;
+  window._opCalcMul = 1.0;
+  window._opCalcUrgLabel = 'Standard';
+  window._opCalcUrgKey   = 'normal';
+
+  function opCalcUpdatePrice() {
+    const opts  = window._opOpts || {};
+    const rate  = opts.rate    || 200;
+    const per   = opts.perUnit || 500;
+    const price = Math.round((window._opCalcQty / per) * rate * window._opCalcMul);
+
+    const qtyEl   = document.getElementById('opCalcQty');
+    const totalEl = document.getElementById('opTotalPrice');
+
+    function fmtN(n) { return Number(n).toLocaleString('en-IN'); }
+
+    if (qtyEl)   qtyEl.textContent   = fmtN(window._opCalcQty);
+    if (totalEl) totalEl.textContent = '৳ ' + fmtN(price);
+
+    /* sync back to opts so opConfirm uses updated values */
+    if (window._opOpts) {
+      window._opOpts.qty          = window._opCalcQty;
+      window._opOpts.price        = price;
+      window._opOpts.urgencyLabel = window._opCalcUrgLabel;
+      window._opOpts.urgency      = window._opCalcUrgKey;
+    }
+  }
+
+  window.opCalcStep = function(delta) {
+    const min = 500;
+    const next = (window._opCalcQty || 500) + delta;
+    window._opCalcQty = Math.max(min, next);
+    opCalcUpdatePrice();
+  };
+
+  window.opCalcUrgency = function(btn) {
+    document.querySelectorAll('.op-urg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window._opCalcMul      = parseFloat(btn.dataset.mul) || 1.0;
+    window._opCalcUrgLabel = btn.querySelector('.op-urg-name')?.textContent || 'Standard';
+    window._opCalcUrgKey   = btn.dataset.urg || 'normal';
+    opCalcUpdatePrice();
   };
 
   /* ── File Upload ── */

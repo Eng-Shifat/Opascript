@@ -400,7 +400,7 @@
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     right: calc(16px + env(safe-area-inset-right, 0px));
   }
-  .sca-bubble { right: 14px; max-width: 190px; }
+  .sca-bubble { right: 14px; max-width: 190px; bottom: 80px; }
   #sca-root.sca-open .sca-toggle { display: none; }
   .ui-bubble { max-width: 90%; }
 

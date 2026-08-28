@@ -255,6 +255,12 @@ window.orderFromCard = async function(id) {
     }
   }
 
+  /* Assignment Writing — redirect to service page (popup is handled there) */
+  if (id === 'assignment-writing') {
+    window.location.href = '../Service page/assignment-writing.html';
+    return;
+  }
+
   const st           = state[id];
   const price        = calcPrice(s, st.urgency);
   const urgencyLabel = URGENCY[st.urgency]?.label || st.urgency;

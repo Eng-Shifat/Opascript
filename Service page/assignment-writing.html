@@ -150,8 +150,8 @@
       <div class="svc-main">
 
         <!-- HERO (background-image style card, sits back in the 2-column layout) -->
-        <div class="svc-card svc-hero-fb-card">
-          <div class="svc-hero-fb-overlay"></div>
+        <div class="svc-card svc-hero-fb-card" style="background-image: url('assets/Assignment writing.png'); background-position: right center;">
+          <div class="svc-hero-fb-overlay" style="background: linear-gradient(105deg, rgba(var(--svc-bg-rgb),0.97) 0%, rgba(var(--svc-bg-rgb),0.93) 45%, rgba(var(--svc-bg-rgb),0.55) 68%, rgba(var(--svc-bg-rgb),0.10) 100%), linear-gradient(to top, rgba(var(--svc-bg-rgb),0.98) 0%, rgba(var(--svc-bg-rgb),0.20) 35%, transparent 60%);"></div>
           <div class="svc-hero-fb-inner">
 
             <div class="svc-hero-fb-badge">
@@ -163,27 +163,25 @@
 
             <h1 class="svc-hero-fb-title">
               <span>Never Miss an</span>
-              <span>Assignment Deadline Again</span>
+              <span>Assignment Deadline <span style="color: var(--color-violet2, #a78bfa);">Again</span></span>
             </h1>
 
             <div class="svc-hero-fb-desc">
               <p>
                 Whether it's a short essay, a case study, or a full course assignment for
-                <strong>School, Undergraduate, or Master's</strong> level, Opa Script turns tight deadlines
+                <strong>School, Undergraduate, or Master's</strong> level, Opascript turns tight deadlines
                 into a seamless, stress-free experience. Led by a <strong>Fiverr Level-2 Certified Writer</strong>,
-                we deliver premium, high-quality assignment support tailored strictly to your course and
-                university guidelines. We strictly commit to a <strong>zero-delay policy</strong>—delivering
-                flawless, AI-free, and 100% plagiarism-free work well before your deadline.
+                we deliver premium, AI-free, and 100% plagiarism-free work — tailored strictly to your
+                course guidelines and submitted <strong>well before your deadline</strong>.
               </p>
               <p>
-                What truly makes us unique is our transparency. Through our <strong>Smart Client Dashboard</strong>,
-                you can track every update in real-time with your own eyes, collaborate directly with your writer,
-                and inspect drafts seamlessly.
+                What sets us apart is full transparency. Through our <strong>Smart Client Dashboard</strong>,
+                you track every update in real time, review drafts, and collaborate directly with your writer — from start to final delivery.
               </p>
             </div>
 
             <div class="svc-hero-fb-cta">
-              <button class="svc-hero-fb-btn-primary" onclick="window.location.href='../Order page/order.html?service=assignment-writing'">
+              <button class="svc-hero-fb-btn-primary" onclick="openAssignmentOrderPopup()">
                 Start Your Project
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               </button>
@@ -626,7 +624,7 @@
         <!-- ══════════════════════════════════════
              ASSIGNMENT SAMPLE CAROUSEL
              (image placeholders — drop real sample photos into
-             "assets/Assignment writing/" and swap the two ts-img-wrap
+             "assets/Handwritten/" and swap the two ts-img-wrap
              blocks below from placeholder to <img src="...">)
              ══════════════════════════════════════ -->
         <div class="svc-card ts-card">
@@ -649,25 +647,21 @@
           <div class="ts-carousel" id="tsCarousel">
             <div class="ts-track" id="tsTrack">
 
-              <!-- Slide 1 -->
+              <!-- Slide 1 — General Assignment -->
               <div class="ts-slide active" data-index="0">
                 <div class="ts-img-wrap">
-                  <div class="ts-img-placeholder">
-                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-                    <span>Sample preview coming soon</span>
-                  </div>
+                  <img src="assets/Handwritten/HSS-Assignment.png" alt="HSS General Assignment Sample" onclick="openSampleLightbox(this.src)" style="cursor:zoom-in;">
                 </div>
                 <div class="ts-info">
                   <div class="ts-badges">
-                    <span class="ts-badge">BBA</span>
-                    <span class="ts-badge purple">Marketing</span>
-                    <span class="ts-badge blue">Case Study</span>
+                    <span class="ts-badge">HSS</span>
+                    <span class="ts-badge purple">General</span>
+                    <span class="ts-badge blue">Assignment</span>
                   </div>
-                  <h3 class="ts-title">Marketing Case Study Assignment</h3>
+                  <h3 class="ts-title">Humanities & Social Science Assignment</h3>
                   <p class="ts-desc">
-                    সম্পূর্ণ BBA course assignment — Introduction থেকে Conclusion পর্যন্ত properly structured। Situation Analysis, SWOT, Recommendation সহ university guideline অনুযায়ী তৈরি। APA format, proper citation এবং plagiarism-free content।
+                    HSS course-এর জন্য পূর্ণাঙ্গ academic assignment — Introduction, Body এবং Conclusion সহ properly structured। University guideline অনুযায়ী format, in-text citation এবং reference list সহ। Plagiarism-free, original content।
                   </p>
-
                   <div class="ts-feature-grid">
                     <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -675,29 +669,27 @@
                     </div>
                     <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                      <span>University Format</span>
+                      <span>University Ready</span>
                     </div>
                     <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       <span>Plagiarism Free</span>
                     </div>
                     <div class="ts-feat">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                      <span>Data Table</span>
-                    </div>
-                    <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                       <span>Full References</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      <span>Proper Structure</span>
                     </div>
                     <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/></svg>
                       <span>Original Work</span>
                     </div>
                   </div>
-
-
                   <div class="ts-actions">
-                    <button class="ts-btn-secondary" style="flex:1" onclick="window.location.href='../Order page/order.html?service=assignment-writing'">
+                    <button class="ts-btn-secondary" style="flex:1" onclick="openAssignmentOrderPopup()">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                       Order This Style
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -706,41 +698,37 @@
                 </div>
               </div>
 
-              <!-- Slide 2 -->
+              <!-- Slide 2 — Circuit Diagram -->
               <div class="ts-slide" data-index="1">
                 <div class="ts-img-wrap">
-                  <div class="ts-img-placeholder">
-                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-                    <span>Sample preview coming soon</span>
-                  </div>
+                  <img src="assets/Handwritten/HSS-Circuit-diagram.png" alt="Circuit Diagram Assignment Sample" onclick="openSampleLightbox(this.src)" style="cursor:zoom-in;">
                 </div>
                 <div class="ts-info">
                   <div class="ts-badges">
-                    <span class="ts-badge">CSE</span>
+                    <span class="ts-badge">EEE</span>
                     <span class="ts-badge cyan">Technical</span>
-                    <span class="ts-badge blue">Lab Report</span>
+                    <span class="ts-badge blue">Circuit</span>
                   </div>
-                  <h3 class="ts-title">CSE Programming Assignment Report</h3>
+                  <h3 class="ts-title">Circuit Diagram & Technical Assignment</h3>
                   <p class="ts-desc">
-                    Algorithm ও Data Structure ভিত্তিক programming assignment report — Problem Statement, Code, Output এবং Explanation সহ সম্পূর্ণ। IEEE format, figure এবং code snippet সহ properly structured। Plagiarism-free ও university-ready।
+                    EEE ও Engineering course-এর জন্য circuit diagram সহ technical assignment — labeled diagram, component list এবং working principle সহ। IEEE format এবং university standard অনুযায়ী properly structured।
                   </p>
-
                   <div class="ts-feature-grid">
                     <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                       <span>IEEE Format</span>
                     </div>
                     <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                      <span>Labeled Diagram</span>
+                    </div>
+                    <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                      <span>Code Included</span>
+                      <span>Technical Accuracy</span>
                     </div>
                     <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                      <span>Output Analysis</span>
-                    </div>
-                    <div class="ts-feat">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                      <span>Figures & Tables</span>
+                      <span>Analysis Included</span>
                     </div>
                     <div class="ts-feat">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -751,10 +739,110 @@
                       <span>Original Work</span>
                     </div>
                   </div>
-
-
                   <div class="ts-actions">
-                    <button class="ts-btn-secondary" style="flex:1" onclick="window.location.href='../Order page/order.html?service=assignment-writing'">
+                    <button class="ts-btn-secondary" style="flex:1" onclick="openAssignmentOrderPopup()">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      Order This Style
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 3 — Chemistry Lab -->
+              <div class="ts-slide" data-index="2">
+                <div class="ts-img-wrap">
+                  <img src="assets/Handwritten/HSS-chemistry-lab.png" alt="Chemistry Lab Assignment Sample" onclick="openSampleLightbox(this.src)" style="cursor:zoom-in;">
+                </div>
+                <div class="ts-info">
+                  <div class="ts-badges">
+                    <span class="ts-badge">Chemistry</span>
+                    <span class="ts-badge green">Lab Work</span>
+                    <span class="ts-badge purple">Science</span>
+                  </div>
+                  <h3 class="ts-title">Chemistry Lab Assignment</h3>
+                  <p class="ts-desc">
+                    Chemistry lab-এর জন্য পূর্ণাঙ্গ assignment — Objective, Theory, Procedure, Observation এবং Result সহ। Reaction equation, data table এবং conclusion properly documented। University lab guideline অনুযায়ী structured।
+                  </p>
+                  <div class="ts-feature-grid">
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 9H8L9 3z"/><path d="M6.7 15a5 5 0 1 0 10.6 0"/></svg>
+                      <span>Lab Procedure</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      <span>Data Table</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                      <span>Result Analysis</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      <span>Reaction Equation</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Plagiarism Free</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/></svg>
+                      <span>Original Work</span>
+                    </div>
+                  </div>
+                  <div class="ts-actions">
+                    <button class="ts-btn-secondary" style="flex:1" onclick="openAssignmentOrderPopup()">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      Order This Style
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 4 — Lab Report -->
+              <div class="ts-slide" data-index="3">
+                <div class="ts-img-wrap">
+                  <img src="assets/Handwritten/HSS-lab-report.png" alt="Lab Report Assignment Sample" onclick="openSampleLightbox(this.src)" style="cursor:zoom-in;">
+                </div>
+                <div class="ts-info">
+                  <div class="ts-badges">
+                    <span class="ts-badge">Lab Report</span>
+                    <span class="ts-badge cyan">Scientific</span>
+                    <span class="ts-badge blue">Formal</span>
+                  </div>
+                  <h3 class="ts-title">Scientific Lab Report</h3>
+                  <p class="ts-desc">
+                    Science ও Engineering lab-এর জন্য formal lab report — Abstract, Introduction, Methodology, Results এবং Discussion সহ পূর্ণাঙ্গ। Graphs, figures এবং proper citations সহ university-standard format।
+                  </p>
+                  <div class="ts-feature-grid">
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <span>Full Structure</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      <span>Graphs & Charts</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      <span>Data Tables</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <span>Discussion</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Plagiarism Free</span>
+                    </div>
+                    <div class="ts-feat">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z"/></svg>
+                      <span>Original Work</span>
+                    </div>
+                  </div>
+                  <div class="ts-actions">
+                    <button class="ts-btn-secondary" style="flex:1" onclick="openAssignmentOrderPopup()">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                       Order This Style
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -777,6 +865,8 @@
             <div class="ts-dots-wrap">
               <button class="ts-dot active" data-idx="0"></button>
               <button class="ts-dot" data-idx="1"></button>
+              <button class="ts-dot" data-idx="2"></button>
+              <button class="ts-dot" data-idx="3"></button>
             </div>
 
           </div><!-- end ts-carousel -->
@@ -1148,7 +1238,7 @@
           <p>Let our experts help you achieve academic success.</p>
         </div>
         <div class="svc-cta-buttons">
-          <button class="svc-btn-primary svc-btn-lg" onclick="window.location.href='../Order page/order.html?service=assignment-writing'">Start Your Project Today →</button>
+          <button class="svc-btn-primary svc-btn-lg" onclick="openAssignmentOrderPopup()">Start Your Project Today →</button>
           <button class="svc-btn-outline-lg">Talk to Expert</button>
         </div>
       </div>
@@ -1175,11 +1265,6 @@
 
     /* ── Assignment Order Popup opener ── */
     function openAssignmentOrderPopup() {
-      /* Mobile-এ সবসময় 5-step order page-এ যাবে */
-      if (window.innerWidth <= 768) {
-        window.location.href = '../Order page/order.html?service=assignment-writing';
-        return;
-      }
       if (typeof window.opOpen !== 'function') {
         window.location.href = '../Order page/order.html?service=assignment-writing';
         return;
@@ -1434,6 +1519,160 @@
   };
 })();
 </script>
+
+<!-- ══ Package Order Popup ══ -->
+<div id="assignmentPkgPopup" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;box-sizing:border-box;" onclick="closePkgPopup(event)">
+  <div id="assignmentPkgPopupInner" style="position:relative;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;border-radius:20px;background:var(--svc-card,#13112a);border:1px solid rgba(167,139,250,0.2);box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(167,139,250,0.1);padding:32px 28px 28px;" onclick="event.stopPropagation()">
+
+    <!-- Close -->
+    <button onclick="closePkgPopup()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,0.14)'" onmouseout="this.style.background='rgba(255,255,255,0.07)'">&#x2715;</button>
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,rgba(167,139,250,0.2),rgba(109,40,217,0.3));border:1px solid rgba(167,139,250,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📝</div>
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(167,139,250,0.8);margin-bottom:2px;">Assignment Writing</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text-main,#f1f5f9);line-height:1.2;" id="popupPkgTitle">Select a Package</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:6px;background:rgba(255,255,255,0.05);border-radius:12px;padding:4px;margin-bottom:20px;">
+      <button class="popup-pkg-tab active" data-pkg="standard" onclick="switchPopupPkg('standard')" style="flex:1;padding:9px 6px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:rgba(167,139,250,0.18);color:#a78bfa;">Standard</button>
+      <button class="popup-pkg-tab" data-pkg="recommended" onclick="switchPopupPkg('recommended')" style="flex:1;padding:9px 6px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,0.45);">Recommended</button>
+      <button class="popup-pkg-tab" data-pkg="premium" onclick="switchPopupPkg('premium')" style="flex:1;padding:9px 6px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,0.45);">Premium</button>
+    </div>
+
+    <!-- Best value badge -->
+    <div id="popupBestValue" style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.18);margin-bottom:18px;font-size:12.5px;color:rgba(167,139,250,0.9);"></div>
+
+    <!-- Price -->
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:18px;">
+      <span id="popupPrice" style="font-size:26px;font-weight:800;color:#a78bfa;"></span>
+      <span style="font-size:12px;color:rgba(255,255,255,0.4);">starting price</span>
+    </div>
+
+    <!-- Features -->
+    <ul id="popupFeatures" style="list-style:none;margin:0 0 24px;padding:0;display:flex;flex-direction:column;gap:10px;"></ul>
+
+    <!-- CTA -->
+    <button id="popupOrderBtn" onclick="proceedPkgOrder()" style="width:100%;padding:15px;border:none;border-radius:13px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s,transform .2s;box-shadow:0 8px 24px rgba(124,58,237,0.35);" onmouseover="this.style.opacity='.88';this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span id="popupOrderBtnText">Order Standard Package</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+
+    <p style="text-align:center;font-size:11.5px;color:rgba(255,255,255,0.3);margin:12px 0 0;">🔒 Secure order &nbsp;·&nbsp; 100% confidential &nbsp;·&nbsp; NDA protected</p>
+  </div>
+</div>
+
+<style>
+.popup-pkg-tab.active { background: rgba(167,139,250,0.18) !important; color: #a78bfa !important; }
+.popup-pkg-tab:not(.active) { background: transparent !important; color: rgba(255,255,255,0.45) !important; }
+[data-theme="light"] #assignmentPkgPopupInner { background: #fff; border-color: rgba(124,58,237,0.2); }
+[data-theme="light"] #assignmentPkgPopupInner button[onclick="closePkgPopup()"] { color: rgba(0,0,0,0.5); border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.05); }
+[data-theme="light"] .popup-pkg-tab:not(.active) { color: rgba(0,0,0,0.4) !important; }
+</style>
+
+<script>
+(function () {
+  var POPUP_PACKAGES = {
+    standard: {
+      name: 'Standard', title: 'Standard Package',
+      price: 'Starting ৳600',
+      bestValue: '◆ &nbsp;Great fit for short assignments (up to 1,500 words)',
+      features: [
+        { icon: '🕐', title: 'Delivery in 4 Days',         desc: 'Standard delivery timeline' },
+        { icon: '🔁', title: '2 Free Revisions',           desc: 'Until requirements are met' },
+        { icon: '📄', title: 'AI Plagiarism Report',       desc: 'Included with every order' },
+        { icon: '👤', title: 'Human Quality Check',        desc: 'Manual review by our editors' },
+        { icon: '📝', title: 'Editable Source File',       desc: 'Fully editable MS Word file' },
+      ],
+    },
+    recommended: {
+      name: 'Recommended', title: 'Recommended Package',
+      price: 'Starting ৳1,700',
+      bestValue: '◆ &nbsp;Best value for standard course assignments (up to 3,000 words)',
+      features: [
+        { icon: '⚡', title: 'Delivery in 2 Days (Express)', desc: 'Faster turnaround' },
+        { icon: '🔁', title: '5 Free Revisions',             desc: 'Until you are satisfied' },
+        { icon: '📄', title: 'AI Plagiarism Report',         desc: 'Included with every order' },
+        { icon: '🔍', title: 'AI + Human Quality Check',     desc: 'Dual-layer quality assurance' },
+        { icon: '📝', title: 'Editable Source File',         desc: 'Fully editable MS Word file' },
+        { icon: '📊', title: 'Progress Dashboard Access',    desc: 'Track progress in real-time' },
+      ],
+    },
+    premium: {
+      name: 'Premium', title: 'Premium Package',
+      price: 'Starting ৳3,600',
+      bestValue: '◆ &nbsp;Best for urgent assignments (up to 5,000 words, Rush delivery)',
+      features: [
+        { icon: '🚀', title: 'Delivery in 24 Hours (Rush)',  desc: 'Guaranteed on-time delivery' },
+        { icon: '♾️', title: 'Unlimited Revisions',          desc: 'Until you are 100% satisfied' },
+        { icon: '📄', title: 'AI Plagiarism Report',         desc: 'Included with every order' },
+        { icon: '🔍', title: 'AI + Human Quality Check',     desc: 'Dual-layer quality assurance' },
+        { icon: '📝', title: 'Editable Source File',         desc: 'Fully editable MS Word file' },
+        { icon: '📊', title: 'Progress Dashboard Access',    desc: 'Track progress in real-time' },
+        { icon: '🎓', title: '1-on-1 Expert Consultation',   desc: 'Direct support from your expert' },
+        { icon: '🎧', title: 'Priority Support',             desc: 'Get faster response always' },
+      ],
+    },
+  };
+
+  var currentPkg = 'standard';
+
+  window.switchPopupPkg = function (key) {
+    currentPkg = key;
+    var pkg = POPUP_PACKAGES[key];
+    document.getElementById('popupPkgTitle').textContent  = pkg.title;
+    document.getElementById('popupBestValue').innerHTML   = pkg.bestValue;
+    document.getElementById('popupPrice').textContent     = pkg.price;
+    document.getElementById('popupOrderBtnText').textContent = 'Order ' + pkg.name + ' Package';
+
+    document.getElementById('popupFeatures').innerHTML = pkg.features.map(function (f) {
+      return '<li style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);">' +
+        '<span style="font-size:16px;flex-shrink:0;margin-top:1px;">' + f.icon + '</span>' +
+        '<div><div style="font-size:13.5px;font-weight:600;color:var(--text-main,#f1f5f9);">' + f.title + '</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">' + f.desc + '</div></div>' +
+        '<svg style="margin-left:auto;flex-shrink:0;margin-top:3px;opacity:.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+        '</li>';
+    }).join('');
+
+    document.querySelectorAll('.popup-pkg-tab').forEach(function (t) {
+      t.classList.toggle('active', t.getAttribute('data-pkg') === key);
+    });
+  };
+
+  window.openAssignmentPkgPopup = function (defaultPkg) {
+    switchPopupPkg(defaultPkg || 'standard');
+    var el = document.getElementById('assignmentPkgPopup');
+    el.style.display = 'flex';
+    el.style.animation = 'none';
+    requestAnimationFrame(function () {
+      el.style.animation = 'pkgPopupIn .25s ease';
+    });
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closePkgPopup = function (e) {
+    if (e && e.target !== document.getElementById('assignmentPkgPopup')) return;
+    document.getElementById('assignmentPkgPopup').style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  window.proceedPkgOrder = function () {
+    var params = new URLSearchParams({ service: 'assignment-writing', tier: currentPkg });
+    window.location.href = '../Order page/order.html?' + params.toString();
+  };
+})();
+</script>
+
+<style>
+@keyframes pkgPopupIn {
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);     }
+}
+</style>
 
 <!-- ══ Sample Lightbox ══ -->
 <div id="sampleLightbox" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;box-sizing:border-box;" onclick="closeSampleLightbox(event)">

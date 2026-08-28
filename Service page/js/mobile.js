@@ -27,8 +27,10 @@
     var html =
 
       /* ── HERO ── */
+      /* D.hero.image lets a page override the default mobile hero photo
+         (assets/hero-banner.png). Set it in that page's *-data.js file. */
       '<div class="mob-hero">' +
-        '<div class="mob-hero-card">' +
+        '<div class="mob-hero-card"' + (D.hero.image ? ' style="background-image:url(\'' + D.hero.image + '\')"' : '') + '>' +
           '<div class="mob-hero-card-overlay"></div>' +
           '<div class="mob-hero-card-inner">' +
             '<div class="mob-hero-badge">' +
