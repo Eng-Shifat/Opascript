@@ -1959,6 +1959,24 @@
           </div>
         </div>
 
+        <!-- Phase 13: State: suspended affiliate -->
+        <div id="aff-suspended" style="display:none;">
+          <div class="profile-card" style="gap:16px;">
+            <div class="profile-section-label">Affiliate Account</div>
+            <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--red-bg);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="flex-shrink:0;">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="10" y1="9" x2="10" y2="15"/>
+                <line x1="14" y1="9" x2="14" y2="15"/>
+              </svg>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--red);">Suspended</div>
+                <div id="affSuspendedReason" style="font-size:12px;color:var(--text-secondary);margin-top:2px;font-family:'Noto Sans Bengali',sans-serif;">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- State: approved affiliate -->
         <div id="aff-approved" style="display:none;">
           <div class="profile-card" style="gap:16px;">
@@ -2297,7 +2315,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-  <script src="js/dashboard.js?v=7"></script>
+  <script src="js/dashboard.js?v=8"></script>
   <script src="js/chat.js?v=8"></script>
   <!-- MOBILE BOTTOM NAV -->
   <nav class="mobile-bottom-nav">

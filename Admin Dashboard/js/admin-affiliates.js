@@ -329,13 +329,13 @@ async function loadCommissions() {
   const sb = window.scriptoraSupabase;
   if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
 
-  setTbodyLoading('cm-tbody', 8);
+  setTbodyLoading('cm-tbody', 9);
 
   try {
     /* 1. Fetch all commission records */
     const { data: comms, error: cmErr } = await sb
       .from('affiliate_commissions')
-      .select('id, affiliate_id, order_id, client_id, referral_code, order_amount, commission_rate, commission_amount, status, created_at, order_paid_at')
+      .select('id, affiliate_id, order_id, client_id, referral_code, order_amount, commission_rate, commission_amount, status, admin_note, created_at, order_paid_at')
       .order('created_at', { ascending: false });
 
     if (cmErr) throw cmErr;
@@ -394,7 +394,7 @@ async function loadCommissions() {
   } catch (err) {
     console.error('loadCommissions error:', err);
     showToast('❌ Commission data load হয়নি: ' + err.message, '#f87171');
-    setTbodyError('cm-tbody', 8);
+    setTbodyError('cm-tbody', 9);
   }
 }
 
@@ -456,6 +456,28 @@ function buildCmRow(cm) {
   const commAmt     = '৳' + Number(cm.commission_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
   const date        = fmtDate(cm.created_at);
 
+  const noteHtml = cm.admin_note
+    ? `<div style="margin-top:4px;font-size:.68rem;color:#f59e0b;background:rgba(245,158,11,.1);
+                   padding:2px 6px;border-radius:4px;max-width:160px;word-break:break-word;">
+         📝 ${esc(cm.admin_note)}
+       </div>`
+    : '';
+
+  const canCancel = cm.status === 'earned';
+  const actionBtn = canCancel
+    ? `<button class="cl-act-btn" title="Commission বাতিল করুন"
+               onclick="confirmCancelCommission('${cm.id}')"
+               style="color:#f87171;border-color:#f87171;">
+         <i class="ti ti-circle-x"></i>
+       </button>`
+    : '';
+
+  const noteBtn = `<button class="cl-act-btn" title="Admin Note যোগ / আপডেট করুন"
+                           onclick="promptCommissionNote('${cm.id}', \`${esc(cm.admin_note || '')}\`)"
+                           style="color:var(--muted2);">
+                     <i class="ti ti-notes"></i>
+                   </button>`;
+
   return `
     <tr>
       <td>
@@ -477,8 +499,15 @@ function buildCmRow(cm) {
       <td style="font-size:.82rem;font-weight:600;">${orderAmt}</td>
       <td style="font-size:.78rem;color:var(--muted2);">${rate}</td>
       <td style="font-size:.85rem;font-weight:700;color:#34d399;">${commAmt}</td>
-      <td>${buildStatusBadge(cm.status)}</td>
+      <td>
+        ${buildStatusBadge(cm.status)}
+        ${noteHtml}
+      </td>
       <td style="color:var(--muted2);font-size:.78rem;">${date}</td>
+      <td style="white-space:nowrap;">
+        ${actionBtn}
+        ${noteBtn}
+      </td>
     </tr>`;
 }
 
@@ -1066,6 +1095,17 @@ window.loadAnalyticsDetail = async function(affiliateId) {
     if (selEl)  selEl.value = String(aff.tier_id || 1);
   }
 
+  /* Phase 13: fetch live suspension state directly (independent of the
+     analytics RPC's return shape, which predates suspended_reason) ── */
+  try {
+    const { data: affRow } = await sb
+      .from('affiliates')
+      .select('status, suspended_reason')
+      .eq('id', affiliateId)
+      .maybeSingle();
+    renderSuspensionUi(affRow?.status, affRow?.suspended_reason);
+  } catch (_) { /* non-critical */ }
+
   // Set loading state
   const mTbody = document.getElementById('analyticsMonthlyTbody');
   const cTbody = document.getElementById('analyticsClicksTbody');
@@ -1147,5 +1187,173 @@ window.adminSetAffiliateTier = async function() {
     loadAnalytics();
   } catch (err) {
     showToast('❌ ' + (err.message || 'Tier update failed'), '#f87171');
+  }
+};
+
+/* ── Phase 13: Affiliate Suspension ──────────────────────────── */
+let ANALYTICS_CURRENT_AFF_STATUS = 'active';
+
+function renderSuspensionUi(status, reason) {
+  ANALYTICS_CURRENT_AFF_STATUS = status || 'active';
+  const btn    = document.getElementById('analyticsSuspendBtn');
+  const banner = document.getElementById('analyticsSuspendBanner');
+  const isSuspended = ANALYTICS_CURRENT_AFF_STATUS === 'suspended';
+
+  if (btn) {
+    btn.textContent = isSuspended ? '▶️ Reactivate' : '⏸️ Suspend';
+    btn.style.borderColor = isSuspended ? '#34d399' : '#f87171';
+    btn.style.color       = isSuspended ? '#34d399' : '#f87171';
+  }
+  if (banner) {
+    if (isSuspended) {
+      banner.style.display = 'block';
+      banner.textContent = '⏸️ This affiliate is currently suspended.' + (reason ? ' Reason: ' + reason : '');
+    } else {
+      banner.style.display = 'none';
+      banner.textContent = '';
+    }
+  }
+}
+
+window.adminToggleAffiliateSuspension = async function() {
+  const sb = window.scriptoraSupabase;
+  if (!sb || !ANALYTICS_CURRENT_AFF_ID) return;
+
+  const willSuspend = ANALYTICS_CURRENT_AFF_STATUS !== 'suspended';
+  let reason = null;
+  if (willSuspend) {
+    reason = prompt('Suspension reason (affiliate ও admin note-এ দেখানো হবে):');
+    if (reason === null) return; /* cancelled */
+  } else if (!confirm('এই Affiliate কে reactivate করবেন?')) {
+    return;
+  }
+
+  const btn = document.getElementById('analyticsSuspendBtn');
+  if (btn) btn.disabled = true;
+
+  try {
+    const { data, error } = await sb.rpc('admin_set_affiliate_suspension', {
+      p_affiliate_id: ANALYTICS_CURRENT_AFF_ID,
+      p_suspend:      willSuspend,
+      p_reason:       reason,
+    });
+    if (error) throw error;
+    if (data?.success === false) throw new Error(data.message);
+
+    showToast(willSuspend ? '⏸️ Affiliate suspended' : '✅ Affiliate reactivated', willSuspend ? '#f87171' : '#34d399');
+    renderSuspensionUi(willSuspend ? 'suspended' : 'active', reason);
+
+    ANALYTICS_AFF_LIST = [];
+    loadAnalytics();
+  } catch (err) {
+    showToast('❌ ' + (err.message || 'Action failed'), '#f87171');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 14 — Admin Commission Cancellation + Note System
+══════════════════════════════════════════════════════════════ */
+
+/**
+ * confirmCancelCommission — earned commission বাতিল করার confirm dialog
+ * Reason note mandatory। RPC: admin_cancel_affiliate_commission
+ */
+window.confirmCancelCommission = async function(commissionId) {
+  const reason = prompt(
+    '⚠️ Commission বাতিল করবেন?\n\n' +
+    'Affiliate-এর wallet থেকে এই commission কেটে নেওয়া হবে।\n' +
+    'কারণ লিখুন (mandatory — affiliate notification-এ দেখাবে):'
+  );
+  if (reason === null) return;          // user pressed Cancel
+  if (!reason.trim()) {
+    alert('কারণ লেখা mandatory। Please একটি কারণ দিন।');
+    return;
+  }
+
+  const sb = window.scriptoraSupabase;
+  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+
+  try {
+    const { data, error } = await sb.rpc('admin_cancel_affiliate_commission', {
+      p_commission_id: commissionId,
+      p_reason:        reason.trim()
+    });
+    if (error) throw error;
+
+    if (data?.success === false) {
+      showToast('❌ ' + (data.message || 'Cancel failed'), '#f87171');
+      return;
+    }
+
+    showToast('✅ Commission বাতিল করা হয়েছে', '#f87171');
+
+    /* Phase 7-style notification to affiliate */
+    (async () => {
+      try {
+        const { data: cmRow } = await sb
+          .from('affiliate_commissions')
+          .select('affiliate_id, commission_amount')
+          .eq('id', commissionId)
+          .maybeSingle();
+        if (!cmRow?.affiliate_id) return;
+
+        const { data: affRow } = await sb
+          .from('affiliates')
+          .select('client_id')
+          .eq('id', cmRow.affiliate_id)
+          .maybeSingle();
+        if (!affRow?.client_id) return;
+
+        notifyAffiliate({
+          clientId:    affRow.client_id,
+          affiliateId: cmRow.affiliate_id,
+          type:        'commission_cancelled',
+          title:       'Commission বাতিল হয়েছে ⚠️',
+          message:     `একটি Commission বাতিল করা হয়েছে। কারণ: ${reason.trim()}`,
+          amount:      null
+        });
+      } catch (e) {
+        console.error('[Affiliate Notify] cancel lookup failed:', e);
+      }
+    })();
+
+    if (CURRENT_TAB === 'commissions') await loadCommissions();
+
+  } catch (err) {
+    console.error('confirmCancelCommission error:', err);
+    showToast('❌ ' + (err.message || 'Cancel failed'), '#f87171');
+  }
+};
+
+/**
+ * promptCommissionNote — admin note যোগ বা আপডেট করুন (internal, not sent to affiliate)
+ * RPC: admin_set_commission_note
+ */
+window.promptCommissionNote = async function(commissionId, existingNote) {
+  const note = prompt(
+    'Admin Note (শুধুমাত্র admin দেখতে পাবে — affiliate দেখবে না):',
+    existingNote || ''
+  );
+  if (note === null) return;            // user pressed Cancel
+
+  const sb = window.scriptoraSupabase;
+  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+
+  try {
+    const { error } = await sb
+      .from('affiliate_commissions')
+      .update({ admin_note: note.trim() || null })
+      .eq('id', commissionId);
+
+    if (error) throw error;
+
+    showToast(note.trim() ? '📝 Note সংরক্ষিত হয়েছে' : '🗑️ Note মুছে ফেলা হয়েছে', '#34d399');
+    if (CURRENT_TAB === 'commissions') await loadCommissions();
+
+  } catch (err) {
+    console.error('promptCommissionNote error:', err);
+    showToast('❌ ' + (err.message || 'Note save failed'), '#f87171');
   }
 };

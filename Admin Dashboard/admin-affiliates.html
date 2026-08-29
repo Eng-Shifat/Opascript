@@ -156,8 +156,9 @@
               <th>Order Amount</th>
               <th>Rate</th>
               <th>Commission</th>
-              <th>Status</th>
+              <th>Status / Note</th>
               <th>Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="cm-tbody">
@@ -319,7 +320,7 @@
             <div style="font-size:13px;font-weight:700;color:var(--text);">Affiliate Detail: <span id="analyticsDetailCode" style="color:var(--accent);font-family:'Sora',monospace;"></span></div>
             <div id="analyticsDetailTier" style="font-size:11px;color:var(--muted2);margin-top:2px;"></div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <label style="font-size:11px;color:var(--muted2);">Set Tier:</label>
             <select id="analyticsSetTierSelect" style="padding:6px 10px;background:var(--bg-card2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;">
               <option value="1">🥉 Bronze (10%)</option>
@@ -328,8 +329,12 @@
               <option value="4">💎 Diamond (20%)</option>
             </select>
             <button onclick="adminSetAffiliateTier()" style="padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Apply</button>
+            <button id="analyticsSuspendBtn" onclick="adminToggleAffiliateSuspension()" style="padding:6px 14px;background:none;border:1px solid #f87171;color:#f87171;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">⏸️ Suspend</button>
           </div>
         </div>
+
+        <!-- Suspension status banner (Phase 13) -->
+        <div id="analyticsSuspendBanner" style="display:none;margin-bottom:14px;padding:10px 14px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:8px;font-size:12px;color:#f87171;"></div>
 
         <!-- Monthly stats -->
         <div style="margin-bottom:16px;">

@@ -62,20 +62,28 @@
 <!-- ══ STATS BAR ══════════════════════════════════════════════ -->
 <div class="aff-stats">
   <div class="aff-stat-item">
-    <div class="aff-stat-val">১০%</div>
+    <div class="aff-stat-icon">📈</div>
+    <div class="aff-stat-val" id="heroCommRate">১০%</div>
     <div class="aff-stat-lbl">Commission Rate</div>
+    <div class="aff-stat-sub" id="heroTierBadge">Bronze Tier</div>
   </div>
   <div class="aff-stat-item">
+    <div class="aff-stat-icon">💸</div>
     <div class="aff-stat-val">৳৫০০</div>
     <div class="aff-stat-lbl">Minimum Withdrawal</div>
+    <div class="aff-stat-sub">যেকোনো সময়</div>
   </div>
   <div class="aff-stat-item">
-    <div class="aff-stat-val">৩টি</div>
-    <div class="aff-stat-lbl">Payment Method (bKash, Nagad, Rocket)</div>
+    <div class="aff-stat-icon">🏦</div>
+    <div class="aff-stat-val">৫টি</div>
+    <div class="aff-stat-lbl">Payment Method</div>
+    <div class="aff-stat-sub">bKash · Nagad · Rocket · Upay · Bank</div>
   </div>
   <div class="aff-stat-item">
+    <div class="aff-stat-icon">♾️</div>
     <div class="aff-stat-val">Unlimited</div>
-    <div class="aff-stat-lbl">Referral — কোনো সীমা নেই</div>
+    <div class="aff-stat-lbl">Referral</div>
+    <div class="aff-stat-sub">কোনো সীমা নেই</div>
   </div>
 </div>
 
@@ -374,6 +382,43 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
         section.style.display = 'block';
       })
       .catch(() => {});
+  }, 300);
+  setTimeout(() => clearInterval(waitSb), 5000);
+})();
+
+/* ── Dynamic Commission Rate from logged-in affiliate tier ── */
+(function() {
+  const waitSb = setInterval(() => {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    clearInterval(waitSb);
+
+    setTimeout(async () => {
+      try {
+        const { data: stats } = await sb.rpc('get_affiliate_stats');
+        if (!stats?.success) return;
+
+        const tier    = stats.tier || {};
+        const rate    = tier.commission_rate || 10;
+        const name    = tier.name || 'Bronze';
+        const color   = tier.badge_color || '#cd7f32';
+        const emoji   = { Bronze: '🥉', Silver: '🥈', Gold: '🥇', Diamond: '💎' }[name] || '🏅';
+
+        const rateEl  = document.getElementById('heroCommRate');
+        const badgeEl = document.getElementById('heroTierBadge');
+        if (rateEl)  rateEl.textContent  = rate + '%';
+        if (badgeEl) {
+          badgeEl.textContent  = emoji + ' ' + name + ' Tier';
+          badgeEl.style.color  = color;
+          badgeEl.style.fontWeight = '700';
+        }
+
+        /* Also update calculator formula line */
+        const calcNoteEl = document.getElementById('calcRateLabel');
+        if (calcNoteEl) calcNoteEl.textContent = rate + '%';
+
+      } catch (e) { /* not logged in or no affiliate — default values stay */ }
+    }, 500);
   }, 300);
   setTimeout(() => clearInterval(waitSb), 5000);
 })();

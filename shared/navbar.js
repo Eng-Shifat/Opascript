@@ -11,7 +11,7 @@
   }
 
   const path       = window.location.pathname;
-  const isHome     = path.includes('Homepage') || path.endsWith('index.html');
+  const isHome     = path.includes('/Homepage/') || path.includes('/Homepage\\') || (path.endsWith('index.html') && !path.includes('/Affiliate/') && !path.includes('/Login') && !path.includes('/Register'));
   const isLogin    = path.includes('Login');
   const isRegister = path.includes('Register');
 
@@ -32,7 +32,15 @@
     return '../Homepage/index.html' + (anchor || '');
   }
   function logoPath() {
-    if (isHome) return './assets/logo.png';
+    /* Count how deep we are from root.
+       Homepage files sit at depth 1 (e.g. /Homepage/index.html).
+       All other pages also sit at depth 1 or deeper.
+       Logo always lives at /Homepage/assets/logo.png.
+       From depth-1 pages: ../Homepage/assets/logo.png
+       From Homepage itself: ./assets/logo.png  */
+    if (path.includes('/Homepage/') || path.match(/\/Homepage[^/]*\.html/)) {
+      return './assets/logo.png';
+    }
     return '../Homepage/assets/logo.png';
   }
   function dashboardLink() {
@@ -66,7 +74,7 @@
   <nav id="shared-nav">
     <a class="logo" href="${homeLink()}">
       <img src="${logoPath()}" alt="Opascript" class="logo-img">
-      Opascript
+      <span class="logo-text">Opascript</span>
     </a>
     <div class="nav-links">
       <a href="${homeLink('#services')}">Services</a>
@@ -75,7 +83,7 @@
       <a href="${homeLink('#how-it-works')}">How it Works</a>
       <a href="${homeLink('#faq')}">FAQ</a>
       <a href="${homeLink('#contact')}">Contact</a>
-      <a href="${affiliateLink()}" style="color:var(--color-green);font-weight:600;">💰 Earn</a>
+
     </div>
     <div class="nav-btns">
       <button class="theme-toggle-btn" id="theme-toggle" title="থিম পরিবর্তন করুন" aria-label="থিম পরিবর্তন করুন">☀️</button>
@@ -90,7 +98,7 @@
     <a href="${homeLink('#how-it-works')}">How it Works</a>
     <a href="${homeLink('#faq')}">FAQ</a>
     <a href="${homeLink('#contact')}">Contact</a>
-    <a href="${affiliateLink()}" style="color:var(--color-green);font-weight:600;">💰 Affiliate Program — Earn করুন</a>
+
     ${mobileAuthButtons}
   </div>`;
 
@@ -103,6 +111,7 @@
     [data-theme="light"] #shared-nav { background:rgba(var(--bg-nav-rgb),0.6); border-bottom:1px solid rgba(0,0,0,0.08); }
     .logo { display:flex; align-items:center; gap:0px; font-weight:700; font-size:20px; color:var(--text-main); text-decoration:none; height:100%; }
     .logo-img { height:calc(55px - 4px); width:auto; object-fit:contain; display:block; margin-right:-16px; }
+    .logo-text { }
     .nav-links { display:flex; gap:1.6rem; align-items:center; }
     .nav-links a { color:rgba(var(--text-rgb),0.7); font-size:14px; text-decoration:none; transition:color 0.2s; }
     .nav-links a:hover { color:var(--text-main); }

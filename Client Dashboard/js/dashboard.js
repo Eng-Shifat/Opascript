@@ -1670,7 +1670,7 @@ async function loadAffiliateState(force = false) {
   if (_affStateLoaded && !force) return;
 
   const show = id => {
-    ['aff-loading','aff-cta','aff-pending','aff-approved'].forEach(s => {
+    ['aff-loading','aff-cta','aff-pending','aff-approved','aff-suspended'].forEach(s => {
       const el = document.getElementById(s);
       if (el) el.style.display = (s === id) ? (id === 'aff-loading' ? 'flex' : 'block') : 'none';
     });
@@ -1682,7 +1682,7 @@ async function loadAffiliateState(force = false) {
     /* 1. Affiliate record আছে কিনা দেখো (approved হলে থাকবে) */
     const { data: aff } = await sb
       .from('affiliates')
-      .select('id, referral_code, status')
+      .select('id, referral_code, status, suspended_reason')
       .eq('client_id', currentUser.id)
       .maybeSingle();
 
@@ -1697,6 +1697,16 @@ async function loadAffiliateState(force = false) {
       loadAffiliateStats();
       initAffiliateShareKit(aff.referral_code); /* Phase 9 */
       loadAffiliatePayoutSettings(); /* Phase 10 */
+      return;
+    }
+
+    /* Phase 13: Suspended affiliate — show a clear status instead of the
+       "Apply" CTA (which would wrongly imply they never applied) */
+    if (aff && aff.status === 'suspended') {
+      const reasonEl = document.getElementById('affSuspendedReason');
+      if (reasonEl) reasonEl.textContent = aff.suspended_reason || 'বিস্তারিত জানতে Support-এ যোগাযোগ করুন।';
+      show('aff-suspended');
+      _affStateLoaded = true;
       return;
     }
 
@@ -2306,13 +2316,14 @@ async function loadAffiliateLeaderboard() {
 
 /* ── AFFILIATE NOTIFICATIONS (Phase 7) ───────────────────────── */
 const AFF_NOTIF_META = {
-  application_approved: { icon: '🎉', color: '#34d399' },
-  application_rejected: { icon: '⚠️', color: '#f87171' },
-  commission_earned:    { icon: '💰', color: '#34d399' },
-  withdrawal_approved:  { icon: '✅', color: '#60a5fa' },
-  withdrawal_rejected:  { icon: '🚫', color: '#f87171' },
-  withdrawal_paid:      { icon: '🎉', color: '#34d399' },
-  tier_upgraded:        { icon: '🏆', color: '#f59e0b' },
+  application_approved:  { icon: '🎉', color: '#34d399' },
+  application_rejected:  { icon: '⚠️', color: '#f87171' },
+  commission_earned:     { icon: '💰', color: '#34d399' },
+  commission_cancelled:  { icon: '⚠️', color: '#f87171' },
+  withdrawal_approved:   { icon: '✅', color: '#60a5fa' },
+  withdrawal_rejected:   { icon: '🚫', color: '#f87171' },
+  withdrawal_paid:       { icon: '🎉', color: '#34d399' },
+  tier_upgraded:         { icon: '🏆', color: '#f59e0b' },
 };
 
 async function loadAffiliateNotifications() {
