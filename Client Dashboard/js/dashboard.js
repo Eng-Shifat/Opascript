@@ -1695,6 +1695,8 @@ async function loadAffiliateState(force = false) {
       loadAffiliateEarnings(aff.id);
       loadAffiliateWithdrawals(aff.id);
       loadAffiliateStats();
+      initAffiliateShareKit(aff.referral_code); /* Phase 9 */
+      loadAffiliatePayoutSettings(); /* Phase 10 */
       return;
     }
 
@@ -1768,6 +1770,199 @@ function affiliateCopyCode() {
     const msg = document.getElementById('affCopyMsg');
     if (msg) { msg.style.opacity = '1'; setTimeout(() => { msg.style.opacity = '0'; }, 1800); }
   });
+}
+
+/* ── AFFILIATE SHARE & EARN KIT (Phase 9) ────────────────────── */
+let _affReferralUrl = '';
+
+function affiliateReferralUrlFor(code) {
+  /* Actual production origin — never hardcoded */
+  return window.location.origin + '/Affiliate/index.html?ref=' + encodeURIComponent(code);
+}
+
+const AFF_SHARE_MESSAGES = [
+  {
+    label: 'বাংলা — সংক্ষিপ্ত',
+    text: code => `থিসিস বা অ্যাসাইনমেন্ট নিয়ে সাহায্য দরকার? Opascript-এ professional writing help পাবেন। এখান থেকে দেখুনঃ\n${affiliateReferralUrlFor(code)}`
+  },
+  {
+    label: 'বাংলা — প্রফেশনাল',
+    text: code => `আমি Opascript ব্যবহার করছি আমার একাডেমিক writing-এর কাজে — Thesis, Assignment, Report সব কিছুতেই experienced writer-দের সাহায্য পাওয়া যায়, deadline অনুযায়ী delivery সহ। নিচের লিংক থেকে নিজের Order দিতে পারেনঃ\n${affiliateReferralUrlFor(code)}`
+  },
+  {
+    label: 'বাংলা — শিক্ষার্থীদের জন্য',
+    text: code => `বন্ধু, সেমিস্টারের চাপে থিসিস/অ্যাসাইনমেন্ট শেষ করতে পারছো না? Opascript-এ কম সময়ে ভালো মানের academic writing help পাওয়া যায়। ট্রাই করে দেখঃ\n${affiliateReferralUrlFor(code)}`
+  },
+  {
+    label: 'English — Short',
+    text: code => `Need help with your thesis or assignment? Opascript offers professional academic writing help. Check it out:\n${affiliateReferralUrlFor(code)}`
+  },
+  {
+    label: 'English — Professional',
+    text: code => `I've been using Opascript for academic writing support — reliable writers, on-time delivery, and solid quality for theses, assignments, and reports. Worth checking out if you need help:\n${affiliateReferralUrlFor(code)}`
+  }
+];
+
+function initAffiliateShareKit(code) {
+  if (!code) return;
+  _affReferralUrl = affiliateReferralUrlFor(code);
+
+  const linkEl = document.getElementById('affReferralLink');
+  if (linkEl) linkEl.value = _affReferralUrl;
+
+  if (navigator.share) {
+    const nativeBtn = document.getElementById('affNativeShareBtn');
+    if (nativeBtn) nativeBtn.style.display = 'flex';
+  }
+
+  renderAffiliateShareMessages(code);
+  affiliateGenerateQr(_affReferralUrl);
+}
+
+function renderAffiliateShareMessages(code) {
+  const wrap = document.getElementById('affShareMessages');
+  if (!wrap) return;
+  wrap.innerHTML = AFF_SHARE_MESSAGES.map((m, i) => `
+    <div class="aff-share-msgitem">
+      <div class="aff-share-msgtext">
+        <span class="aff-share-msglabel">${m.label}</span>${m.text(code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+      </div>
+      <button class="aff-share-msgcopy" id="affMsgCopyBtn${i}" onclick="affiliateCopyMessage(${i})">Copy</button>
+    </div>
+  `).join('');
+}
+
+function affiliateCopyMessage(i) {
+  const code = document.getElementById('affReferralCode')?.textContent || '';
+  if (!code || code === '—') return;
+  const text = AFF_SHARE_MESSAGES[i].text(code);
+  const btn = document.getElementById('affMsgCopyBtn' + i);
+  const done = () => {
+    if (!btn) return;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1600);
+  };
+  navigator.clipboard.writeText(text).then(done).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    done();
+  });
+}
+
+function affiliateCopyLink() {
+  if (!_affReferralUrl) return;
+  const btn = document.querySelector('.aff-share-iconbtn');
+  const label = document.getElementById('affLinkCopyLabel');
+  const done = () => {
+    if (label) label.textContent = 'Copied!';
+    if (btn) btn.classList.add('copied');
+    setTimeout(() => { if (label) label.textContent = 'Copy Link'; if (btn) btn.classList.remove('copied'); }, 1800);
+  };
+  navigator.clipboard.writeText(_affReferralUrl).then(done).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = _affReferralUrl; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    done();
+  });
+}
+
+function affiliateShareWhatsApp() {
+  if (!_affReferralUrl) return;
+  const text = `Opascript-এ professional academic writing help পাবেন — দেখে নিন:\n${_affReferralUrl}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
+}
+
+function affiliateShareFacebook() {
+  if (!_affReferralUrl) return;
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(_affReferralUrl), '_blank', 'noopener');
+}
+
+function affiliateNativeShare() {
+  if (!_affReferralUrl || !navigator.share) return;
+  navigator.share({
+    title: 'Opascript — Academic Writing Help',
+    text: 'Opascript-এ professional academic writing help পাবেন:',
+    url: _affReferralUrl
+  }).catch(() => {});
+}
+
+function affiliateGenerateQr(url) {
+  const box = document.getElementById('affQrBox');
+  if (!box || typeof QRCode === 'undefined') return;
+  box.innerHTML = '';
+  const canvas = document.createElement('canvas');
+  box.appendChild(canvas);
+  QRCode.toCanvas(canvas, url, { width: 176, margin: 1 }, err => {
+    if (err) console.error('[Affiliate] QR generation error:', err);
+  });
+}
+
+function affiliateDownloadQr() {
+  const canvas = document.querySelector('#affQrBox canvas');
+  if (!canvas) return;
+  const link = document.createElement('a');
+  const code = document.getElementById('affReferralCode')?.textContent || 'referral';
+  link.download = `opascript-referral-${code}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+/* ── AFFILIATE PAYOUT SETTINGS (Phase 10) ────────────────────── */
+let _affPayoutMaskedNumber = '';
+
+async function loadAffiliatePayoutSettings() {
+  try {
+    const { data, error } = await sb.rpc('get_affiliate_payout_settings');
+    if (error || !data?.success || !data.settings) return;
+
+    const s = data.settings;
+    const methodEl = document.getElementById('affWithdrawMethod');
+    const numberEl = document.getElementById('affWithdrawNumber');
+    const nameEl   = document.getElementById('affWithdrawName');
+
+    if (methodEl) methodEl.value = s.payment_method;
+    if (numberEl) numberEl.value = s.payment_number;
+    if (nameEl && s.payment_name) nameEl.value = s.payment_name;
+
+    _affPayoutMaskedNumber = s.payment_number.length > 4
+      ? '•••' + s.payment_number.slice(-4)
+      : s.payment_number;
+
+    const row = document.getElementById('affPayoutSavedRow');
+    const summary = document.getElementById('affPayoutSavedSummary');
+    if (summary) summary.textContent = `${s.payment_method.toUpperCase()} — ${_affPayoutMaskedNumber}`;
+    if (row) row.style.display = 'flex';
+
+  } catch (err) {
+    console.error('[Affiliate] loadAffiliatePayoutSettings error:', err);
+  }
+}
+
+function affiliateEditPayoutSettings() {
+  const row = document.getElementById('affPayoutSavedRow');
+  if (row) row.style.display = 'none';
+  const numberEl = document.getElementById('affWithdrawNumber');
+  if (numberEl) { numberEl.value = ''; numberEl.focus(); }
+}
+
+async function saveAffiliatePayoutSettingsIfRequested(method, number, name) {
+  const checkbox = document.getElementById('affSavePayoutCheckbox');
+  if (!checkbox || !checkbox.checked) return;
+  try {
+    await sb.rpc('save_affiliate_payout_settings', {
+      p_payment_method: method,
+      p_payment_number: number,
+      p_payment_name: name || null,
+    });
+    loadAffiliatePayoutSettings();
+  } catch (err) {
+    console.error('[Affiliate] saveAffiliatePayoutSettings error:', err);
+  }
 }
 
 /* ── AFFILIATE EARNINGS ──────────────────────────────────────── */
@@ -1984,7 +2179,8 @@ async function affiliateRequestWithdrawal() {
     if (msgEl) { msgEl.textContent = '✓ Withdrawal request submitted'; msgEl.className = 'profile-msg success'; }
 
     document.getElementById('affWithdrawAmount').value = '';
-    document.getElementById('affWithdrawNumber').value = '';
+
+    await saveAffiliatePayoutSettingsIfRequested(method, number, name); /* Phase 10 */
 
     if (_currentAffiliateId) {
       await loadAffiliateEarnings(_currentAffiliateId);

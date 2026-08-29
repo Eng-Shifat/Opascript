@@ -1694,6 +1694,152 @@ input, select, textarea { font-family: inherit; }
 .profile-msg.success { color: var(--green); }
 .profile-msg.error   { color: var(--red); }
 
+/* ── AFFILIATE: SHARE & EARN KIT (Phase 9) ──────────────────────────────── */
+.aff-share-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.aff-share-linkrow { display: flex; gap: 8px; }
+.aff-share-linkinput {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  outline: none;
+  font-family: 'Sora', monospace;
+}
+.aff-share-iconbtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s;
+}
+.aff-share-iconbtn:hover { background: #1d4ed8; }
+.aff-share-iconbtn.copied { background: var(--green); }
+
+.aff-share-btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.aff-share-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card2);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  flex: 1;
+  justify-content: center;
+  min-width: 100px;
+}
+.aff-share-btn:hover { border-color: var(--border-hover); background: var(--bg-input); }
+.aff-share-wa:hover     { color: #25D366; border-color: rgba(37,211,102,0.4); }
+.aff-share-fb:hover     { color: #1877F2; border-color: rgba(24,119,242,0.4); }
+.aff-share-native:hover { color: var(--accent-light); }
+
+.aff-share-messages { display: flex; flex-direction: column; gap: 8px; }
+.aff-share-msgitem {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.aff-share-msgtext {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  white-space: pre-line;
+  font-family: 'Noto Sans Bengali', sans-serif;
+}
+.aff-share-msglabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: block;
+}
+.aff-share-msgcopy {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 9px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  transition: all .2s;
+}
+.aff-share-msgcopy:hover { border-color: var(--border-hover); color: var(--text-primary); }
+.aff-share-msgcopy.copied { color: var(--green); border-color: rgba(34,197,94,0.4); }
+
+.aff-share-qrrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.aff-share-qrbox {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.aff-share-qrbox canvas, .aff-share-qrbox img { width: 100%; height: 100%; display: block; }
+.aff-share-qrinfo { flex: 1; }
+.aff-share-qrdl {
+  margin-top: 8px;
+  background: rgba(37,99,235,0.08);
+  color: var(--accent-light);
+  border: 1px solid rgba(37,99,235,0.3);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.aff-share-qrdl:hover { background: rgba(37,99,235,0.18); border-color: var(--accent-light); }
+
+@media (max-width: 480px) {
+  .aff-share-btn { min-width: 0; }
+}
+
 /* ── EMPTY STATES ─────────────────────────────────────────────────────────── */
 .empty-state {
   display: flex;
