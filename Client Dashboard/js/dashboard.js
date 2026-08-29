@@ -124,6 +124,7 @@ async function loadAllData() {
   loadFilesPage();
   loadProfileData();
   loadAffiliateState();
+  loadAffiliateNotifications(); /* Phase 7: populates sidebar unread badge on load */
 }
 
 async function loadOrders() {
@@ -1693,6 +1694,7 @@ async function loadAffiliateState(force = false) {
       _affStateLoaded = true;
       loadAffiliateEarnings(aff.id);
       loadAffiliateWithdrawals(aff.id);
+      loadAffiliateStats();
       return;
     }
 
@@ -2000,6 +2002,201 @@ async function affiliateRequestWithdrawal() {
   }
 }
 
+/* ── AFFILIATE STATS (Phase 6) ───────────────────────────────── */
+async function loadAffiliateStats() {
+  try {
+    const { data: stats, error } = await sb.rpc('get_affiliate_stats');
+    if (error || !stats?.success) return;
+
+    /* Tier panel */
+    const tierPanel = document.getElementById('affTierPanel');
+    const analyticsPanel = document.getElementById('affAnalyticsPanel');
+    if (tierPanel) tierPanel.style.display = 'block';
+    if (analyticsPanel) analyticsPanel.style.display = 'block';
+
+    /* Tier badge & name */
+    const tier = stats.tier || {};
+    const tierBadge = document.getElementById('affTierBadge');
+    const tierName  = document.getElementById('affTierName');
+    const commRate  = document.getElementById('affCommRate');
+
+    const tierEmoji = { Bronze: '🥉', Silver: '🥈', Gold: '🥇', Diamond: '💎' };
+    if (tierBadge) {
+      tierBadge.textContent = tierEmoji[tier.name] || '🏅';
+      tierBadge.style.background = (tier.badge_color || '#cd7f32') + '22';
+      tierBadge.style.border = '2px solid ' + (tier.badge_color || '#cd7f32');
+    }
+    if (tierName) { tierName.textContent = tier.name || '—'; tierName.style.color = tier.badge_color || 'var(--text)'; }
+    if (commRate) commRate.textContent = (tier.commission_rate || 10) + '%';
+
+    /* Next tier progress */
+    const nextTier = stats.next_tier;
+    const progressDiv = document.getElementById('affTierProgress');
+    if (nextTier && progressDiv) {
+      progressDiv.style.display = 'block';
+      const current = stats.total_referrals || 0;
+      const needed  = nextTier.min_referrals || 1;
+      const prevMin = tier.min_referrals || 0;
+      const pct     = Math.min(100, Math.round(((current - prevMin) / (needed - prevMin)) * 100));
+      const nextEl  = document.getElementById('affNextTierName');
+      const labelEl = document.getElementById('affTierProgressLabel');
+      const barEl   = document.getElementById('affTierProgressBar');
+      if (nextEl)  nextEl.textContent = nextTier.name;
+      if (labelEl) labelEl.textContent = current + ' / ' + needed + ' referrals';
+      if (barEl)   { barEl.style.width = pct + '%'; barEl.style.background = nextTier.badge_color || 'var(--accent-light)'; }
+    }
+
+    /* Analytics numbers */
+    const fmt = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    set('affStatClicks',     stats.total_clicks   || 0);
+    set('affStatUnique',     stats.unique_clicks  || 0);
+    set('affStatConversions',stats.conversions     || 0);
+    set('affStatConvRate',   (stats.conversion_rate || 0) + '%');
+    set('affStatThisMonth',  fmt(stats.this_month_earnings));
+    set('affStatLastMonth',  fmt(stats.last_month_earnings));
+
+    loadAffiliateLeaderboard(); /* Phase 8 */
+
+  } catch (err) {
+    console.error('[Affiliate] loadAffiliateStats error:', err);
+  }
+}
+
+/* ── AFFILIATE LEADERBOARD (Phase 8) ─────────────────────────── */
+async function loadAffiliateLeaderboard() {
+  const panel  = document.getElementById('affLeaderboardPanel');
+  const listEl = document.getElementById('affLbList');
+  const rankEl = document.getElementById('affLbMyRank');
+  if (!panel || !listEl) return;
+
+  try {
+    const { data, error } = await sb.rpc('get_affiliate_leaderboard', {
+      p_limit: 10,
+      p_period: 'all_time'
+    });
+    if (error || !data?.success) return;
+
+    const rows = data.leaderboard || [];
+    if (rows.length === 0) {
+      panel.style.display = 'none';
+      return;
+    }
+    panel.style.display = 'block';
+
+    if (rankEl) {
+      rankEl.textContent = data.my_rank?.rank ? `আপনার Rank: #${data.my_rank.rank}` : '';
+    }
+
+    const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : `#${r}`;
+    const fmt   = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+    listEl.innerHTML = rows.map(r => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;
+                   background:${r.is_me ? 'var(--accent-light)15' : 'transparent'};
+                   border:1px solid ${r.is_me ? 'var(--accent-light)' : 'transparent'};">
+        <div style="width:26px;text-align:center;font-size:13px;font-weight:800;color:var(--text-muted);">${medal(r.rank)}</div>
+        <div style="flex:1;font-size:12.5px;font-weight:${r.is_me ? '800' : '600'};color:${r.is_me ? 'var(--accent-light)' : 'var(--text)'};">
+          ${escHtml(r.name)}${r.is_me ? ' (আপনি)' : ''}
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#34d399;">${fmt(r.total_earned)}</div>
+      </div>`).join('');
+
+  } catch (err) {
+    console.error('[Affiliate] loadAffiliateLeaderboard error:', err);
+  }
+}
+
+/* ── AFFILIATE NOTIFICATIONS (Phase 7) ───────────────────────── */
+const AFF_NOTIF_META = {
+  application_approved: { icon: '🎉', color: '#34d399' },
+  application_rejected: { icon: '⚠️', color: '#f87171' },
+  commission_earned:    { icon: '💰', color: '#34d399' },
+  withdrawal_approved:  { icon: '✅', color: '#60a5fa' },
+  withdrawal_rejected:  { icon: '🚫', color: '#f87171' },
+  withdrawal_paid:      { icon: '🎉', color: '#34d399' },
+  tier_upgraded:        { icon: '🏆', color: '#f59e0b' },
+};
+
+async function loadAffiliateNotifications() {
+  const panel   = document.getElementById('affNotifPanel');
+  const listEl  = document.getElementById('affNotifList');
+  const badge   = document.getElementById('affNotifUnreadBadge');
+  const sbBadge = document.getElementById('affNotifSbBadge');
+  if (!panel || !listEl || !currentUser?.id) return;
+
+  try {
+    const { data: rows, error } = await sb
+      .from('affiliate_notifications')
+      .select('id, type, title, message, amount, is_read, created_at')
+      .eq('client_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+
+    if (!rows || rows.length === 0) {
+      panel.style.display = 'none';
+      if (sbBadge) sbBadge.style.display = 'none';
+      return;
+    }
+
+    panel.style.display = 'block';
+    const unread = rows.filter(n => !n.is_read).length;
+
+    if (badge) {
+      badge.style.display = unread > 0 ? 'inline-flex' : 'none';
+      badge.textContent = unread;
+    }
+    if (sbBadge) {
+      sbBadge.style.display = unread > 0 ? 'inline-block' : 'none';
+      sbBadge.textContent = unread;
+    }
+
+    listEl.innerHTML = rows.map(n => {
+      const meta = AFF_NOTIF_META[n.type] || { icon: '🔔', color: 'var(--text-secondary)' };
+      const dt = n.created_at
+        ? new Date(n.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '';
+      return `
+        <div class="aff-notif-item" data-id="${n.id}" onclick="affiliateMarkNotifRead('${n.id}')"
+          style="cursor:${n.is_read ? 'default' : 'pointer'};display:flex;gap:10px;padding:10px 12px;border-radius:var(--radius);
+                 background:${n.is_read ? 'transparent' : 'var(--bg-card2)'};
+                 border:1px solid ${n.is_read ? 'var(--border)' : meta.color + '40'};">
+          <div style="font-size:16px;line-height:1;flex-shrink:0;">${meta.icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12.5px;font-weight:700;color:var(--text);">${escHtml(n.title)}</div>
+            <div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;line-height:1.5;font-family:'Noto Sans Bengali',sans-serif;">${escHtml(n.message)}</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">${dt}</div>
+          </div>
+          ${!n.is_read ? `<div style="width:7px;height:7px;border-radius:50%;background:${meta.color};flex-shrink:0;margin-top:4px;"></div>` : ''}
+        </div>`;
+    }).join('');
+
+  } catch (err) {
+    console.error('[Affiliate] loadAffiliateNotifications error:', err);
+  }
+}
+
+async function affiliateMarkNotifRead(id) {
+  try {
+    await sb.rpc('mark_affiliate_notifications_read', { p_ids: [id] });
+    await loadAffiliateNotifications();
+  } catch (err) {
+    console.error('[Affiliate] markNotifRead error:', err);
+  }
+}
+
+async function affiliateMarkAllNotifsRead() {
+  try {
+    await sb.rpc('mark_affiliate_notifications_read', { p_ids: null });
+    await loadAffiliateNotifications();
+  } catch (err) {
+    console.error('[Affiliate] markAllNotifsRead error:', err);
+  }
+}
+
 function showPage(pageId,clickedItem) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const target=document.getElementById('page-'+pageId);
@@ -2022,6 +2219,7 @@ function showPage(pageId,clickedItem) {
   }
   if(pageId==='affiliate'){
     loadAffiliateState();
+    loadAffiliateNotifications(); /* Phase 7: always refresh, independent of aff-state cache */
   }
 }
 

@@ -35,6 +35,9 @@
         <button id="tabBtnReferrals" class="aff-tab-btn" onclick="switchTab('referrals')">
           <i class="ti ti-users-group"></i> Referred Clients
         </button>
+        <button id="tabBtnAnalytics" class="aff-tab-btn" onclick="switchTab('analytics')">
+          <i class="ti ti-chart-bar"></i> Analytics
+        </button>
       </div>
       <button class="cl-add-btn" onclick="refreshCurrentTab()" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">
         <i class="ti ti-refresh"></i> Refresh
@@ -280,6 +283,95 @@
       </div>
 
     </div><!-- /tabReferrals -->
+
+    <!-- ══ ANALYTICS TAB ═══════════════════════════════════════ -->
+    <div id="tabAnalytics" style="display:none;">
+
+      <!-- Affiliate overview table -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);">Affiliate Overview</div>
+          <div style="font-size:11px;color:var(--muted2);">Click a row to see detailed analytics</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="padding:10px 16px;text-align:left;font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;">Affiliate</th>
+                <th style="padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;">Tier</th>
+                <th style="padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;">Rate</th>
+                <th style="padding:10px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;">Referrals</th>
+                <th style="padding:10px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;">Clicks</th>
+                <th style="padding:10px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;">Total Earned</th>
+              </tr>
+            </thead>
+            <tbody id="analyticsAffTbody">
+              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">লোড হচ্ছে…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Affiliate detail analytics panel -->
+      <div id="analyticsDetailPanel" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Affiliate Detail: <span id="analyticsDetailCode" style="color:var(--accent);font-family:'Sora',monospace;"></span></div>
+            <div id="analyticsDetailTier" style="font-size:11px;color:var(--muted2);margin-top:2px;"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <label style="font-size:11px;color:var(--muted2);">Set Tier:</label>
+            <select id="analyticsSetTierSelect" style="padding:6px 10px;background:var(--bg-card2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;">
+              <option value="1">🥉 Bronze (10%)</option>
+              <option value="2">🥈 Silver (12%)</option>
+              <option value="3">🥇 Gold (15%)</option>
+              <option value="4">💎 Diamond (20%)</option>
+            </select>
+            <button onclick="adminSetAffiliateTier()" style="padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Apply</button>
+          </div>
+        </div>
+
+        <!-- Monthly stats -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Monthly Earnings (Last 6 Months)</div>
+          <div id="analyticsMonthlyTable" style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted2);">Month</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted2);">Orders</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted2);">Earned</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsMonthlyTbody">
+                <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted2);font-size:.8rem;">লোড হচ্ছে…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Daily click chart (simple table) -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Recent Clicks (Last 30 Days)</div>
+          <div id="analyticsClicksTable" style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted2);">Date</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted2);">Clicks</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted2);">Signups</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted2);">Conv. Rate</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsClicksTbody">
+                <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted2);font-size:.8rem;">Select an affiliate above to view data.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tabAnalytics -->
 
   </div>
 </div>

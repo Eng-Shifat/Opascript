@@ -55,21 +55,25 @@ window.switchTab = function(tab) {
   document.getElementById('tabCommissions').style.display   = tab === 'commissions'  ? '' : 'none';
   document.getElementById('tabWithdrawals').style.display   = tab === 'withdrawals'  ? '' : 'none';
   document.getElementById('tabReferrals').style.display     = tab === 'referrals'    ? '' : 'none';
+  document.getElementById('tabAnalytics').style.display     = tab === 'analytics'    ? '' : 'none';
 
   document.getElementById('tabBtnApplications').classList.toggle('aff-tab-active', tab === 'applications');
   document.getElementById('tabBtnCommissions').classList.toggle('aff-tab-active',  tab === 'commissions');
   document.getElementById('tabBtnWithdrawals').classList.toggle('aff-tab-active',  tab === 'withdrawals');
   document.getElementById('tabBtnReferrals').classList.toggle('aff-tab-active',    tab === 'referrals');
+  document.getElementById('tabBtnAnalytics').classList.toggle('aff-tab-active',    tab === 'analytics');
 
   if (tab === 'commissions' && ALL_COMMISSIONS.length === 0) loadCommissions();
   if (tab === 'withdrawals' && ALL_WITHDRAWALS.length === 0) loadWithdrawals();
   if (tab === 'referrals'   && ALL_REFERRALS.length   === 0) loadReferrals();
+  if (tab === 'analytics'   && ANALYTICS_AFF_LIST.length === 0) loadAnalytics();
 };
 
 window.refreshCurrentTab = function() {
   if      (CURRENT_TAB === 'applications') loadApplications();
   else if (CURRENT_TAB === 'commissions')  loadCommissions();
   else if (CURRENT_TAB === 'referrals')    { ALL_REFERRALS = []; loadReferrals(); }
+  else if (CURRENT_TAB === 'analytics')   { ANALYTICS_AFF_LIST = []; loadAnalytics(); }
   else                                     loadWithdrawals();
 };
 
@@ -254,6 +258,26 @@ async function doApprove(appId) {
     }
     const code = data?.referral_code ? ` — Code: ${data.referral_code}` : '';
     showToast(`✅ Affiliate Approved${code}`, '#34d399');
+
+    /* Phase 7: notify affiliate */
+    const app = ALL_APPLICATIONS.find(a => a.id === appId);
+    if (app) {
+      let affId = data?.affiliate_id || null;
+      if (!affId) {
+        const { data: affRow } = await sb.from('affiliates').select('id').eq('client_id', app.client_id).maybeSingle();
+        affId = affRow?.id || null;
+      }
+      notifyAffiliate({
+        clientId: app.client_id,
+        affiliateId: affId,
+        type: 'application_approved',
+        title: 'Affiliate Application Approved 🎉',
+        message: data?.referral_code
+          ? `Congratulations! আপনার Affiliate Application Approve হয়েছে। আপনার Referral Code: ${data.referral_code}`
+          : 'Congratulations! আপনার Affiliate Application Approve হয়েছে।'
+      });
+    }
+
     await loadApplications();
   } catch (err) {
     console.error('doApprove error:', err);
@@ -278,6 +302,18 @@ async function doReject(appId) {
       .eq('status', 'pending');
     if (error) throw error;
     showToast('🚫 Application Rejected', '#f59e0b');
+
+    /* Phase 7: notify affiliate */
+    const app = ALL_APPLICATIONS.find(a => a.id === appId);
+    if (app) {
+      notifyAffiliate({
+        clientId: app.client_id,
+        type: 'application_rejected',
+        title: 'Affiliate Application Update',
+        message: 'দুঃখিত, আপনার Affiliate Application এই মুহূর্তে Approve করা যায়নি। আপনি পরবর্তীতে আবার Apply করতে পারবেন।'
+      });
+    }
+
     await loadApplications();
   } catch (err) {
     console.error('doReject error:', err);
@@ -469,6 +505,39 @@ window.adminRecordCommission = async function(orderId) {
       : '';
     showToast(`✅ Commission Recorded${amt}`, '#34d399');
 
+    /* Phase 7: notify affiliate — look up who earned it for this order */
+    (async () => {
+      try {
+        const { data: cmRow } = await sb
+          .from('affiliate_commissions')
+          .select('affiliate_id, commission_amount')
+          .eq('order_id', orderId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!cmRow?.affiliate_id) return;
+
+        const { data: affRow } = await sb
+          .from('affiliates')
+          .select('client_id')
+          .eq('id', cmRow.affiliate_id)
+          .maybeSingle();
+        if (!affRow?.client_id) return;
+
+        const amtVal = data?.commission_amount ?? cmRow.commission_amount;
+        notifyAffiliate({
+          clientId: affRow.client_id,
+          affiliateId: cmRow.affiliate_id,
+          type: 'commission_earned',
+          title: 'নতুন Commission Earn হয়েছে 💰',
+          message: `একটি সফল Referral Order-এর জন্য আপনার Wallet-এ ৳${Number(amtVal || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Commission যোগ হয়েছে।`,
+          amount: amtVal
+        });
+      } catch (e) {
+        console.error('[Affiliate Notify] commission lookup failed:', e);
+      }
+    })();
+
     /* If commissions tab is open, refresh it */
     if (CURRENT_TAB === 'commissions') await loadCommissions();
 
@@ -630,6 +699,20 @@ async function doWdApprove(id, note) {
       return;
     }
     showToast('✅ Withdrawal Approved', '#34d399');
+
+    /* Phase 7: notify affiliate */
+    const w = ALL_WITHDRAWALS.find(x => x.id === id);
+    if (w) {
+      notifyAffiliate({
+        clientId: w.client_id,
+        affiliateId: w.affiliate_id,
+        type: 'withdrawal_approved',
+        title: 'Withdrawal Request Approved ✅',
+        message: `আপনার ৳${Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Withdrawal Request Approve হয়েছে। খুব শীঘ্রই Payout করা হবে।`,
+        amount: w.amount
+      });
+    }
+
     await loadWithdrawals();
   } catch (err) {
     showToast('❌ Error: ' + err.message, '#f87171');
@@ -657,6 +740,22 @@ async function doWdReject(id, note) {
       return;
     }
     showToast('🚫 Withdrawal Rejected', '#f59e0b');
+
+    /* Phase 7: notify affiliate */
+    const w = ALL_WITHDRAWALS.find(x => x.id === id);
+    if (w) {
+      notifyAffiliate({
+        clientId: w.client_id,
+        affiliateId: w.affiliate_id,
+        type: 'withdrawal_rejected',
+        title: 'Withdrawal Request Rejected',
+        message: note
+          ? `আপনার ৳${Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Withdrawal Request Reject হয়েছে। কারণ: ${note}`
+          : `আপনার ৳${Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Withdrawal Request Reject হয়েছে। বিস্তারিত জানতে Support-এ যোগাযোগ করুন।`,
+        amount: w.amount
+      });
+    }
+
     await loadWithdrawals();
   } catch (err) {
     showToast('❌ Error: ' + err.message, '#f87171');
@@ -688,10 +787,48 @@ async function doWdPayout(id, txn, note) {
       return;
     }
     showToast('✅ Payout Confirmed', '#34d399');
+
+    /* Phase 7: notify affiliate */
+    const w = ALL_WITHDRAWALS.find(x => x.id === id);
+    if (w) {
+      notifyAffiliate({
+        clientId: w.client_id,
+        affiliateId: w.affiliate_id,
+        type: 'withdrawal_paid',
+        title: 'Payout সম্পন্ন হয়েছে 🎉',
+        message: `আপনার ৳${Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Withdrawal সফলভাবে Pay করা হয়েছে। TXN ID: ${txn}`,
+        amount: w.amount
+      });
+    }
+
     await loadWithdrawals();
     if (ALL_COMMISSIONS.length > 0) await loadCommissions();
   } catch (err) {
     showToast('❌ Error: ' + err.message, '#f87171');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   PHASE 7 — AFFILIATE NOTIFICATIONS
+   Fire-and-forget: never blocks or breaks the primary action
+   (approve/reject/record/withdraw) if the insert fails.
+══════════════════════════════════════════════════════════ */
+async function notifyAffiliate({ clientId, affiliateId = null, type, title, message, amount = null }) {
+  const sb = window.scriptoraSupabase;
+  if (!sb || !clientId || !type) return;
+  try {
+    await sb.from('affiliate_notifications').insert({
+      client_id: clientId,
+      affiliate_id: affiliateId,
+      type,
+      title,
+      message,
+      amount
+    });
+  } catch (err) {
+    console.error('[Affiliate Notify] failed:', err);
+    /* Silent — notification failures must never surface to the admin
+       as if the underlying action (approve/reject/payout) failed. */
   }
 }
 
@@ -840,4 +977,175 @@ function renderReferrals() {
 window.filterReferrals = function() {
   REF_SEARCH = (document.getElementById('refSearch')?.value || '').trim();
   renderReferrals();
+};
+
+/* ══════════════════════════════════════════════════════════════
+   TAB 5 — ANALYTICS (Phase 6)
+══════════════════════════════════════════════════════════════ */
+
+let ANALYTICS_AFF_LIST = [];
+let ANALYTICS_CURRENT_AFF_ID = null;
+
+async function loadAnalytics() {
+  const sb = window.scriptoraSupabase;
+  if (!sb) return;
+
+  const tbody = document.getElementById('analyticsAffTbody');
+  if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">লোড হচ্ছে…</td></tr>`;
+
+  try {
+    const { data: rows, error } = await sb.rpc('admin_list_affiliates_with_stats');
+    if (error) throw error;
+
+    ANALYTICS_AFF_LIST = rows || [];
+    renderAnalyticsList();
+  } catch (err) {
+    console.error('[Analytics] load error:', err);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:#f87171;font-size:.82rem;">Load error: ${esc(String(err.message || err))}</td></tr>`;
+  }
+}
+
+function renderAnalyticsList() {
+  const tbody = document.getElementById('analyticsAffTbody');
+  if (!tbody) return;
+
+  if (!ANALYTICS_AFF_LIST.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">কোনো affiliate নেই।</td></tr>`;
+    return;
+  }
+
+  const fmtAmt = v => '৳' + Number(v || 0).toLocaleString('en-IN', { minimumFractionDigits: 0 });
+
+  tbody.innerHTML = ANALYTICS_AFF_LIST.map(r => {
+    const isActive = r.status === 'active';
+    const tierEmoji = { Bronze: '🥉', Silver: '🥈', Gold: '🥇', Diamond: '💎' }[r.tier_name] || '🏅';
+
+    return `
+      <tr style="border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;"
+          onmouseover="this.style.background='rgba(255,255,255,.03)'"
+          onmouseout="this.style.background=''"
+          onclick="loadAnalyticsDetail('${r.affiliate_id}')">
+        <td style="padding:12px 16px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:18px;">${isActive ? '✅' : '⏸️'}</span>
+            <div>
+              <div style="font-weight:600;font-size:.88rem;color:var(--accent);font-family:'Sora',monospace;">${esc(r.referral_code || '—')}</div>
+              <div style="color:var(--muted2);font-size:.72rem;">${fmtDate(r.joined_at)}</div>
+            </div>
+          </div>
+        </td>
+        <td style="padding:12px 12px;">
+          <span style="font-size:.82rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${r.badge_color || '#cd7f32'}22;color:${r.badge_color || '#cd7f32'};">
+            ${tierEmoji} ${esc(r.tier_name || 'Bronze')}
+          </span>
+        </td>
+        <td style="padding:12px 12px;font-weight:700;color:var(--accent-light);font-size:.9rem;">${r.commission_rate || 10}%</td>
+        <td style="padding:12px 12px;text-align:right;font-weight:700;font-size:.9rem;">${r.total_referrals || 0}</td>
+        <td style="padding:12px 12px;text-align:right;color:var(--muted2);font-size:.85rem;">${r.total_clicks || 0}</td>
+        <td style="padding:12px 12px;text-align:right;font-weight:700;color:#34d399;font-size:.9rem;">${fmtAmt(r.total_earned)}</td>
+      </tr>`;
+  }).join('');
+}
+
+window.loadAnalyticsDetail = async function(affiliateId) {
+  const sb = window.scriptoraSupabase;
+  if (!sb) return;
+
+  ANALYTICS_CURRENT_AFF_ID = affiliateId;
+  const panel = document.getElementById('analyticsDetailPanel');
+  if (panel) panel.style.display = 'block';
+
+  // Find affiliate in list for quick display
+  const aff = ANALYTICS_AFF_LIST.find(a => a.affiliate_id === affiliateId);
+  if (aff) {
+    const codeEl = document.getElementById('analyticsDetailCode');
+    const tierEl = document.getElementById('analyticsDetailTier');
+    const selEl  = document.getElementById('analyticsSetTierSelect');
+    if (codeEl) codeEl.textContent = aff.referral_code || '—';
+    if (tierEl) tierEl.textContent = `${aff.tier_name || 'Bronze'} · ${aff.commission_rate || 10}% commission · ${aff.total_referrals || 0} paid referrals`;
+    if (selEl)  selEl.value = String(aff.tier_id || 1);
+  }
+
+  // Set loading state
+  const mTbody = document.getElementById('analyticsMonthlyTbody');
+  const cTbody = document.getElementById('analyticsClicksTbody');
+  if (mTbody) mTbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted2);">লোড হচ্ছে…</td></tr>`;
+  if (cTbody) cTbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted2);">লোড হচ্ছে…</td></tr>`;
+
+  try {
+    const { data: detail, error } = await sb.rpc('admin_get_affiliate_analytics', { p_affiliate_id: affiliateId });
+    if (error) throw error;
+
+    const fmtAmt = v => '৳' + Number(v || 0).toLocaleString('en-IN', { minimumFractionDigits: 0 });
+
+    // Monthly stats
+    const monthly = detail.monthly_stats || [];
+    if (mTbody) {
+      if (!monthly.length) {
+        mTbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted2);">কোনো monthly data নেই।</td></tr>`;
+      } else {
+        mTbody.innerHTML = monthly.map(m => `
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:9px 12px;font-size:.83rem;">${esc(m.month || '—')}</td>
+            <td style="padding:9px 12px;text-align:right;font-weight:600;">${m.orders || 0}</td>
+            <td style="padding:9px 12px;text-align:right;font-weight:700;color:#34d399;">${fmtAmt(m.earned)}</td>
+          </tr>`).join('');
+      }
+    }
+
+    // Daily clicks
+    const daily = detail.daily_clicks || [];
+    if (cTbody) {
+      if (!daily.length) {
+        cTbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted2);">গত ৩০ দিনে কোনো click নেই।</td></tr>`;
+      } else {
+        cTbody.innerHTML = daily.map(d => {
+          const convRate = d.total_clicks > 0 ? Math.round((d.conversions / d.total_clicks) * 100) : 0;
+          return `
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:9px 12px;font-size:.83rem;color:var(--muted2);">${esc(String(d.day || '—'))}</td>
+              <td style="padding:9px 12px;text-align:right;font-weight:600;">${d.total_clicks || 0}</td>
+              <td style="padding:9px 12px;text-align:right;color:#34d399;font-weight:600;">${d.conversions || 0}</td>
+              <td style="padding:9px 12px;text-align:right;color:#60a5fa;">${convRate}%</td>
+            </tr>`;
+        }).join('');
+      }
+    }
+
+    // Update tier display from detail
+    const tier = detail.tier || {};
+    const codeEl = document.getElementById('analyticsDetailCode');
+    const tierEl = document.getElementById('analyticsDetailTier');
+    if (codeEl) codeEl.textContent = detail.referral_code || '—';
+    if (tierEl) tierEl.textContent = `${tier.name || 'Bronze'} · ${tier.commission_rate || 10}% commission · ${detail.total_referrals || 0} paid referrals`;
+
+    // Scroll to panel
+    panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch (err) {
+    console.error('[Analytics] detail error:', err);
+    if (mTbody) mTbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:#f87171;">Error: ${esc(String(err.message || err))}</td></tr>`;
+    if (cTbody) cTbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#f87171;">Error loading data.</td></tr>`;
+  }
+};
+
+window.adminSetAffiliateTier = async function() {
+  const sb = window.scriptoraSupabase;
+  if (!sb || !ANALYTICS_CURRENT_AFF_ID) return;
+
+  const tierId = parseInt(document.getElementById('analyticsSetTierSelect')?.value || '1');
+  try {
+    const { data, error } = await sb.rpc('admin_set_affiliate_tier', {
+      p_affiliate_id: ANALYTICS_CURRENT_AFF_ID,
+      p_tier_id:      tierId
+    });
+    if (error) throw error;
+    if (data?.success === false) throw new Error(data.message);
+    showToast('✅ Tier updated successfully', '#34d399');
+    // Reload list to reflect change
+    ANALYTICS_AFF_LIST = [];
+    loadAnalytics();
+  } catch (err) {
+    showToast('❌ ' + (err.message || 'Tier update failed'), '#f87171');
+  }
 };

@@ -346,6 +346,13 @@ async function handleRegister() {
       }
     }
 
+    // ── Phase 6: Mark referral click as converted ──────────────────────
+    if (refCode) {
+      try {
+        await sb.rpc('mark_affiliate_click_converted', { p_referral_code: refCode });
+      } catch (_) { /* non-critical */ }
+    }
+
     // ── STEP 5: localStorage save ──────────────────────────────────────
     // শুধু non-sensitive info রাখুন
     localStorage.setItem('scriptora_client_id', authUser.id);
