@@ -1047,6 +1047,36 @@ async function nextStep() {
     const languageVal   = document.getElementById('language')?.value || null;
     const addonKeys     = Object.entries(activeAddons).filter(([,v])=>v).map(([k])=>k);
 
+    // ── Phase 11: Resolve affiliate referral code (do not overwrite an
+    //    already-attributed client) ──────────────────────────────────
+    let referredByCodeVal = null;
+    try {
+      // 1. Priority: the client's own permanent attribution set at registration
+      //    (Phase 5). This must not be overwritten by a newer/session ref code.
+      const { data: clientRow } = await window.scriptoraSupabase
+        .from('clients')
+        .select('referred_by_code')
+        .eq('id', client_id)
+        .maybeSingle();
+
+      let candidateCode = (clientRow?.referred_by_code || '').trim().toUpperCase() || null;
+
+      // 2. Fallback: an ?ref=CODE / sessionStorage code from this visit
+      //    (same mechanism as Register page), only if no permanent attribution exists.
+      if (!candidateCode) {
+        candidateCode = (new URLSearchParams(window.location.search).get('ref')
+          || sessionStorage.getItem('scriptora_ref_code') || '').trim().toUpperCase() || null;
+      }
+
+      if (candidateCode) {
+        const { data: resolved } = await window.scriptoraSupabase
+          .rpc('resolve_order_referral_code', { p_code: candidateCode });
+        if (resolved?.valid) referredByCodeVal = resolved.code;
+      }
+    } catch (refErr) {
+      console.warn('[Referral] resolution skipped (non-critical):', refErr);
+    }
+
     // ── Real Supabase insert — orders table এর actual column অনুযায়ী ──
     const { data: orderRow, error } = await window.scriptoraSupabase
       .from('orders')
@@ -1077,6 +1107,7 @@ async function nextStep() {
         coupon:                appliedCoupon || null,
         discount:              discountAmount || 0,
         service_type:          new URLSearchParams(window.location.search).get('service') || null,
+        ...(referredByCodeVal ? { referred_by_code: referredByCodeVal } : {}),
         // ── Handwritten-only columns (see SQL migration) — omitted entirely for other services ──
         ...(window._isHandwritten ? {
           assignment_type:  hwAssignmentTypeVal,

@@ -211,7 +211,10 @@
 
       /* ── Affiliate Commission Button ──────────────────────────────
          Show only when: order has referred_by_code AND no commission exists yet.
-         This is a MANUAL admin action — no automatic recording.
+         Phase 12: commissions are now auto-recorded when payment is fully
+         confirmed (due=0) inside odpApprovePayment(). This button remains
+         as a manual fallback (e.g. orders that reached "paid" before this
+         phase, or if the automatic call failed for any reason).
       ── */
       const rawDB = window._currentOrder?._rawDB;
       if (rawDB?.referred_by_code && window._isRealUUID(window._currentOrderId)) {
@@ -394,6 +397,7 @@
       }
 
       /* 5. If due === 0 → unlock all files + complete order */
+      let autoCommissionMsg = '';
       if (due === 0) {
         await window._sb().from('order_file_access')
           .update({ download_allowed: true, updated_at: new Date().toISOString() })
@@ -412,6 +416,45 @@
         Object.keys(window._fileMetaCache || {}).forEach(path => {
           if (window._fileMetaCache[path]) window._fileMetaCache[path].download_allowed = true;
         });
+
+        /* ── Phase 12: Auto-record affiliate commission on full payment ──
+           Reuses the same record_affiliate_commission RPC the manual
+           "Record Commission" button already calls (Phase 3/8). The manual
+           button stays as a fallback — it re-checks for an existing row
+           first, so it becomes a no-op / shows "already recorded" once
+           this succeeds. ── */
+        try {
+          const { data: ordRef } = await window._sb()
+            .from('orders')
+            .select('referred_by_code')
+            .eq('id', window._currentOrderId)
+            .single();
+
+          if (ordRef?.referred_by_code) {
+            const { data: existingComm } = await window._sb()
+              .from('affiliate_commissions')
+              .select('id')
+              .eq('order_id', window._currentOrderId)
+              .maybeSingle();
+
+            if (!existingComm) {
+              const { data: commData, error: commErr } = await window._sb()
+                .rpc('record_affiliate_commission', { p_order_id: window._currentOrderId });
+
+              if (!commErr && commData?.success) {
+                const amt = commData?.commission_amount
+                  ? '৳' + Number(commData.commission_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })
+                  : '';
+                autoCommissionMsg = ` Affiliate commission ${amt} recorded.`;
+              } else if (commErr) {
+                console.warn('[Affiliate] auto commission error:', commErr);
+              }
+            }
+          }
+        } catch (commCatchErr) {
+          console.warn('[Affiliate] auto commission skipped (non-critical):', commCatchErr);
+        }
+
       } else {
         await window._sb().from('orders').update({
           payment_status: 'approved',
@@ -478,7 +521,7 @@
       await window._loadPaymentHistory();
 
       const msg = due === 0
-        ? `✅ Full payment received! ৳${Number(newTotalPaid).toLocaleString()} — Files unlocked, Order completed.`
+        ? `✅ Full payment received! ৳${Number(newTotalPaid).toLocaleString()} — Files unlocked, Order completed.${autoCommissionMsg}`
         : `✓ ৳${Number(thisAmount).toLocaleString()} approved. Total paid: ৳${Number(newTotalPaid).toLocaleString()}. Due: ৳${Number(due).toLocaleString()}.`;
       window._toast(msg, due === 0 ? 'var(--green)' : 'var(--gold)');
       window._logActivity('payment', `Payment confirmed: ৳${Number(thisAmount).toLocaleString()}. Total paid: ৳${Number(newTotalPaid).toLocaleString()}. Due: ৳${Number(due).toLocaleString()}`);
