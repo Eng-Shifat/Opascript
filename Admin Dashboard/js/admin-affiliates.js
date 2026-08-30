@@ -44,6 +44,9 @@ let ALL_RECONCILIATION = [];
 let RC_FILTER           = 'all';
 let RC_SEARCH           = '';
 
+let ALL_AUDIT_LOG = [];
+let AL_SEARCH     = '';
+
 /* ── Init ─────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
   await waitForSession();
@@ -61,6 +64,7 @@ window.switchTab = function(tab) {
   document.getElementById('tabReferrals').style.display     = tab === 'referrals'    ? '' : 'none';
   document.getElementById('tabAnalytics').style.display     = tab === 'analytics'    ? '' : 'none';
   document.getElementById('tabReconciliation').style.display = tab === 'reconciliation' ? '' : 'none';
+  document.getElementById('tabAuditLog').style.display       = tab === 'auditlog' ? '' : 'none';
 
   document.getElementById('tabBtnApplications').classList.toggle('aff-tab-active', tab === 'applications');
   document.getElementById('tabBtnCommissions').classList.toggle('aff-tab-active',  tab === 'commissions');
@@ -68,12 +72,14 @@ window.switchTab = function(tab) {
   document.getElementById('tabBtnReferrals').classList.toggle('aff-tab-active',    tab === 'referrals');
   document.getElementById('tabBtnAnalytics').classList.toggle('aff-tab-active',    tab === 'analytics');
   document.getElementById('tabBtnReconciliation').classList.toggle('aff-tab-active', tab === 'reconciliation');
+  document.getElementById('tabBtnAuditLog').classList.toggle('aff-tab-active', tab === 'auditlog');
 
   if (tab === 'commissions' && ALL_COMMISSIONS.length === 0) loadCommissions();
   if (tab === 'withdrawals' && ALL_WITHDRAWALS.length === 0) loadWithdrawals();
   if (tab === 'referrals'   && ALL_REFERRALS.length   === 0) loadReferrals();
   if (tab === 'analytics'   && ANALYTICS_AFF_LIST.length === 0) loadAnalytics();
   if (tab === 'reconciliation' && ALL_RECONCILIATION.length === 0) loadReconciliation();
+  if (tab === 'auditlog' && ALL_AUDIT_LOG.length === 0) loadAuditLog();
 };
 
 window.refreshCurrentTab = function() {
@@ -82,6 +88,7 @@ window.refreshCurrentTab = function() {
   else if (CURRENT_TAB === 'referrals')    { ALL_REFERRALS = []; loadReferrals(); }
   else if (CURRENT_TAB === 'analytics')   { ANALYTICS_AFF_LIST = []; loadAnalytics(); }
   else if (CURRENT_TAB === 'reconciliation') { ALL_RECONCILIATION = []; loadReconciliation(); }
+  else if (CURRENT_TAB === 'auditlog') { ALL_AUDIT_LOG = []; loadAuditLog(); }
   else                                     loadWithdrawals();
 };
 
@@ -267,14 +274,16 @@ async function doApprove(appId) {
     const code = data?.referral_code ? ` — Code: ${data.referral_code}` : '';
     showToast(`✅ Affiliate Approved${code}`, '#34d399');
 
-    /* Phase 7: notify affiliate */
     const app = ALL_APPLICATIONS.find(a => a.id === appId);
+    let affId = data?.affiliate_id || null;
+    if (!affId && app) {
+      const { data: affRow } = await sb.from('affiliates').select('id').eq('client_id', app.client_id).maybeSingle();
+      affId = affRow?.id || null;
+    }
+    logAudit('application_approved', { affiliateId: affId, targetTable: 'affiliate_applications', targetId: appId, details: { referral_code: data?.referral_code || null } });
+
+    /* Phase 7: notify affiliate */
     if (app) {
-      let affId = data?.affiliate_id || null;
-      if (!affId) {
-        const { data: affRow } = await sb.from('affiliates').select('id').eq('client_id', app.client_id).maybeSingle();
-        affId = affRow?.id || null;
-      }
       notifyAffiliate({
         clientId: app.client_id,
         affiliateId: affId,
@@ -313,6 +322,7 @@ async function doReject(appId) {
 
     /* Phase 7: notify affiliate */
     const app = ALL_APPLICATIONS.find(a => a.id === appId);
+    logAudit('application_rejected', { targetTable: 'affiliate_applications', targetId: appId, details: { client_id: app?.client_id || null } });
     if (app) {
       notifyAffiliate({
         clientId: app.client_id,
@@ -754,6 +764,7 @@ async function doWdApprove(id, note) {
 
     /* Phase 7: notify affiliate */
     const w = ALL_WITHDRAWALS.find(x => x.id === id);
+    logAudit('withdrawal_approved', { affiliateId: w?.affiliate_id || null, targetTable: 'affiliate_withdrawals', targetId: id, details: { amount: w?.amount ?? null, admin_note: note || null } });
     if (w) {
       notifyAffiliate({
         clientId: w.client_id,
@@ -795,6 +806,7 @@ async function doWdReject(id, note) {
 
     /* Phase 7: notify affiliate */
     const w = ALL_WITHDRAWALS.find(x => x.id === id);
+    logAudit('withdrawal_rejected', { affiliateId: w?.affiliate_id || null, targetTable: 'affiliate_withdrawals', targetId: id, details: { amount: w?.amount ?? null, admin_note: note || null } });
     if (w) {
       notifyAffiliate({
         clientId: w.client_id,
@@ -842,6 +854,7 @@ async function doWdPayout(id, txn, note) {
 
     /* Phase 7: notify affiliate */
     const w = ALL_WITHDRAWALS.find(x => x.id === id);
+    logAudit('payout_confirmed', { affiliateId: w?.affiliate_id || null, targetTable: 'affiliate_withdrawals', targetId: id, details: { amount: w?.amount ?? null, payout_txn_id: txn, admin_note: note || null } });
     if (w) {
       notifyAffiliate({
         clientId: w.client_id,
@@ -881,6 +894,25 @@ async function notifyAffiliate({ clientId, affiliateId = null, type, title, mess
     console.error('[Affiliate Notify] failed:', err);
     /* Silent — notification failures must never surface to the admin
        as if the underlying action (approve/reject/payout) failed. */
+  }
+}
+
+/* ── Phase 20: Immutable admin audit log ─────────────────────
+   Call right after any state-changing admin action succeeds.
+   Never blocks/alters the action's own success or failure. */
+async function logAudit(action, { affiliateId = null, targetTable = null, targetId = null, details = null } = {}) {
+  const sb = window.scriptoraSupabase;
+  if (!sb) return;
+  try {
+    await sb.rpc('log_affiliate_admin_action', {
+      p_action: action,
+      p_affiliate_id: affiliateId,
+      p_target_table: targetTable,
+      p_target_id: targetId,
+      p_details: details
+    });
+  } catch (err) {
+    console.error('[Audit Log] failed:', err);
   }
 }
 
@@ -1168,6 +1200,97 @@ function renderRcTable() {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   TAB 7 — AUDIT LOG (Phase 20)
+   Reads via RPC get_affiliate_admin_audit_log() — table itself
+   has no direct-access policies (write-only via RPC, immutable).
+══════════════════════════════════════════════════════════════ */
+
+async function loadAuditLog() {
+  const sb = window.scriptoraSupabase;
+  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+
+  setTbodyLoading('alTbody', 5);
+
+  try {
+    const { data, error } = await sb.rpc('get_affiliate_admin_audit_log', { p_limit: 300 });
+    if (error) throw error;
+
+    ALL_AUDIT_LOG = data || [];
+    renderAuditLog();
+
+  } catch (err) {
+    console.error('loadAuditLog error:', err);
+    showToast('❌ Audit log load হয়নি: ' + err.message, '#f87171');
+    setTbodyError('alTbody', 5);
+  }
+}
+
+window.filterAuditLog = function() {
+  AL_SEARCH = (document.getElementById('alSearch')?.value || '').trim().toLowerCase();
+  renderAuditLog();
+};
+
+const AL_ACTION_LABELS = {
+  application_approved:    { label: 'Application Approved',   color: '#34d399' },
+  application_rejected:    { label: 'Application Rejected',    color: '#f87171' },
+  commission_cancelled:    { label: 'Commission Cancelled',    color: '#f87171' },
+  withdrawal_approved:     { label: 'Withdrawal Approved',     color: '#34d399' },
+  withdrawal_rejected:     { label: 'Withdrawal Rejected',     color: '#f87171' },
+  payout_confirmed:        { label: 'Payout Confirmed',        color: '#60a5fa' },
+  affiliate_suspended:     { label: 'Affiliate Suspended',     color: '#f87171' },
+  affiliate_reactivated:   { label: 'Affiliate Reactivated',   color: '#34d399' },
+  tier_changed:            { label: 'Tier Changed',            color: '#fbbf24' },
+};
+
+function renderAuditLog() {
+  const tbody = document.getElementById('alTbody');
+  if (!tbody) return;
+
+  const q = AL_SEARCH;
+  let rows = ALL_AUDIT_LOG;
+  if (q) {
+    rows = rows.filter(r =>
+      (r.action       || '').toLowerCase().includes(q) ||
+      (r.admin_email  || '').toLowerCase().includes(q) ||
+      (r.target_table || '').toLowerCase().includes(q) ||
+      JSON.stringify(r.details || {}).toLowerCase().includes(q)
+    );
+  }
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">কোনো log নেই।</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const a = AL_ACTION_LABELS[r.action] || { label: r.action, color: 'var(--muted2)' };
+    const targetStr = r.target_table
+      ? `${esc(r.target_table)}${r.target_id ? ' · ' + esc(String(r.target_id).slice(0, 8).toUpperCase()) : ''}`
+      : '—';
+    let detailsStr = '—';
+    try {
+      if (r.details && Object.keys(r.details).length) {
+        detailsStr = Object.entries(r.details)
+          .filter(([, v]) => v !== null && v !== undefined && v !== '')
+          .map(([k, v]) => `${esc(k)}: ${esc(String(v))}`)
+          .join(' · ') || '—';
+      }
+    } catch (e) { /* noop */ }
+
+    return `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:12px 14px;color:var(--muted2);font-size:.78rem;white-space:nowrap;">${fmtDate(r.created_at)}</td>
+      <td style="padding:12px 14px;">
+        <span style="font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:${a.color}22;color:${a.color};">${a.label}</span>
+      </td>
+      <td style="padding:12px 14px;font-size:.8rem;font-family:monospace;color:var(--text-secondary);">${targetStr}</td>
+      <td style="padding:12px 14px;font-size:.82rem;">${esc(r.admin_email || '—')}</td>
+      <td style="padding:12px 14px;font-size:.78rem;color:var(--muted2);max-width:280px;">${detailsStr}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════════════
    TAB 5 — ANALYTICS (Phase 6)
 ══════════════════════════════════════════════════════════════ */
 
@@ -1341,6 +1464,7 @@ window.adminSetAffiliateTier = async function() {
     if (error) throw error;
     if (data?.success === false) throw new Error(data.message);
     showToast('✅ Tier updated successfully', '#34d399');
+    logAudit('tier_changed', { affiliateId: ANALYTICS_CURRENT_AFF_ID, targetTable: 'affiliates', targetId: ANALYTICS_CURRENT_AFF_ID, details: { new_tier_id: tierId } });
     // Reload list to reflect change
     ANALYTICS_AFF_LIST = [];
     loadAnalytics();
@@ -1401,6 +1525,7 @@ window.adminToggleAffiliateSuspension = async function() {
 
     showToast(willSuspend ? '⏸️ Affiliate suspended' : '✅ Affiliate reactivated', willSuspend ? '#f87171' : '#34d399');
     renderSuspensionUi(willSuspend ? 'suspended' : 'active', reason);
+    logAudit(willSuspend ? 'affiliate_suspended' : 'affiliate_reactivated', { affiliateId: ANALYTICS_CURRENT_AFF_ID, targetTable: 'affiliates', targetId: ANALYTICS_CURRENT_AFF_ID, details: { reason: reason || null } });
 
     ANALYTICS_AFF_LIST = [];
     loadAnalytics();
@@ -1447,6 +1572,7 @@ window.confirmCancelCommission = async function(commissionId) {
     }
 
     showToast('✅ Commission বাতিল করা হয়েছে', '#f87171');
+    logAudit('commission_cancelled', { targetTable: 'affiliate_commissions', targetId: commissionId, details: { reason: reason.trim() } });
 
     /* Phase 7-style notification to affiliate */
     (async () => {

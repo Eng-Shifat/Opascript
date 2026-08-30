@@ -210,14 +210,19 @@
       }
 
       /* ── Affiliate Commission Button ──────────────────────────────
-         Show only when: order has referred_by_code AND no commission exists yet.
+         Show only when: order has referred_by_code, payment is fully
+         confirmed (payment_status === 'paid'), AND no commission exists yet.
          Phase 12: commissions are now auto-recorded when payment is fully
          confirmed (due=0) inside odpApprovePayment(). This button remains
          as a manual fallback (e.g. orders that reached "paid" before this
          phase, or if the automatic call failed for any reason).
+         Phase 24: previously this button showed for ANY referred order
+         regardless of payment status — an admin could click it on a
+         partially-paid/unpaid order and record a full commission on money
+         the client hadn't actually paid yet. Now gated on payment_status.
       ── */
       const rawDB = window._currentOrder?._rawDB;
-      if (rawDB?.referred_by_code && window._isRealUUID(window._currentOrderId)) {
+      if (rawDB?.referred_by_code && rawDB?.payment_status === 'paid' && window._isRealUUID(window._currentOrderId)) {
         try {
           const { data: existingComm } = await window._sb()
             .from('affiliate_commissions')
