@@ -40,6 +40,10 @@ let WD_FILTER          = 'all';
 let ALL_REFERRALS      = [];
 let REF_SEARCH         = '';
 
+let ALL_RECONCILIATION = [];
+let RC_FILTER           = 'all';
+let RC_SEARCH           = '';
+
 /* ── Init ─────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
   await waitForSession();
@@ -56,17 +60,20 @@ window.switchTab = function(tab) {
   document.getElementById('tabWithdrawals').style.display   = tab === 'withdrawals'  ? '' : 'none';
   document.getElementById('tabReferrals').style.display     = tab === 'referrals'    ? '' : 'none';
   document.getElementById('tabAnalytics').style.display     = tab === 'analytics'    ? '' : 'none';
+  document.getElementById('tabReconciliation').style.display = tab === 'reconciliation' ? '' : 'none';
 
   document.getElementById('tabBtnApplications').classList.toggle('aff-tab-active', tab === 'applications');
   document.getElementById('tabBtnCommissions').classList.toggle('aff-tab-active',  tab === 'commissions');
   document.getElementById('tabBtnWithdrawals').classList.toggle('aff-tab-active',  tab === 'withdrawals');
   document.getElementById('tabBtnReferrals').classList.toggle('aff-tab-active',    tab === 'referrals');
   document.getElementById('tabBtnAnalytics').classList.toggle('aff-tab-active',    tab === 'analytics');
+  document.getElementById('tabBtnReconciliation').classList.toggle('aff-tab-active', tab === 'reconciliation');
 
   if (tab === 'commissions' && ALL_COMMISSIONS.length === 0) loadCommissions();
   if (tab === 'withdrawals' && ALL_WITHDRAWALS.length === 0) loadWithdrawals();
   if (tab === 'referrals'   && ALL_REFERRALS.length   === 0) loadReferrals();
   if (tab === 'analytics'   && ANALYTICS_AFF_LIST.length === 0) loadAnalytics();
+  if (tab === 'reconciliation' && ALL_RECONCILIATION.length === 0) loadReconciliation();
 };
 
 window.refreshCurrentTab = function() {
@@ -74,6 +81,7 @@ window.refreshCurrentTab = function() {
   else if (CURRENT_TAB === 'commissions')  loadCommissions();
   else if (CURRENT_TAB === 'referrals')    { ALL_REFERRALS = []; loadReferrals(); }
   else if (CURRENT_TAB === 'analytics')   { ANALYTICS_AFF_LIST = []; loadAnalytics(); }
+  else if (CURRENT_TAB === 'reconciliation') { ALL_RECONCILIATION = []; loadReconciliation(); }
   else                                     loadWithdrawals();
 };
 
@@ -1022,6 +1030,142 @@ window.filterReferrals = function() {
   REF_SEARCH = (document.getElementById('refSearch')?.value || '').trim();
   renderReferrals();
 };
+
+/* ══════════════════════════════════════════════════════════════
+   TAB 6 — RECONCILIATION (Phase 19)
+   Reads: public.v_affiliate_reconciliation (view — joins orders,
+   affiliates, clients, affiliate_commissions; one row per referred
+   order, flagging missing/mismatched commissions).
+══════════════════════════════════════════════════════════════ */
+
+async function loadReconciliation() {
+  const sb = window.scriptoraSupabase;
+  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+
+  setTbodyLoading('rcTbody', 7);
+
+  try {
+    const { data, error } = await sb
+      .from('v_affiliate_reconciliation')
+      .select('*')
+      .order('order_created_at', { ascending: false });
+
+    if (error) throw error;
+
+    ALL_RECONCILIATION = data || [];
+    updateRcStats();
+    renderRcTable();
+
+  } catch (err) {
+    console.error('loadReconciliation error:', err);
+    showToast('❌ Reconciliation data load হয়নি: ' + err.message, '#f87171');
+    setTbodyError('rcTbody', 7);
+  }
+}
+
+function updateRcStats() {
+  const total    = ALL_RECONCILIATION.length;
+  const missing  = ALL_RECONCILIATION.filter(r => r.reconciliation_flag === 'missing_commission').length;
+  const mismatch = ALL_RECONCILIATION.filter(r =>
+    r.reconciliation_flag === 'order_amount_drift' || r.reconciliation_flag === 'commission_amount_mismatch'
+  ).length;
+  const ok       = ALL_RECONCILIATION.filter(r => r.reconciliation_flag === 'ok').length;
+
+  const el = id => document.getElementById(id);
+  if (el('rc-total'))    el('rc-total').textContent    = total;
+  if (el('rc-missing'))  el('rc-missing').textContent  = missing;
+  if (el('rc-mismatch')) el('rc-mismatch').textContent = mismatch;
+  if (el('rc-ok'))       el('rc-ok').textContent       = ok;
+}
+
+window.filterReconciliation = function(filter, btn) {
+  if (filter !== undefined) {
+    RC_FILTER = filter;
+    if (btn) {
+      document.querySelectorAll('.cl-filter-chip[data-f]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  }
+  RC_SEARCH = (document.getElementById('rcSearch')?.value || '').trim();
+  renderRcTable();
+};
+
+function renderRcTable() {
+  const tbody = document.getElementById('rcTbody');
+  if (!tbody) return;
+
+  const q = RC_SEARCH.toLowerCase();
+  let rows = RC_FILTER === 'all'
+    ? ALL_RECONCILIATION
+    : ALL_RECONCILIATION.filter(r => r.reconciliation_flag === RC_FILTER);
+
+  if (q) {
+    rows = rows.filter(r =>
+      (r.order_number       || '').toLowerCase().includes(q) ||
+      (r.affiliate_name     || '').toLowerCase().includes(q) ||
+      (r.affiliate_email    || '').toLowerCase().includes(q) ||
+      (r.referred_client_name  || '').toLowerCase().includes(q) ||
+      (r.referred_client_email || '').toLowerCase().includes(q) ||
+      (r.referred_by_code   || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">কোনো record নেই।</td></tr>`;
+    return;
+  }
+
+  const fmt = v => v === null || v === undefined ? '—' : '৳' + Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+  const flagMap = {
+    missing_commission:         { color: '#f87171', label: 'Missing Commission' },
+    order_amount_drift:         { color: '#f59e0b', label: 'Order Drift' },
+    commission_amount_mismatch: { color: '#f59e0b', label: 'Commission Mismatch' },
+    ok:                         { color: '#34d399', label: 'OK' },
+  };
+
+  const cmStatusMap = {
+    earned:    { color: '#34d399', label: 'Earned' },
+    withdrawn: { color: '#60a5fa', label: 'Withdrawn' },
+    cancelled: { color: '#f87171', label: 'Cancelled' },
+  };
+
+  tbody.innerHTML = rows.map(r => {
+    const flag = flagMap[r.reconciliation_flag] || { color: 'var(--muted2)', label: r.reconciliation_flag };
+    const cmSt = r.commission_id ? (cmStatusMap[r.commission_status] || { color: 'var(--muted2)', label: r.commission_status }) : null;
+
+    return `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:12px 14px;">
+        <div style="font-weight:600;font-size:.86rem;font-family:monospace;">${esc(r.order_number || r.order_id?.slice(0,8).toUpperCase() || '—')}</div>
+        <div style="color:var(--muted2);font-size:.72rem;">${fmtDate(r.order_created_at)}</div>
+      </td>
+      <td style="padding:12px 14px;">
+        <div style="font-weight:600;font-size:.86rem;">${esc(r.affiliate_name || '—')}</div>
+        <div style="color:var(--muted2);font-size:.72rem;font-family:monospace;">${esc(r.referred_by_code || '—')}</div>
+      </td>
+      <td style="padding:12px 14px;">
+        <div style="font-weight:600;font-size:.86rem;">${esc(r.referred_client_name || '—')}</div>
+        <div style="color:var(--muted2);font-size:.72rem;">${esc(r.referred_client_email || '')}</div>
+      </td>
+      <td style="padding:12px 14px;font-size:.82rem;">
+        <div>${fmt(r.order_total_price)}</div>
+        <div style="color:var(--muted2);font-size:.72rem;">${esc(r.order_payment_status || '—')} · ${esc(r.order_status || '—')}</div>
+      </td>
+      <td style="padding:12px 14px;font-size:.82rem;">
+        ${r.commission_id
+          ? `${fmt(r.commission_amount)}<div style="color:var(--muted2);font-size:.72rem;">@ ${r.commission_rate ?? '—'}% of ${fmt(r.commission_order_amount)}</div>`
+          : `<span style="color:var(--muted2);">—</span>`}
+      </td>
+      <td style="padding:12px 14px;">
+        ${cmSt ? `<span style="font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:${cmSt.color}22;color:${cmSt.color};">${cmSt.label}</span>` : '<span style="color:var(--muted2);">—</span>'}
+      </td>
+      <td style="padding:12px 14px;">
+        <span style="font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:${flag.color}22;color:${flag.color};">${flag.label}</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
 
 /* ══════════════════════════════════════════════════════════════
    TAB 5 — ANALYTICS (Phase 6)

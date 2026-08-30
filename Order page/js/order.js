@@ -860,6 +860,66 @@ const COUPONS = {
 let appliedCoupon = null;
 let discountAmount = 0;
 
+/* ── Phase: Manual referral code entry at order time ─────────
+   Lets a client type a referral code directly (shared verbally,
+   via SMS, WhatsApp text without a link, etc.) instead of relying
+   only on ?ref= links. Validated live against the same
+   resolve_order_referral_code RPC used for link-based capture. */
+let manualReferralCode = null;
+
+async function applyReferralCode() {
+  const input = document.getElementById('referralInput');
+  const btn   = document.getElementById('referralApplyBtn');
+  const code  = input.value.trim().toUpperCase();
+
+  if (!code) { showReferralMsg('Referral code লিখুন', 'error'); return; }
+  if (manualReferralCode && code === manualReferralCode) { removeReferralCode(); return; }
+
+  btn.disabled = true;
+  const prevText = btn.textContent;
+  btn.textContent = 'Checking…';
+
+  try {
+    const { data: resolved, error } = await window.scriptoraSupabase
+      .rpc('resolve_order_referral_code', { p_code: code });
+
+    if (error) throw error;
+
+    if (!resolved?.valid) {
+      manualReferralCode = null;
+      showReferralMsg('Invalid বা inactive referral code', 'error');
+      btn.textContent = prevText;
+      return;
+    }
+
+    manualReferralCode = resolved.code;
+    btn.textContent = 'Remove';
+    btn.classList.add('remove');
+    showReferralMsg('✓ Referral code apply হয়েছে!', 'success');
+
+  } catch (err) {
+    console.warn('[Referral] manual apply error:', err);
+    manualReferralCode = null;
+    showReferralMsg('এই মুহূর্তে check করা যাচ্ছে না, পরে চেষ্টা করুন', 'error');
+    btn.textContent = prevText;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function removeReferralCode() {
+  manualReferralCode = null;
+  document.getElementById('referralInput').value = '';
+  const btn = document.getElementById('referralApplyBtn');
+  btn.textContent = 'Apply'; btn.classList.remove('remove');
+  showReferralMsg('', '');
+}
+
+function showReferralMsg(text, type) {
+  const el = document.getElementById('referralMsg');
+  if (!el) return; el.textContent = text; el.className = 'coupon-msg ' + type;
+}
+
 function applyCoupon() {
   const code = document.getElementById('couponInput').value.trim().toUpperCase();
   const btn  = document.getElementById('couponApplyBtn');
@@ -1051,17 +1111,23 @@ async function nextStep() {
     //    already-attributed client) ──────────────────────────────────
     let referredByCodeVal = null;
     try {
-      // 1. Priority: the client's own permanent attribution set at registration
+      // 1. Highest priority: a code the client manually typed & applied
+      //    on THIS order (Step 5 Referral box) — the most explicit signal.
+      let candidateCode = manualReferralCode || null;
+
+      // 2. Next: the client's own permanent attribution set at registration
       //    (Phase 5). This must not be overwritten by a newer/session ref code.
-      const { data: clientRow } = await window.scriptoraSupabase
-        .from('clients')
-        .select('referred_by_code')
-        .eq('id', client_id)
-        .maybeSingle();
+      if (!candidateCode) {
+        const { data: clientRow } = await window.scriptoraSupabase
+          .from('clients')
+          .select('referred_by_code')
+          .eq('id', client_id)
+          .maybeSingle();
 
-      let candidateCode = (clientRow?.referred_by_code || '').trim().toUpperCase() || null;
+        candidateCode = (clientRow?.referred_by_code || '').trim().toUpperCase() || null;
+      }
 
-      // 2. Fallback: an ?ref=CODE / sessionStorage code from this visit
+      // 3. Fallback: an ?ref=CODE / sessionStorage code from this visit
       //    (same mechanism as Register page), only if no permanent attribution exists.
       if (!candidateCode) {
         candidateCode = (new URLSearchParams(window.location.search).get('ref')

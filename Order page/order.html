@@ -756,6 +756,19 @@
           <div class="coupon-msg" id="couponMsg"></div>
         </div>
 
+        <!-- REFERRAL CODE SECTION -->
+        <div class="coupon-box" id="referralBox">
+          <div class="coupon-head">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>কারো Referral Code দিয়ে এসেছেন?</span>
+          </div>
+          <div class="coupon-input-row">
+            <input type="text" id="referralInput" placeholder="Referral code লিখুন..." autocomplete="off" oninput="this.value=this.value.toUpperCase()" />
+            <button class="coupon-apply-btn" id="referralApplyBtn" onclick="applyReferralCode()">Apply</button>
+          </div>
+          <div class="coupon-msg" id="referralMsg"></div>
+        </div>
+
         <label class="terms-row">
           <input type="checkbox" id="termsChk">
           <span>আমি Scriptora এর <a href="#">Terms & Conditions</a>, <a href="#">Revision Policy</a> ও <a href="#">Confidentiality Agreement</a> পড়েছি ও সম্মত আছি</span>

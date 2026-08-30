@@ -1694,6 +1694,7 @@ async function loadAffiliateState(force = false) {
       _affStateLoaded = true;
       loadAffiliateEarnings(aff.id);
       loadAffiliateWithdrawals(aff.id);
+      loadAffiliateMyReferrals(); /* Phase 18 */
       loadAffiliateStats();
       initAffiliateShareKit(aff.referral_code); /* Phase 9 */
       loadAffiliatePayoutSettings(); /* Phase 10 */
@@ -1787,7 +1788,7 @@ let _affReferralUrl = '';
 
 function affiliateReferralUrlFor(code) {
   /* Actual production origin — never hardcoded */
-  return window.location.origin + '/Affiliate/index.html?ref=' + encodeURIComponent(code);
+  return window.location.origin + '/Pricing page/pricing.html?ref=' + encodeURIComponent(code);
 }
 
 const AFF_SHARE_MESSAGES = [
@@ -2157,6 +2158,59 @@ async function loadAffiliateWithdrawals(affiliateId) {
   } catch (err) {
     console.error('[Affiliate] loadAffiliateWithdrawals error:', err);
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Withdrawal history load করতে সমস্যা হয়েছে।</td></tr>';
+  }
+}
+
+/* ── Phase 18: Affiliate self-service referral tracking ─────── */
+async function loadAffiliateMyReferrals() {
+  const tbody = document.getElementById('affMyReferralsTbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">লোড হচ্ছে…</td></tr>';
+
+  try {
+    const { data: rows, error } = await sb.rpc('get_my_affiliate_referrals');
+    if (error) throw error;
+
+    if (!rows || rows.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align:center;padding:28px 12px;">
+            <div style="color:var(--text-muted);font-size:12px;font-family:'Noto Sans Bengali',sans-serif;">
+              এখনো কেউ আপনার কোড দিয়ে join করেনি। আপনার referral link শেয়ার করুন।
+            </div>
+          </td>
+        </tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => {
+      const dt = r.registered_at
+        ? new Date(r.registered_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+        : '—';
+      const orderCount = Number(r.order_count || 0);
+      const converted  = orderCount > 0;
+      const st = converted
+        ? { color: '#34d399', label: 'Converted' }
+        : { color: 'var(--text-muted)', label: 'Registered' };
+
+      return `
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 8px;font-size:12px;color:var(--text-secondary);">
+            <div style="font-weight:600;">${escHtml(r.client_name || '—')}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${escHtml(r.client_email || '')}</div>
+          </td>
+          <td style="padding:10px 8px;font-size:11px;color:var(--text-muted);">${dt}</td>
+          <td style="padding:10px 8px;font-size:12px;font-weight:700;color:var(--accent-light);text-align:center;">${orderCount}</td>
+          <td style="padding:10px 8px;">
+            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${st.color}20;color:${st.color};">${st.label}</span>
+          </td>
+        </tr>`;
+    }).join('');
+
+  } catch (err) {
+    console.error('[Affiliate] loadAffiliateMyReferrals error:', err);
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Referral list load করতে সমস্যা হয়েছে।</td></tr>';
   }
 }
 

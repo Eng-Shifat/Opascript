@@ -38,6 +38,9 @@
         <button id="tabBtnAnalytics" class="aff-tab-btn" onclick="switchTab('analytics')">
           <i class="ti ti-chart-bar"></i> Analytics
         </button>
+        <button id="tabBtnReconciliation" class="aff-tab-btn" onclick="switchTab('reconciliation')">
+          <i class="ti ti-git-compare"></i> Reconciliation
+        </button>
       </div>
       <button class="cl-add-btn" onclick="refreshCurrentTab()" style="background:linear-gradient(135deg,#2563eb,#3b82f6);">
         <i class="ti ti-refresh"></i> Refresh
@@ -377,6 +380,68 @@
       </div>
 
     </div><!-- /tabAnalytics -->
+
+    <!-- ══ RECONCILIATION TAB (Phase 19) ═══════════════════════ -->
+    <div id="tabReconciliation" style="display:none;">
+
+      <!-- Stats -->
+      <div class="cl-stats">
+        <div class="cl-stat">
+          <div class="cl-stat-label">Referred Orders</div>
+          <div class="cl-stat-val blue" id="rc-total">—</div>
+          <div class="cl-stat-sub">Referral code যুক্ত সব order</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Missing Commission</div>
+          <div class="cl-stat-val red" id="rc-missing">—</div>
+          <div class="cl-stat-sub">Paid কিন্তু commission নেই</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Amount Mismatch</div>
+          <div class="cl-stat-val yellow" id="rc-mismatch">—</div>
+          <div class="cl-stat-sub">Order/commission amount না মিললে</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Reconciled OK</div>
+          <div class="cl-stat-val green" id="rc-ok">—</div>
+          <div class="cl-stat-sub">সব ঠিক আছে</div>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div style="margin:18px 0 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;gap:6px;">
+          <button class="cl-filter-chip active" data-f="all" onclick="filterReconciliation('all',this)">All</button>
+          <button class="cl-filter-chip" data-f="missing_commission" onclick="filterReconciliation('missing_commission',this)">Missing Commission</button>
+          <button class="cl-filter-chip" data-f="order_amount_drift" onclick="filterReconciliation('order_amount_drift',this)">Order Drift</button>
+          <button class="cl-filter-chip" data-f="commission_amount_mismatch" onclick="filterReconciliation('commission_amount_mismatch',this)">Commission Mismatch</button>
+        </div>
+        <input id="rcSearch" type="text" placeholder="Order #, Affiliate বা Client দিয়ে খুঁজুন…"
+          oninput="filterReconciliation()"
+          style="flex:1;min-width:200px;background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 14px;font-size:.85rem;outline:none;font-family:inherit;">
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+          <thead>
+            <tr style="background:var(--bg-card2);text-align:left;">
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Order</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Affiliate</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Referred Client</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Order Amt / Payment</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Commission</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Comm. Status</th>
+              <th style="padding:12px 14px;color:var(--muted2);font-weight:600;border-bottom:1px solid var(--border);">Flag</th>
+            </tr>
+          </thead>
+          <tbody id="rcTbody">
+            <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted2);font-size:.82rem;">লোড হচ্ছে…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /tabReconciliation -->
 
   </div>
 </div>
