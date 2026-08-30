@@ -2132,6 +2132,16 @@ async function loadAffiliateWithdrawals(affiliateId) {
         : '—';
       const amt = '৳' + Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
       const method = (w.payment_method || '—').toUpperCase();
+      const cancelBtn = w.status === 'pending'
+        ? `<button onclick="affiliateCancelWithdrawal('${w.id}')"
+                   style="margin-top:4px;font-size:10px;font-weight:600;color:#f87171;background:rgba(248,113,113,.1);
+                          border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:2px 8px;cursor:pointer;
+                          display:block;transition:background .2s;"
+                   onmouseover="this.style.background='rgba(248,113,113,.2)'"
+                   onmouseout="this.style.background='rgba(248,113,113,.1)'">
+             বাতিল করুন
+           </button>`
+        : '';
       return `
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:10px 8px;font-size:11px;color:var(--text-muted);">${dt}</td>
@@ -2139,6 +2149,7 @@ async function loadAffiliateWithdrawals(affiliateId) {
           <td style="padding:10px 8px;font-size:11px;color:var(--text-secondary);">${method}</td>
           <td style="padding:10px 8px;">
             <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${st.color}20;color:${st.color};">${st.label}</span>
+            ${cancelBtn}
           </td>
         </tr>`;
     }).join('');
@@ -2146,6 +2157,45 @@ async function loadAffiliateWithdrawals(affiliateId) {
   } catch (err) {
     console.error('[Affiliate] loadAffiliateWithdrawals error:', err);
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Withdrawal history load করতে সমস্যা হয়েছে।</td></tr>';
+  }
+}
+
+/* ── Phase 15: Affiliate self-cancel pending withdrawal ─────── */
+async function affiliateCancelWithdrawal(withdrawalId) {
+  if (!confirm('এই Withdrawal Request বাতিল করবেন?\n\nটাকা আপনার balance-এ ফেরত যাবে।')) return;
+
+  try {
+    const { data, error } = await sb.rpc('affiliate_cancel_withdrawal', {
+      p_withdrawal_id: withdrawalId
+    });
+    if (error) throw error;
+    if (data?.success === false) {
+      alert('❌ ' + (data.message || 'Cancel করা যায়নি।'));
+      return;
+    }
+
+    /* Refresh withdrawal list + earnings panel */
+    const affId = data?.affiliate_id || null;
+    if (affId) {
+      await loadAffiliateWithdrawals(affId);
+      await loadAffiliateEarnings(affId);
+    } else {
+      /* Fallback: reload the whole affiliate section */
+      loadAffiliateSection?.();
+    }
+
+    /* Show inline toast */
+    const msg = document.getElementById('affWithdrawMsg');
+    if (msg) {
+      msg.textContent = '✅ Withdrawal Request বাতিল হয়েছে। Balance ফেরত দেওয়া হয়েছে।';
+      msg.style.color = '#34d399';
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 4000);
+    }
+
+  } catch (err) {
+    console.error('[Affiliate] cancelWithdrawal error:', err);
+    alert('❌ ' + (err.message || 'Cancel করতে সমস্যা হয়েছে।'));
   }
 }
 
@@ -2199,7 +2249,11 @@ async function affiliateRequestWithdrawal() {
 
   } catch (err) {
     console.error('[Affiliate] withdrawal error:', err);
-    if (msgEl) { msgEl.textContent = err.message || 'সমস্যা হয়েছে'; msgEl.className = 'profile-msg error'; }
+    /* Phase 16: DB unique constraint — pending withdrawal already exists */
+    const friendlyMsg = err.code === '23505'
+      ? 'আপনার একটি Pending Withdrawal Request ইতিমধ্যে রয়েছে।'
+      : (err.message || 'সমস্যা হয়েছে');
+    if (msgEl) { msgEl.textContent = friendlyMsg; msgEl.className = 'profile-msg error'; }
   } finally {
     if (btn) {
       btn.disabled = false;

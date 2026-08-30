@@ -446,6 +446,21 @@
                   ? '৳' + Number(commData.commission_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })
                   : '';
                 autoCommissionMsg = ` Affiliate commission ${amt} recorded.`;
+
+                /* Phase 17: tier upgrade check (fire-and-forget) */
+                try {
+                  const { data: affComm } = await window._sb()
+                    .from('affiliate_commissions')
+                    .select('affiliate_id')
+                    .eq('order_id', window._currentOrderId)
+                    .maybeSingle();
+                  if (affComm?.affiliate_id) {
+                    await window._sb().rpc('check_and_upgrade_affiliate_tier', {
+                      p_affiliate_id: affComm.affiliate_id
+                    });
+                  }
+                } catch (_te) { /* non-critical */ }
+
               } else if (commErr) {
                 console.warn('[Affiliate] auto commission error:', commErr);
               }

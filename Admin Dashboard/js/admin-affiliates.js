@@ -562,6 +562,21 @@ window.adminRecordCommission = async function(orderId) {
           message: `একটি সফল Referral Order-এর জন্য আপনার Wallet-এ ৳${Number(amtVal || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Commission যোগ হয়েছে।`,
           amount: amtVal
         });
+
+        /* Phase 17: check tier upgrade (fire-and-forget) */
+        try {
+          const { data: tierResult } = await sb.rpc('check_and_upgrade_affiliate_tier', {
+            p_affiliate_id: cmRow.affiliate_id
+          });
+          if (tierResult?.upgraded) {
+            showToast(
+              `🏆 Tier Upgrade! ${tierResult.old_tier} → ${tierResult.new_tier} (${tierResult.new_rate}%)`,
+              '#f59e0b'
+            );
+          }
+        } catch (te) {
+          console.warn('[Affiliate Tier] upgrade check failed (non-critical):', te);
+        }
       } catch (e) {
         console.error('[Affiliate Notify] commission lookup failed:', e);
       }
