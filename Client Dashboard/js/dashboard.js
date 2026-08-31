@@ -2002,7 +2002,7 @@ async function loadAffiliateEarnings(affiliateId) {
 
     const { data: comms, error } = await sb
       .from('affiliate_commissions')
-      .select('id, order_id, order_amount, commission_amount, status, created_at')
+      .select('id, order_id, order_amount, paid_amount, commission_amount, status, created_at')
       .eq('affiliate_id', affiliateId)
       .order('created_at', { ascending: false });
 
@@ -2051,38 +2051,68 @@ async function loadAffiliateEarnings(affiliateId) {
       return;
     }
 
-    /* Fetch order numbers for display */
+    /* Fetch order numbers + payment info for display */
     const orderIds = [...new Set(comms.map(c => c.order_id))];
     const { data: orders } = await sb
       .from('orders')
-      .select('id, order_number')
+      .select('id, order_number, advance_paid, total_price, payment_status, status')
       .in('id', orderIds);
 
     const orderMap = {};
-    (orders || []).forEach(o => {
-      orderMap[o.id] = o.order_number || o.id.slice(0, 8).toUpperCase();
-    });
+    (orders || []).forEach(o => { orderMap[o.id] = o; });
 
     tbodyEl.innerHTML = comms.map(c => {
-      const orderNum   = orderMap[c.order_id] || c.order_id?.slice(0, 8).toUpperCase() || '—';
+      const order      = orderMap[c.order_id] || {};
+      const orderNum   = order.order_number || c.order_id?.slice(0, 8).toUpperCase() || '—';
       const date       = c.created_at
         ? new Date(c.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
         : '—';
-      const orderAmt   = '৳' + Number(c.order_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-      const commAmt    = '৳' + Number(c.commission_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-      const statusMap  = {
+
+      const totalAmt   = Number(c.order_amount  || 0);
+      const paidAmt    = Number(c.paid_amount   || order.advance_paid || 0);
+      const commAmt    = Number(c.commission_amount || 0);
+      const paidPct    = totalAmt > 0 ? Math.min(100, Math.round(paidAmt / totalAmt * 100)) : 0;
+      const dueAmt     = Math.max(0, totalAmt - paidAmt);
+
+      const fmtAmt = n => '৳' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+      const statusMap = {
         earned:    { color: '#34d399', label: 'Earned' },
-        withdrawn: { color: '#f59e0b', label: 'Withdrawn' },
+        pending:   { color: '#f59e0b', label: 'Pending' },
+        withdrawn: { color: '#60a5fa', label: 'Withdrawn' },
         cancelled: { color: '#f87171', label: 'Cancelled' },
       };
       const st = statusMap[c.status] || { color: 'var(--text-muted)', label: c.status };
+
+      /* Pending row: show progress bar + paid/due breakdown */
+      const isPending = c.status === 'pending';
+      const progressBar = isPending ? `
+        <div style="margin-top:6px;">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-bottom:3px;">
+            <span>Paid: ${fmtAmt(paidAmt)}</span>
+            <span>Due: ${fmtAmt(dueAmt)}</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.08);border-radius:4px;height:5px;overflow:hidden;">
+            <div style="background:#f59e0b;height:100%;width:${paidPct}%;border-radius:4px;transition:width .4s;"></div>
+          </div>
+          <div style="font-size:10px;color:#f59e0b;margin-top:3px;">⏳ কাজ চলছে — সম্পূর্ণ payment পেলে commission Earned হবে</div>
+        </div>` : '';
+
+      /* Commission amount display — pending shows expected amount greyed */
+      const commDisplay = isPending
+        ? `<span style="color:#f59e0b;font-weight:700;">${fmtAmt(commAmt)}</span>
+           <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">প্রত্যাশিত (pending)</div>`
+        : `<span style="color:#34d399;font-weight:700;">${fmtAmt(commAmt)}</span>`;
 
       return `
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:10px 8px;font-size:12px;font-weight:600;color:var(--accent-light);font-family:'Sora',monospace;">${orderNum}</td>
           <td style="padding:10px 8px;font-size:11px;color:var(--text-muted);">${date}</td>
-          <td style="padding:10px 8px;font-size:12px;color:var(--text-secondary);">${orderAmt}</td>
-          <td style="padding:10px 8px;font-size:12px;font-weight:700;color:#34d399;">${commAmt}</td>
+          <td style="padding:10px 8px;font-size:12px;color:var(--text-secondary);">
+            ${fmtAmt(totalAmt)}
+            ${progressBar}
+          </td>
+          <td style="padding:10px 8px;font-size:12px;">${commDisplay}</td>
           <td style="padding:10px 8px;">
             <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${st.color}20;color:${st.color};">${st.label}</span>
           </td>

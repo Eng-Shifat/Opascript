@@ -407,11 +407,12 @@
             ✅ Order moves to 'writing' (running) so countdown starts on client side.
             ✅ Admin must deliver files manually, then mark status 'completed'. */
       let autoCommissionMsg = '';
+      /* Determine correct running status — declared here so both branches can access */
+      const currentStatusFull = window._currentOrder?._rawDB?.status || window._currentOrder?.status || 'pending';
+      const preStartStatusesFull = ['pending', 'confirmed', 'payment_received', 'payment_done', 'hold'];
+      const newOrderStatusFull = preStartStatusesFull.includes(currentStatusFull) ? 'writing' : currentStatusFull;
+      const newOrderStatus = newOrderStatusFull;
       if (due === 0) {
-        /* Determine correct running status — keep current stage if already mid-flow */
-        const currentStatusFull = window._currentOrder?._rawDB?.status || window._currentOrder?.status || 'pending';
-        const preStartStatusesFull = ['pending', 'confirmed', 'payment_received', 'payment_done', 'hold'];
-        const newOrderStatusFull = preStartStatusesFull.includes(currentStatusFull) ? 'writing' : currentStatusFull;
 
         await window._sb().from('orders').update({
           payment_status: 'paid',
@@ -497,10 +498,6 @@
            NOT go back to pending. Client paid an advance, so work begins.
            Only set to 'writing' if order was in a pre-start state (pending/confirmed).
            If order was already in a later stage (in_review, draft_ready etc.), keep it. */
-        const currentStatus = window._currentOrder?._rawDB?.status || window._currentOrder?.status || 'pending';
-        const preStartStatuses = ['pending', 'confirmed', 'payment_received', 'payment_done', 'hold'];
-        const newOrderStatus = preStartStatuses.includes(currentStatus) ? 'writing' : currentStatus;
-
         await window._sb().from('orders').update({
           payment_status: 'approved',
           advance_paid:   newTotalPaid,
