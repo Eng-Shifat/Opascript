@@ -9,6 +9,56 @@
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function fmtNum(n) { return Number(n).toLocaleString('en-IN'); }
 
+  /* ── Referral code — URL ?ref= অথবা sessionStorage থেকে ── */
+  const _urlRef = new URLSearchParams(window.location.search).get('ref') || '';
+  if (_urlRef) sessionStorage.setItem('op_ref_code', _urlRef.toUpperCase());
+  function getRefCode() {
+    return (document.getElementById('opRefCode')?.value.trim().toUpperCase()) ||
+           sessionStorage.getItem('op_ref_code') || '';
+  }
+
+  /* ── Click tracking — ?ref= থাকলে affiliate_clicks এ insert ── */
+  async function trackAffiliateClick(refCode) {
+    try {
+      const sb = window.scriptoraSupabase;
+      if (!sb || !refCode) return;
+
+      /* আগে clicked কিনা check — same session এ duplicate avoid */
+      if (sessionStorage.getItem('op_click_tracked_' + refCode)) return;
+
+      /* affiliate_id বের করো referral_code দিয়ে */
+      const { data: aff } = await sb
+        .from('affiliates')
+        .select('id')
+        .eq('referral_code', refCode)
+        .maybeSingle();
+
+      if (!aff?.id) return;
+
+      /* IP hash — privacy-safe fingerprint */
+      const ua = navigator.userAgent || '';
+      const raw = ua + (screen.width || '') + (screen.height || '') + (navigator.language || '');
+      const msgBuffer = new TextEncoder().encode(raw);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const ipHash = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+
+      await sb.from('affiliate_clicks').insert({
+        referral_code: refCode,
+        affiliate_id:  aff.id,
+        ip_hash:       ipHash,
+        user_agent:    ua.slice(0, 300),
+        landed_at:     new Date().toISOString(),
+        converted:     false,
+      });
+
+      sessionStorage.setItem('op_click_tracked_' + refCode, '1');
+    } catch (_) {}
+  }
+
+  /* URL-এ ?ref= থাকলে page load-এ immediately track করো */
+  if (_urlRef) trackAffiliateClick(_urlRef.toUpperCase());
+
   /* ────────────────────────────────
      BUILD ORDER POPUP HTML
   ──────────────────────────────── */
@@ -283,6 +333,21 @@
             <div class="op-file-sub">PDF, Word, PPT, Excel, Images</div>
           </div>
           <div class="op-file-list" id="opFileList"></div>
+        </div>
+
+        <!-- Referral code -->
+        <div class="op-field-group">
+          <label class="op-field-label">Referral Code <span class="op-optional">(Optional)</span></label>
+          <div class="op-input-wrap" style="border:1.5px solid rgba(139,92,246,0.45);border-radius:10px;background:rgba(139,92,246,0.07);">
+            <span class="op-input-icon">🎟️</span>
+            <input class="op-input" id="opRefCode" type="text" placeholder="Enter referral code (if any)"
+              value="${esc(getRefCode())}"
+              oninput="this.value=this.value.toUpperCase()"
+              style="background:transparent;letter-spacing:0.05em;font-family:monospace;font-size:.92rem;"/>
+          </div>
+          <div style="font-size:.72rem;color:rgba(139,92,246,0.8);margin-top:5px;padding-left:2px;">
+            🎁 কারো referral link থেকে এসে থাকলে তার code এখানে দিন
+          </div>
         </div>
 
         <!-- Privacy note -->
@@ -702,12 +767,24 @@
             notes ? `Notes: ${notes}`       : '',
           ].filter(Boolean).join('\n');
         })(),
+        referred_by_code: getRefCode() || null,
       };
 
       const { data: insertData, error } = await db.from('orders').insert(row).select('id').single();
       if (error) throw error;
 
       const orderId = insertData.id;
+
+      /* ── Mark affiliate click as converted ── */
+      const _trackedRef = getRefCode();
+      if (_trackedRef) {
+        try {
+          await db.from('affiliate_clicks')
+            .update({ converted: true, converted_at: new Date().toISOString() })
+            .eq('referral_code', _trackedRef)
+            .eq('converted', false);
+        } catch (_) {}
+      }
 
       /* ── Ensure scriptora_client_id is persisted in localStorage ── */
       if (clientId) localStorage.setItem('scriptora_client_id', clientId);

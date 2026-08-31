@@ -572,7 +572,7 @@ async function approvePayment(payId, orderId, amount) {
                 order_id:          orderId,
                 referral_code:     ordRef.referred_by_code,
                 order_amount:      Number(ordRef.total_price || 0),
-                commission_rate:   rate,
+                commission_rate:   rate / 100,
                 commission_amount: commAmount,
                 status:            'pending',
               });

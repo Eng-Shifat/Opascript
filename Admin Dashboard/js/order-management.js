@@ -1102,7 +1102,7 @@ async function loadRealOrders() {
     const { data, error } = await sb
       .from('orders')
       .select('*')
-      .or('payment_status.neq.unpaid,payment_status.neq.rejected,advance_paid.gt.0')
+      .or('payment_status.not.in.(unpaid,rejected),advance_paid.gt.0')
       .order('order_date', { ascending: false });
 
     if (error) throw error;
@@ -1120,7 +1120,7 @@ async function loadRealOrders() {
     if (clientIds.length) {
       const { data: clients } = await sb
         .from('clients')
-        .select('id, name, email, "University"')
+        .select('id, name, email, university')
         .in('id', clientIds);
       if (clients) clients.forEach(c => { clientMap[c.id] = c; });
     }
