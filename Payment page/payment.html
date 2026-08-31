@@ -41,8 +41,26 @@
       <!-- LEFT: Payment Method -->
       <div class="pay-left">
 
+        <!-- Pending Review Banner — shown when an earlier payment for this
+             order is still awaiting admin verification. Client must wait
+             for that one to be approved/rejected before sending another,
+             so payment history never gets cluttered with duplicate claims. -->
+        <div class="pay-card" id="pendingReviewBanner" style="display:none;border:1px solid rgba(245,158,11,0.35);background:rgba(245,158,11,0.08);">
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:4px 2px;">
+            <div style="font-size:22px;line-height:1;">⏳</div>
+            <div>
+              <div style="font-weight:700;font-size:14px;color:#f59e0b;margin-bottom:4px;">আপনার আগের payment এখনো review হচ্ছে</div>
+              <div style="font-size:13px;color:var(--text-secondary,#a5adc3);line-height:1.5;">
+                আপনি ইতিমধ্যে <b id="pendingReviewAmount">—</b> পাঠিয়েছেন এবং সেটা এখনো Admin verify করেননি।
+                আগের payment টি Approve বা Reject না হওয়া পর্যন্ত নতুন payment submit করা যাবে না —
+                এতে আপনার payment history পরিষ্কার থাকবে এবং কোনো টাকা ভুলবশত দুইবার count হবে না।
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Method Select -->
-        <div class="pay-card">
+        <div class="pay-card" id="payMethodCard">
           <div class="card-head">
             <div class="card-head-dot"></div>
             <span>PAYMENT METHOD বেছে নিন</span>
@@ -220,7 +238,7 @@
         </div>
 
         <!-- Payment Info Form -->
-        <div class="pay-card">
+        <div class="pay-card" id="payInfoFormCard">
           <div class="card-head">
             <div class="card-head-dot"></div>
             <span>PAYMENT তথ্য দিন</span>

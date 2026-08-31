@@ -149,6 +149,49 @@ function loadNewOrderMode() {
 }
 
 // ── MODE B: Existing order — fetch live due amount from Supabase ────────────
+// ── Guard: is there an unconfirmed payment already sitting in review? ───────
+// Returns the pending row (or null). Used both on page load (to lock the
+// form) and right before submit (to catch race conditions — e.g. two tabs
+// open, or admin approving in another window at the same moment).
+let _pendingReviewPay = null;
+
+async function checkPendingReviewPayment(orderId) {
+  const sb = window.scriptoraSupabase;
+  if (!sb || !orderId) return null;
+  const { data } = await sb
+    .from('payments')
+    .select('id, amount, method, paid_at')
+    .eq('order_id', orderId)
+    .eq('confirmed', false)
+    .in('type', ['pending', 'advance'])
+    .order('paid_at', { ascending: false })
+    .limit(1);
+  return (data && data[0]) || null;
+}
+
+function lockPaymentFormForReview(pendingPay) {
+  const banner   = document.getElementById('pendingReviewBanner');
+  const amtEl    = document.getElementById('pendingReviewAmount');
+  const methodEl = document.getElementById('payMethodCard');
+  const formEl   = document.getElementById('payInfoFormCard');
+  const btn      = document.querySelector('.pay-btn');
+
+  if (amtEl) amtEl.textContent = '৳' + Number(pendingPay.amount || 0).toLocaleString();
+  if (banner) banner.style.display = 'block';
+  if (methodEl) methodEl.style.display = 'none';
+  if (formEl) formEl.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ আগের payment review হচ্ছে'; }
+}
+
+function unlockPaymentForm() {
+  const banner   = document.getElementById('pendingReviewBanner');
+  const methodEl = document.getElementById('payMethodCard');
+  const formEl   = document.getElementById('payInfoFormCard');
+  if (banner) banner.style.display = 'none';
+  if (methodEl) methodEl.style.display = '';
+  if (formEl) formEl.style.display = '';
+}
+
 async function loadDuePaymentMode(orderId) {
   const sb = window.scriptoraSupabase;
   if (!sb) {
@@ -166,6 +209,16 @@ async function loadDuePaymentMode(orderId) {
     if (error || !ord) {
       setText('sumTitle', 'Order পাওয়া যায়নি');
       return;
+    }
+
+    /* Block a fresh payment while an earlier one for this order is still
+       awaiting admin verification — keeps the payment history clean and
+       stops the client from "double submitting" for the same due amount. */
+    _pendingReviewPay = await checkPendingReviewPayment(orderId);
+    if (_pendingReviewPay) {
+      lockPaymentFormForReview(_pendingReviewPay);
+    } else {
+      unlockPaymentForm();
     }
 
     const { data: approvedPays } = await sb
@@ -351,6 +404,16 @@ async function submitPayment() {
     }
     if (amount <= 0) {
       errEl.textContent = 'এই order সম্পূর্ণ পরিশোধিত — নতুন payment প্রয়োজন নেই।';
+      return;
+    }
+
+    /* Re-check right before insert — catches the case where a pending
+       payment appeared after the page loaded (another tab, or the client
+       sat on this page for a while). */
+    const stillPending = await checkPendingReviewPayment(order_id);
+    if (stillPending) {
+      lockPaymentFormForReview(stillPending);
+      alert('আপনার আগের payment এখনো Admin review করেননি। সেটা Approve/Reject না হওয়া পর্যন্ত নতুন payment পাঠানো যাবে না।');
       return;
     }
   } else {
