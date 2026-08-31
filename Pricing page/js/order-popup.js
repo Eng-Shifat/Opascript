@@ -586,7 +586,7 @@
       /* ── Order number — same sequential RPC as order.js to keep prefix consistent ── */
       const now     = new Date();
       const yyyymm  = now.toISOString().slice(0, 7).replace('-', '');   // e.g. "202608"
-      const { data: seqData, error: seqErr } = await supabase
+      const { data: seqData, error: seqErr } = await db
         .rpc('get_next_order_number', { p_yyyymm: yyyymm });
       if (seqErr || !seqData) {
         console.error('Order number RPC failed:', seqErr);
@@ -666,11 +666,10 @@
           return topic;
         })(),
         page_count:           pageCount,
-        pages:                pageCount ? String(pageCount) : null,
+        pages:                document.getElementById('opPages')?.value.trim() || (pageCount ? String(pageCount) : null),
         department:           document.getElementById('opDepartment')?.value.trim() || null,
         university:           document.getElementById('opUniversity')?.value.trim() || null,
         language:             document.getElementById('opLanguage')?.value || null,
-        pages:                document.getElementById('opPages')?.value.trim() || null,
         special_instructions: (() => {
           const isCV = (opts.serviceId === 'cv-writing');
           if (isCV) {

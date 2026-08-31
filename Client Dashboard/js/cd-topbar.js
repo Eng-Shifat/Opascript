@@ -77,30 +77,53 @@ async function cdLoadNotifications() {
   list.innerHTML = '<div style="padding:20px;text-align:center;color:#64748b;font-size:13px;font-family:Sora,sans-serif;">Loading...</div>';
 
   try {
-    /* Step 1: get all order ids for this client */
-    const { data: orders, error: oErr } = await sb
+    /* ── Fetch order-based client_notifications ── */
+    let orderNotifs = [];
+    const { data: orders } = await sb
       .from('orders')
       .select('id')
       .eq('client_id', window.currentUser.id);
 
-    if (oErr) throw oErr;
-    if (!orders || !orders.length) { cdRenderNotifEmpty(list); return; }
+    if (orders && orders.length) {
+      const ids = orders.map(o => o.id);
+      const { data: notifs } = await sb
+        .from('client_notifications')
+        .select('*')
+        .in('order_id', ids)
+        .order('created_at', { ascending: false })
+        .limit(15);
+      orderNotifs = notifs || [];
+    }
 
-    const ids = orders.map(o => o.id);
-
-    /* Step 2: fetch notifications matching those order ids */
-    const { data: notifs, error: nErr } = await sb
-      .from('client_notifications')
-      .select('*')
-      .in('order_id', ids)
+    /* ── Fetch affiliate_notifications ── */
+    let affNotifs = [];
+    const { data: affRows } = await sb
+      .from('affiliate_notifications')
+      .select('id, type, title, message, amount, is_read, created_at')
+      .eq('client_id', window.currentUser.id)
       .order('created_at', { ascending: false })
-      .limit(15);
+      .limit(10);
+    /* Normalise to the same shape cdRenderNotifications expects */
+    affNotifs = (affRows || []).map(n => ({
+      id:         n.id,
+      type:       n.type,
+      /* Use title as message so the bell shows it */
+      message:    n.title + (n.message ? ' — ' + n.message : ''),
+      is_read:    n.is_read,
+      created_at: n.created_at,
+      order_id:   null,          /* affiliate notifs have no order_id */
+      _is_affiliate: true,       /* flag so click handler knows */
+    }));
 
-    if (nErr) throw nErr;
-    if (!notifs || !notifs.length) { cdRenderNotifEmpty(list); return; }
+    /* ── Merge, sort newest-first, cap at 20 ── */
+    const merged = [...orderNotifs, ...affNotifs]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 20);
 
-    cdRenderNotifications(list, notifs);
-    cdUpdateNotifBadge(notifs);
+    if (!merged.length) { cdRenderNotifEmpty(list); return; }
+
+    cdRenderNotifications(list, merged);
+    cdUpdateNotifBadge(merged);
   } catch(e) {
     console.warn('[Topbar] notif load error:', e);
     cdRenderNotifEmpty(list);
@@ -117,11 +140,21 @@ function cdRenderNotifEmpty(list) {
 
 function cdRenderNotifications(list, notifs) {
   const iconMap = {
+    /* order notifications */
     file_uploaded:    { cls: 'file',    icon: '📎' },
     status_change:    { cls: 'status',  icon: '✅' },
     message:          { cls: 'message', icon: '💬' },
     payment_approved: { cls: 'status',  icon: '💰' },
     payment_rejected: { cls: 'file',    icon: '❌' },
+    /* affiliate notifications */
+    application_approved: { cls: 'status',  icon: '🎉' },
+    application_rejected: { cls: 'file',    icon: '⚠️' },
+    commission_earned:    { cls: 'status',  icon: '💰' },
+    commission_cancelled: { cls: 'file',    icon: '⚠️' },
+    withdrawal_approved:  { cls: 'status',  icon: '✅' },
+    withdrawal_rejected:  { cls: 'file',    icon: '🚫' },
+    withdrawal_paid:      { cls: 'status',  icon: '🎉' },
+    tier_upgraded:        { cls: 'status',  icon: '🏆' },
   };
 
   list.innerHTML = notifs.map(n => {
@@ -133,8 +166,9 @@ function cdRenderNotifications(list, notifs) {
           hour: '2-digit', minute: '2-digit', hour12: true
         })
       : '';
+    const isAffiliate = n._is_affiliate ? 'true' : 'false';
     return `
-      <div class="cd-notif-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" onclick="cdNotifClick('${n.id}','${n.order_id || ''}','${n.type || ''}',this)">
+      <div class="cd-notif-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" onclick="cdNotifClick('${n.id}','${n.order_id || ''}','${n.type || ''}',this,${isAffiliate})">
         <div class="cd-notif-icon ${info.cls}">${info.icon}</div>
         <div class="cd-notif-content">
           <div class="cd-notif-msg">${_esc(n.message || '')}</div>
@@ -162,10 +196,15 @@ window.cdMarkRead = async function(id, el) {
 window.cdMarkAllRead = async function() {
   if (typeof sb === 'undefined' || !window.currentUser) return;
   try {
+    /* Mark order-based notifications read */
     const { data: orders } = await sb.from('orders').select('id').eq('client_id', window.currentUser.id);
-    if (!orders?.length) return;
-    const ids = orders.map(o => o.id);
-    await sb.from('client_notifications').update({ is_read: true }).in('order_id', ids).eq('is_read', false);
+    if (orders?.length) {
+      const ids = orders.map(o => o.id);
+      await sb.from('client_notifications').update({ is_read: true }).in('order_id', ids).eq('is_read', false);
+    }
+    /* Mark affiliate notifications read */
+    await sb.rpc('mark_affiliate_notifications_read', { p_ids: null });
+
     document.querySelectorAll('.cd-notif-item.unread').forEach(el => el.classList.remove('unread'));
     const dot = document.getElementById('cdNotifDot');
     if (dot) dot.style.display = 'none';
@@ -175,16 +214,30 @@ window.cdMarkAllRead = async function() {
 async function cdCheckUnreadCount() {
   if (typeof sb === 'undefined' || !window.currentUser) return;
   try {
+    let total = 0;
+
+    /* Order-based unread */
     const { data: orders } = await sb.from('orders').select('id').eq('client_id', window.currentUser.id);
-    if (!orders?.length) return;
-    const ids = orders.map(o => o.id);
-    const { count } = await sb
-      .from('client_notifications')
+    if (orders?.length) {
+      const ids = orders.map(o => o.id);
+      const { count: orderCount } = await sb
+        .from('client_notifications')
+        .select('id', { count: 'exact', head: true })
+        .in('order_id', ids)
+        .eq('is_read', false);
+      total += orderCount || 0;
+    }
+
+    /* Affiliate unread */
+    const { count: affCount } = await sb
+      .from('affiliate_notifications')
       .select('id', { count: 'exact', head: true })
-      .in('order_id', ids)
+      .eq('client_id', window.currentUser.id)
       .eq('is_read', false);
+    total += affCount || 0;
+
     const dot = document.getElementById('cdNotifDot');
-    if (dot) dot.style.display = (count > 0) ? 'block' : 'none';
+    if (dot) dot.style.display = (total > 0) ? 'block' : 'none';
   } catch(e) {}
 }
 
@@ -257,6 +310,8 @@ document.addEventListener('keydown', _cdUnlockAudio);
 /* ── Realtime: new notifications ──────────────────────── */
 function cdSetupNotifRealtime() {
   if (typeof sb === 'undefined' || !window.currentUser) return;
+
+  /* Order-based notifications */
   sb.channel('cd-notifs-' + window.currentUser.id)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'client_notifications' },
       async (payload) => {
@@ -269,16 +324,30 @@ function cdSetupNotifRealtime() {
 
         if (order?.client_id !== window.currentUser.id) return;
 
-        /* 🔔 Notification sound */
         cdPlayNotifSound('notification');
 
-        /* Show dot */
         const dot = document.getElementById('cdNotifDot');
         if (dot) dot.style.display = 'block';
 
-        /* If dropdown is open, refresh it */
         if (_cdNotifOpen) cdLoadNotifications();
       })
+    .subscribe();
+
+  /* Affiliate notifications */
+  sb.channel('cd-aff-notifs-' + window.currentUser.id)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'affiliate_notifications',
+      filter: `client_id=eq.${window.currentUser.id}`,
+    }, () => {
+      cdPlayNotifSound('notification');
+
+      const dot = document.getElementById('cdNotifDot');
+      if (dot) dot.style.display = 'block';
+
+      if (_cdNotifOpen) cdLoadNotifications();
+    })
     .subscribe();
 }
 
@@ -449,9 +518,24 @@ function cdSetupMsgRealtime() {
 }
 
 /* ── Notification click → navigate to the relevant page ─────────────────── */
-window.cdNotifClick = function(id, orderId, type, el) {
-  window.cdMarkRead(id, el);
+window.cdNotifClick = function(id, orderId, type, el, isAffiliate) {
+  /* Mark read in the correct table */
+  if (isAffiliate) {
+    el?.classList.remove('unread');
+    if (typeof sb !== 'undefined') {
+      sb.rpc('mark_affiliate_notifications_read', { p_ids: [id] }).catch(() => {});
+    }
+    cdCheckUnreadCount();
+  } else {
+    window.cdMarkRead(id, el);
+  }
   cdToggleNotif(); /* close dropdown */
+
+  /* Affiliate notifications → navigate to Affiliate tab */
+  if (isAffiliate) {
+    if (typeof showPage === 'function') showPage('affiliate');
+    return;
+  }
 
   if (!orderId) return;
   if (type === 'message') {
