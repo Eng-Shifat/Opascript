@@ -1069,9 +1069,11 @@ window.filterReferrals = function() {
 
 /* ══════════════════════════════════════════════════════════════
    TAB 6 — RECONCILIATION (Phase 19)
-   Reads: public.v_affiliate_reconciliation (view — joins orders,
-   affiliates, clients, affiliate_commissions; one row per referred
-   order, flagging missing/mismatched commissions).
+   Reads via admin-only RPC get_affiliate_reconciliation() (Phase 25
+   security fix — the underlying view v_affiliate_reconciliation no
+   longer grants direct SELECT to anon/authenticated). Same fields,
+   same joins (orders, affiliates, clients, affiliate_commissions);
+   one row per referred order, flagging missing/mismatched commissions.
 ══════════════════════════════════════════════════════════════ */
 
 async function loadReconciliation() {
@@ -1081,10 +1083,7 @@ async function loadReconciliation() {
   setTbodyLoading('rcTbody', 7);
 
   try {
-    const { data, error } = await sb
-      .from('v_affiliate_reconciliation')
-      .select('*')
-      .order('order_created_at', { ascending: false });
+    const { data, error } = await sb.rpc('get_affiliate_reconciliation');
 
     if (error) throw error;
 
