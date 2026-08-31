@@ -247,7 +247,7 @@
         <div class="op-field-group">
           <label class="op-field-label">Language / ভাষা <span class="op-optional">(Optional)</span></label>
           <div class="op-input-wrap">
-            <select class="op-input" id="opLanguage" style="cursor:pointer;">
+            <select class="op-input" id="opLanguage" style="cursor:pointer;background:#1e1e2e;color:inherit;">
               <option value="">Select language</option>
               <option value="English">English</option>
               <option value="Bengali">Bengali / বাংলা</option>

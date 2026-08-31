@@ -475,33 +475,137 @@ async function approvePayment(payId, orderId, amount) {
   const sb = window.scriptoraSupabase;
 
   try {
-    /* Mark payment confirmed */
+    /* 1. Get current order total */
+    const { data: ord } = await sb.from('orders').select('total_price').eq('id', orderId).single();
+    const rawTotal = Number(ord?.total_price || 0);
+
+    /* 2. Get the pending payment row */
+    const { data: pendingPays } = await sb.from('payments')
+      .select('id, amount, method, txn_id, client_id')
+      .eq('order_id', orderId)
+      .eq('confirmed', false)
+      .in('type', ['pending', 'advance'])
+      .order('paid_at', { ascending: false })
+      .limit(1);
+    const pendingPay = pendingPays && pendingPays[0];
+
+    /* 3. Mark payment confirmed */
     const { error: e1 } = await sb.from('payments')
-      .update({ confirmed: true, type: 'received', note: 'Approved by Admin' })
+      .update({ confirmed: true, type: 'received', note: 'Verified by Admin', amount: amount })
       .eq('id', payId);
     if (e1) throw e1;
 
-    /* Update order advance_paid + payment_status */
-    const order = ALL_ORDERS[orderId] || {};
-    const { data: latestOrder } = await sb.from('orders').select('advance_paid, total_price').eq('id', orderId).single();
-    if (latestOrder) {
-      const newAdvance = (Number(latestOrder.advance_paid)||0) + amount;
-      const total      = Number(latestOrder.total_price)||0;
-      const newDue     = Math.max(0, total - newAdvance);
-      const newStatus  = newDue === 0 ? 'confirmed' : 'writing';
-      const payStatus  = newDue === 0 ? 'paid' : 'approved';
+    /* 4. Sum all approved payments */
+    const { data: approvedPays, error: e2 } = await sb.from('payments')
+      .select('amount')
+      .eq('order_id', orderId)
+      .eq('confirmed', true)
+      .in('type', ['received', 'approval']);
+    if (e2) throw new Error('Step 3: ' + e2.message);
+    const newTotalPaid = (approvedPays || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+    const due          = Math.max(0, rawTotal - newTotalPaid);
 
-      await sb.from('orders').update({
-        advance_paid:   newAdvance,
-        due_amount:     newDue,
-        payment_status: payStatus,
-        status:         newStatus,
+    /* 5. Update order + commission + files */
+    if (due === 0) {
+      await sb.from('order_file_access').update({ download_allowed: true }).eq('order_id', orderId);
+      await sb.from('revision_files').update({ download_allowed: true }).eq('order_id', orderId);
+      const { error: e3 } = await sb.from('orders').update({
+        payment_status: 'paid',
+        advance_paid:   newTotalPaid,
+        status:         'completed',
         updated_at:     new Date().toISOString(),
       }).eq('id', orderId);
+      if (e3) throw new Error('Step 4 (paid): ' + e3.message);
+
+      /* Affiliate commission — full payment */
+      try {
+        const { data: ordRef } = await sb.from('orders').select('referred_by_code').eq('id', orderId).single();
+        if (ordRef?.referred_by_code) {
+          /* Promote pending commission → earned if exists */
+          const { data: pendingComm } = await sb.from('affiliate_commissions')
+            .select('id').eq('order_id', orderId).eq('status', 'pending').maybeSingle();
+          if (pendingComm) {
+            await sb.from('affiliate_commissions')
+              .update({ status: 'earned', order_paid_at: new Date().toISOString() })
+              .eq('id', pendingComm.id);
+          } else {
+            const { data: existingEarned } = await sb.from('affiliate_commissions')
+              .select('id').eq('order_id', orderId).maybeSingle();
+            if (!existingEarned) {
+              await sb.rpc('record_affiliate_commission', { p_order_id: orderId });
+            }
+          }
+          /* Tier upgrade */
+          try {
+            const { data: affComm } = await sb.from('affiliate_commissions')
+              .select('affiliate_id').eq('order_id', orderId).maybeSingle();
+            if (affComm?.affiliate_id)
+              await sb.rpc('check_and_upgrade_affiliate_tier', { p_affiliate_id: affComm.affiliate_id });
+          } catch (_) {}
+        }
+      } catch (_) {}
+
+    } else {
+      const { error: e4 } = await sb.from('orders').update({
+        payment_status: 'approved',
+        advance_paid:   newTotalPaid,
+        status:         'pending',
+        updated_at:     new Date().toISOString(),
+      }).eq('id', orderId);
+      if (e4) throw new Error('Step 4 (partial): ' + e4.message);
+
+      /* Affiliate commission — partial payment (pending, not withdrawable) */
+      try {
+        const { data: ordRef } = await sb.from('orders')
+          .select('referred_by_code, total_price').eq('id', orderId).single();
+        if (ordRef?.referred_by_code) {
+          const { data: existingComm } = await sb.from('affiliate_commissions')
+            .select('id').eq('order_id', orderId).maybeSingle();
+          if (!existingComm) {
+            const { data: affRow } = await sb.from('affiliates')
+              .select('id, commission_rate').eq('referral_code', ordRef.referred_by_code).maybeSingle();
+            if (affRow) {
+              const rate       = Number(affRow.commission_rate || 10);
+              const commAmount = Math.round((Number(ordRef.total_price || 0) * rate / 100) * 100) / 100;
+              await sb.from('affiliate_commissions').insert({
+                affiliate_id:      affRow.id,
+                order_id:          orderId,
+                referral_code:     ordRef.referred_by_code,
+                order_amount:      Number(ordRef.total_price || 0),
+                commission_rate:   rate,
+                commission_amount: commAmount,
+                status:            'pending',
+              });
+            }
+          }
+        }
+      } catch (_) {}
     }
 
+    /* 6. Notify client */
+    const clientId = pendingPay?.client_id || null;
+    const notifyMsg = due === 0
+      ? `✅ আপনার সম্পূর্ণ payment পাওয়া গেছে! Payment Confirmed। Files এখন unlock হয়েছে।`
+      : `✅ ৳${Number(amount).toLocaleString()} payment confirmed। বাকি ৳${Number(due).toLocaleString()} পরিশোধ করুন।`;
+    try {
+      await sb.from('client_notifications').insert({
+        order_id: orderId, client_id: clientId,
+        type: 'payment_approved', message: notifyMsg,
+        is_read: false, created_at: new Date().toISOString(),
+      });
+    } catch (_) {}
+    try {
+      await sb.from('messages').insert({
+        order_id: orderId, text: notifyMsg,
+        from_admin: true, read: false, sent_at: new Date().toISOString(),
+      });
+    } catch (_) {}
+
     document.getElementById(`pay-item-${payId}`)?.remove();
-    showToast('✅ Payment approved!', '#34d399');
+    const msg = due === 0
+      ? `✅ Full payment received! ৳${Number(newTotalPaid).toLocaleString()} — Files unlocked, Order completed.`
+      : `✅ ৳${Number(amount).toLocaleString()} approved. Total paid: ৳${Number(newTotalPaid).toLocaleString()}. Due: ৳${Number(due).toLocaleString()}.`;
+    showToast(msg, due === 0 ? '#34d399' : '#fbbf24');
     await loadAll();
   } catch(e) {
     showToast('Error: ' + e.message, '#f87171');
