@@ -2000,11 +2000,12 @@ async function loadAffiliateEarnings(affiliateId) {
     if (availableEl) availableEl.textContent = fmt(wallet.available_balance);
     if (pendingEl)   pendingEl.textContent   = fmt(wallet.pending_withdrawal);
 
-    const { data: comms, error } = await sb
-      .from('affiliate_commissions')
-      .select('id, order_id, order_amount, paid_amount, commission_amount, status, created_at')
-      .eq('affiliate_id', affiliateId)
-      .order('created_at', { ascending: false });
+    /* Phase 26: single RPC replaces the old raw affiliate_commissions + orders
+       queries — the old direct `orders` query was silently blocked by RLS for
+       affiliates (returned nothing), and affiliate_commissions.paid_amount was
+       a frozen snapshot from when the row was first created. This RPC joins
+       server-side and returns live order status + live paid amount. */
+    const { data: comms, error } = await sb.rpc('get_my_affiliate_commissions');
 
     if (error) throw error;
 
@@ -2051,25 +2052,14 @@ async function loadAffiliateEarnings(affiliateId) {
       return;
     }
 
-    /* Fetch order numbers + payment info for display */
-    const orderIds = [...new Set(comms.map(c => c.order_id))];
-    const { data: orders } = await sb
-      .from('orders')
-      .select('id, order_number, advance_paid, total_price, payment_status, status')
-      .in('id', orderIds);
-
-    const orderMap = {};
-    (orders || []).forEach(o => { orderMap[o.id] = o; });
-
     tbodyEl.innerHTML = comms.map(c => {
-      const order      = orderMap[c.order_id] || {};
-      const orderNum   = order.order_number || c.order_id?.slice(0, 8).toUpperCase() || '—';
+      const orderNum   = c.order_number || c.order_id?.slice(0, 8).toUpperCase() || '—';
       const date       = c.created_at
         ? new Date(c.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
         : '—';
 
-      const totalAmt   = Number(c.order_amount  || 0);
-      const paidAmt    = Number(c.paid_amount   || order.advance_paid || 0);
+      const totalAmt   = Number(c.total_amount  || 0);
+      const paidAmt    = Number(c.paid_amount   || 0);
       const commAmt    = Number(c.commission_amount || 0);
       const paidPct    = totalAmt > 0 ? Math.min(100, Math.round(paidAmt / totalAmt * 100)) : 0;
       const dueAmt     = Math.max(0, totalAmt - paidAmt);
@@ -2082,9 +2072,9 @@ async function loadAffiliateEarnings(affiliateId) {
         withdrawn: { color: '#60a5fa', label: 'Withdrawn' },
         cancelled: { color: '#f87171', label: 'Cancelled' },
       };
-      const st = statusMap[c.status] || { color: 'var(--text-muted)', label: c.status };
+      const st = statusMap[c.commission_status] || { color: 'var(--text-muted)', label: c.commission_status };
 
-      const isPending = c.status === 'pending';
+      const isPending = c.commission_status === 'pending';
 
       /* Order status label */
       const orderStatusMap = {
@@ -2096,10 +2086,11 @@ async function loadAffiliateEarnings(affiliateId) {
         writing:         { color: '#a78bfa', label: 'In Progress' },
         in_review:       { color: '#f59e0b', label: 'In Review' },
         draft_ready:     { color: '#fb923c', label: 'Draft Ready' },
+        delivered:       { color: '#38bdf8', label: 'Delivered' },
         completed:       { color: '#34d399', label: 'Completed' },
         cancelled:       { color: '#f87171', label: 'Cancelled' },
       };
-      const orderStatus = order.status || '';
+      const orderStatus = c.order_status || '';
       const oSt = orderStatusMap[orderStatus] || { color: '#94a3b8', label: orderStatus };
 
       /* Pending row — just percentage */
@@ -2108,10 +2099,14 @@ async function loadAffiliateEarnings(affiliateId) {
           ${paidPct}% paid &nbsp;·&nbsp; Due ${fmtAmt(dueAmt)}
         </div>` : '';
 
-      /* Commission display */
+      /* Commission display — while pending, show only the portion actually
+         "earned" so far (proportional to what the client has paid), not the
+         full commission the order would eventually be worth. */
+      const proportionalComm = totalAmt > 0 ? (commAmt * paidAmt / totalAmt) : 0;
       const commDisplay = isPending
-        ? `<span style="color:#f59e0b;font-weight:700;">${fmtAmt(commAmt)}</span>
-           <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">প্রত্যাশিত</div>`
+        ? `<span style="color:#f59e0b;font-weight:700;">${fmtAmt(proportionalComm)}</span>
+           <span style="color:var(--text-muted);font-size:11px;"> of ${fmtAmt(commAmt)}</span>
+           <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">প্রত্যাশিত (${paidPct}% paid)</div>`
         : `<span style="color:#34d399;font-weight:700;">${fmtAmt(commAmt)}</span>`;
 
       /* Status column */
