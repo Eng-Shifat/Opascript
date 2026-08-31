@@ -477,7 +477,7 @@ async function approvePayment(payId, orderId, amount) {
   try {
     /* Mark payment confirmed */
     const { error: e1 } = await sb.from('payments')
-      .update({ confirmed: true, type: 'received', note: 'Approved by Admin', updated_at: new Date().toISOString() })
+      .update({ confirmed: true, type: 'received', note: 'Approved by Admin' })
       .eq('id', payId);
     if (e1) throw e1;
 
@@ -517,7 +517,6 @@ async function rejectPayment(payId) {
     await sb.from('payments').update({
       confirmed: false, type: 'rejected',
       note: reason || 'Rejected by Admin',
-      updated_at: new Date().toISOString(),
     }).eq('id', payId);
     document.getElementById(`pay-item-${payId}`)?.remove();
     showToast('❌ Payment rejected', '#f87171');
