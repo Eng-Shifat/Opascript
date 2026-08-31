@@ -751,6 +751,9 @@ async function doWdApprove(id, note) {
   const sb = window.scriptoraSupabase;
   if (!sb) return;
   try {
+
+    const w = ALL_WITHDRAWALS.find(x => x.id === id);
+
     const { data, error } = await sb.rpc('admin_approve_affiliate_withdrawal', {
       p_withdrawal_id: id,
       p_admin_note: note || null,
@@ -763,16 +766,17 @@ async function doWdApprove(id, note) {
     showToast('✅ Withdrawal Approved', '#34d399');
 
     /* Phase 7: notify affiliate */
-    const w = ALL_WITHDRAWALS.find(x => x.id === id);
-    logAudit('withdrawal_approved', { affiliateId: w?.affiliate_id || null, targetTable: 'affiliate_withdrawals', targetId: id, details: { amount: w?.amount ?? null, admin_note: note || null } });
-    if (w) {
+    // w is already declared above in the guard block; reuse it
+    const _w = w || ALL_WITHDRAWALS.find(x => x.id === id);
+    logAudit('withdrawal_approved', { affiliateId: _w?.affiliate_id || null, targetTable: 'affiliate_withdrawals', targetId: id, details: { amount: _w?.amount ?? null, admin_note: note || null } });
+    if (_w) {
       notifyAffiliate({
-        clientId: w.client_id,
-        affiliateId: w.affiliate_id,
+        clientId: _w.client_id,
+        affiliateId: _w.affiliate_id,
         type: 'withdrawal_approved',
         title: 'Withdrawal Request Approved ✅',
-        message: `আপনার ৳${Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Withdrawal Request Approve হয়েছে। খুব শীঘ্রই Payout করা হবে।`,
-        amount: w.amount
+        message: `আপনার ৳${Number(_w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Withdrawal Request Approve হয়েছে। খুব শীঘ্রই Payout করা হবে।`,
+        amount: _w.amount
       });
     }
 
