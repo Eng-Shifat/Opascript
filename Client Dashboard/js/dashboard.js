@@ -2088,35 +2088,24 @@ async function loadAffiliateEarnings(affiliateId) {
 
       /* Order status label */
       const orderStatusMap = {
-        pending:        { color: '#94a3b8', label: 'Payment Pending' },
-        confirmed:      { color: '#60a5fa', label: 'Confirmed' },
+        pending:         { color: '#94a3b8', label: 'Payment Pending' },
+        confirmed:       { color: '#60a5fa', label: 'Confirmed' },
         payment_received:{ color: '#60a5fa', label: 'Payment Received' },
-        writing:        { color: '#a78bfa', label: 'কাজ চলছে ✍' },
-        in_review:      { color: '#f59e0b', label: 'Review এ আছে' },
-        draft_ready:    { color: '#fb923c', label: 'Draft Ready' },
-        completed:      { color: '#34d399', label: 'Completed ✓' },
-        cancelled:      { color: '#f87171', label: 'Cancelled' },
+        payment_done:    { color: '#60a5fa', label: 'Payment Done' },
+        hold:            { color: '#f87171', label: 'On Hold' },
+        writing:         { color: '#a78bfa', label: 'In Progress' },
+        in_review:       { color: '#f59e0b', label: 'In Review' },
+        draft_ready:     { color: '#fb923c', label: 'Draft Ready' },
+        completed:       { color: '#34d399', label: 'Completed' },
+        cancelled:       { color: '#f87171', label: 'Cancelled' },
       };
       const orderStatus = order.status || '';
       const oSt = orderStatusMap[orderStatus] || { color: '#94a3b8', label: orderStatus };
 
-      /* Progress bar — clean, percentage only */
+      /* Pending row — just percentage */
       const progressBar = isPending ? `
-        <div style="margin-top:7px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:20px;height:6px;overflow:hidden;">
-              <div style="background:linear-gradient(90deg,#f59e0b,#fbbf24);height:100%;width:${paidPct}%;border-radius:20px;transition:width .4s;"></div>
-            </div>
-            <span style="font-size:10px;font-weight:700;color:#f59e0b;white-space:nowrap;">${paidPct}% paid</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
-            <span>Paid ${fmtAmt(paidAmt)}</span>
-            <span>Due ${fmtAmt(dueAmt)}</span>
-          </div>
-          <div style="margin-top:5px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;background:${oSt.color}15;border:1px solid ${oSt.color}30;">
-            <span style="width:5px;height:5px;border-radius:50%;background:${oSt.color};display:inline-block;"></span>
-            <span style="font-size:10px;color:${oSt.color};font-weight:600;">${oSt.label}</span>
-          </div>
+        <div style="margin-top:4px;font-size:10px;color:#f59e0b;font-weight:600;">
+          ${paidPct}% paid &nbsp;·&nbsp; Due ${fmtAmt(dueAmt)}
         </div>` : '';
 
       /* Commission display */
@@ -2124,6 +2113,11 @@ async function loadAffiliateEarnings(affiliateId) {
         ? `<span style="color:#f59e0b;font-weight:700;">${fmtAmt(commAmt)}</span>
            <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">প্রত্যাশিত</div>`
         : `<span style="color:#34d399;font-weight:700;">${fmtAmt(commAmt)}</span>`;
+
+      /* Status column */
+      const statusColor = isPending ? oSt.color : st.color;
+      const statusLabel = isPending ? (oSt.label || orderStatus || 'In Progress') : st.label;
+      const statusCell = `<span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;display:inline-block;background:rgba(255,255,255,0.07);color:${statusColor};">${statusLabel}</span>`;
 
       return `
         <tr style="border-bottom:1px solid var(--border);">
@@ -2134,9 +2128,7 @@ async function loadAffiliateEarnings(affiliateId) {
             ${progressBar}
           </td>
           <td style="padding:10px 8px;font-size:12px;">${commDisplay}</td>
-          <td style="padding:10px 8px;">
-            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${st.color}20;color:${st.color};">${st.label}</span>
-          </td>
+          <td style="padding:10px 8px;">${statusCell}</td>
         </tr>`;
     }).join('');
 
