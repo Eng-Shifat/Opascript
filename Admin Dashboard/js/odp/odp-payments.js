@@ -222,11 +222,11 @@
          the client hadn't actually paid yet. Now gated on payment_status.
       ── */
       const rawDB = window._currentOrder?._rawDB;
-      if (rawDB?.referred_by_code && rawDB?.payment_status === 'paid' && window._isRealUUID(window._currentOrderId)) {
+      if (rawDB?.referred_by_code && window._isRealUUID(window._currentOrderId)) {
         try {
           const { data: existingComm } = await window._sb()
             .from('affiliate_commissions')
-            .select('id')
+            .select('id, status, commission_amount, order_amount, paid_amount')
             .eq('order_id', window._currentOrderId)
             .maybeSingle();
 
@@ -238,27 +238,45 @@
           commBtnWrap.id = 'odpCommissionBtnWrap';
           commBtnWrap.style.cssText = 'margin-top:14px;';
 
+          const isPaid = rawDB?.payment_status === 'paid';
+          const isPartial = rawDB?.payment_status === 'approved'; /* partial */
+          const refCode = window._esc ? window._esc(rawDB.referred_by_code) : rawDB.referred_by_code;
+
           if (existingComm) {
+            const stColor = existingComm.status === 'earned' ? '#34d399' : existingComm.status === 'cancelled' ? '#f87171' : '#f59e0b';
+            const stLabel = existingComm.status === 'earned' ? 'Earned ✓' : existingComm.status === 'cancelled' ? 'Cancelled' : 'Pending';
+            const commAmt = '৳' + Number(existingComm.commission_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
             commBtnWrap.innerHTML = `
               <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:8px;font-size:12px;color:#34d399;">
                 <i class="ti ti-circle-check"></i>
-                Affiliate commission already recorded &mdash; Ref: <strong>${window._esc ? window._esc(rawDB.referred_by_code) : rawDB.referred_by_code}</strong>
+                Commission recorded — Ref: <strong>${refCode}</strong> &nbsp;|&nbsp;
+                <span style="color:${stColor};font-weight:700;">${commAmt} · ${stLabel}</span>
               </div>`;
+          } else if (isPaid || isPartial) {
+            /* Auto-record commission (partial → pending, full → earned) */
+            const clientId = rawDB?.client_id || null;
+            if (clientId) {
+              const { data: autoRes } = await window._sb().rpc('record_affiliate_commission', {
+                p_order_id: window._currentOrderId,
+                p_client_id: clientId
+              });
+              const statusLabel = rawDB?.payment_status === 'paid' ? 'Earned ✓' : 'Pending (partial payment)';
+              const statusColor = rawDB?.payment_status === 'paid' ? '#34d399' : '#f59e0b';
+              commBtnWrap.innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:8px;font-size:12px;color:#34d399;">
+                  <i class="ti ti-circle-check"></i>
+                  Commission auto-recorded — Ref: <strong>${refCode}</strong> &nbsp;|&nbsp;
+                  <span style="color:${statusColor};font-weight:700;">${statusLabel}</span>
+                </div>`;
+            }
           } else {
             commBtnWrap.innerHTML = `
               <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:8px;">
                 <i class="ti ti-affiliate" style="color:#a78bfa;font-size:15px;flex-shrink:0;"></i>
                 <div style="flex:1;min-width:0;">
                   <div style="font-size:12px;font-weight:600;color:#a78bfa;">Affiliate Referral Detected</div>
-                  <div style="font-size:11px;color:var(--muted2);margin-top:1px;">Ref code: <strong>${window._esc ? window._esc(rawDB.referred_by_code) : rawDB.referred_by_code}</strong></div>
+                  <div style="font-size:11px;color:var(--muted2);margin-top:1px;">Ref code: <strong>${refCode}</strong> — payment confirm হলে commission auto-record হবে</div>
                 </div>
-                <button
-                  id="odpCommissionRecordBtn"
-                  onclick="odpRecordCommission()"
-                  style="flex-shrink:0;padding:6px 14px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;transition:opacity .15s;"
-                  onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-                  Record Commission
-                </button>
               </div>`;
           }
           el.after(commBtnWrap);
