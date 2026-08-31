@@ -869,7 +869,11 @@ async function doWdPayout(id, txn, note) {
     await loadWithdrawals();
     if (ALL_COMMISSIONS.length > 0) await loadCommissions();
   } catch (err) {
-    showToast('❌ Error: ' + err.message, '#f87171');
+    /* Phase 24b: duplicate payout TXN ID guard */
+    const friendlyMsg = err.code === '23505'
+      ? '⚠️ এই Transaction ID ইতিমধ্যে অন্য একটি Payout-এ ব্যবহার হয়েছে। সঠিক TXN ID যাচাই করে আবার চেষ্টা করুন।'
+      : 'Error: ' + err.message;
+    showToast('❌ ' + friendlyMsg, '#f87171');
   }
 }
 
