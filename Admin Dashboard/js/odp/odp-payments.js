@@ -401,26 +401,25 @@
         });
       }
 
-      /* 5. If due === 0 → unlock all files + complete order */
+      /* 5. Payment fully received (due === 0).
+            ❌ Files are NOT unlocked automatically.
+            ❌ Order is NOT marked 'completed' automatically.
+            ✅ Order moves to 'writing' (running) so countdown starts on client side.
+            ✅ Admin must deliver files manually, then mark status 'completed'. */
       let autoCommissionMsg = '';
       if (due === 0) {
-        await window._sb().from('order_file_access')
-          .update({ download_allowed: true, updated_at: new Date().toISOString() })
-          .eq('order_id', window._currentOrderId);
-        /* Revision-delivered files use the same due-based lock — unlock those too */
-        await window._sb().from('revision_files')
-          .update({ download_allowed: true })
-          .eq('order_id', window._currentOrderId);
+        /* Determine correct running status — keep current stage if already mid-flow */
+        const currentStatusFull = window._currentOrder?._rawDB?.status || window._currentOrder?.status || 'pending';
+        const preStartStatusesFull = ['pending', 'confirmed', 'payment_received', 'payment_done', 'hold'];
+        const newOrderStatusFull = preStartStatusesFull.includes(currentStatusFull) ? 'writing' : currentStatusFull;
+
         await window._sb().from('orders').update({
           payment_status: 'paid',
           advance_paid:   newTotalPaid,
-          status:         'completed',
+          status:         newOrderStatusFull,
           updated_at:     new Date().toISOString(),
         }).eq('id', window._currentOrderId);
-        /* Invalidate file cache */
-        Object.keys(window._fileMetaCache || {}).forEach(path => {
-          if (window._fileMetaCache[path]) window._fileMetaCache[path].download_allowed = true;
-        });
+        /* File cache NOT invalidated here — files unlock only when admin delivers */
 
         /* ── Phase 12: Auto-record affiliate commission on full payment ──
            Reuses the same record_affiliate_commission RPC the manual
@@ -443,8 +442,25 @@
               .maybeSingle();
 
             if (!existingComm) {
+              /* Fetch client_id from orders table before calling RPC —
+                 some DB versions require it to be passed explicitly */
+              const { data: ordFull } = await window._sb()
+                .from('orders')
+                .select('client_id, referred_by_code')
+                .eq('id', window._currentOrderId)
+                .single();
+
+              const resolvedClientId = ordFull?.client_id
+                || window._currentOrder?.clientId
+                || window._currentOrder?._rawDB?.client_id
+                || pendingPay?.client_id
+                || null;
+
+              if (!resolvedClientId) {
+                console.warn('[Affiliate] Skipping commission — client_id could not be resolved for order:', window._currentOrderId);
+              } else {
               const { data: commData, error: commErr } = await window._sb()
-                .rpc('record_affiliate_commission', { p_order_id: window._currentOrderId });
+                .rpc('record_affiliate_commission', { p_order_id: window._currentOrderId, p_client_id: resolvedClientId });
 
               if (!commErr && commData?.success) {
                 const amt = commData?.commission_amount
@@ -469,6 +485,7 @@
               } else if (commErr) {
                 console.warn('[Affiliate] auto commission error:', commErr);
               }
+              } // end resolvedClientId check
             }
           }
         } catch (commCatchErr) {
@@ -476,10 +493,18 @@
         }
 
       } else {
+        /* Partial payment approved — order should start running (writing),
+           NOT go back to pending. Client paid an advance, so work begins.
+           Only set to 'writing' if order was in a pre-start state (pending/confirmed).
+           If order was already in a later stage (in_review, draft_ready etc.), keep it. */
+        const currentStatus = window._currentOrder?._rawDB?.status || window._currentOrder?.status || 'pending';
+        const preStartStatuses = ['pending', 'confirmed', 'payment_received', 'payment_done', 'hold'];
+        const newOrderStatus = preStartStatuses.includes(currentStatus) ? 'writing' : currentStatus;
+
         await window._sb().from('orders').update({
           payment_status: 'approved',
           advance_paid:   newTotalPaid,
-          status:         'pending',
+          status:         newOrderStatus,
           updated_at:     new Date().toISOString(),
         }).eq('id', window._currentOrderId);
       }
@@ -493,6 +518,11 @@
         window._currentOrder.paymentStatus = newStatus;
         window._currentOrder.advance_paid  = newTotalPaid;
         window._currentOrder.due_amount    = due;
+        /* Sync order status in cache so UI reflects new running status */
+        if (window._currentOrder._rawDB) {
+          if (due > 0) window._currentOrder._rawDB.status = newOrderStatus;
+          else window._currentOrder._rawDB.status = newOrderStatusFull;
+        }
       }
 
       /* 7. Inject payment milestone into Order Progress timeline */
@@ -504,8 +534,8 @@
         || pendingPay?.client_id
         || null;
       const notifyMsg = due === 0
-        ? `✅ আপনার সম্পূর্ণ payment পাওয়া গেছে! Payment Confirmed. Files এখন unlock হয়েছে।`
-        : `✅ ৳${Number(thisAmount).toLocaleString()} payment confirmed. বাকি ৳${Number(due).toLocaleString()} পরিশোধ করুন।`;
+        ? `✅ আপনার সম্পূর্ণ payment পাওয়া গেছে! আপনার order এখন শুরু হয়েছে। কাজ শেষ হলে আপনাকে জানানো হবে।`
+        : `✅ ৳${Number(thisAmount).toLocaleString()} advance payment confirm হয়েছে। আপনার order এখন শুরু হয়েছে! বাকি ৳${Number(due).toLocaleString()} delivery এর আগে পরিশোধ করুন।`;
 
       try {
         await window._sb().from('client_notifications').insert({
@@ -541,7 +571,7 @@
       await window._loadPaymentHistory();
 
       const msg = due === 0
-        ? `✅ Full payment received! ৳${Number(newTotalPaid).toLocaleString()} — Files unlocked, Order completed.${autoCommissionMsg}`
+        ? `✅ Full payment received! ৳${Number(newTotalPaid).toLocaleString()} — Order চালু হয়েছে। File deliver করার পর manually Complete করুন।${autoCommissionMsg}`
         : `✓ ৳${Number(thisAmount).toLocaleString()} approved. Total paid: ৳${Number(newTotalPaid).toLocaleString()}. Due: ৳${Number(due).toLocaleString()}.`;
       window._toast(msg, due === 0 ? 'var(--green)' : 'var(--gold)');
       window._logActivity('payment', `Payment confirmed: ৳${Number(thisAmount).toLocaleString()}. Total paid: ৳${Number(newTotalPaid).toLocaleString()}. Due: ৳${Number(due).toLocaleString()}`);
@@ -560,8 +590,27 @@
     if (btn) { btn.disabled = true; btn.textContent = 'Recording…'; }
 
     try {
+      /* Resolve client_id before calling RPC to avoid NOT NULL constraint error */
+      const { data: ordForComm } = await window._sb()
+        .from('orders')
+        .select('client_id')
+        .eq('id', window._currentOrderId)
+        .single();
+
+      const commClientId = ordForComm?.client_id
+        || window._currentOrder?.clientId
+        || window._currentOrder?._rawDB?.client_id
+        || null;
+
+      if (!commClientId) {
+        window._toast('⚠ Client ID পাওয়া যাচ্ছে না। Order reload করে আবার চেষ্টা করুন।', 'var(--red)');
+        if (btn) { btn.disabled = false; btn.textContent = 'Record Commission'; }
+        return;
+      }
+
       const { data, error } = await window._sb().rpc('record_affiliate_commission', {
-        p_order_id: window._currentOrderId
+        p_order_id: window._currentOrderId,
+        p_client_id: commClientId
       });
 
       if (error) throw error;
