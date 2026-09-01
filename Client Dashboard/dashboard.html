@@ -2243,15 +2243,20 @@
 
             <!-- Phase 8: Top Affiliates  +  Phase 18: My Referrals -->
             <div class="affd-two-col">
-              <div class="affd-card" id="affLeaderboardPanel" style="display:none;">
-                <div class="affd-panel-header">
-                  <div class="affd-card-label" style="margin:0;">🏆 Top Affiliates</div>
+              <div class="affd-table-card" id="affLeaderboardPanel" style="display:none;">
+                <div class="affd-table-head">
+                  <span style="display:flex;align-items:center;gap:6px;">
+                    <span style="font-size:13px;">🏆</span>
+                    MY REFERRALS
+                  </span>
                   <div style="display:flex;align-items:center;gap:10px;">
-                    <span id="affLbMyRank" style="font-size:11px;font-weight:700;color:var(--accent-light);"></span>
+                    <span id="affLbMyRank" style="font-size:10.5px;font-weight:700;color:var(--accent-light);"></span>
                     <a href="#" class="affd-view-all" data-target="affLbList">View All</a>
                   </div>
                 </div>
-                <div id="affLbList" class="affd-lb-list"></div>
+                <div class="affd-table-scroll">
+                  <div id="affLbList" class="affd-lb-list"></div>
+                </div>
               </div>
 
               <div class="affd-table-card">

@@ -1850,22 +1850,33 @@ function affiliateNativeShare() {
 
 function affiliateGenerateQr(url) {
   const box = document.getElementById('affQrBox');
-  if (!box || typeof QRCode === 'undefined') return;
-  box.innerHTML = '';
-  const canvas = document.createElement('canvas');
-  box.appendChild(canvas);
-  QRCode.toCanvas(canvas, url, { width: 176, margin: 1 }, err => {
-    if (err) console.error('[Affiliate] QR generation error:', err);
-  });
+  if (!box) return;
+
+  function tryGenerate(attemptsLeft) {
+    if (typeof QRCode === 'undefined') {
+      if (attemptsLeft > 0) setTimeout(() => tryGenerate(attemptsLeft - 1), 300);
+      return;
+    }
+    QRCode.toDataURL(url, { width: 176, margin: 2, color: { dark: '#000000', light: '#ffffff' } }, (err, dataUrl) => {
+      if (err) { console.error('[Affiliate] QR generation error:', err); return; }
+      box.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      img.style.cssText = 'width:110px;height:110px;display:block;border-radius:6px;';
+      box.appendChild(img);
+    });
+  }
+
+  tryGenerate(10);
 }
 
 function affiliateDownloadQr() {
-  const canvas = document.querySelector('#affQrBox canvas');
-  if (!canvas) return;
+  const img = document.querySelector('#affQrBox img');
+  if (!img) return;
   const link = document.createElement('a');
   const code = document.getElementById('affReferralCode')?.textContent || 'referral';
   link.download = `opascript-referral-${code}.png`;
-  link.href = canvas.toDataURL('image/png');
+  link.href = img.src;
   link.click();
 }
 
@@ -2276,8 +2287,13 @@ function affdAvatarColor(name) {
   return AFFD_AVATAR_COLORS[hash % AFFD_AVATAR_COLORS.length];
 }
 function affdInitial(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
-function affdAvatarHtml(name, size) {
-  size = size || 26;
+function affdAvatarHtml(name, size, photoUrl) {
+  size = size || 36;
+  if (photoUrl) {
+    return `<div style="flex-shrink:0;width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;background:${affdAvatarColor(name)};">
+      <img src="${photoUrl}" alt="${affdInitial(name)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:${Math.round(size*0.42)}px;font-weight:700;color:#fff;\\'>${affdInitial(name)}</span>'">
+    </div>`;
+  }
   return `<div style="flex-shrink:0;width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;
                font-size:${Math.round(size*0.42)}px;font-weight:700;color:#fff;background:${affdAvatarColor(name)};">${affdInitial(name)}</div>`;
 }
@@ -2333,7 +2349,7 @@ async function loadAffiliateMyReferrals() {
         <tr class="affd-ref-row">
           <td class="affd-ref-name-cell">
             <div class="affd-ref-name-wrap">
-              ${affdAvatarHtml(r.client_name, 34)}
+              ${affdAvatarHtml(r.client_name, 28)}
               <div style="min-width:0;">
                 <div class="affd-ref-name">${escHtml(r.client_name || '—')}</div>
                 ${r.client_email ? `<div class="affd-ref-email">${escHtml(r.client_email)}</div>` : ''}
@@ -2696,18 +2712,28 @@ async function loadAffiliateLeaderboard() {
     const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : `${r}`;
     const fmt   = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-    listEl.innerHTML = rows.map(r => `
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;
-                   background:${r.is_me ? 'var(--accent-light)15' : 'transparent'};
-                   border:1px solid ${r.is_me ? 'var(--accent-light)' : 'transparent'};">
-        <div class="affd-lb-rank">${medal(r.rank)}</div>
-        ${affdAvatarHtml(r.name)}
-        <div style="flex:1;font-size:12px;font-weight:${r.is_me ? '800' : '600'};color:${r.is_me ? 'var(--accent-light)' : 'var(--text)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:5px;">
-          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(r.name)}</span>
-          ${r.is_me ? '<span class="affd-you-badge">You</span>' : ''}
-        </div>
-        <div style="font-size:11.5px;font-weight:700;color:#34d399;white-space:nowrap;">${fmt(r.total_earned)}</div>
-      </div>`).join('');
+    listEl.innerHTML = '<table class="affd-table affd-table-referrals" style="min-width:unset;"><tbody>' +
+      rows.map(r => {
+        const rankMedal = r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : r.rank;
+        return `
+        <tr class="affd-ref-row" style="${r.is_me ? 'background:rgba(45,110,247,0.08);' : ''}">
+          <td class="affd-ref-name-cell">
+            <div class="affd-ref-name-wrap">
+              <div style="position:relative;flex-shrink:0;">
+                ${affdAvatarHtml(r.name, 28, r.avatar_url || r.profile_picture || null)}
+                <span style="position:absolute;bottom:-3px;right:-5px;font-size:11px;line-height:1;">${rankMedal}</span>
+              </div>
+              <div style="min-width:0;">
+                <div class="affd-ref-name" style="${r.is_me ? 'color:var(--accent-light);' : ''}">${escHtml(r.name)}${r.is_me ? ' <span style="font-family:\'Noto Sans Bengali\',sans-serif;font-size:9.5px;font-weight:700;">(আপনি)</span>' : ''}${r.is_me ? ' <span class="affd-you-badge" style="font-size:8px;padding:2px 6px;">You</span>' : ''}</div>
+                <div class="affd-ref-email">${escHtml(r.email || '')}</div>
+              </div>
+            </div>
+          </td>
+          <td class="affd-ref-joined">${r.joined_label || '—'}</td>
+          <td class="affd-ref-orders">${fmt(r.total_earned)}<span class="affd-ref-orders-lbl">Earned</span></td>
+          <td><span class="affd-ref-status" style="background:#34d39922;color:#34d399;">Top ${r.rank}</span></td>
+        </tr>`;
+      }).join('') + '</tbody></table>';
 
     /* Short list — fill the space with a friendly nudge instead of leaving
        a bare empty card, so it doesn't look broken next to a taller table. */
@@ -2846,6 +2872,8 @@ function showPage(pageId,clickedItem) {
     // Cards may have loaded while this tab was hidden (width was 0 then).
     // Redraw now that the tab is actually visible so lines fill the card.
     setTimeout(initEarningSparklines, 50);
+    // Regenerate QR if URL is ready but canvas was hidden during initial render
+    setTimeout(() => { if (_affReferralUrl) affiliateGenerateQr(_affReferralUrl); }, 100);
   }
 }
 
@@ -3938,17 +3966,35 @@ function buildProgressBar(pct, color) {
 }
 
 /* ── Referral Funnel ─────────────────────────────────────────── */
-function renderAffiliateFunnel(stats) {
+async function renderAffiliateFunnel(stats) {
   const funnelCard = document.getElementById('affFunnelCard');
   if (!funnelCard) return;
 
   const clicks   = Number(stats.total_clicks   || 0);
-  const signups  = Number(stats.conversions     || stats.total_referrals || 0);
-  const orders   = Number(stats.converted_orders || 0);
-  const earnings = Number(stats.total_earned    || 0);
+  const signups  = Number(stats.total_referrals || stats.conversions || 0);
+  let   orders   = Number(stats.converted_orders || 0);
+  let   earnings = Number(stats.total_earned    || 0);
 
-  // Only show funnel if there's any data
-  if (clicks === 0 && signups === 0 && orders === 0) {
+  // Get real orders + earnings from referrals and commissions if stats missing them
+  try {
+    if (orders === 0 && signups > 0) {
+      const { data: refs } = await sb.rpc('get_my_affiliate_referrals');
+      if (refs && refs.length > 0) {
+        orders = refs.reduce((sum, r) => sum + Number(r.order_count || 0), 0);
+      }
+    }
+    if (earnings === 0) {
+      const { data: comms } = await sb.rpc('get_my_affiliate_commissions');
+      if (comms && comms.length > 0) {
+        earnings = comms
+          .filter(c => c.commission_status === 'earned' || c.commission_status === 'paid')
+          .reduce((sum, c) => sum + Number(c.commission_amount || c.paid_amount || 0), 0);
+      }
+    }
+  } catch (e) { /* fallback to 0 */ }
+
+  // Only hide if truly no data at all
+  if (clicks === 0 && signups === 0 && orders === 0 && earnings === 0) {
     funnelCard.style.display = 'none';
     return;
   }
@@ -3960,14 +4006,15 @@ function renderAffiliateFunnel(stats) {
   set('funnelOrdersVal',   orders);
   set('funnelEarningsVal', '৳' + earnings.toLocaleString('en-IN', { minimumFractionDigits: 0 }));
 
-  // Conversion rates
+  // Conversion rates — use signups as fallback base if clicks=0
   const ratesEl = document.getElementById('affFunnelRates');
   if (ratesEl && (clicks > 0 || signups > 0)) {
     ratesEl.style.display = 'flex';
     const clickToSignup  = clicks  > 0 ? Math.round(signups / clicks  * 100) : 0;
     const signupToOrder  = signups > 0 ? Math.round(orders  / signups * 100) : 0;
-    const overall        = clicks  > 0 ? Math.round(orders  / clicks  * 100) : 0;
-    set('funnelRateSignupVal',  clickToSignup  + '%');
+    // Overall: if clicks=0, use signup→order as the meaningful conversion
+    const overall        = clicks  > 0 ? Math.round(orders  / clicks  * 100) : signupToOrder;
+    set('funnelRateSignupVal',  clicks > 0 ? clickToSignup + '%' : 'N/A');
     set('funnelRateOrderVal',   signupToOrder  + '%');
     set('funnelRateOverallVal', overall        + '%');
   }

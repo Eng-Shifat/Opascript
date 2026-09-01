@@ -4761,7 +4761,7 @@ input, select, textarea { font-family: inherit; }
 /* ── Top Affiliates + My Referrals row ───────────────────────── */
 .affd-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
 .affd-two-col > * { align-self: start; height: fit-content; }
-.affd-lb-list { display: flex; flex-direction: column; gap: 4px; }
+.affd-lb-list { display: flex; flex-direction: column; gap: 0; }
 
 /* Leaderboard row avatar (initials) */
 .affd-lb-avatar {
@@ -4818,23 +4818,23 @@ input, select, textarea { font-family: inherit; }
 .affd-table-referrals { border-collapse: collapse !important; min-width: 480px; }
 .affd-table-referrals thead { display: none; }
 .affd-ref-row { background: transparent; }
-.affd-ref-row td { padding: 12px 10px !important; vertical-align: middle; border-bottom: 1px solid var(--border); }
+.affd-ref-row td { padding: 8px 10px !important; vertical-align: middle; border-bottom: 1px solid var(--border); }
 .affd-ref-row:last-child td { border-bottom: none; }
-.affd-ref-name-wrap { display: flex; align-items: center; gap: 10px; }
+.affd-ref-name-wrap { display: flex; align-items: center; gap: 8px; }
 .affd-ref-name {
-  font-size: 13.5px; font-weight: 700; color: var(--text-primary);
+  font-size: 11.5px; font-weight: 700; color: var(--text-primary);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .affd-ref-email {
-  font-size: 11px; color: var(--text-muted); margin-top: 2px;
+  font-size: 9.5px; color: var(--text-muted); margin-top: 1px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.affd-ref-joined { font-size: 12.5px; color: var(--text-secondary); white-space: nowrap; }
-.affd-ref-orders { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-primary); font-family: 'Sora', sans-serif; }
-.affd-ref-orders-lbl { display: block; font-size: 10px; font-weight: 500; color: var(--text-muted); margin-top: 1px; }
+.affd-ref-joined { font-size: 10.5px; color: var(--text-secondary); white-space: nowrap; }
+.affd-ref-orders { text-align: center; font-size: 12px; font-weight: 800; color: var(--text-primary); font-family: 'Sora', sans-serif; }
+.affd-ref-orders-lbl { display: block; font-size: 8.5px; font-weight: 500; color: var(--text-muted); margin-top: 1px; }
 .affd-ref-status {
-  display: inline-block; font-size: 11px; font-weight: 700;
-  padding: 5px 12px; border-radius: 20px; white-space: nowrap;
+  display: inline-block; font-size: 9.5px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px; white-space: nowrap;
 }
 
 /* ── Withdrawal request form ──────────────────────────────────── */
