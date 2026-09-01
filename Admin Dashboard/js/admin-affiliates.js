@@ -715,19 +715,22 @@ function buildWdRow(w) {
 
   const requested = fmtDate(w.requested_at);
 
+  const _btn = (color, bg, onclick, icon, label) =>
+    `<button onclick="${onclick}" style="display:inline-flex;align-items:center;gap:5px;` +
+    `padding:5px 11px;font-size:.72rem;font-weight:600;border-radius:7px;cursor:pointer;` +
+    `color:${color};background:${bg};border:1px solid ${color}4d;transition:background .18s;" ` +
+    `onmouseover="this.style.background='${bg.replace(',.08)',','+ '.18)')}';" ` +
+    `onmouseout="this.style.background='${bg}';">` +
+    `<i class="ti ${icon}" style="font-size:.8rem;"></i> ${label}</button>`;
+
   let actions = '<span style="color:var(--muted);font-size:.75rem;">—</span>';
   if (w.status === 'pending') {
-    actions = `<div class="cl-actions">
-      <button class="cl-act-btn" title="Approve" onclick="confirmWdApprove('${w.id}')"
-        style="color:#34d399;border-color:rgba(52,211,153,.3);"><i class="ti ti-check"></i></button>
-      <button class="cl-act-btn" title="Reject" onclick="confirmWdReject('${w.id}')"
-        style="color:#f87171;border-color:rgba(248,113,113,.3);"><i class="ti ti-x"></i></button>
+    actions = `<div style="display:flex;gap:6px;">
+      ${_btn('#34d399','rgba(52,211,153,.08)',`confirmWdApprove('${w.id}')`, 'ti-circle-check','Approve')}
+      ${_btn('#f87171','rgba(248,113,113,.08)',`confirmWdReject('${w.id}')`, 'ti-circle-x','Reject')}
     </div>`;
   } else if (w.status === 'approved') {
-    actions = `<button class="cl-act-btn" title="Confirm Payout" onclick="confirmWdPayout('${w.id}')"
-      style="color:#60a5fa;border-color:rgba(96,165,250,.3);padding:4px 10px;font-size:.72rem;font-weight:700;">
-      <i class="ti ti-cash"></i> Pay Out
-    </button>`;
+    actions = _btn('#60a5fa','rgba(96,165,250,.08)',`confirmWdPayout('${w.id}')`, 'ti-cash','Pay Out');
   }
 
   return `
