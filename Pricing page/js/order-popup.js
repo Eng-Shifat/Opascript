@@ -43,7 +43,7 @@
       const ipHash = Array.from(new Uint8Array(hashBuffer))
         .map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
 
-      await sb.from('affiliate_clicks').insert({
+      const { error: insertErr } = await sb.from('affiliate_clicks').insert({
         referral_code: refCode,
         affiliate_id:  aff.id,
         ip_hash:       ipHash,
@@ -51,9 +51,15 @@
         landed_at:     new Date().toISOString(),
         converted:     false,
       });
+      if (insertErr) {
+        console.error('[Affiliate] trackAffiliateClick insert error:', insertErr);
+        return; // don't mark as tracked if it actually failed
+      }
 
       sessionStorage.setItem('op_click_tracked_' + refCode, '1');
-    } catch (_) {}
+    } catch (err) {
+      console.error('[Affiliate] trackAffiliateClick error:', err);
+    }
   }
 
   /* URL-এ ?ref= থাকলে page load-এ immediately track করো */

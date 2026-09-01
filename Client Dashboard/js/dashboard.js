@@ -2160,13 +2160,25 @@ async function loadAffiliateWithdrawals(affiliateId) {
 }
 
 /* ── Earnings Overview Sparklines ────────────────────────────── */
-function drawEarningSparkline(canvasId, color) {
+function drawEarningSparkline(canvasId, color, _retries) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const W    = rect.width || canvas.parentElement?.clientWidth || 0;
+
+  // Card is still hidden (e.g. Affiliate tab not open yet) — measuring now
+  // would lock the canvas to a wrong, narrow width via the inline style
+  // below. Wait for real layout instead of falling back to a guessed width.
+  if (W < 20) {
+    const tries = _retries || 0;
+    if (tries < 20) {
+      requestAnimationFrame(() => drawEarningSparkline(canvasId, color, tries + 1));
+    }
+    return;
+  }
+
   const ctx  = canvas.getContext('2d');
   const dpr  = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
-  const W    = rect.width  || canvas.parentElement?.clientWidth || 200;
   const H    = 36;
 
   canvas.width  = Math.round(W * dpr);
@@ -2788,6 +2800,9 @@ function showPage(pageId,clickedItem) {
   if(pageId==='affiliate'){
     loadAffiliateState();
     loadAffiliateNotifications(); /* Phase 7: always refresh, independent of aff-state cache */
+    // Cards may have loaded while this tab was hidden (width was 0 then).
+    // Redraw now that the tab is actually visible so lines fill the card.
+    setTimeout(initEarningSparklines, 50);
   }
 }
 
