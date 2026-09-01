@@ -2267,6 +2267,32 @@ function initEarningSparklines() {
   drawEarningSparkline('sparkWithdrawn', '#a78bfa');
 }
 
+/* ── Shared avatar helper (Top Affiliates + My Referrals) ────── */
+const AFFD_AVATAR_COLORS = ['#7c3aed', '#2563eb', '#059669', '#d97706', '#db2777', '#0891b2'];
+function affdAvatarColor(name) {
+  let hash = 0;
+  const s = name || '';
+  for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+  return AFFD_AVATAR_COLORS[hash % AFFD_AVATAR_COLORS.length];
+}
+function affdInitial(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
+function affdAvatarHtml(name, size) {
+  size = size || 26;
+  return `<div style="flex-shrink:0;width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+               font-size:${Math.round(size*0.42)}px;font-weight:700;color:#fff;background:${affdAvatarColor(name)};">${affdInitial(name)}</div>`;
+}
+
+/* ── "View All" expand/collapse for leaderboard + tables ─────── */
+document.addEventListener('click', e => {
+  const link = e.target.closest('.affd-view-all');
+  if (!link) return;
+  e.preventDefault();
+  const target = document.getElementById(link.dataset.target);
+  if (!target) return;
+  const expanded = target.classList.toggle('affd-expanded');
+  link.textContent = expanded ? 'Show Less' : 'View All';
+});
+
 /* ── Phase 18: Affiliate self-service referral tracking ─────── */
 async function loadAffiliateMyReferrals() {
   const tbody = document.getElementById('affMyReferralsTbody');
@@ -2290,7 +2316,10 @@ async function loadAffiliateMyReferrals() {
       return;
     }
 
-    tbody.innerHTML = rows.map(r => {
+    /* বেশি order করা referral উপরে দেখানোর জন্য sort */
+    const sortedRows = [...rows].sort((a, b) => (Number(b.order_count || 0)) - (Number(a.order_count || 0)));
+
+    tbody.innerHTML = sortedRows.map(r => {
       const dt = r.registered_at
         ? new Date(r.registered_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
         : '—';
@@ -2301,14 +2330,20 @@ async function loadAffiliateMyReferrals() {
         : { color: 'var(--text-muted)', label: 'Registered' };
 
       return `
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:10px 8px;font-size:12px;color:var(--text-secondary);">
-            <div style="font-weight:600;">${escHtml(r.client_name || '—')}</div>
+        <tr class="affd-ref-row">
+          <td class="affd-ref-name-cell">
+            <div class="affd-ref-name-wrap">
+              ${affdAvatarHtml(r.client_name, 34)}
+              <div style="min-width:0;">
+                <div class="affd-ref-name">${escHtml(r.client_name || '—')}</div>
+                ${r.client_email ? `<div class="affd-ref-email">${escHtml(r.client_email)}</div>` : ''}
+              </div>
+            </div>
           </td>
-          <td style="padding:10px 8px;font-size:11px;color:var(--text-muted);">${dt}</td>
-          <td style="padding:10px 8px;font-size:12px;font-weight:700;color:var(--accent-light);text-align:center;">${orderCount}</td>
-          <td style="padding:10px 8px;">
-            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${st.color}20;color:${st.color};">${st.label}</span>
+          <td class="affd-ref-joined">${dt}</td>
+          <td class="affd-ref-orders">${orderCount}<span class="affd-ref-orders-lbl">Orders</span></td>
+          <td>
+            <span class="affd-ref-status" style="background:${st.color}22;color:${st.color};">${st.label}</span>
           </td>
         </tr>`;
     }).join('');
@@ -2661,26 +2696,34 @@ async function loadAffiliateLeaderboard() {
     const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : `${r}`;
     const fmt   = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-    /* Deterministic avatar color + initial from the name */
-    const AVATAR_COLORS = ['#7c3aed', '#2563eb', '#059669', '#d97706', '#db2777', '#0891b2'];
-    const avatarColor = name => {
-      let hash = 0;
-      for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-      return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-    };
-    const initial = name => (name || '?').trim().charAt(0).toUpperCase();
-
     listEl.innerHTML = rows.map(r => `
       <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;
                    background:${r.is_me ? 'var(--accent-light)15' : 'transparent'};
                    border:1px solid ${r.is_me ? 'var(--accent-light)' : 'transparent'};">
         <div class="affd-lb-rank">${medal(r.rank)}</div>
-        <div class="affd-lb-avatar" style="background:${avatarColor(r.name || '')};">${initial(r.name)}</div>
-        <div style="flex:1;font-size:12px;font-weight:${r.is_me ? '800' : '600'};color:${r.is_me ? 'var(--accent-light)' : 'var(--text)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          ${escHtml(r.name)}${r.is_me ? ' (আপনি)' : ''}
+        ${affdAvatarHtml(r.name)}
+        <div style="flex:1;font-size:12px;font-weight:${r.is_me ? '800' : '600'};color:${r.is_me ? 'var(--accent-light)' : 'var(--text)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:5px;">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(r.name)}</span>
+          ${r.is_me ? '<span class="affd-you-badge">You</span>' : ''}
         </div>
         <div style="font-size:11.5px;font-weight:700;color:#34d399;white-space:nowrap;">${fmt(r.total_earned)}</div>
       </div>`).join('');
+
+    /* Short list — fill the space with a friendly nudge instead of leaving
+       a bare empty card, so it doesn't look broken next to a taller table. */
+    let nudge = document.getElementById('affLbNudge');
+    if (rows.length < 4) {
+      if (!nudge) {
+        nudge = document.createElement('div');
+        nudge.id = 'affLbNudge';
+        nudge.style.cssText = 'margin-top:14px;padding:14px 10px;text-align:center;border-radius:10px;border:1px dashed var(--border);color:var(--text-muted);font-size:11px;line-height:1.6;';
+        panel.appendChild(nudge);
+      }
+      nudge.innerHTML = `🚀 <span style="font-family:'Noto Sans Bengali',sans-serif;">আরও বন্ধুদের invite করুন — leaderboard-এ উপরে উঠে আসুন!</span>`;
+      nudge.style.display = 'block';
+    } else if (nudge) {
+      nudge.style.display = 'none';
+    }
 
   } catch (err) {
     console.error('[Affiliate] loadAffiliateLeaderboard error:', err);

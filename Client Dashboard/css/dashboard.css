@@ -4562,7 +4562,7 @@ input, select, textarea { font-family: inherit; }
 .affd-card-flush { margin: 0; }
 
 /* ── Overall vertical rhythm for the approved dashboard ──────── */
-.affd-wrap { display: flex; flex-direction: column; gap: 14px; }
+.affd-wrap { display: flex; flex-direction: column; gap: 12px; }
 
 /* ── 2. Welcome banner ────────────────────────────────────── */
 .affd-banner {
@@ -4661,7 +4661,6 @@ input, select, textarea { font-family: inherit; }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 16px 16px 16px;
-  margin: 12px 0;
 }
 .affd-section-label {
   font-size: 11px; font-weight: 700; color: var(--text-secondary);
@@ -4761,6 +4760,7 @@ input, select, textarea { font-family: inherit; }
 
 /* ── Top Affiliates + My Referrals row ───────────────────────── */
 .affd-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.affd-two-col > * { align-self: start; height: fit-content; }
 .affd-lb-list { display: flex; flex-direction: column; gap: 4px; }
 
 /* Leaderboard row avatar (initials) */
@@ -4778,6 +4778,18 @@ input, select, textarea { font-family: inherit; }
   cursor: pointer; text-decoration: none;
 }
 .affd-view-all:hover { text-decoration: underline; }
+
+.affd-you-badge {
+  display: inline-block; font-size: 9px; font-weight: 800; line-height: 1;
+  padding: 3px 7px; border-radius: 20px; flex-shrink: 0;
+  background: var(--accent-light); color: #0b1220;
+  font-family: 'Sora', sans-serif; letter-spacing: .02em;
+}
+
+/* Default: show a short preview list/table; "View All" reveals the rest */
+.affd-lb-list:not(.affd-expanded) > *:nth-child(n+5) { display: none; }
+#affMyReferralsTbody:not(.affd-expanded) tr:nth-child(n+6) { display: none; }
+#affCommTbody:not(.affd-expanded) tr:nth-child(n+6) { display: none; }
 
 /* ── Tables (Withdrawal History / My Referrals / Commission History) ── */
 .affd-table-card {
@@ -4801,6 +4813,29 @@ input, select, textarea { font-family: inherit; }
 }
 .affd-table td { padding: 8px !important; }
 .affd-table-loading { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; }
+
+/* ── My Referrals: subtle line-separated list (not boxed cards) ── */
+.affd-table-referrals { border-collapse: collapse !important; min-width: 480px; }
+.affd-table-referrals thead { display: none; }
+.affd-ref-row { background: transparent; }
+.affd-ref-row td { padding: 12px 10px !important; vertical-align: middle; border-bottom: 1px solid var(--border); }
+.affd-ref-row:last-child td { border-bottom: none; }
+.affd-ref-name-wrap { display: flex; align-items: center; gap: 10px; }
+.affd-ref-name {
+  font-size: 13.5px; font-weight: 700; color: var(--text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.affd-ref-email {
+  font-size: 11px; color: var(--text-muted); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.affd-ref-joined { font-size: 12.5px; color: var(--text-secondary); white-space: nowrap; }
+.affd-ref-orders { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-primary); font-family: 'Sora', sans-serif; }
+.affd-ref-orders-lbl { display: block; font-size: 10px; font-weight: 500; color: var(--text-muted); margin-top: 1px; }
+.affd-ref-status {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 5px 12px; border-radius: 20px; white-space: nowrap;
+}
 
 /* ── Withdrawal request form ──────────────────────────────────── */
 .affd-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
