@@ -419,13 +419,11 @@ async function loadCommissions() {
 function updateCmStats() {
   const total     = ALL_COMMISSIONS.length;
   const earned    = ALL_COMMISSIONS.filter(c => c.status === 'earned');
-  const withdrawn = ALL_COMMISSIONS.filter(c => c.status === 'withdrawn').length;
   const cancelled = ALL_COMMISSIONS.filter(c => c.status === 'cancelled').length;
   const earnedAmt = earned.reduce((s, c) => s + Number(c.commission_amount || 0), 0);
 
   document.getElementById('cm-total').textContent         = total;
   document.getElementById('cm-earned-amount').textContent = '৳' + earnedAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('cm-withdrawn').textContent     = withdrawn;
   document.getElementById('cm-cancelled').textContent     = cancelled;
   document.getElementById('cm-subtitle').textContent =
     `${total} টি commission — মোট earned ৳${earnedAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
@@ -483,17 +481,27 @@ function buildCmRow(cm) {
 
   const canCancel = cm.status === 'earned';
   const actionBtn = canCancel
-    ? `<button class="cl-act-btn" title="Commission বাতিল করুন"
-               onclick="confirmCancelCommission('${cm.id}')"
-               style="color:#f87171;border-color:#f87171;">
-         <i class="ti ti-circle-x"></i>
+    ? `<button onclick="confirmCancelCommission('${cm.id}')" title="Commission বাতিল করুন"
+               style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;
+                      font-size:.72rem;font-weight:600;border-radius:7px;cursor:pointer;
+                      color:#f87171;background:rgba(248,113,113,.08);
+                      border:1px solid rgba(248,113,113,.3);
+                      transition:all .18s;"
+               onmouseover="this.style.background='rgba(248,113,113,.18)'"
+               onmouseout="this.style.background='rgba(248,113,113,.08)'">
+         <i class="ti ti-circle-x" style="font-size:.8rem;"></i> বাতিল
        </button>`
     : '';
 
-  const noteBtn = `<button class="cl-act-btn" title="Admin Note যোগ / আপডেট করুন"
-                           onclick="promptCommissionNote('${cm.id}', \`${esc(cm.admin_note || '')}\`)"
-                           style="color:var(--muted2);">
-                     <i class="ti ti-notes"></i>
+  const noteBtn = `<button onclick="promptCommissionNote('${cm.id}', \`${esc(cm.admin_note || '')}\`)" title="Admin Note যোগ / আপডেট করুন"
+                           style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;
+                                  font-size:.72rem;font-weight:600;border-radius:7px;cursor:pointer;
+                                  color:#94a3b8;background:rgba(148,163,184,.08);
+                                  border:1px solid rgba(148,163,184,.2);
+                                  transition:all .18s;"
+                           onmouseover="this.style.background='rgba(148,163,184,.18)'"
+                           onmouseout="this.style.background='rgba(148,163,184,.08)'">
+                     <i class="ti ti-notes" style="font-size:.8rem;"></i> Note
                    </button>`;
 
   return `

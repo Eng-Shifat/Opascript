@@ -130,11 +130,6 @@
           <div class="cl-stat-sub">status = earned</div>
         </div>
         <div class="cl-stat">
-          <div class="cl-stat-label">Withdrawn</div>
-          <div class="cl-stat-val yellow" id="cm-withdrawn">—</div>
-          <div class="cl-stat-sub">paid out</div>
-        </div>
-        <div class="cl-stat">
           <div class="cl-stat-label">Cancelled</div>
           <div class="cl-stat-val red" id="cm-cancelled">—</div>
           <div class="cl-stat-sub">voided</div>
@@ -147,7 +142,6 @@
       <div class="cl-filters">
         <button class="cl-filter-chip active" data-cm-filter="all"       onclick="setCmFilter('all',this)">সব</button>
         <button class="cl-filter-chip"        data-cm-filter="earned"    onclick="setCmFilter('earned',this)">Earned</button>
-        <button class="cl-filter-chip"        data-cm-filter="withdrawn" onclick="setCmFilter('withdrawn',this)">Withdrawn</button>
         <button class="cl-filter-chip"        data-cm-filter="cancelled" onclick="setCmFilter('cancelled',this)">Cancelled</button>
       </div>
 
@@ -507,6 +501,6 @@
 }
 </style>
 
-<script src="js/admin-affiliates.js"></script>
+<script src="js/admin-affiliates.js?v=2"></script>
 </body>
 </html>
