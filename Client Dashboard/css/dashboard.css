@@ -1712,8 +1712,8 @@ input, select, textarea { font-family: inherit; }
   background: var(--bg-input);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 9px 12px;
-  font-size: 12px;
+  padding: 7px 10px;
+  font-size: 11px;
   color: var(--text-secondary);
   outline: none;
   font-family: 'Sora', monospace;
@@ -1721,8 +1721,8 @@ input, select, textarea { font-family: inherit; }
 .aff-share-iconbtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 12px;
+  gap: 5px;
+  padding: 0 11px;
   background: var(--accent);
   color: #fff;
   border: none;
@@ -1740,8 +1740,8 @@ input, select, textarea { font-family: inherit; }
 .aff-share-btn {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
+  gap: 6px;
+  padding: 7px 11px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--bg-card2);
@@ -1752,7 +1752,7 @@ input, select, textarea { font-family: inherit; }
   transition: all .2s;
   flex: 1;
   justify-content: center;
-  min-width: 100px;
+  min-width: 80px;
 }
 .aff-share-btn:hover { border-color: var(--border-hover); background: var(--bg-input); }
 .aff-share-wa:hover     { color: #25D366; border-color: rgba(37,211,102,0.4); }
@@ -1804,17 +1804,15 @@ input, select, textarea { font-family: inherit; }
 .aff-share-qrrow {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding-top: 4px;
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
+  gap: 12px;
+  padding-top: 10px;
 }
 .aff-share-qrbox {
-  width: 88px;
-  height: 88px;
+  width: 76px;
+  height: 76px;
   flex-shrink: 0;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1823,12 +1821,12 @@ input, select, textarea { font-family: inherit; }
 .aff-share-qrbox canvas, .aff-share-qrbox img { width: 100%; height: 100%; display: block; }
 .aff-share-qrinfo { flex: 1; }
 .aff-share-qrdl {
-  margin-top: 8px;
+  margin-top: 6px;
   background: rgba(37,99,235,0.08);
   color: var(--accent-light);
   border: 1px solid rgba(37,99,235,0.3);
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 5px 9px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -4521,4 +4519,483 @@ input, select, textarea { font-family: inherit; }
 @media (max-width: 380px) {
   .cd-flip { width: 30px !important; height: 42px !important; font-size: 22px !important; }
   .cd-sep { font-size: 16px !important; margin-top: 0 !important; }
+}
+
+/* =========================================================
+   AFFILIATE DASHBOARD — PREMIUM REDESIGN (Step 1: UI/UX only)
+   Scoped under `.affd-*` so it never collides with the public
+   Affiliate landing page (Affiliate/css/affiliate.css, `.aff-*`)
+   or the existing Share & Earn Kit styles (`.aff-share-*`) above,
+   which are reused as-is inside the new cards.
+   ========================================================= */
+
+/* ── Header: How It Works button ─────────────────────────── */
+.affd-howitworks-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--accent-light);
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap;
+  transition: border-color .2s, background .2s;
+}
+.affd-howitworks-btn:hover { border-color: var(--border-hover); background: var(--bg-input); }
+
+/* ── Generic state / alert cards (loading, pending, suspended) ── */
+.affd-state-card { padding: 16px; }
+.affd-cta-card { align-items: flex-start; text-align: left; }
+.affd-cta-icon { font-size: 26px; }
+.affd-cta-list { padding-left: 16px; font-size: 13px; color: var(--text-secondary); line-height: 1.9; font-family: 'Noto Sans Bengali', sans-serif; margin: 0; }
+
+.affd-alert {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius);
+}
+.affd-alert-title { font-size: 13px; font-weight: 700; }
+.affd-alert-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; font-family: 'Noto Sans Bengali', sans-serif; line-height: 1.5; }
+.affd-alert-green { background: var(--green-bg); border: 1px solid rgba(34,197,94,0.25); }
+.affd-alert-gold  { background: var(--gold-bg);  border: 1px solid rgba(245,158,11,0.25); }
+.affd-alert-red   { background: var(--red-bg);   border: 1px solid rgba(239,68,68,0.25); }
+.affd-card-flush { margin: 0; }
+
+/* ── Overall vertical rhythm for the approved dashboard ──────── */
+.affd-wrap { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── 2. Welcome banner ────────────────────────────────────── */
+.affd-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: linear-gradient(120deg, rgba(124,58,237,0.16), rgba(37,99,235,0.10) 60%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+  overflow: hidden;
+  position: relative;
+}
+.affd-banner-text { position: relative; z-index: 1; max-width: 520px; }
+.affd-banner-hi { font-size: 13px; font-weight: 800; color: var(--text-primary); letter-spacing: -.2px; }
+.affd-banner-sub { margin-top: 3px; font-size: 11px; color: var(--text-secondary); line-height: 1.5; font-family: 'Noto Sans Bengali', sans-serif; }
+.affd-banner-art { flex-shrink: 0; opacity: .95; }
+
+/* ── Generic card shell reused across panels ─────────────────── */
+.affd-card {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.affd-card-label {
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.affd-divider { height: 1px; background: var(--border); border: none; margin: 1px 0; }
+
+/* ── 3 & 4. Status row: tier card (left) + approval/referral/promo (right) ── */
+.affd-top-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+.affd-right-col { display: flex; flex-direction: column; gap: 10px; }
+#affTierPanel { height: 100%; box-sizing: border-box; justify-content: space-between; }
+
+.affd-tier-head { display: flex; align-items: center; gap: 14px; }
+.affd-tier-badge {
+  width: 72px; height: 72px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.affd-tier-badge svg { width: 72px; height: 72px; }
+.affd-tier-sub { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+.affd-tier-name { font-size: 18px; font-weight: 800; color: var(--text-primary); margin-top: 2px; }
+.affd-tier-rate-row { padding-top: 8px; border-top: 1px solid var(--border); }
+.affd-tier-rate { font-size: 22px; font-weight: 800; color: var(--accent-light); font-family: 'Sora', sans-serif; margin-top: 1px; }
+.affd-tier-progress-labels { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; font-size: 11px; color: var(--text-muted); }
+.affd-tier-progress-next { color: var(--text-secondary); font-weight: 600; }
+.affd-progress-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.affd-progress-fill { height: 100%; border-radius: 3px; background: var(--accent-light); transition: width .6s ease; }
+
+/* ── 5, 6, 7. Referral code + share card ────────────────── */
+.affd-code-row { display: flex; align-items: center; gap: 8px; }
+.affd-code { font-size: 18px; font-weight: 700; letter-spacing: 2.5px; color: var(--accent-light); font-family: 'Sora', monospace; }
+.affd-icon-btn {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 7px; color: var(--text-secondary); cursor: pointer; transition: border-color .2s;
+}
+.affd-icon-btn:hover { border-color: var(--border-hover); }
+.affd-copied-msg { font-size: 11px; color: var(--green); opacity: 0; transition: opacity .3s; }
+
+/* ── 8. Promotional / Earning Guide card ─────────────────────── */
+.affd-promo-card {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(120deg, rgba(124,58,237,0.14), rgba(59,130,246,0.08));
+  border: 1px solid rgba(124,58,237,0.28);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  flex-wrap: wrap;
+}
+.affd-promo-icon { font-size: 20px; flex-shrink: 0; }
+.affd-promo-text { flex: 1; min-width: 160px; }
+.affd-promo-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.affd-promo-sub { margin-top: 3px; font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+.affd-promo-btn {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  background: var(--purple);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+  transition: background .2s;
+}
+.affd-promo-btn:hover { background: #6d28d9; }
+
+/* ── 9. Earnings overview ────────────────────────────────────── */
+.affd-earn-wrapper {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px 16px 16px;
+  margin: 12px 0;
+}
+.affd-section-label {
+  font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  letter-spacing: .06em; text-transform: uppercase;
+  display: flex; align-items: center;
+  margin-bottom: 10px;
+}
+.affd-earnings-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.affd-earn-card {
+  background: var(--bg-card, #0f1c38);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 10px 12px 0 12px;
+  overflow: hidden;
+  position: relative;
+}
+.affd-spark-canvas {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin-top: 6px;
+}
+.affd-earn-top { display: flex; align-items: center; justify-content: space-between; }
+.affd-earn-lbl { font-size: 9.5px; font-weight: 700; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+.affd-earn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.affd-earn-val { font-size: 18px; font-weight: 800; font-family: 'Sora', sans-serif; margin-top: 4px; color: var(--text-primary); }
+.affd-earn-note { font-size: 9.5px; color: var(--text-muted); margin-top: 2px; }
+.affd-earn-green  { border-left-color: var(--green); }
+.affd-earn-green .affd-earn-dot { background: var(--green); }
+.affd-earn-green .affd-earn-val { color: #34d399; }
+.affd-earn-blue   { border-left-color: var(--accent-light); }
+.affd-earn-blue .affd-earn-dot { background: var(--accent-light); }
+.affd-earn-blue .affd-earn-val { color: #60a5fa; }
+.affd-earn-gold   { border-left-color: var(--gold); }
+.affd-earn-gold .affd-earn-dot { background: var(--gold); }
+.affd-earn-gold .affd-earn-val { color: var(--gold); }
+.affd-earn-purple { border-left-color: var(--purple); }
+.affd-earn-purple .affd-earn-dot { background: var(--purple); }
+.affd-earn-purple .affd-earn-val { color: #a78bfa; }
+
+/* ── 10. Performance analytics ───────────────────────────────── */
+.affd-panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.affd-period-pill {
+  font-size: 10px; font-weight: 600; color: var(--text-secondary);
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 10px;
+}
+.affd-analytics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.affd-metric { background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.affd-metric-lbl { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.affd-metric-val { font-size: 18px; font-weight: 800; color: var(--text-primary); font-family: 'Sora', sans-serif; }
+
+/* ── Analytics stats row (compact) ── */
+.affd-analytics-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.affd-analytics-stat {
+  flex: 0 1 180px;
+  padding: 8px 14px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.affd-analytics-stat:last-child { border-right: none; }
+.affd-analytics-stat-icon { margin-bottom: 0; }
+.affd-analytics-stat-icon svg { width: 12px; height: 12px; }
+.affd-analytics-stat-lbl {
+  font-size: 8px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .04em;
+  white-space: nowrap;
+}
+.affd-analytics-stat-val {
+  font-size: 15px; font-weight: 800;
+  font-family: 'Sora', sans-serif;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+/* ── Analytics line chart ── */
+.affd-analytics-chart-wrap {
+  position: relative;
+  height: 90px;
+  width: 100%;
+}
+.affd-analytics-chart-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Top Affiliates + My Referrals row ───────────────────────── */
+.affd-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.affd-lb-list { display: flex; flex-direction: column; gap: 4px; }
+
+/* Leaderboard row avatar (initials) */
+.affd-lb-avatar {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff;
+  font-family: 'Sora', sans-serif;
+}
+.affd-lb-rank {
+  width: 18px; text-align: center; font-size: 12px; font-weight: 800; color: var(--text-muted); flex-shrink: 0;
+}
+.affd-view-all {
+  font-size: 10.5px; font-weight: 700; color: var(--accent-light);
+  cursor: pointer; text-decoration: none;
+}
+.affd-view-all:hover { text-decoration: underline; }
+
+/* ── Tables (Withdrawal History / My Referrals / Commission History) ── */
+.affd-table-card {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.affd-table-head {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  letter-spacing: .08em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.affd-table-scroll { overflow-x: auto; }
+.affd-table { width: 100%; border-collapse: collapse; min-width: 460px; }
+.affd-table thead tr { border-bottom: 1px solid var(--border); }
+.affd-table th {
+  padding: 7px 8px; font-size: 10px; font-weight: 700; color: var(--text-muted);
+  text-align: left; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+}
+.affd-table td { padding: 8px !important; }
+.affd-table-loading { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; }
+
+/* ── Withdrawal request form ──────────────────────────────────── */
+.affd-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.affd-input {
+  padding: 10px 12px; background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text-primary); font-size: 13px; width: 100%;
+}
+.affd-input:focus { border-color: var(--border-hover); outline: none; }
+
+/* ── Pro tip footer bar ───────────────────────────────────────── */
+.affd-protip {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  background: linear-gradient(120deg, rgba(37,99,235,0.14), rgba(124,58,237,0.10));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-size: 12.5px; color: var(--text-secondary); font-family: 'Noto Sans Bengali', sans-serif;
+}
+.affd-protip-btn {
+  flex-shrink: 0; padding: 8px 16px; background: var(--accent); color: #fff;
+  border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;
+  white-space: nowrap; transition: background .2s;
+}
+.affd-protip-btn:hover { background: #1d4ed8; }
+
+/* =========================================================
+   RESPONSIVE — Affiliate Dashboard
+   ========================================================= */
+@media (max-width: 900px) {
+  .affd-top-grid { grid-template-columns: 1fr; }
+  .affd-two-col { grid-template-columns: 1fr; }
+  .affd-earnings-grid { grid-template-columns: repeat(2, 1fr); }
+  .affd-analytics-grid { grid-template-columns: repeat(2, 1fr); }
+  .affd-earn-wrapper { padding: 12px; }
+}
+@media (max-width: 680px) {
+  .affd-banner { flex-direction: column; align-items: flex-start; text-align: left; padding: 18px; }
+  .affd-banner-art { align-self: center; }
+  .affd-form-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .affd-earnings-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .affd-analytics-grid { grid-template-columns: repeat(2, 1fr); }
+  .affd-earn-val { font-size: 18px; }
+  .affd-code { font-size: 18px; letter-spacing: 2px; }
+  .affd-protip { flex-direction: column; align-items: flex-start; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STEP 3 — Referred Orders, Progress, Funnel
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Referred Orders table extras */
+.affd-table-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.affd-orders-table { min-width: 520px; }
+.affd-table-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.06);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* Mobile order cards */
+.affd-orders-cards {
+  display: none;
+  padding: 10px;
+  flex-direction: column;
+  gap: 10px;
+}
+.affd-order-mobile-card {
+  background: var(--bg-input, rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.affd-omc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.affd-omc-num {
+  font-family: 'Sora', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-light, #60a5fa);
+}
+.affd-omc-progress { margin: 2px 0; }
+.affd-omc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Referral Funnel card */
+.affd-funnel-card {
+  padding: 18px 20px;
+}
+.affd-funnel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.affd-funnel-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 70px;
+  max-width: 120px;
+}
+.affd-funnel-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.affd-funnel-val {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: 'Sora', sans-serif;
+  color: var(--text-primary);
+}
+.affd-funnel-earnings { color: #34d399 !important; }
+.affd-funnel-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.affd-funnel-arrow {
+  font-size: 20px;
+  color: rgba(255,255,255,0.2);
+  padding: 0 4px;
+  flex-shrink: 0;
+  align-self: center;
+  margin-top: -10px; /* align with icons */
+}
+.affd-funnel-rates {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  justify-content: center;
+}
+.affd-funnel-rate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 100px;
+}
+.affd-funnel-rate-lbl {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.affd-funnel-rate-val {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: 'Sora', sans-serif;
+  color: var(--text-primary);
+}
+
+/* Responsive for funnel and orders */
+@media (max-width: 600px) {
+  .affd-funnel { gap: 4px; }
+  .affd-funnel-step { min-width: 55px; }
+  .affd-funnel-val { font-size: 16px; }
+  .affd-funnel-icon { width: 36px; height: 36px; }
+  .affd-funnel-arrow { font-size: 14px; }
+  .affd-funnel-rates { gap: 8px; }
+  .affd-funnel-rate-val { font-size: 15px; }
+  /* Show card view for referred orders (JS also handles this via setupOrdersResponsive) */
+  .affd-orders-cards { display: flex !important; }
+  /* Commission & Withdrawal tables: enforce horizontal scroll */
+  .affd-table-scroll { -webkit-overflow-scrolling: touch; }
+}
+@media (max-width: 480px) {
+  .affd-funnel { flex-wrap: wrap; justify-content: space-around; }
+  .affd-funnel-arrow { display: none; }
+  .affd-funnel-step { flex-basis: 40%; }
 }
