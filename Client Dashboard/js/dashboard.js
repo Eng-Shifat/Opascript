@@ -1791,28 +1791,6 @@ function affiliateReferralUrlFor(code) {
   return window.location.origin + '/Pricing page/pricing.html?ref=' + encodeURIComponent(code);
 }
 
-const AFF_SHARE_MESSAGES = [
-  {
-    label: 'বাংলা — সংক্ষিপ্ত',
-    text: code => `থিসিস বা অ্যাসাইনমেন্ট নিয়ে সাহায্য দরকার? Opascript-এ professional writing help পাবেন। এখান থেকে দেখুনঃ\n${affiliateReferralUrlFor(code)}`
-  },
-  {
-    label: 'বাংলা — প্রফেশনাল',
-    text: code => `আমি Opascript ব্যবহার করছি আমার একাডেমিক writing-এর কাজে — Thesis, Assignment, Report সব কিছুতেই experienced writer-দের সাহায্য পাওয়া যায়, deadline অনুযায়ী delivery সহ। নিচের লিংক থেকে নিজের Order দিতে পারেনঃ\n${affiliateReferralUrlFor(code)}`
-  },
-  {
-    label: 'বাংলা — শিক্ষার্থীদের জন্য',
-    text: code => `বন্ধু, সেমিস্টারের চাপে থিসিস/অ্যাসাইনমেন্ট শেষ করতে পারছো না? Opascript-এ কম সময়ে ভালো মানের academic writing help পাওয়া যায়। ট্রাই করে দেখঃ\n${affiliateReferralUrlFor(code)}`
-  },
-  {
-    label: 'English — Short',
-    text: code => `Need help with your thesis or assignment? Opascript offers professional academic writing help. Check it out:\n${affiliateReferralUrlFor(code)}`
-  },
-  {
-    label: 'English — Professional',
-    text: code => `I've been using Opascript for academic writing support — reliable writers, on-time delivery, and solid quality for theses, assignments, and reports. Worth checking out if you need help:\n${affiliateReferralUrlFor(code)}`
-  }
-];
 
 function initAffiliateShareKit(code) {
   if (!code) return;
@@ -1826,43 +1804,9 @@ function initAffiliateShareKit(code) {
     if (nativeBtn) nativeBtn.style.display = 'flex';
   }
 
-  renderAffiliateShareMessages(code);
   affiliateGenerateQr(_affReferralUrl);
 }
 
-function renderAffiliateShareMessages(code) {
-  const wrap = document.getElementById('affShareMessages');
-  if (!wrap) return;
-  wrap.innerHTML = AFF_SHARE_MESSAGES.map((m, i) => `
-    <div class="aff-share-msgitem">
-      <div class="aff-share-msgtext">
-        <span class="aff-share-msglabel">${m.label}</span>${m.text(code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-      </div>
-      <button class="aff-share-msgcopy" id="affMsgCopyBtn${i}" onclick="affiliateCopyMessage(${i})">Copy</button>
-    </div>
-  `).join('');
-}
-
-function affiliateCopyMessage(i) {
-  const code = document.getElementById('affReferralCode')?.textContent || '';
-  if (!code || code === '—') return;
-  const text = AFF_SHARE_MESSAGES[i].text(code);
-  const btn = document.getElementById('affMsgCopyBtn' + i);
-  const done = () => {
-    if (!btn) return;
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1600);
-  };
-  navigator.clipboard.writeText(text).then(done).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta);
-    done();
-  });
-}
 
 function affiliateCopyLink() {
   if (!_affReferralUrl) return;
@@ -2069,7 +2013,6 @@ async function loadAffiliateEarnings(affiliateId) {
       const statusMap = {
         earned:    { color: '#34d399', label: 'Earned' },
         pending:   { color: '#f59e0b', label: 'Pending' },
-        withdrawn: { color: '#60a5fa', label: 'Withdrawn' },
         cancelled: { color: '#f87171', label: 'Cancelled' },
       };
       const st = statusMap[c.commission_status] || { color: 'var(--text-muted)', label: c.commission_status };
