@@ -1943,6 +1943,7 @@ async function loadAffiliateEarnings(affiliateId) {
   const earningsEl  = document.getElementById('affEarningsTotal');
   const availableEl = document.getElementById('affAvailableBalance');
   const pendingEl   = document.getElementById('affEarningsPending');
+  const clearanceEl = document.getElementById('affPendingClearance');
   const tbodyEl     = document.getElementById('affCommTbody');
   const withdrawSec = document.getElementById('affWithdrawSection');
   const pendingNote = document.getElementById('affWithdrawPendingNotice');
@@ -1950,6 +1951,7 @@ async function loadAffiliateEarnings(affiliateId) {
   if (earningsEl)  earningsEl.textContent  = '…';
   if (availableEl) availableEl.textContent = '…';
   if (pendingEl)   pendingEl.textContent   = '…';
+  if (clearanceEl) clearanceEl.textContent = '…';
   if (tbodyEl) tbodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">লোড হচ্ছে…</td></tr>';
 
   try {
@@ -1980,6 +1982,7 @@ async function loadAffiliateEarnings(affiliateId) {
     }
 
     if (pendingEl)   pendingEl.textContent   = fmt(wallet.pending_withdrawal);
+    if (clearanceEl) clearanceEl.textContent = fmt(wallet.pending_clearance);
 
     // Draw sparklines after values are set
     setTimeout(initEarningSparklines, 50);
@@ -2315,6 +2318,7 @@ function initEarningSparklines() {
   drawEarningSparkline('sparkTotal',     '#34d399');
   drawEarningSparkline('sparkBalance',   '#60a5fa');
   drawEarningSparkline('sparkPending',   '#f59e0b');
+  drawEarningSparkline('sparkClearance', '#2dd4bf');
   drawEarningSparkline('sparkWithdrawn', '#a78bfa');
 }
 

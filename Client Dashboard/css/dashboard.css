@@ -4668,7 +4668,7 @@ input, select, textarea { font-family: inherit; }
   display: flex; align-items: center;
   margin-bottom: 10px;
 }
-.affd-earnings-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.affd-earnings-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
 .affd-earn-card {
   background: var(--bg-card, #0f1c38);
   border: 1px solid var(--border);
@@ -4701,6 +4701,9 @@ input, select, textarea { font-family: inherit; }
 .affd-earn-purple { border-left-color: var(--purple); }
 .affd-earn-purple .affd-earn-dot { background: var(--purple); }
 .affd-earn-purple .affd-earn-val { color: #a78bfa; }
+.affd-earn-teal   { border-left-color: #2dd4bf; }
+.affd-earn-teal .affd-earn-dot { background: #2dd4bf; }
+.affd-earn-teal .affd-earn-val { color: #2dd4bf; }
 
 /* ── 10. Performance analytics ───────────────────────────────── */
 .affd-panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
