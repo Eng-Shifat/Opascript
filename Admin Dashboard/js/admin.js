@@ -1,147 +1,44 @@
 /* ═══════════════════════════════════════════
    SCRIPTORA ADMIN DASHBOARD — admin.js
+   Full Supabase integration — no demo data
 ═══════════════════════════════════════════ */
 
-/* ─── DATA ─── */
-const orders = [
-  { id:'#SCR-1082', client:'Rahim Uddin',   avatar:'RU', color:'#6c63ff', service:'Assignment Writing', dept:'BBA', status:'progress', amount:850,  deadline:'Jun 15' },
-  { id:'#SCR-1081', client:'Nusrat Jahan',  avatar:'NJ', color:'#34d399', service:'Thesis Writing',     dept:'CSE', status:'pending',  amount:3200, deadline:'Jun 20' },
-  { id:'#SCR-1080', client:'Tanvir Ahmed',  avatar:'TA', color:'#f59e0b', service:'Report Writing',     dept:'BBA', status:'done',     amount:1200, deadline:'Jun 05' },
-  { id:'#SCR-1079', client:'Priya Sharma',  avatar:'PS', color:'#a78bfa', service:'Research Paper',     dept:'Law', status:'overdue',  amount:2800, deadline:'Jun 01' },
-  { id:'#SCR-1078', client:'Farhan Islam',  avatar:'FI', color:'#f87171', service:'Presentation',       dept:'EEE', status:'done',     amount:600,  deadline:'Jun 03' },
-  { id:'#SCR-1077', client:'Sadia Khatun',  avatar:'SK', color:'#34d399', service:'Assignment Writing', dept:'CSE', status:'progress', amount:750,  deadline:'Jun 18' },
-];
-
-const activities = [
-  { icon:'✅', color:'rgba(52,211,153,0.15)',   title:'Order <b>#SCR-1080</b> completed',           sub:'Tanvir Ahmed — Report Writing',    time:'Today, 2:30 PM' },
-  { icon:'💳', color:'rgba(108,99,255,0.15)',   title:'Payment received <b>৳1,200</b>',            sub:'Invoice #INV-0412 settled',        time:'Today, 1:15 PM' },
-  { icon:'📋', color:'rgba(245,158,11,0.15)',   title:'New order <b>#SCR-1082</b> created',        sub:'Rahim Uddin — BBA Assignment',     time:'Today, 11:00 AM' },
-  { icon:'👤', color:'rgba(167,139,250,0.15)',  title:'New client <b>Nusrat Jahan</b> registered', sub:'CSE Dept · Thesis Writing',        time:'Yesterday, 6:45 PM' },
-  { icon:'⚠️', color:'rgba(248,113,113,0.15)', title:'Order <b>#SCR-1079</b> is overdue',         sub:'Priya Sharma — Research Paper',    time:'Yesterday, 9:00 AM' },
-  { icon:'📁', color:'rgba(52,211,153,0.15)',   title:'File uploaded for <b>#SCR-1081</b>',        sub:'requirements.pdf — 2.3 MB',        time:'Jun 3, 4:20 PM' },
-];
-
-const donutData = [
-  { label:'Completed',   value:22, color:'#6c63ff' },
-  { label:'In Progress', value:18, color:'#34d399' },
-  { label:'Pending',     value:12, color:'#f59e0b' },
-  { label:'Overdue',     value: 5, color:'#f87171' },
-];
-
-const revenueData = {
-  monthly: {
-    labels:   ['Jan','Feb','Mar','Apr','May','Jun'],
-    revenue:  [52000,60000,58000,65000,68000,84320],
-    expenses: [28000,30000,32000,28000,35000,42000],
-  },
-  quarterly: {
-    labels:   ['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 2025'],
-    revenue:  [140000,175000,160000,195000,220000,250000],
-    expenses: [80000, 90000, 85000, 95000,110000,125000],
-  },
-  yearly: {
-    labels:   ['2020','2021','2022','2023','2024','2025'],
-    revenue:  [350000,420000,510000,640000,780000,950000],
-    expenses: [180000,210000,250000,310000,380000,460000],
-  },
-};
-
-/* ─── CHART INSTANCES ─── */
+/* ─── GLOBAL STATE ─── */
+let allOrders       = [];   // real orders from Supabase
 let revenueChart, donutChart;
 
 /* ═══════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  animateCounter('stat-revenue', 84320, '৳', true);
-  animateCounter('stat-orders',  47);
-  animateCounter('stat-clients', 138);
-  animateCounter('stat-due',     12480, '৳', true);
-
-  document.getElementById('orders-inprogress').textContent = '18 In Progress';
-  document.getElementById('orders-pending').textContent    = '12 Pending';
-  document.getElementById('orders-overdue').textContent    = '5 Overdue';
-  document.getElementById('clients-active').textContent    = '112 Active';
-  document.getElementById('clients-inactive').textContent  = '26 Inactive';
-  document.getElementById('clients-retention').textContent = '94% Retention';
-
-  renderActivity();
-  renderDonutLegend();
-  initRevenueChart('monthly');
-  initDonutChart();
+  /* Skeleton placeholders while data loads */
+  document.getElementById('stat-revenue').textContent  = '৳—';
+  document.getElementById('stat-orders').textContent   = '—';
+  document.getElementById('stat-clients').textContent  = '—';
+  document.getElementById('stat-due').textContent      = '৳—';
 
   document.getElementById('m-deadline').value = new Date().toISOString().split('T')[0];
 
-  loadAdminMessages();
-
-  /* ── Load real orders from Supabase ── */
+  /* Orders আগে load করতে হবে — loadClientStats allOrders use করে */
   await loadOrdersFromSupabase();
 
-  /* ── Load real client count ── */
-  await loadRealClientStats();
+  /* বাকিগুলো parallel এ চলতে পারে */
+  await Promise.all([
+    loadClientStats(),
+    loadAdminMessages(),
+  ]);
+
+  loadActivityFeed();
 });
-
-/* ═══════════════════════════════════════════
-   REAL CLIENT & DUE STATS
-═══════════════════════════════════════════ */
-async function loadRealClientStats() {
-  try {
-    const sb = window.scriptoraSupabase;
-    if (!sb) return;
-
-    /* Clients */
-    const { count: totalClients } = await sb
-      .from('clients').select('id', { count: 'exact', head: true });
-
-    const { data: activeData } = await sb
-      .from('orders').select('client_id').not('client_id', 'is', null);
-    const uniqueActive = new Set((activeData || []).map(o => o.client_id)).size;
-    const inactive     = Math.max(0, (totalClients || 0) - uniqueActive);
-    const retention    = totalClients > 0 ? Math.round((uniqueActive / totalClients) * 100) : 0;
-
-    if (totalClients !== null) {
-      animateCounter('stat-clients', totalClients);
-      document.getElementById('clients-active').textContent   = uniqueActive + ' Active';
-      document.getElementById('clients-inactive').textContent = inactive + ' Inactive';
-      document.getElementById('clients-retention').textContent = retention + '% Retention';
-    }
-
-    /* Due amount — sum of due_amount from all orders */
-    const { data: dueData } = await sb
-      .from('orders').select('due_amount, advance_paid');
-    const totalDue = (dueData || []).reduce((s, o) => s + (Number(o.due_amount) || 0), 0);
-    const pendingInvoices = (dueData || []).filter(o => (Number(o.due_amount) || 0) > 0).length;
-    const totalRevenue    = (dueData || []).reduce((s, o) => s + (Number(o.advance_paid) || 0), 0);
-
-    if (totalDue > 0) animateCounter('stat-due', totalDue, '৳', true);
-    if (pendingInvoices > 0) {
-      const inlineEl = document.querySelector('#stat-due')?.closest('.stat-card')?.querySelector('.stat-badge');
-      if (inlineEl) inlineEl.textContent = '⚠ ' + pendingInvoices + ' invoices pending';
-    }
-    if (totalRevenue > 0) animateCounter('stat-revenue', totalRevenue, '৳', true);
-
-    /* Revenue chart — update donut with real data */
-    updateDonutFromSupabase(dueData);
-
-  } catch(e) {
-    console.warn('[Admin] Client stats load error:', e);
-  }
-}
-
-function updateDonutFromSupabase(orders) {
-  if (!orders || !orders.length || !donutChart) return;
-  /* We already have ORDERS from loadOrdersFromSupabase — use global */
-  /* This function is called separately, just refreshes visual */
-}
 
 /* ═══════════════════════════════════════════
    COUNTER ANIMATION
 ═══════════════════════════════════════════ */
 function animateCounter(id, target, prefix = '', comma = false) {
   const el   = document.getElementById(id);
-  const step = target / (1200 / 16);
+  if (!el) return;
+  const step = Math.max(1, target / (1200 / 16));
   let   cur  = 0;
-
   const timer = setInterval(() => {
     cur += step;
     if (cur >= target) { cur = target; clearInterval(timer); }
@@ -151,202 +48,285 @@ function animateCounter(id, target, prefix = '', comma = false) {
 }
 
 /* ═══════════════════════════════════════════
-   ORDERS TABLE
-═══════════════════════════════════════════ */
-/* ═══════════════════════════════════════════
-   LOAD REAL ORDERS FROM SUPABASE
+   LOAD ALL ORDERS FROM SUPABASE
 ═══════════════════════════════════════════ */
 async function loadOrdersFromSupabase() {
-  try {
-    const db = window.scriptoraSupabase;
-    if (!db) { renderOrders(orders); return; }
+  const db = window.scriptoraSupabase;
+  if (!db) { renderOrders([]); return; }
 
-    /* Fetch orders — hide fake / never-paid orders from admin.
-       Logic: hide when payment_status is 'unpaid' or 'rejected' AND
-       advance_paid = 0 (no real money ever came in for this order).
-       Show: under_review (proof submitted, needs approval), approved,
-       paid, confirmed — and anything with advance_paid > 0 regardless
-       of status, since that money still needs to be accounted for. */
+  try {
     const { data, error } = await db
       .from('orders')
       .select('*')
-      .or('payment_status.not.in.(unpaid,rejected),advance_paid.gt.0')
-      .order('order_date', { ascending: false })
-      .limit(50);
+      .order('order_date', { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      renderOrders(orders); /* fallback to mock data */
-      return;
+    if (error) throw error;
+
+    allOrders = data || [];
+
+    /* ── Fetch client names ── */
+    const clientIds = [...new Set(allOrders.map(o => o.client_id).filter(Boolean))];
+    let clientMap   = {};
+    if (clientIds.length) {
+      const { data: clients } = await db
+        .from('clients')
+        .select('id, name, email')
+        .in('id', clientIds);
+      (clients || []).forEach(c => { clientMap[c.id] = c; });
     }
 
-    /* Map Supabase columns → renderOrders format */
+    /* ── Map to display format ── */
     const colors = ['#6c63ff','#34d399','#f59e0b','#a78bfa','#f87171','#11b5d9','#fb923c'];
-    const mapped = data.map((o, i) => {
-      /* Extract name from special_instructions */
-      const lines    = (o.special_instructions || '').split('\n');
-      const nameLine = lines.find(l => l.startsWith('Name:'));
-      const client   = nameLine ? nameLine.replace('Name:', '').trim() : (o.title || 'Client');
+    const mapped = allOrders.map((o, i) => {
+      const cl      = clientMap[o.client_id];
+      let   client  = cl?.name || cl?.email || null;
+      if (!client) {
+        const lines    = (o.special_instructions || '').split('\n');
+        const nameLine = lines.find(l => l.startsWith('Name:'));
+        client = nameLine ? nameLine.replace('Name:', '').trim() : (o.title || 'Client');
+      }
       const initials = client.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-      const color    = colors[i % colors.length];
-
-      /* Status map */
-      const statusMap = { pending:'pending', in_progress:'progress', completed:'done', overdue:'overdue' };
-
-      /* Deadline format */
+      const statusMap = {
+        pending:     'pending',
+        writing:     'progress',
+        confirmed:   'progress',
+        draft_ready: 'progress',
+        revision:    'progress',
+        in_review:   'progress',
+        hold:        'pending',
+        in_progress: 'progress',
+        completed:   'done',
+        overdue:     'overdue',
+      };
       const dl = o.deadline
         ? new Date(o.deadline).toLocaleDateString('en-GB', { day:'2-digit', month:'short' })
         : '—';
-
       return {
-        id:       o.order_number || `#${o.id?.slice(0,8)}`,
-        client:   client,
+        id:       o.order_number || `#${(o.id||'').slice(0, 8)}`,
+        client,
         avatar:   initials || 'CL',
-        color:    color,
+        color:    colors[i % colors.length],
         service:  o.title || o.service_type || 'Academic Service',
         dept:     o.department || o.service_type || '—',
         status:   statusMap[o.status] || o.status || 'pending',
         amount:   o.total_price || 0,
         deadline: dl,
+        raw:      o,
       };
     });
 
-    /* Update stat counters with real data */
-    const pending    = data.filter(o => o.status === 'pending').length;
-    const inProgress = data.filter(o => o.status === 'in_progress').length;
-    const overdue    = data.filter(o => o.status === 'overdue').length;
-    const totalRev   = data.reduce((sum, o) => sum + (o.total_price || 0), 0);
+    /* ── Stat counters ── */
+    const IN_PROGRESS_STATUSES = ['writing', 'confirmed', 'draft_ready', 'revision', 'in_review', 'in_progress'];
+    const PENDING_STATUSES     = ['pending', 'hold'];
 
-    animateCounter('stat-orders',  data.length);
+    const pending    = allOrders.filter(o => PENDING_STATUSES.includes(o.status)).length;
+    const inProgress = allOrders.filter(o => IN_PROGRESS_STATUSES.includes(o.status)).length;
+    const overdue    = allOrders.filter(o => o.status === 'overdue').length;
+    const completed  = allOrders.filter(o => o.status === 'completed').length;
+    const totalRev   = allOrders.reduce((s, o) => s + (Number(o.advance_paid) || 0), 0);
+    const totalDue   = allOrders.reduce((s, o) => s + (Number(o.due_amount)   || 0), 0);
+    const pendingInv = allOrders.filter(o => (Number(o.due_amount) || 0) > 0).length;
+
     animateCounter('stat-revenue', totalRev, '৳', true);
+    animateCounter('stat-orders',  allOrders.length);
+    animateCounter('stat-due',     totalDue, '৳', true);
+
     document.getElementById('orders-inprogress').textContent = `${inProgress} In Progress`;
     document.getElementById('orders-pending').textContent    = `${pending} Pending`;
     document.getElementById('orders-overdue').textContent    = `${overdue} Overdue`;
 
-    renderOrders(mapped);
+    /* ── Dynamic badges ── */
+    updateDynamicBadges(allOrders, totalRev);
+
+    /* Pending invoices badge */
+    const dueCard = document.getElementById('stat-due')?.closest('.stat-card');
+    const badge   = dueCard?.querySelector('.stat-badge');
+    if (badge) badge.textContent = `⚠ ${pendingInv} invoices pending`;
+
+    /* ── Charts ── */
+    buildRevenueChart(allOrders);
+    buildDonutChart(allOrders, { pending, inProgress, overdue, completed });
+
+    /* ── Recent Orders table (last 10) ── */
+    renderOrders(mapped.slice(0, 10));
+
+    /* Store mapped for search */
+    window._mappedOrders = mapped;
 
   } catch (err) {
     console.error('[Admin] Orders load failed:', err);
-    renderOrders(orders); /* fallback */
+    showToast('❌ Orders লোড হয়নি: ' + (err.message || 'Unknown error'), '#f87171');
+    renderOrders([]);
   }
 }
 
-function renderOrders(data) {
-  document.getElementById('ordersBody').innerHTML = data.map(o => `
-    <tr>
-      <td><span class="order-id">${o.id}</span></td>
-      <td>
-        <div class="client-cell">
-          <div class="client-av" style="background:${o.color}22;color:${o.color}">${o.avatar}</div>
-          ${o.client}
-        </div>
-      </td>
-      <td>${o.service}</td>
-      <td><span class="dept-cell">${o.dept}</span></td>
-      <td><span class="status-badge ${o.status}">${statusLabel(o.status)}</span></td>
-      <td class="amount-cell">৳${o.amount.toLocaleString()}</td>
-      <td class="deadline-cell">${o.deadline}</td>
-    </tr>
-  `).join('');
+/* ═══════════════════════════════════════════
+   DYNAMIC BADGES — real comparison calculations
+═══════════════════════════════════════════ */
+function updateDynamicBadges(orders, totalRevThisMonth) {
+  const now         = new Date();
+  const thisMonth   = now.getMonth();
+  const thisYear    = now.getFullYear();
+  const lastMonth   = thisMonth === 0 ? 11 : thisMonth - 1;
+  const lastMonthYr = thisMonth === 0 ? thisYear - 1 : thisYear;
+
+  const thisWeekStart = new Date(now);
+  thisWeekStart.setDate(now.getDate() - now.getDay()); // Sunday
+  thisWeekStart.setHours(0, 0, 0, 0);
+
+  /* ── Revenue: this month vs last month ── */
+  const revBadge = document.getElementById('badge-revenue');
+  const revSub   = document.getElementById('sub-revenue');
+  if (revBadge) {
+    const revThis = orders
+      .filter(o => {
+        const d = new Date(o.order_date || o.created_at);
+        return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+      })
+      .reduce((s, o) => s + (Number(o.advance_paid) || 0), 0);
+
+    const revLast = orders
+      .filter(o => {
+        const d = new Date(o.order_date || o.created_at);
+        return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYr;
+      })
+      .reduce((s, o) => s + (Number(o.advance_paid) || 0), 0);
+
+    if (revLast > 0) {
+      const pct    = ((revThis - revLast) / revLast * 100).toFixed(1);
+      const isUp   = pct >= 0;
+      revBadge.textContent  = (isUp ? '↑ +' : '↓ ') + pct + '%';
+      revBadge.className    = 'stat-badge ' + (isUp ? 'up' : 'down');
+      if (revSub) revSub.textContent = 'গত মাসের তুলনায়';
+    } else if (revThis > 0) {
+      revBadge.textContent = '↑ নতুন revenue';
+      revBadge.className   = 'stat-badge up';
+    } else {
+      revBadge.textContent = '— কোনো data নেই';
+      revBadge.className   = 'stat-badge';
+    }
+  }
+
+  /* ── Orders: new this week ── */
+  const ordBadge = document.getElementById('badge-orders');
+  if (ordBadge) {
+    const newThisWeek = orders.filter(o => {
+      const d = new Date(o.order_date || o.created_at);
+      return d >= thisWeekStart;
+    }).length;
+
+    ordBadge.textContent = newThisWeek > 0
+      ? `↑ +${newThisWeek} this week`
+      : '— এই সপ্তাহে নতুন নেই';
+    ordBadge.className = newThisWeek > 0 ? 'stat-badge up' : 'stat-badge';
+  }
 }
 
-function statusLabel(s) {
-  return { progress:'In Progress', pending:'Pending', done:'Completed', overdue:'Overdue' }[s] || s;
+/* ── Client badge — called from loadClientStats ── */
+function updateClientBadge(clients) {
+  const badge = document.getElementById('badge-clients');
+  if (!badge) return;
+
+  const now         = new Date();
+  const thisMonth   = now.getMonth();
+  const thisYear    = now.getFullYear();
+
+  const newThisMonth = (clients || []).filter(c => {
+    const d = new Date(c.created_at);
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+  }).length;
+
+  badge.textContent = newThisMonth > 0
+    ? `↑ +${newThisMonth} new this month`
+    : '— এই মাসে নতুন নেই';
+  badge.className = newThisMonth > 0 ? 'stat-badge up' : 'stat-badge';
 }
 
 /* ═══════════════════════════════════════════
-   ACTIVITY FEED
+   CLIENT STATS
 ═══════════════════════════════════════════ */
-function renderActivity() {
-  document.getElementById('activityList').innerHTML = activities.map(a => `
-    <div class="activity-item">
-      <div class="activity-dot-wrap">
-        <div class="activity-dot" style="background:${a.color}">${a.icon}</div>
-        <div class="activity-line"></div>
-      </div>
-      <div class="activity-body">
-        <div class="activity-title">${a.title}</div>
-        <div class="activity-title"><span>${a.sub}</span></div>
-        <div class="activity-time"><i class="ti ti-clock" style="font-size:.7rem"></i> ${a.time}</div>
-      </div>
-    </div>
-  `).join('');
+async function loadClientStats() {
+  const db = window.scriptoraSupabase;
+  if (!db) return;
+  try {
+    /* created_at আনতে হবে badge calculation-এর জন্য */
+    const { data: clientsData, count: totalClients } = await db
+      .from('clients')
+      .select('id, created_at', { count: 'exact' });
+
+    const uniqueActive = new Set(allOrders.map(o => o.client_id).filter(Boolean)).size;
+    const inactive     = Math.max(0, (totalClients || 0) - uniqueActive);
+    const retention    = totalClients > 0 ? Math.round((uniqueActive / totalClients) * 100) : 0;
+
+    animateCounter('stat-clients', totalClients || 0);
+    document.getElementById('clients-active').textContent    = `${uniqueActive} Active`;
+    document.getElementById('clients-inactive').textContent  = `${inactive} Inactive`;
+    document.getElementById('clients-retention').textContent = `${retention}% Retention`;
+
+    /* Badge: new clients this month */
+    updateClientBadge(clientsData || []);
+
+  } catch (e) {
+    console.warn('[Admin] Client stats error:', e);
+  }
 }
 
 /* ═══════════════════════════════════════════
-   DONUT CHART
+   REVENUE CHART — real data from orders
 ═══════════════════════════════════════════ */
-function initDonutChart() {
-  const canvas = document.getElementById('donutChart');
-  canvas.width  = 180;
-  canvas.height = 180;
-  const ctx   = canvas.getContext('2d');
-  const total = donutData.reduce((a, b) => a + b.value, 0);
+function buildRevenueChart(orders, period = 'monthly') {
+  const ctx = document.getElementById('revenueChart')?.getContext('2d');
+  if (!ctx) return;
 
-  if (donutChart) donutChart.destroy();
+  const now = new Date();
 
-  donutChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: donutData.map(d => d.label),
-      datasets: [{
-        data:            donutData.map(d => d.value),
-        backgroundColor: donutData.map(d => d.color),
-        borderWidth:     0,
-        hoverOffset:     6,
-      }],
-    },
-    options: {
-      cutout: '72%',
-      plugins: {
-        legend:  { display: false },
-        tooltip: {
-          enabled:         true,
-          backgroundColor: '#1a1d2e',
-          borderColor:     'rgba(255,255,255,0.1)',
-          borderWidth:     1,
-          titleColor:      '#e8eaf6',
-          bodyColor:       '#9ca3af',
-          padding:         12,
-          cornerRadius:    10,
-          displayColors:   true,
-          boxWidth:        10,
-          boxHeight:       10,
-          callbacks: {
-            title: (items) => items[0].label,
-            label: (item) => {
-              const total = donutData.reduce((a, b) => a + b.value, 0);
-              const pct   = ((item.raw / total) * 100).toFixed(1);
-              return ` ${item.raw} orders · ${pct}%`;
-            },
-          },
-        },
-      },
-      animation: { animateRotate: true, duration: 1000 },
-    },
-  });
-}
+  let labels, revenue, expenses;
 
-function renderDonutLegend() {
-  const total = donutData.reduce((a, b) => a + b.value, 0);
-  document.getElementById('donut-total').textContent = total;
-  document.getElementById('donut-legend').innerHTML = donutData.map(d => {
-    const pct = Math.round((d.value / total) * 100);
-    return `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${d.color}"></div>
-      <span class="legend-label">${d.label}</span>
-      <span class="legend-count" style="color:${d.color}">${d.value}</span>
-      <span class="legend-pct">${pct}%</span>
-    </div>`;
-  }).join('');
-}
+  if (period === 'monthly') {
+    /* Last 6 months */
+    labels   = [];
+    revenue  = [];
+    expenses = [];
+    for (let i = 5; i >= 0; i--) {
+      const d  = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const yr = d.getFullYear(), mo = d.getMonth();
+      labels.push(d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }));
+      const monthOrders = orders.filter(o => {
+        const od = new Date(o.order_date || o.created_at);
+        return od.getFullYear() === yr && od.getMonth() === mo;
+      });
+      revenue.push(monthOrders.reduce((s, o) => s + (Number(o.advance_paid) || 0), 0));
+      expenses.push(monthOrders.reduce((s, o) => s + (Number(o.due_amount)  || 0), 0));
+    }
 
-/* ═══════════════════════════════════════════
-   REVENUE CHART
-═══════════════════════════════════════════ */
-function initRevenueChart(period) {
-  const ctx = document.getElementById('revenueChart').getContext('2d');
-  const d   = revenueData[period];
+  } else if (period === 'quarterly') {
+    /* Last 6 quarters */
+    labels   = [];
+    revenue  = [];
+    expenses = [];
+    for (let i = 5; i >= 0; i--) {
+      const qDate   = new Date(now.getFullYear(), now.getMonth() - i * 3, 1);
+      const yr      = qDate.getFullYear();
+      const quarter = Math.floor(qDate.getMonth() / 3);
+      labels.push(`Q${quarter + 1} ${yr}`);
+      const qOrders = orders.filter(o => {
+        const od = new Date(o.order_date || o.created_at);
+        return od.getFullYear() === yr && Math.floor(od.getMonth() / 3) === quarter;
+      });
+      revenue.push(qOrders.reduce((s, o) => s + (Number(o.advance_paid) || 0), 0));
+      expenses.push(qOrders.reduce((s, o) => s + (Number(o.due_amount)  || 0), 0));
+    }
+
+  } else {
+    /* Yearly — last 4 years */
+    const years = [];
+    for (let i = 3; i >= 0; i--) years.push(now.getFullYear() - i);
+    labels   = years.map(String);
+    revenue  = years.map(yr => orders.filter(o => new Date(o.order_date || o.created_at).getFullYear() === yr)
+                                      .reduce((s, o) => s + (Number(o.advance_paid) || 0), 0));
+    expenses = years.map(yr => orders.filter(o => new Date(o.order_date || o.created_at).getFullYear() === yr)
+                                      .reduce((s, o) => s + (Number(o.due_amount)  || 0), 0));
+  }
 
   if (revenueChart) revenueChart.destroy();
 
@@ -361,27 +341,27 @@ function initRevenueChart(period) {
   revenueChart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels:   d.labels,
+      labels,
       datasets: [
         {
-          label:           'Revenue',
-          data:            d.revenue,
+          label:           'Revenue (Received)',
+          data:            revenue,
           backgroundColor: gradBlue,
           borderRadius:    6,
           borderSkipped:   false,
           order:           2,
         },
         {
-          label:           'Expenses',
-          data:            d.expenses,
+          label:           'Due Amount',
+          data:            expenses,
           backgroundColor: gradGray,
           borderRadius:    6,
           borderSkipped:   false,
           order:           3,
         },
         {
-          label:                'Net Profit',
-          data:                 d.revenue.map((r, i) => r - d.expenses[i]),
+          label:                'Net (Revenue − Due)',
+          data:                 revenue.map((r, i) => r - expenses[i]),
           type:                 'line',
           borderColor:          '#34d399',
           backgroundColor:      'transparent',
@@ -417,6 +397,10 @@ function initRevenueChart(period) {
       },
     },
   });
+
+  /* Store current period for tab switch */
+  window._currentRevPeriod = period;
+  window._allOrdersForChart = orders;
 }
 
 /* ═══════════════════════════════════════════
@@ -425,55 +409,260 @@ function initRevenueChart(period) {
 function switchTab(btn, period) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  initRevenueChart(period);
+  buildRevenueChart(window._allOrdersForChart || allOrders, period);
 }
 
 /* ═══════════════════════════════════════════
-   SEARCH
+   DONUT CHART — real status counts
+═══════════════════════════════════════════ */
+function buildDonutChart(orders, counts) {
+  const canvas = document.getElementById('donutChart');
+  if (!canvas) return;
+  canvas.width  = 180;
+  canvas.height = 180;
+  const ctx = canvas.getContext('2d');
+
+  const donutData = [
+    { label: 'Completed',   value: counts.completed,  color: '#6c63ff' },
+    { label: 'In Progress', value: counts.inProgress, color: '#34d399' },
+    { label: 'Pending',     value: counts.pending,    color: '#f59e0b' },
+    { label: 'Overdue',     value: counts.overdue,    color: '#f87171' },
+  ].filter(d => d.value > 0);
+
+  const total = donutData.reduce((a, b) => a + b.value, 0);
+
+  /* Donut total center */
+  const totalEl = document.getElementById('donut-total');
+  if (totalEl) totalEl.textContent = total;
+
+  /* Legend */
+  const legendEl = document.getElementById('donut-legend');
+  if (legendEl) {
+    legendEl.innerHTML = donutData.map(d => {
+      const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
+      return `
+      <div class="legend-item">
+        <div class="legend-dot" style="background:${d.color}"></div>
+        <span class="legend-label">${d.label}</span>
+        <span class="legend-count" style="color:${d.color}">${d.value}</span>
+        <span class="legend-pct">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  if (donutChart) donutChart.destroy();
+
+  if (!donutData.length) return;
+
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels:   donutData.map(d => d.label),
+      datasets: [{
+        data:            donutData.map(d => d.value),
+        backgroundColor: donutData.map(d => d.color),
+        borderWidth:     0,
+        hoverOffset:     6,
+      }],
+    },
+    options: {
+      cutout: '72%',
+      plugins: {
+        legend:  { display: false },
+        tooltip: {
+          enabled:         true,
+          backgroundColor: '#1a1d2e',
+          borderColor:     'rgba(255,255,255,0.1)',
+          borderWidth:     1,
+          titleColor:      '#e8eaf6',
+          bodyColor:       '#9ca3af',
+          padding:         12,
+          cornerRadius:    10,
+          displayColors:   true,
+          boxWidth:        10,
+          boxHeight:       10,
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (item) => {
+              const pct = total > 0 ? ((item.raw / total) * 100).toFixed(1) : 0;
+              return ` ${item.raw} orders · ${pct}%`;
+            },
+          },
+        },
+      },
+      animation: { animateRotate: true, duration: 1000 },
+    },
+  });
+}
+
+/* ═══════════════════════════════════════════
+   ACTIVITY FEED — real Supabase data
+═══════════════════════════════════════════ */
+async function loadActivityFeed() {
+  const db = window.scriptoraSupabase;
+  const el = document.getElementById('activityList');
+  if (!el) return;
+
+  if (!db) {
+    el.innerHTML = '<div class="activity-item"><div class="activity-body"><div class="activity-title">Supabase সংযুক্ত নেই</div></div></div>';
+    return;
+  }
+
+  try {
+    /* Last 20 orders sorted by creation — derive activity from them */
+    const { data: recentOrders } = await db
+      .from('orders')
+      .select('id, order_number, title, service_type, status, total_price, advance_paid, client_id, order_date, created_at, updated_at')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    /* Fetch client names */
+    const cids = [...new Set((recentOrders || []).map(o => o.client_id).filter(Boolean))];
+    let cMap = {};
+    if (cids.length) {
+      const { data: cls } = await db.from('clients').select('id, name, email').in('id', cids);
+      (cls || []).forEach(c => { cMap[c.id] = c; });
+    }
+
+    /* Fetch recent unread messages — from_admin column olmayabilir */
+    const { data: recentMsgs } = await db
+      .from('messages')
+      .select('order_id, text, sent_at')
+      .order('sent_at', { ascending: false })
+      .limit(5);
+
+    /* Build activity items from orders + messages, merged & sorted */
+    const items = [];
+
+    (recentOrders || []).forEach(o => {
+      const cl     = cMap[o.client_id];
+      const name   = cl?.name || cl?.email || 'Client';
+      const oNum   = o.order_number || '#' + (o.id || '').slice(0, 8);
+      const svc    = o.title || o.service_type || 'Academic Service';
+      const time   = o.created_at;
+
+      const statusIcons = {
+        completed:   { icon: '✅', color: 'rgba(52,211,153,0.15)',  label: 'completed' },
+        in_progress: { icon: '🔄', color: 'rgba(108,99,255,0.15)',  label: 'in progress' },
+        writing:     { icon: '🔄', color: 'rgba(108,99,255,0.15)',  label: 'in progress' },
+        confirmed:   { icon: '🔄', color: 'rgba(108,99,255,0.15)',  label: 'confirmed' },
+        draft_ready: { icon: '📤', color: 'rgba(52,211,153,0.15)',  label: 'delivered' },
+        in_review:   { icon: '👁', color: 'rgba(167,139,250,0.15)', label: 'in review' },
+        revision:    { icon: '✏', color: 'rgba(245,158,11,0.15)',   label: 'revision requested' },
+        hold:        { icon: '⏸', color: 'rgba(156,163,175,0.15)', label: 'on hold' },
+        pending:     { icon: '📋', color: 'rgba(245,158,11,0.15)',  label: 'created' },
+        overdue:     { icon: '⚠', color: 'rgba(248,113,113,0.15)', label: 'overdue' },
+      };
+      const si = statusIcons[o.status] || { icon: '📋', color: 'rgba(108,99,255,0.15)', label: o.status || 'created' };
+
+      if (o.advance_paid > 0) {
+        items.push({
+          icon:  '💳',
+          color: 'rgba(52,211,153,0.15)',
+          title: `Payment received <b>৳${Number(o.advance_paid).toLocaleString()}</b>`,
+          sub:   `${name} — ${oNum}`,
+          time,
+        });
+      }
+
+      items.push({
+        icon:  si.icon,
+        color: si.color,
+        title: `Order <b>${oNum}</b> ${si.label}`,
+        sub:   `${name} — ${svc}`,
+        time,
+      });
+    });
+
+    (recentMsgs || []).forEach(m => {
+      items.push({
+        icon:  '💬',
+        color: 'rgba(17,181,217,0.15)',
+        title: 'New message received',
+        sub:   (m.text || '').slice(0, 60) + ((m.text || '').length > 60 ? '…' : ''),
+        time:  m.sent_at,
+      });
+    });
+
+    /* Sort all items by time descending */
+    items.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    if (!items.length) {
+      el.innerHTML = '<div class="activity-item"><div class="activity-body"><div class="activity-title">কোনো activity নেই</div></div></div>';
+      return;
+    }
+
+    el.innerHTML = items.slice(0, 8).map(a => `
+      <div class="activity-item">
+        <div class="activity-dot-wrap">
+          <div class="activity-dot" style="background:${a.color}">${a.icon}</div>
+          <div class="activity-line"></div>
+        </div>
+        <div class="activity-body">
+          <div class="activity-title">${a.title}</div>
+          <div class="activity-title"><span>${escapeHtmlAdmin(a.sub)}</span></div>
+          <div class="activity-time"><i class="ti ti-clock" style="font-size:.7rem"></i> ${formatRelativeTimeAdmin(a.time)}</div>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    console.error('[Admin] Activity feed error:', err);
+    if (el) el.innerHTML = '<div class="activity-item"><div class="activity-body"><div class="activity-title">Activity লোড হয়নি</div></div></div>';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   ORDERS TABLE RENDER
+═══════════════════════════════════════════ */
+function renderOrders(data) {
+  const tbody = document.getElementById('ordersBody');
+  if (!tbody) return;
+  if (!data || !data.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#6b7280;padding:24px;">কোনো order পাওয়া যায়নি</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(o => `
+    <tr>
+      <td><span class="order-id">${escapeHtmlAdmin(o.id)}</span></td>
+      <td>
+        <div class="client-cell">
+          <div class="client-av" style="background:${o.color}22;color:${o.color}">${escapeHtmlAdmin(o.avatar)}</div>
+          ${escapeHtmlAdmin(o.client)}
+        </div>
+      </td>
+      <td>${escapeHtmlAdmin(o.service)}</td>
+      <td><span class="dept-cell">${escapeHtmlAdmin(o.dept)}</span></td>
+      <td><span class="status-badge ${o.status}">${statusLabel(o.status)}</span></td>
+      <td class="amount-cell">৳${Number(o.amount).toLocaleString()}</td>
+      <td class="deadline-cell">${escapeHtmlAdmin(o.deadline)}</td>
+    </tr>
+  `).join('');
+}
+
+function statusLabel(s) {
+  return { progress:'In Progress', in_progress:'In Progress', pending:'Pending', done:'Completed', completed:'Completed', overdue:'Overdue' }[s] || s;
+}
+
+/* ═══════════════════════════════════════════
+   SEARCH — filters from real Supabase data
 ═══════════════════════════════════════════ */
 function handleSearch(q) {
-  const term     = q.toLowerCase().trim();
+  const term   = (q || '').toLowerCase().trim();
+  const source = window._mappedOrders || [];
   const filtered = term === ''
-    ? orders
-    : orders.filter(o =>
-        o.client.toLowerCase().includes(term) ||
-        o.id.toLowerCase().includes(term)     ||
-        o.service.toLowerCase().includes(term)
+    ? source.slice(0, 10)
+    : source.filter(o =>
+        o.client.toLowerCase().includes(term)  ||
+        o.id.toLowerCase().includes(term)      ||
+        o.service.toLowerCase().includes(term) ||
+        o.dept.toLowerCase().includes(term)
       );
   renderOrders(filtered);
 }
 
 /* ═══════════════════════════════════════════
-   NAVIGATION
-═══════════════════════════════════════════ */
-function setPage(page) {
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-
-  const titles = {
-    dashboard: 'Dashboard Overview',
-    orders:    'Orders Management',
-    clients:   'Client List',
-    payments:  'Payments & Billing',
-    files:     'File Manager',
-    settings:  'Settings',
-    help:      'Help & Support',
-  };
-
-  document.getElementById('page-title').textContent = titles[page] || 'Dashboard';
-
-  if (page === 'orders') {
-    window.location.href = 'order-management.html';
-    return;
-  }
-
-  if (page !== 'dashboard') {
-    showToast(`📂 "${titles[page]}" — এই পেজটি শীঘ্রই যোগ হবে!`, '#f59e0b');
-  }
-}
-
-/* ═══════════════════════════════════════════
-   MODAL
+   MODAL — Create New Order
 ═══════════════════════════════════════════ */
 function openModal() {
   document.getElementById('modalOverlay').classList.add('open');
@@ -503,14 +692,10 @@ async function submitOrder() {
 
   try {
     const sb = window.scriptoraSupabase;
+    const orderNum = 'OPA-' + Date.now().toString().slice(-6) + '-' + Math.floor(Math.random() * 900 + 100);
 
-    /* Generate order number */
-    const orderNum = 'OPA-' + Date.now().toString().slice(-6) + '-' + Math.floor(Math.random()*900+100);
-
-    /* Try to find or create client record */
     let clientId = null;
     if (sb && contact) {
-      /* Search by email or phone */
       const isEmail = contact.includes('@');
       const query = isEmail
         ? sb.from('clients').select('id').eq('email', contact).maybeSingle()
@@ -520,7 +705,6 @@ async function submitOrder() {
       if (existingClient) {
         clientId = existingClient.id;
       } else {
-        /* Create new client */
         const clientData = { name: client, created_at: new Date().toISOString() };
         if (isEmail) clientData.email = contact;
         else         clientData.phone = contact;
@@ -529,9 +713,8 @@ async function submitOrder() {
       }
     }
 
-    /* Insert order to Supabase */
     if (sb) {
-      const orderPayload = {
+      const { error: orderErr } = await sb.from('orders').insert({
         order_number:         orderNum,
         client_id:            clientId,
         title:                service,
@@ -546,51 +729,139 @@ async function submitOrder() {
         special_instructions: notes || null,
         order_date:           new Date().toISOString(),
         created_at:           new Date().toISOString(),
-      };
-      const { error: orderErr } = await sb.from('orders').insert(orderPayload);
+      });
       if (orderErr) throw orderErr;
     }
 
-    /* Local UI update (optimistic) */
-    const localOrder = {
-      id:       '#' + orderNum,
-      client,
-      avatar:   client.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2),
-      color:    '#6c63ff',
-      service,
-      dept,
-      status:   'pending',
-      amount,
-      deadline: deadline ? new Date(deadline).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '—',
-    };
-    orders.unshift(localOrder);
-    renderOrders(orders);
-
-    activities.unshift({
-      icon:  '📋',
-      color: 'rgba(108,99,255,0.15)',
-      title: `New order <b>#${orderNum}</b> created`,
-      sub:   `${client} — ${dept} ${service}`,
-      time:  'এখনই',
-    });
-    renderActivity();
-
     closeModal();
-    showToast(`✅ Order #${orderNum} Supabase-এ save হয়েছে!`, '#34d399');
+    showToast(`✅ Order #${orderNum} সফলভাবে তৈরি হয়েছে!`, '#34d399');
 
-    /* Reload real stats after 1s */
-    setTimeout(loadOrdersFromSupabase, 1200);
+    /* Reload everything */
+    setTimeout(() => {
+      loadOrdersFromSupabase();
+      loadClientStats();
+      loadActivityFeed();
+    }, 800);
 
-  } catch(err) {
-    console.error('[Admin] Order create error:', err);
-    showToast('❌ Error: ' + (err.message || 'Unknown'), '#f87171');
-  } finally {
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Create Order'; }
     /* Reset form */
     ['m-client','m-contact','m-amount','m-notes'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+
+  } catch (err) {
+    console.error('[Admin] Order create error:', err);
+    showToast('❌ Error: ' + (err.message || 'Unknown'), '#f87171');
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Create Order'; }
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TOPBAR MESSAGES — real Supabase data
+═══════════════════════════════════════════ */
+async function loadAdminMessages() {
+  if (!window.scriptoraSupabase) return;
+  const sb = window.scriptoraSupabase;
+
+  const list     = document.querySelector('#msg-panel .dp-list');
+  const badgeTxt = document.querySelector('#msg-panel .dp-badge');
+  const dot      = document.getElementById('msgDot');
+
+  const { data: unread, error } = await sb
+    .from('messages')
+    .select('order_id, text, sent_at, from_admin, read')
+    .or('from_admin.eq.false,from_admin.is.null')
+    .order('sent_at', { ascending: false })
+    .limit(30);
+
+  if (error) { console.error('Message load error:', error); return; }
+
+  if (!unread || !unread.length) {
+    if (list)     list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text">কোনো নতুন message নেই</div></div></div>';
+    if (badgeTxt) badgeTxt.style.display = 'none';
+    if (dot)      dot.style.display = 'none';
+    return;
+  }
+
+  const grouped = {};
+  unread.forEach(m => {
+    if (!grouped[m.order_id]) grouped[m.order_id] = { latest: m, count: 0 };
+    grouped[m.order_id].count++;
+    if (new Date(m.sent_at) > new Date(grouped[m.order_id].latest.sent_at))
+      grouped[m.order_id].latest = m;
+  });
+  const orderIds = Object.keys(grouped);
+
+  const { data: ordersData } = await sb
+    .from('orders').select('id, title, service_type, client_id').in('id', orderIds);
+
+  const orderMap = {};
+  (ordersData || []).forEach(o => { orderMap[o.id] = o; });
+
+  const clientIds = [...new Set((ordersData || []).map(o => o.client_id).filter(Boolean))];
+  let clientMap = {};
+  if (clientIds.length) {
+    const { data: clientsData } = await sb.from('clients').select('id, name, email').in('id', clientIds);
+    (clientsData || []).forEach(c => { clientMap[c.id] = c; });
+  }
+
+  const rows = orderIds.map(oid => {
+    const o      = orderMap[oid] || {};
+    const client = clientMap[o.client_id] || {};
+    return {
+      orderId: oid,
+      name:    client.name || client.email || 'Client',
+      title:   o.title || o.service_type || 'Order',
+      preview: (grouped[oid].latest.text || '').replace(/^\[REVIEW_REQUEST\]\s*/i, '📋 Review: '),
+      time:    grouped[oid].latest.sent_at,
+      count:   grouped[oid].count,
+    };
+  }).sort((a, b) => new Date(b.time) - new Date(a.time));
+
+  if (list) {
+    list.innerHTML = rows.slice(0, 5).map(r => `
+      <div class="dp-item unread" onclick="window.location.href='admin-messages.html?order=${r.orderId}'" style="cursor:pointer">
+        <div class="dp-avatar dp-av-purple">${escapeHtmlAdmin(r.name).substring(0, 2).toUpperCase()}</div>
+        <div class="dp-body">
+          <div class="dp-text"><b>${escapeHtmlAdmin(r.name)}</b></div>
+          <div class="dp-sub">${escapeHtmlAdmin(r.preview)}</div>
+          <div class="dp-time">${formatRelativeTimeAdmin(r.time)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  const totalUnread = rows.reduce((s, r) => s + r.count, 0);
+  if (badgeTxt) { badgeTxt.textContent = totalUnread + ' new'; badgeTxt.style.display = ''; }
+  if (dot)      dot.style.display = '';
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+function setPage(page) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  const titles = {
+    dashboard: 'Dashboard Overview',
+    orders:    'Orders Management',
+    clients:   'Client List',
+    payments:  'Payments & Billing',
+    files:     'File Manager',
+    settings:  'Settings',
+    help:      'Help & Support',
+  };
+
+  document.getElementById('page-title').textContent = titles[page] || 'Dashboard';
+
+  if (page === 'orders') {
+    window.location.href = 'order-management.html';
+    return;
+  }
+
+  if (page !== 'dashboard') {
+    showToast(`📂 "${titles[page]}" — এই পেজটি শীঘ্রই যোগ হবে!`, '#f59e0b');
   }
 }
 
@@ -634,128 +905,24 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault();
-    document.getElementById('searchInput').focus();
+    document.getElementById('searchInput')?.focus();
   }
 });
-
-/* ═══════════════════════════════════════════
-   TOPBAR MESSAGES — real Supabase data
-   (sb = window.scriptoraSupabase, supabaseClient.js
-   এ বানানো single shared client)
-═══════════════════════════════════════════ */
-async function loadAdminMessages() {
-  if (!window.scriptoraSupabase) return;
-  const sb = window.scriptoraSupabase;
-
-  const list     = document.querySelector('#msg-panel .dp-list');
-  const badgeTxt = document.querySelector('#msg-panel .dp-badge');
-  const dot      = document.getElementById('msgDot');
-
-  const { data: unread, error } = await sb
-    .from('messages')
-    .select('order_id, text, sent_at')
-    .eq('from_admin', false)
-    .eq('read', false)
-    .order('sent_at', { ascending: false });
-
-  if (error) { console.error('Message load error:', error); return; }
-
-  if (!unread || !unread.length) {
-    if (list) list.innerHTML = '<div class="dp-item"><div class="dp-body"><div class="dp-text">কোনো নতুন message নেই</div></div></div>';
-    if (badgeTxt) badgeTxt.style.display = 'none';
-    if (dot) dot.style.display = 'none';
-    return;
-  }
-
-  /* প্রতিটা order এর জন্য latest message + unread count */
-  const grouped = {};
-  unread.forEach(m => {
-    if (!grouped[m.order_id]) grouped[m.order_id] = { latest: m, count: 0 };
-    grouped[m.order_id].count++;
-    if (new Date(m.sent_at) > new Date(grouped[m.order_id].latest.sent_at)) {
-      grouped[m.order_id].latest = m;
-    }
-  });
-  const orderIds = Object.keys(grouped);
-
-  const { data: ordersData } = await sb
-    .from('orders')
-    .select('id, title, service_type, client_id')
-    .in('id', orderIds);
-
-  const orderMap = {};
-  (ordersData || []).forEach(o => orderMap[o.id] = o);
-
-  const clientIds = [...new Set((ordersData || []).map(o => o.client_id).filter(Boolean))];
-  let clientMap = {};
-  if (clientIds.length) {
-    const { data: clientsData } = await sb.from('clients').select('id, name, email').in('id', clientIds);
-    (clientsData || []).forEach(c => clientMap[c.id] = c);
-  }
-
-  const rows = orderIds.map(oid => {
-    const o      = orderMap[oid] || {};
-    const client = clientMap[o.client_id] || {};
-    return {
-      orderId: oid,
-      name:    client.name || client.email || 'Client',
-      title:   o.title || o.service_type || 'Order',
-      preview: (grouped[oid].latest.text || '').replace(/^\[REVIEW_REQUEST\]\s*/i, '📋 Review: '),
-      time:    grouped[oid].latest.sent_at,
-      count:   grouped[oid].count,
-    };
-  }).sort((a, b) => new Date(b.time) - new Date(a.time));
-
-  if (list) {
-    list.innerHTML = rows.slice(0, 5).map(r => `
-      <div class="dp-item unread" onclick="window.location.href='admin-messages.html?order=${r.orderId}'" style="cursor:pointer">
-        <div class="dp-avatar dp-av-purple">${escapeHtmlAdmin(r.name).substring(0, 2).toUpperCase()}</div>
-        <div class="dp-body">
-          <div class="dp-text"><b>${escapeHtmlAdmin(r.name)}</b></div>
-          <div class="dp-sub">${escapeHtmlAdmin(r.preview)}</div>
-          <div class="dp-time">${formatRelativeTimeAdmin(r.time)}</div>
-        </div>
-      </div>`).join('');
-  }
-
-  const totalUnread = rows.reduce((s, r) => s + r.count, 0);
-  if (badgeTxt) { badgeTxt.textContent = totalUnread + ' new'; badgeTxt.style.display = ''; }
-  if (dot) dot.style.display = '';
-}
-
-function escapeHtmlAdmin(str) {
-  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function formatRelativeTimeAdmin(isoStr) {
-  const diffMin = Math.floor((Date.now() - new Date(isoStr)) / 60000);
-  if (diffMin < 1)  return 'এখনই';
-  if (diffMin < 60) return diffMin + ' min ago';
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return diffHr + ' hours ago';
-  const diffDay = Math.floor(diffHr / 24);
-  return diffDay === 1 ? 'গতকাল' : diffDay + ' days ago';
-}
 
 /* ═══════════════════════════════════════════
    DROPDOWN PANELS
 ═══════════════════════════════════════════ */
 function toggleDropdown(id, e) {
   e.stopPropagation();
-  const panel = document.getElementById(id);
+  const panel  = document.getElementById(id);
   const isOpen = panel.classList.contains('open');
-
-  // Close all panels first
   document.querySelectorAll('.dropdown-panel').forEach(p => p.classList.remove('open'));
-
-  // Open clicked one if it was closed
   if (!isOpen) {
     panel.classList.add('open');
-    if (id === 'msg-panel') loadAdminMessages(); // খোলার সময় fresh data আনো
+    if (id === 'msg-panel') loadAdminMessages();
   }
 }
 
-// Close all dropdowns on outside click
 document.addEventListener('click', () => {
   document.querySelectorAll('.dropdown-panel').forEach(p => p.classList.remove('open'));
 });
@@ -765,4 +932,21 @@ function handleLogout() {
     showToast('👋 Logged out successfully!', '#34d399');
     setTimeout(() => { window.location.href = 'index.html'; }, 1500);
   }
+}
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+function escapeHtmlAdmin(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatRelativeTimeAdmin(isoStr) {
+  const diffMin = Math.floor((Date.now() - new Date(isoStr)) / 60000);
+  if (diffMin < 1)  return 'এখনই';
+  if (diffMin < 60) return diffMin + ' min ago';
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24)  return diffHr + ' hours ago';
+  const diffDay = Math.floor(diffHr / 24);
+  return diffDay === 1 ? 'গতকাল' : diffDay + ' days ago';
 }
