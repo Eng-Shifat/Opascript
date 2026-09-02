@@ -420,13 +420,22 @@ function updateCmStats() {
   const total     = ALL_COMMISSIONS.length;
   const earned    = ALL_COMMISSIONS.filter(c => c.status === 'earned');
   const cancelled = ALL_COMMISSIONS.filter(c => c.status === 'cancelled').length;
+
+  /* Commission Paid Out — affiliate দের দেওয়া মোট commission */
   const earnedAmt = earned.reduce((s, c) => s + Number(c.commission_amount || 0), 0);
 
-  document.getElementById('cm-total').textContent         = total;
-  document.getElementById('cm-earned-amount').textContent = '৳' + earnedAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('cm-cancelled').textContent     = cancelled;
+  /* Platform Revenue — সব earned order এর total amount - commission */
+  const totalOrderAmt  = earned.reduce((s, c) => s + Number(c.order_amount || 0), 0);
+  const platformRevenue = totalOrderAmt - earnedAmt;
+
+  const fmt = n => '৳' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  document.getElementById('cm-total').textContent            = total;
+  document.getElementById('cm-earned-amount').textContent    = fmt(earnedAmt);
+  document.getElementById('cm-platform-revenue').textContent = fmt(platformRevenue);
+  document.getElementById('cm-cancelled').textContent        = cancelled;
   document.getElementById('cm-subtitle').textContent =
-    `${total} টি commission — মোট earned ৳${earnedAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+    `${total} টি commission — Commission Paid ৳${earnedAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })} · Platform Revenue ৳${platformRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 }
 
 window.setCmFilter = function(filter, btn) {
@@ -481,7 +490,7 @@ function buildCmRow(cm) {
 
   const canCancel = cm.status !== 'cancelled';
   const actionBtn = canCancel
-    ? `<button onclick="confirmCancelCommission('${cm.id}')" title="Commission বাতিল করুন"
+    ? `<button onclick="confirmCancelCommission('${cm.id}','${cm.order_id}')" title="Commission বাতিল করুন"
                style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;
                       font-size:.72rem;font-weight:600;border-radius:7px;cursor:pointer;
                       color:#f87171;background:rgba(248,113,113,.08);
@@ -1558,59 +1567,165 @@ window.adminToggleAffiliateSuspension = async function() {
    Phase 14 — Admin Commission Cancellation + Note System
 ══════════════════════════════════════════════════════════════ */
 
-/**
- * confirmCancelCommission — earned commission বাতিল করার confirm dialog
- * Reason note mandatory। RPC: admin_cancel_affiliate_commission
- */
-window.confirmCancelCommission = async function(commissionId) {
-  /* Check if commission belongs to a withdrawal (already paid out) */
-  const sb = window.scriptoraSupabase;
-  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+/* Cancel type selection modal — inject once */
+(function injectCancelModal() {
+  if (document.getElementById('cmCancelModal')) return;
+  const m = document.createElement('div');
+  m.id = 'cmCancelModal';
+  m.style.cssText = `
+    display:none;position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+    align-items:center;justify-content:center;
+  `;
+  m.innerHTML = `
+    <div style="background:#1e1e2e;border:1px solid rgba(255,255,255,.1);
+                border-radius:14px;padding:28px 30px;width:420px;max-width:95vw;
+                box-shadow:0 20px 60px rgba(0,0,0,.5);">
+      <div style="font-size:1rem;font-weight:700;color:#f8f8f2;margin-bottom:6px;">
+        ⚠️ বাতিল করার ধরন বেছে নিন
+      </div>
+      <div style="font-size:.82rem;color:#94a3b8;margin-bottom:20px;">
+        কোনটা বাতিল করতে চাইছেন?
+      </div>
 
-  let isWithdrawn = false;
-  try {
-    const { data: cmCheck } = await sb
-      .from('affiliate_commissions')
-      .select('status, commission_amount')
-      .eq('id', commissionId)
-      .maybeSingle();
-    if (cmCheck?.status === 'withdrawn' || cmCheck?.status === 'paid') {
-      isWithdrawn = true;
-    }
-  } catch (_) { /* non-critical */ }
+      <!-- Option 1: Order Cancel -->
+      <div id="cmCancelOptOrder" onclick="window._cmCancelSelectType('order')"
+           style="border:2px solid rgba(248,113,113,.25);border-radius:10px;
+                  padding:14px 16px;margin-bottom:10px;cursor:pointer;
+                  transition:all .18s;background:rgba(248,113,113,.05);">
+        <div style="font-weight:700;color:#f87171;font-size:.9rem;margin-bottom:4px;">
+          🛑 Order বাতিল
+        </div>
+        <div style="font-size:.78rem;color:#94a3b8;line-height:1.5;">
+          Order টি cancelled হবে <strong>এবং</strong> সেই order এর commission ও automatically বাতিল হবে।
+          Affiliate এর balance থেকে কেটে নেওয়া হবে।
+        </div>
+      </div>
 
-  const warningExtra = isWithdrawn
-    ? '\n\n⚠️ এই commission ইতিমধ্যে withdrawal-এ অন্তর্ভুক্ত ছিল।\nAffiliates-এর balance negative হতে পারে।'
-    : '';
+      <!-- Option 2: Commission Only Cancel -->
+      <div id="cmCancelOptComm" onclick="window._cmCancelSelectType('commission')"
+           style="border:2px solid rgba(251,191,36,.25);border-radius:10px;
+                  padding:14px 16px;margin-bottom:20px;cursor:pointer;
+                  transition:all .18s;background:rgba(251,191,36,.05);">
+        <div style="font-weight:700;color:#fbbf24;font-size:.9rem;margin-bottom:4px;">
+          💸 শুধু Commission বাতিল
+        </div>
+        <div style="font-size:.78rem;color:#94a3b8;line-height:1.5;">
+          Order টি <strong>ঠিক থাকবে</strong>, শুধু commission টা বাতিল হবে।
+          Affiliate এর balance থেকে কেটে নেওয়া হবে।
+        </div>
+      </div>
 
-  const reason = prompt(
-    '⚠️ Commission বাতিল করবেন?\n\n' +
-    'Affiliate-এর wallet থেকে এই commission কেটে নেওয়া হবে।' +
-    warningExtra + '\n\n' +
-    'কারণ লিখুন (mandatory — affiliate notification-এ দেখাবে):'
-  );
-  if (reason === null) return;          // user pressed Cancel
-  if (!reason.trim()) {
-    alert('কারণ লেখা mandatory। Please একটি কারণ দিন।');
+      <!-- Reason input -->
+      <div id="cmCancelReasonWrap" style="display:none;">
+        <div style="font-size:.8rem;color:#94a3b8;margin-bottom:6px;">
+          কারণ লিখুন <span style="color:#f87171;">*</span>
+          <span style="color:#64748b;font-size:.75rem;">(affiliate notification এ দেখাবে)</span>
+        </div>
+        <textarea id="cmCancelReasonInput" rows="3"
+          style="width:100%;background:#0f0f1a;border:1px solid rgba(255,255,255,.1);
+                 border-radius:8px;color:#f8f8f2;padding:10px;font-size:.85rem;
+                 resize:none;outline:none;box-sizing:border-box;"
+          placeholder="কারণ লিখুন…"></textarea>
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button onclick="window._cmCancelSubmit()"
+            style="flex:1;padding:10px;background:#f87171;color:#fff;border:none;
+                   border-radius:8px;font-weight:700;cursor:pointer;font-size:.85rem;">
+            নিশ্চিত করুন
+          </button>
+          <button onclick="window._cmCancelClose()"
+            style="flex:1;padding:10px;background:rgba(255,255,255,.07);color:#94a3b8;
+                   border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:.85rem;">
+            বাতিল
+          </button>
+        </div>
+      </div>
+
+      <button onclick="window._cmCancelClose()"
+        id="cmCancelCloseBtn"
+        style="width:100%;padding:10px;background:rgba(255,255,255,.05);color:#94a3b8;
+               border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:.82rem;">
+        বন্ধ করুন
+      </button>
+    </div>
+  `;
+  document.body.appendChild(m);
+
+  /* Hover effects */
+  ['cmCancelOptOrder','cmCancelOptComm'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('mouseenter', () => el.style.background = id.includes('Order') ? 'rgba(248,113,113,.12)' : 'rgba(251,191,36,.12)');
+    el.addEventListener('mouseleave', () => el.style.background = id.includes('Order') ? 'rgba(248,113,113,.05)' : 'rgba(251,191,36,.05)');
+  });
+})();
+
+/* Modal state */
+window._cmCancelState = { commissionId: null, orderId: null, type: null };
+
+window._cmCancelClose = function() {
+  const m = document.getElementById('cmCancelModal');
+  if (m) { m.style.display = 'none'; }
+  document.getElementById('cmCancelReasonWrap').style.display = 'none';
+  document.getElementById('cmCancelCloseBtn').style.display = '';
+  document.getElementById('cmCancelOptOrder').style.display = '';
+  document.getElementById('cmCancelOptComm').style.display = '';
+  document.getElementById('cmCancelReasonInput').value = '';
+  window._cmCancelState = { commissionId: null, orderId: null, type: null };
+};
+
+window._cmCancelSelectType = function(type) {
+  window._cmCancelState.type = type;
+  /* Hide options, show reason input */
+  document.getElementById('cmCancelOptOrder').style.display = 'none';
+  document.getElementById('cmCancelOptComm').style.display = 'none';
+  document.getElementById('cmCancelCloseBtn').style.display = 'none';
+  document.getElementById('cmCancelReasonWrap').style.display = '';
+  document.getElementById('cmCancelReasonInput').focus();
+};
+
+window._cmCancelSubmit = async function() {
+  const { commissionId, orderId, type } = window._cmCancelState;
+  const reason = document.getElementById('cmCancelReasonInput').value.trim();
+  if (!reason) {
+    document.getElementById('cmCancelReasonInput').style.borderColor = '#f87171';
+    document.getElementById('cmCancelReasonInput').placeholder = '⚠️ কারণ লেখা mandatory!';
     return;
   }
 
+  window._cmCancelClose();
+
+  const sb = window.scriptoraSupabase;
+  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+
   try {
+    /* ── Order cancel path ── */
+    if (type === 'order' && orderId) {
+      const { error: oErr } = await sb
+        .from('orders')
+        .update({ status: 'cancelled' })
+        .eq('id', orderId);
+      if (oErr) throw oErr;
+      logAudit('order_cancelled', { targetTable: 'orders', targetId: orderId, details: { reason, source: 'affiliate_commission_panel' } });
+    }
+
+    /* ── Commission cancel (both paths) ── */
     const { data, error } = await sb.rpc('admin_cancel_affiliate_commission', {
       p_commission_id: commissionId,
-      p_reason:        reason.trim()
+      p_reason:        reason
     });
     if (error) throw error;
-
     if (data?.success === false) {
       showToast('❌ ' + (data.message || 'Cancel failed'), '#f87171');
       return;
     }
 
-    showToast('✅ Commission বাতিল করা হয়েছে', '#f87171');
-    logAudit('commission_cancelled', { targetTable: 'affiliate_commissions', targetId: commissionId, details: { reason: reason.trim() } });
+    const msg = type === 'order'
+      ? '✅ Order ও Commission বাতিল করা হয়েছে'
+      : '✅ Commission বাতিল করা হয়েছে';
+    showToast(msg, '#f87171');
+    logAudit('commission_cancelled', { targetTable: 'affiliate_commissions', targetId: commissionId, details: { reason, cancel_type: type } });
 
-    /* Phase 7-style notification to affiliate */
+    /* Notify affiliate */
     (async () => {
       try {
         const { data: cmRow } = await sb
@@ -1631,21 +1746,29 @@ window.confirmCancelCommission = async function(commissionId) {
           clientId:    affRow.client_id,
           affiliateId: cmRow.affiliate_id,
           type:        'commission_cancelled',
-          title:       'Commission বাতিল হয়েছে ⚠️',
-          message:     `একটি Commission বাতিল করা হয়েছে। কারণ: ${reason.trim()}`,
+          title:       type === 'order' ? 'Order ও Commission বাতিল হয়েছে ⚠️' : 'Commission বাতিল হয়েছে ⚠️',
+          message:     `${type === 'order' ? 'আপনার order ও commission' : 'একটি Commission'} বাতিল করা হয়েছে। কারণ: ${reason}`,
           amount:      null
         });
-      } catch (e) {
-        console.error('[Affiliate Notify] cancel lookup failed:', e);
-      }
+      } catch (e) { console.error('[Affiliate Notify] cancel lookup failed:', e); }
     })();
 
     if (CURRENT_TAB === 'commissions') await loadCommissions();
 
   } catch (err) {
-    console.error('confirmCancelCommission error:', err);
+    console.error('_cmCancelSubmit error:', err);
     showToast('❌ ' + (err.message || 'Cancel failed'), '#f87171');
   }
+};
+
+/**
+ * confirmCancelCommission — modal দিয়ে cancel type বেছে নাও
+ */
+window.confirmCancelCommission = function(commissionId, orderId) {
+  window._cmCancelState.commissionId = commissionId;
+  window._cmCancelState.orderId      = orderId || null;
+  const m = document.getElementById('cmCancelModal');
+  if (m) { m.style.display = 'flex'; }
 };
 
 /**
