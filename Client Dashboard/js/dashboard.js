@@ -1806,7 +1806,7 @@ function initAffiliateShareKit(code) {
     if (nativeBtn) nativeBtn.style.display = 'flex';
   }
 
-  affiliateGenerateQr(_affReferralUrl);
+  setTimeout(() => affiliateGenerateQr(_affReferralUrl), 200);
 }
 
 
@@ -1851,18 +1851,23 @@ function affiliateNativeShare() {
 function affiliateGenerateQr(url) {
   const box = document.getElementById('affQrBox');
   if (!box) return;
+  if (!url || url.trim() === '') {
+    console.warn('[Affiliate] QR: no URL provided');
+    return;
+  }
 
   function tryGenerate(attemptsLeft) {
     if (typeof QRCode === 'undefined') {
       if (attemptsLeft > 0) setTimeout(() => tryGenerate(attemptsLeft - 1), 300);
+      else console.error('[Affiliate] QRCode library not loaded');
       return;
     }
-    QRCode.toDataURL(url, { width: 176, margin: 2, color: { dark: '#000000', light: '#ffffff' } }, (err, dataUrl) => {
+    QRCode.toDataURL(url, { width: 200, margin: 1, color: { dark: '#000000', light: '#ffffff' } }, (err, dataUrl) => {
       if (err) { console.error('[Affiliate] QR generation error:', err); return; }
       box.innerHTML = '';
       const img = document.createElement('img');
       img.src = dataUrl;
-      img.style.cssText = 'width:110px;height:110px;display:block;border-radius:6px;';
+      img.alt = 'Referral QR Code';
       box.appendChild(img);
     });
   }
@@ -2136,29 +2141,45 @@ async function loadAffiliateWithdrawals(affiliateId) {
     };
 
     tbody.innerHTML = rows.map(w => {
-      const st = statusMap[w.status] || { color: 'var(--text-muted)', label: w.status };
-      const dt = w.requested_at
+      const st  = statusMap[w.status] || { color: 'var(--text-muted)', label: w.status };
+      const dt  = w.requested_at
         ? new Date(w.requested_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
         : '—';
-      const amt = '৳' + Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-      const method = (w.payment_method || '—').toUpperCase();
+      const paidDt = w.paid_at
+        ? new Date(w.paid_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+        : null;
+      const amt    = '৳' + Number(w.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      const method = (w.payment_method || '').toUpperCase();
+      const methodIcon = method === 'BKASH' ? '🟣' : method === 'NAGAD' ? '🟠' : method === 'ROCKET' ? '🟤' : '💳';
+      const number = w.payment_number ? `<div style="font-size:9.5px;color:var(--text-muted);margin-top:1px;">${w.payment_number}</div>` : '';
       const cancelBtn = w.status === 'pending'
         ? `<button onclick="affiliateCancelWithdrawal('${w.id}')"
                    style="margin-top:4px;font-size:10px;font-weight:600;color:#f87171;background:rgba(248,113,113,.1);
                           border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:2px 8px;cursor:pointer;
                           display:block;transition:background .2s;"
                    onmouseover="this.style.background='rgba(248,113,113,.2)'"
-                   onmouseout="this.style.background='rgba(248,113,113,.1)'">
-             বাতিল করুন
-           </button>`
+                   onmouseout="this.style.background='rgba(248,113,113,.1)'">বাতিল করুন</button>`
         : '';
       return `
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:10px 8px;font-size:11px;color:var(--text-muted);">${dt}</td>
-          <td style="padding:10px 8px;font-size:12px;font-weight:700;color:#34d399;">${amt}</td>
-          <td style="padding:10px 8px;font-size:11px;color:var(--text-secondary);">${method}</td>
-          <td style="padding:10px 8px;">
-            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${st.color}20;color:${st.color};">${st.label}</span>
+          <td style="padding:8px 12px;">
+            <div style="font-size:11.5px;font-weight:700;color:var(--text-primary);">${dt}</div>
+            ${paidDt ? `<div style="font-size:9.5px;color:var(--text-muted);margin-top:1px;">Paid: ${paidDt}</div>` : ''}
+          </td>
+          <td style="padding:8px 12px;">
+            <div style="font-size:11.5px;font-weight:700;color:#34d399;">${amt}</div>
+          </td>
+          <td style="padding:8px 12px;">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <span style="font-size:12px;">${methodIcon}</span>
+              <div>
+                <div style="font-size:11.5px;font-weight:700;color:var(--text-primary);">${method || '—'}</div>
+                ${number}
+              </div>
+            </div>
+          </td>
+          <td style="padding:8px 12px;">
+            <span style="font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:${st.color}20;color:${st.color};white-space:nowrap;">${st.label}</span>
             ${cancelBtn}
           </td>
         </tr>`;

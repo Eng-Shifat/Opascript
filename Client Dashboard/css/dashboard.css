@@ -4562,7 +4562,7 @@ input, select, textarea { font-family: inherit; }
 .affd-card-flush { margin: 0; }
 
 /* ── Overall vertical rhythm for the approved dashboard ──────── */
-.affd-wrap { display: flex; flex-direction: column; gap: 12px; }
+.affd-wrap { display: flex; flex-direction: column; gap: 8px; }
 
 /* ── 2. Welcome banner ────────────────────────────────────── */
 .affd-banner {
@@ -4599,10 +4599,10 @@ input, select, textarea { font-family: inherit; }
 .affd-top-grid {
   display: grid;
   grid-template-columns: 260px 1fr;
-  gap: 12px;
+  gap: 8px;
   align-items: stretch;
 }
-.affd-right-col { display: flex; flex-direction: column; gap: 10px; }
+.affd-right-col { display: flex; flex-direction: column; gap: 6px; }
 #affTierPanel { height: 100%; box-sizing: border-box; justify-content: space-between; }
 
 .affd-tier-head { display: flex; align-items: center; gap: 14px; }
