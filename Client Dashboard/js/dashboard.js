@@ -2092,8 +2092,7 @@ async function loadAffiliateEarnings(affiliateId) {
       const proportionalComm = totalAmt > 0 ? (commAmt * paidAmt / totalAmt) : 0;
       const commDisplay = isPending
         ? `<span style="color:#f59e0b;font-weight:700;">${fmtAmt(proportionalComm)}</span>
-           <span style="color:var(--text-muted);font-size:11px;"> of ${fmtAmt(commAmt)}</span>
-           <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">প্রত্যাশিত (${paidPct}% paid)</div>`
+           <span style="color:var(--text-muted);font-size:11px;"> of ${fmtAmt(commAmt)}</span>`
         : `<span style="color:#34d399;font-weight:700;">${fmtAmt(commAmt)}</span>`;
 
       /* Status column */

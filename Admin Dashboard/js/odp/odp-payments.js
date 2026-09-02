@@ -522,6 +522,62 @@
           status:         newOrderStatus,
           updated_at:     new Date().toISOString(),
         }).eq('id', window._currentOrderId);
+
+        /* ── BUGFIX: auto-record affiliate commission on PARTIAL payment too ──
+           Previously this only happened in the due===0 (full payment) branch
+           above, so a referred order that only ever received partial
+           payments never got a commission row at all — Pending Clearance
+           stayed ৳0 forever even though the client had genuinely paid.
+           Mirrors the full-payment block; record_affiliate_commission()
+           itself sets status='pending' + paid_amount=advance_paid when the
+           order isn't fully paid, which is exactly what we want here. ── */
+        try {
+          const { data: ordRef } = await window._sb()
+            .from('orders')
+            .select('referred_by_code')
+            .eq('id', window._currentOrderId)
+            .single();
+
+          if (ordRef?.referred_by_code) {
+            const { data: existingComm } = await window._sb()
+              .from('affiliate_commissions')
+              .select('id')
+              .eq('order_id', window._currentOrderId)
+              .maybeSingle();
+
+            if (!existingComm) {
+              const { data: ordFull } = await window._sb()
+                .from('orders')
+                .select('client_id, referred_by_code')
+                .eq('id', window._currentOrderId)
+                .single();
+
+              const resolvedClientId = ordFull?.client_id
+                || window._currentOrder?.clientId
+                || window._currentOrder?._rawDB?.client_id
+                || pendingPay?.client_id
+                || null;
+
+              if (!resolvedClientId) {
+                console.warn('[Affiliate] Skipping commission — client_id could not be resolved for order:', window._currentOrderId);
+              } else {
+                const { data: commData, error: commErr } = await window._sb()
+                  .rpc('record_affiliate_commission', { p_order_id: window._currentOrderId, p_client_id: resolvedClientId });
+
+                if (!commErr && commData?.success) {
+                  const amt = commData?.commission_amount
+                    ? '৳' + Number(commData.commission_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })
+                    : '';
+                  autoCommissionMsg = ` Affiliate commission ${amt} recorded (pending clearance).`;
+                } else if (commErr) {
+                  console.warn('[Affiliate] auto commission error (partial):', commErr);
+                }
+              }
+            }
+          }
+        } catch (commCatchErr) {
+          console.warn('[Affiliate] auto commission skipped (non-critical, partial):', commCatchErr);
+        }
       }
 
       const newStatus = due === 0 ? 'paid' : 'approved';
@@ -537,6 +593,13 @@
         if (window._currentOrder._rawDB) {
           if (due > 0) window._currentOrder._rawDB.status = newOrderStatus;
           else window._currentOrder._rawDB.status = newOrderStatusFull;
+          /* ── BUGFIX: _rawDB.payment_status/advance_paid were never synced
+             here, so _loadPaymentHistory()'s isPaid/isPartial check (which
+             reads straight from _rawDB) kept seeing the OLD payment_status
+             until a full page reload — meaning the affiliate-commission
+             auto-record-on-render fallback silently never fired either. ── */
+          window._currentOrder._rawDB.payment_status = newStatus;
+          window._currentOrder._rawDB.advance_paid    = newTotalPaid;
         }
       }
 
