@@ -479,7 +479,7 @@ function buildCmRow(cm) {
        </div>`
     : '';
 
-  const canCancel = cm.status === 'earned';
+  const canCancel = cm.status !== 'cancelled';
   const actionBtn = canCancel
     ? `<button onclick="confirmCancelCommission('${cm.id}')" title="Commission বাতিল করুন"
                style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;
@@ -1563,9 +1563,30 @@ window.adminToggleAffiliateSuspension = async function() {
  * Reason note mandatory। RPC: admin_cancel_affiliate_commission
  */
 window.confirmCancelCommission = async function(commissionId) {
+  /* Check if commission belongs to a withdrawal (already paid out) */
+  const sb = window.scriptoraSupabase;
+  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
+
+  let isWithdrawn = false;
+  try {
+    const { data: cmCheck } = await sb
+      .from('affiliate_commissions')
+      .select('status, commission_amount')
+      .eq('id', commissionId)
+      .maybeSingle();
+    if (cmCheck?.status === 'withdrawn' || cmCheck?.status === 'paid') {
+      isWithdrawn = true;
+    }
+  } catch (_) { /* non-critical */ }
+
+  const warningExtra = isWithdrawn
+    ? '\n\n⚠️ এই commission ইতিমধ্যে withdrawal-এ অন্তর্ভুক্ত ছিল।\nAffiliates-এর balance negative হতে পারে।'
+    : '';
+
   const reason = prompt(
     '⚠️ Commission বাতিল করবেন?\n\n' +
-    'Affiliate-এর wallet থেকে এই commission কেটে নেওয়া হবে।\n' +
+    'Affiliate-এর wallet থেকে এই commission কেটে নেওয়া হবে।' +
+    warningExtra + '\n\n' +
     'কারণ লিখুন (mandatory — affiliate notification-এ দেখাবে):'
   );
   if (reason === null) return;          // user pressed Cancel
@@ -1573,9 +1594,6 @@ window.confirmCancelCommission = async function(commissionId) {
     alert('কারণ লেখা mandatory। Please একটি কারণ দিন।');
     return;
   }
-
-  const sb = window.scriptoraSupabase;
-  if (!sb) { showToast('⚠️ Supabase connected হয়নি', '#f87171'); return; }
 
   try {
     const { data, error } = await sb.rpc('admin_cancel_affiliate_commission', {

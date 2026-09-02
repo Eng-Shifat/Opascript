@@ -1959,7 +1959,26 @@ async function loadAffiliateEarnings(affiliateId) {
 
     const fmt = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (earningsEl)  earningsEl.textContent  = fmt(wallet.total_earned);
-    if (availableEl) availableEl.textContent = fmt(wallet.available_balance);
+
+    /* Negative balance — লাল রঙে দেখাও এবং warning দাও */
+    const availableAmt = Number(wallet.available_balance || 0);
+    if (availableEl) {
+      availableEl.textContent = fmt(availableAmt);
+      if (availableAmt < 0) {
+        availableEl.style.color = '#f87171'; /* red */
+        /* Warning note দেখাও যদি element থাকে */
+        const negNote = document.getElementById('affNegativeBalanceNote');
+        if (negNote) {
+          negNote.style.display = 'block';
+          negNote.textContent   = '⚠️ আপনার balance negative। নতুন commission earn হলে automatically ঠিক হয়ে যাবে।';
+        }
+      } else {
+        availableEl.style.color = ''; /* default */
+        const negNote = document.getElementById('affNegativeBalanceNote');
+        if (negNote) negNote.style.display = 'none';
+      }
+    }
+
     if (pendingEl)   pendingEl.textContent   = fmt(wallet.pending_withdrawal);
 
     // Draw sparklines after values are set
