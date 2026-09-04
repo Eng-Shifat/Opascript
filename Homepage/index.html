@@ -17,17 +17,21 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- DNS prefetch -->
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- Non-blocking font: loads after render, no paint delay -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
   <link rel="stylesheet" href="style.css?v=2" />
-  <script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 
 <body>
 
   <!-- NAV -->
   <!-- SHARED NAVBAR -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
   <script src="../shared/supabaseClient.js"></script>
   <script src="../shared/theme.js"></script>
   <script src="../shared/navbar.js"></script>
@@ -729,6 +733,7 @@
         </div>
       </div>
       <script>
+      document.addEventListener('DOMContentLoaded', function() {
       (function () {
         var mq = window.matchMedia('(max-width: 600px)');
         var originalGrid = document.getElementById('uniGrid');
@@ -804,6 +809,7 @@
         mq.addEventListener('change', sync);
         sync(mq);
       })();
+      }); // end DOMContentLoaded
       </script>
 
       <!-- Serving badge -->
@@ -868,9 +874,15 @@
   </section>
 
   <!-- FOOTER -->
-  <script src="../shared/footer.js"></script>
+  <script src="../shared/footer.js" defer></script>
 
   <script>
+    // Non-critical animations deferred to idle time
+    function runWhenIdle(fn) {
+      if ('requestIdleCallback' in window) { requestIdleCallback(fn, { timeout: 2000 }); }
+      else { setTimeout(fn, 200); }
+    }
+
     // Hamburger menu handled by shared/navbar.js
     const hiwSection = document.querySelector('.hiw-section');
     const hiwObserver = new IntersectionObserver((entries) => {
@@ -933,32 +945,34 @@
       fadeObserver.disconnect();
     }, 500);
 
-    // Bottom stats count-up animation
-    const statNums = document.querySelectorAll('.bstat-num');
-    const countObserver = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          const el = e.target;
-          const text = el.textContent;
-          const num = parseInt(text);
-          const suffix = text.replace(/[0-9]/g, '');
-          if (!isNaN(num)) {
-            let start = 0;
-            const duration = 1400;
-            const step = (timestamp) => {
-              if (!start) start = timestamp;
-              const progress = Math.min((timestamp - start) / duration, 1);
-              const ease = 1 - Math.pow(1 - progress, 3);
-              el.textContent = Math.floor(ease * num) + suffix;
-              if (progress < 1) requestAnimationFrame(step);
-            };
-            requestAnimationFrame(step);
+    // Bottom stats count-up animation — deferred to idle
+    runWhenIdle(function() {
+      const statNums = document.querySelectorAll('.bstat-num');
+      const countObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            const el = e.target;
+            const text = el.textContent;
+            const num = parseInt(text);
+            const suffix = text.replace(/[0-9]/g, '');
+            if (!isNaN(num)) {
+              let start = 0;
+              const duration = 1400;
+              const step = (timestamp) => {
+                if (!start) start = timestamp;
+                const progress = Math.min((timestamp - start) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.floor(ease * num) + suffix;
+                if (progress < 1) requestAnimationFrame(step);
+              };
+              requestAnimationFrame(step);
+            }
+            countObserver.unobserve(el);
           }
-          countObserver.unobserve(el);
-        }
-      });
-    }, { threshold: 0.5 });
-    statNums.forEach(el => countObserver.observe(el));
+        });
+      }, { threshold: 0.5 });
+      statNums.forEach(el => countObserver.observe(el));
+    });
 
   </script>
 

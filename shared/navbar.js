@@ -103,7 +103,6 @@
   </div>`;
 
   const navCSS = `
-  <style id="shared-nav-css">
     body { padding-top: 55px; }
     #shared-nav { background:rgba(var(--bg-nav-rgb),0.55); backdrop-filter:blur(16px) saturate(180%); -webkit-backdrop-filter:blur(16px) saturate(180%); padding:0 2.5rem; height:55px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--text-rgb),0.10); position:fixed; top:0; left:0; right:0; z-index:1000; transition:background 0.3s; isolation:isolate; will-change:transform; font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
     #shared-nav, #shared-nav * { font-family:'Inter','Segoe UI','Kalpurush',sans-serif; }
@@ -153,9 +152,34 @@
       .nav-dashboard-btn { padding:5px 12px 5px 6px; border:0.5px solid rgba(150,150,180,0.35); border-radius:20px; }
       .nav-dashboard-btn span { display:inline; }
     }
-  </style>`;
+  `;
 
-  document.write(navCSS + navHTML);
+  // ── CSS → <head> এ inject (document.write() বাদ দেওয়া হয়েছে) ───────────
+  const _styleEl = document.createElement('style');
+  _styleEl.id = 'shared-nav-css';
+  _styleEl.textContent = navCSS;
+  (document.head || document.documentElement).appendChild(_styleEl);
+
+  // ── HTML → currentScript-এর জায়গায় inject ────────────────────────────
+  const _placeholder = document.createElement('div');
+  _placeholder.innerHTML = navHTML;
+  const _scriptTag = document.currentScript;
+  if (_scriptTag && _scriptTag.parentNode) {
+    // synchronous: script tag-এর জায়গায় বসাও
+    _scriptTag.parentNode.insertBefore(_placeholder, _scriptTag);
+  } else if (document.body) {
+    // defer হলে body ইতিমধ্যে ready — সরাসরি prepend
+    document.body.insertAdjacentElement('afterbegin', _placeholder);
+  } else {
+    // edge case: DOMContentLoaded fire হয়েছে কিনা চেক
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        document.body.insertAdjacentElement('afterbegin', _placeholder);
+      });
+    } else {
+      document.body.insertAdjacentElement('afterbegin', _placeholder);
+    }
+  }
 
   document.addEventListener('DOMContentLoaded', function () {
     const btn = document.getElementById('hamburgerBtn');
