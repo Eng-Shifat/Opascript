@@ -420,6 +420,75 @@
       .subscribe((status, err) => {
         console.log('[Realtime] topbar-files status:', status, err || '');
       });
+
+    /* affiliate tables — new withdrawal / new application / new commission */
+    sb.channel('topbar-affiliates')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'affiliate_withdrawals' }, async (payload) => {
+        const w = payload.new;
+        let clientName = '';
+        try {
+          if (w.client_id) {
+            const { data: cl } = await sb.from('clients').select('name,email').eq('id', w.client_id).single();
+            if (cl) clientName = cl.name || cl.email || '';
+          }
+        } catch (_) {}
+        _addNotif({
+          id:      'aff-wd-' + w.id,
+          icon:    'ti-cash',
+          color:   'dp-orange',
+          text:    'নতুন Withdrawal Request এসেছে',
+          sub:     (clientName ? clientName + ' — ' : '') + '৳' + Number(w.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+          time:    new Date().toISOString(),
+          onclick: `window.location.href='admin-affiliates.html'`,
+          type:    'affiliate_withdrawal',
+        });
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'affiliate_applications' }, async (payload) => {
+        const a = payload.new;
+        let clientName = '';
+        try {
+          if (a.client_id) {
+            const { data: cl } = await sb.from('clients').select('name,email').eq('id', a.client_id).single();
+            if (cl) clientName = cl.name || cl.email || '';
+          }
+        } catch (_) {}
+        _addNotif({
+          id:      'aff-app-' + a.id,
+          icon:    'ti-user-plus',
+          color:   'dp-purple',
+          text:    'নতুন Affiliate Application এসেছে',
+          sub:     clientName || 'নতুন applicant',
+          time:    new Date().toISOString(),
+          onclick: `window.location.href='admin-affiliates.html'`,
+          type:    'affiliate_application',
+        });
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'affiliate_commissions' }, async (payload) => {
+        const c = payload.new;
+        let affName = '';
+        try {
+          if (c.affiliate_id) {
+            const { data: aff } = await sb.from('affiliates').select('client_id').eq('id', c.affiliate_id).single();
+            if (aff?.client_id) {
+              const { data: cl } = await sb.from('clients').select('name,email').eq('id', aff.client_id).single();
+              if (cl) affName = cl.name || cl.email || '';
+            }
+          }
+        } catch (_) {}
+        _addNotif({
+          id:      'aff-comm-' + c.id,
+          icon:    'ti-coins',
+          color:   'dp-green',
+          text:    'নতুন Commission রেকর্ড হয়েছে',
+          sub:     (affName ? affName + ' — ' : '') + '৳' + Number(c.commission_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+          time:    new Date().toISOString(),
+          onclick: `window.location.href='admin-affiliates.html'`,
+          type:    'affiliate_commission',
+        });
+      })
+      .subscribe((status, err) => {
+        console.log('[Realtime] topbar-affiliates status:', status, err || '');
+      });
   }
 
   /* ══════════════════════════════════════
@@ -449,6 +518,9 @@
           rating:           { icon: 'ti-star',         color: 'dp-yellow' },
           message:          { icon: 'ti-message',      color: 'dp-blue'   },
           file_upload:      { icon: 'ti-file-upload',  color: 'dp-blue'   },
+          affiliate_withdrawal: { icon: 'ti-cash', color: 'dp-orange' },
+          affiliate_application:{ icon: 'ti-user-plus',     color: 'dp-purple' },
+          affiliate_commission: { icon: 'ti-coins',          color: 'dp-green'  },
         };
         const tm = typeIconMap[n.type] || {};
         fresh.push({

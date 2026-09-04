@@ -47,6 +47,18 @@ let RC_SEARCH           = '';
 let ALL_AUDIT_LOG = [];
 let AL_SEARCH     = '';
 
+/* ── Shared avatar helper — photo থাকলে img, না থাকলে initials fallback ── */
+function esAvatarHtml(name, avatarUrl, bgColor, initialsText) {
+  const initials = initialsText || (name && name !== '—' ? name.slice(0, 2).toUpperCase() : '??');
+  if (avatarUrl) {
+    return `<div class="cl-avatar" style="padding:0;overflow:hidden;background:${bgColor}20;">
+      <img src="${esc(avatarUrl)}" alt="${esc(initials)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+           onerror="this.parentElement.style.padding='';this.parentElement.style.color='${bgColor}';this.outerHTML='${esc(initials)}';">
+    </div>`;
+  }
+  return `<div class="cl-avatar" style="background:${bgColor}20;color:${bgColor};">${esc(initials)}</div>`;
+}
+
 /* ── Init ─────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
   await waitForSession();
@@ -133,7 +145,7 @@ async function loadApplications() {
     if (clientIds.length > 0) {
       const { data: clients } = await sb
         .from('clients')
-        .select('id, name, email')
+        .select('id, name, email, avatar_url')
         .in('id', clientIds);
       (clients || []).forEach(c => { CLIENT_MAP[c.id] = c; });
     }
@@ -222,7 +234,7 @@ function buildAppRow(app) {
     <tr>
       <td>
         <div class="cl-name-cell">
-          <div class="cl-avatar" style="background:${avatarBg}20;color:${avatarBg};">${initials}</div>
+          ${esAvatarHtml(name, client?.avatar_url, avatarBg, initials)}
           <div>
             <strong>${esc(name)}</strong>
             <span>${esc(email)}</span>
@@ -372,14 +384,14 @@ async function loadCommissions() {
         const affClientIds = [...new Set(affs.map(a => a.client_id))];
         const { data: affClients } = await sb
           .from('clients')
-          .select('id, name, email')
+          .select('id, name, email, avatar_url')
           .in('id', affClientIds);
 
         const affClientMap = {};
         (affClients || []).forEach(c => { affClientMap[c.id] = c; });
         affs.forEach(a => {
           const cl = affClientMap[a.client_id] || {};
-          AFF_MAP[a.id] = { name: cl.name || '—', email: cl.email || '—', referral_code: a.referral_code };
+          AFF_MAP[a.id] = { name: cl.name || '—', email: cl.email || '—', avatar_url: cl.avatar_url || null, referral_code: a.referral_code };
         });
       }
     }
@@ -517,7 +529,7 @@ function buildCmRow(cm) {
     <tr>
       <td>
         <div class="cl-name-cell">
-          <div class="cl-avatar" style="background:${affBg}20;color:${affBg};">${affInitials}</div>
+          ${esAvatarHtml(affName, aff.avatar_url, affBg, affInitials)}
           <div>
             <strong>${esc(affName)}</strong>
             <span>${esc(affEmail)}</span>
@@ -650,7 +662,7 @@ async function loadWithdrawals() {
     if (clientIds.length > 0) {
       const { data: clients } = await sb
         .from('clients')
-        .select('id, name, email')
+        .select('id, name, email, avatar_url')
         .in('id', clientIds);
       (clients || []).forEach(c => { WD_AFF_MAP[c.id] = c; });
     }
@@ -746,7 +758,7 @@ function buildWdRow(w) {
     <tr>
       <td>
         <div class="cl-name-cell">
-          <div class="cl-avatar" style="background:${avatarBg}20;color:${avatarBg};">${initials}</div>
+          ${esAvatarHtml(name, client?.avatar_url, avatarBg, initials)}
           <div>
             <strong>${esc(name)}</strong>
             <span>${esc(email)}</span>
