@@ -542,38 +542,12 @@ function initEscalateBtn() {
 }
 
 // ══════════════════════════════════════════
-// TAB FILTER (functional)
+// (আগে এখানে একটা duplicate/legacy tab-filter click-listener ছিলো
+//  — badge টেক্সট match করতো, যেটা filterStatus() এর data-status
+//  attribute logic এর সাথে conflict করে override করে দিতো।
+//  filterStatus() (HTML এর onclick দিয়ে বাঁধা) already সঠিকভাবে
+//  কাজ করে, তাই এই duplicate mechanism সরিয়ে দেওয়া হলো।)
 // ══════════════════════════════════════════
-function initTabFilter() {
-  document.querySelectorAll('.topbar-tabs .tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.topbar-tabs .tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const label = btn.textContent.trim().toLowerCase();
-      const rows  = document.querySelectorAll('#ordersTableBody tr');
-
-      rows.forEach(row => {
-        if (label.startsWith('all')) {
-          row.style.display = '';
-          return;
-        }
-        const statusCell = row.querySelector('.status-badge');
-        if (!statusCell) { row.style.display = ''; return; }
-        const rowStatus = statusCell.textContent.trim().toLowerCase();
-
-        let show = false;
-        if (label.startsWith('overdue')    && rowStatus.includes('overdue'))     show = true;
-        if (label.startsWith('pending')    && rowStatus.includes('pending'))     show = true;
-        if (label.startsWith('in progress')&& rowStatus.includes('progress'))   show = true;
-        if (label.startsWith('in review')  && rowStatus.includes('review'))     show = true;
-        if (label.startsWith('completed')  && rowStatus.includes('completed'))  show = true;
-
-        row.style.display = show ? '' : 'none';
-      });
-    });
-  });
-}
 
 // ══════════════════════════════════════════
 // SORT & FILTER BUTTONS (UI feedback)
@@ -768,7 +742,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initStatusUpdate();
   initMessageBtn();
   initEscalateBtn();
-  initTabFilter();
   initFilterBtns();
   initUploadBtn();
 });
@@ -858,6 +831,7 @@ function updateOrderStatus() {
   const row = document.querySelector(`#ordersTableBody tr[data-id="${activeOrderId}"]`);
   if (row) {
     row.className = info.rowClass;
+    row.setAttribute('data-status', newStatus); /* ফিল্টার ট্যাব এই attribute দিয়েই সার্চ করে — না বদলালে stale থেকে যায় */
     const statusCell = row.querySelector('.status-badge');
     if (statusCell) {
       statusCell.textContent = info.label;
