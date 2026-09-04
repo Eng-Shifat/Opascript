@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Affiliate Application — Opascript</title>
+  <meta name="description" content="Opascript Affiliate Program-এ Apply করুন। প্রতিটি successful referral-এ commission earn করুন।"/>
+
+  <!-- Theme bootstrap -->
+  <script>
+    (function(){
+      const t = localStorage.getItem('scriptora_theme') || localStorage.getItem('opascript_theme');
+      if(t==='light') document.documentElement.setAttribute('data-theme','light');
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+
+  <link rel="stylesheet" href="../shared/variables.css"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-main, #0f1b3d);
+      color: var(--text-main, #fff);
+      font-family: 'Inter', 'Kalpurush', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* ── Page Header ──────────────────────────────────────── */
+    .aff-apply-header {
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(45,110,247,.12), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 85% 80%, rgba(52,211,153,.08), transparent 55%),
+        linear-gradient(180deg, #060e24 0%, #0d1b38 100%);
+      padding: 56px 1.5rem 48px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .aff-apply-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.03) 1px, transparent 0);
+      background-size: 36px 36px;
+      pointer-events: none;
+    }
+
+    .aff-apply-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(45,110,247,.12);
+      border: 1px solid rgba(45,110,247,.3);
+      color: #60a5fa;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 50px;
+      letter-spacing: .1em;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    .aff-apply-badge-dot {
+      width: 6px; height: 6px;
+      background: #34d399;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:.5; transform:scale(.7); }
+    }
+
+    .aff-apply-header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .aff-apply-header h1 .green { color: #34d399; }
+    .aff-apply-header h1 .blue  { color: #60a5fa; }
+
+    .aff-apply-header p {
+      font-size: .9rem;
+      color: rgba(255,255,255,.55);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── Form container ───────────────────────────────────── */
+    .aff-form-wrap {
+      max-width: 720px;
+      margin: 40px auto 0;
+      padding: 0 1rem;
+    }
+
+    .aff-form-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 36px 40px;
+      backdrop-filter: blur(12px);
+    }
+    @media (max-width: 600px) {
+      .aff-form-card { padding: 24px 18px; }
+    }
+
+    /* ── Section label ────────────────────────────────────── */
+    .form-section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .7rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.35);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin: 32px 0 18px;
+    }
+    .form-section-label:first-child { margin-top: 0; }
+    .form-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,.07);
+    }
+    .form-section-label .ti {
+      font-size: .85rem;
+      color: #60a5fa;
+    }
+
+    /* ── Field groups ─────────────────────────────────────── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .form-row.single { grid-template-columns: 1fr; }
+    @media (max-width: 560px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      font-size: .78rem;
+      font-weight: 600;
+      color: rgba(255,255,255,.7);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-label .required {
+      color: #f87171;
+      font-size: .65rem;
+    }
+    .form-label .ti {
+      font-size: .9rem;
+      color: #60a5fa;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      background: rgba(255,255,255,.05);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: #fff;
+      font-family: 'Inter', 'Kalpurush', sans-serif;
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      width: 100%;
+    }
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: rgba(45,110,247,.6);
+      box-shadow: 0 0 0 3px rgba(45,110,247,.12);
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder { color: rgba(255,255,255,.25); }
+    .form-select option { background: #0d1b38; color: #fff; }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.6;
+    }
+
+    /* ── Payment method selector ──────────────────────────── */
+    .payment-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .pay-tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.55);
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .18s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pay-tab:hover { border-color: rgba(45,110,247,.4); color: #fff; }
+    .pay-tab.active {
+      background: rgba(45,110,247,.18);
+      border-color: rgba(45,110,247,.6);
+      color: #60a5fa;
+    }
+    .pay-tab .pay-icon { font-size: .85rem; }
+
+    .pay-number-wrap { display: none; }
+    .pay-number-wrap.visible { display: flex; flex-direction: column; gap: 7px; }
+    .pay-number-wrap .form-label { margin-top: 2px; }
+
+    /* ── Skills tag input ─────────────────────────────────── */
+    .skills-wrap {
+      background: rgba(255,255,255,.05);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+      min-height: 48px;
+      transition: border-color .2s, box-shadow .2s;
+      cursor: text;
+    }
+    .skills-wrap:focus-within {
+      border-color: rgba(45,110,247,.6);
+      box-shadow: 0 0 0 3px rgba(45,110,247,.12);
+    }
+    .skill-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(45,110,247,.18);
+      border: 1px solid rgba(45,110,247,.35);
+      color: #60a5fa;
+      border-radius: 6px;
+      padding: 3px 10px 3px 8px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .skill-tag-remove {
+      cursor: pointer;
+      color: #f87171;
+      font-size: .65rem;
+      line-height: 1;
+      opacity: .7;
+      transition: opacity .15s;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .skill-tag-remove:hover { opacity: 1; }
+    .skills-input {
+      background: none;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: .85rem;
+      min-width: 140px;
+      flex: 1;
+    }
+    .skills-input::placeholder { color: rgba(255,255,255,.25); }
+    .skills-hint {
+      font-size: .72rem;
+      color: rgba(255,255,255,.3);
+      margin-top: 5px;
+    }
+
+    /* ── Services sector checkboxes ───────────────────────── */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    .service-check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      cursor: pointer;
+      transition: all .18s;
+      user-select: none;
+    }
+    .service-check-item:hover {
+      border-color: rgba(45,110,247,.3);
+      background: rgba(45,110,247,.06);
+    }
+    .service-check-item input[type="checkbox"] {
+      accent-color: #2d6ef7;
+      width: 15px; height: 15px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .service-check-item span {
+      font-size: .8rem;
+      color: rgba(255,255,255,.65);
+      font-weight: 500;
+    }
+    .service-check-item.checked {
+      border-color: rgba(45,110,247,.5);
+      background: rgba(45,110,247,.12);
+    }
+    .service-check-item.checked span { color: #fff; }
+
+    .service-limit-note {
+      font-size: .73rem;
+      color: rgba(255,255,255,.35);
+      margin-top: 8px;
+    }
+    .service-limit-note.exceeded { color: #f87171; }
+
+    /* ── Affiliate ID field (conditional) ────────────────── */
+    .aff-id-hint {
+      font-size: .73rem;
+      color: rgba(255,255,255,.3);
+      margin-top: 4px;
+    }
+
+    /* ── Photo + NID upload ───────────────────────────────── */
+    .upload-area {
+      border: 2px dashed rgba(255,255,255,.12);
+      border-radius: 10px;
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-area:hover {
+      border-color: rgba(45,110,247,.45);
+      background: rgba(45,110,247,.05);
+    }
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-area .ti {
+      font-size: 1.8rem;
+      color: rgba(255,255,255,.25);
+      display: block;
+      margin-bottom: 8px;
+    }
+    .upload-area p {
+      font-size: .78rem;
+      color: rgba(255,255,255,.4);
+      line-height: 1.5;
+    }
+    .upload-area p strong { color: #60a5fa; }
+    .upload-preview {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: .8rem;
+      color: #34d399;
+    }
+    .upload-preview .ti { font-size: 1.1rem; display: inline; margin: 0; }
+    .upload-preview.visible { display: flex; }
+
+    /* ── Submit button ─────────────────────────────────────── */
+    .aff-submit-btn {
+      width: 100%;
+      margin-top: 32px;
+      padding: 15px;
+      background: linear-gradient(135deg, #2d6ef7, #3b82f6);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity .2s, transform .15s;
+      letter-spacing: -.01em;
+    }
+    .aff-submit-btn:hover:not(:disabled) {
+      opacity: .9;
+      transform: translateY(-1px);
+    }
+    .aff-submit-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .aff-submit-btn .ti { font-size: 1.1rem; }
+
+    /* ── Success overlay ──────────────────────────────────── */
+    .aff-success {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .aff-success.visible { display: block; }
+    .aff-success-icon {
+      width: 72px; height: 72px;
+      background: rgba(52,211,153,.15);
+      border: 2px solid rgba(52,211,153,.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #34d399;
+      margin: 0 auto 20px;
+    }
+    .aff-success h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    .aff-success p {
+      font-size: .88rem;
+      color: rgba(255,255,255,.5);
+      line-height: 1.7;
+      max-width: 400px;
+      margin: 0 auto 24px;
+    }
+    .aff-success .wait-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245,158,11,.1);
+      border: 1px solid rgba(245,158,11,.3);
+      color: #f59e0b;
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: .8rem;
+      font-weight: 600;
+    }
+
+    /* ── Error banner ─────────────────────────────────────── */
+    .aff-error-banner {
+      display: none;
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: .82rem;
+      color: #fca5a5;
+      margin-top: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .aff-error-banner.hidden { display: none !important; }
+    .aff-error-banner .ti { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  </style>
+</head>
+<body>
+
+<!-- SHARED NAVBAR -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../shared/supabaseClient.js"></script>
+<script src="../shared/theme.js"></script>
+<script src="../shared/navbar.js"></script>
+
+<!-- ══ PAGE HEADER ══════════════════════════════════════════ -->
+<div class="aff-apply-header">
+  <div class="aff-apply-badge">
+    <span class="aff-apply-badge-dot"></span>
+    Affiliate Program — Open
+  </div>
+  <h1>
+    <span class="green">Affiliate হন,</span><br>
+    <span class="blue">Commission Earn করুন</span>
+  </h1>
+  <p>নিচের form টি সম্পূর্ণ সঠিকভাবে পূরণ করুন। ২৪ ঘণ্টার মধ্যে আপনাকে update জানানো হবে।</p>
+</div>
+
+<!-- ══ FORM SECTION ═════════════════════════════════════════ -->
+<div class="aff-form-wrap">
+  <div class="aff-form-card">
+
+    <!-- Success State -->
+    <div class="aff-success" id="successView">
+      <div class="aff-success-icon"><i class="ti ti-check"></i></div>
+      <h2>Application জমা হয়েছে! 🎉</h2>
+      <p>আপনার Affiliate Application সফলভাবে submit হয়েছে। আমাদের team review করে ২৪ ঘণ্টার মধ্যে আপনাকে জানাবে।</p>
+      <span class="wait-badge">
+        <i class="ti ti-clock"></i>
+        সর্বোচ্চ ২৪ ঘণ্টা অপেক্ষা করুন
+      </span>
+    </div>
+
+    <!-- Form -->
+    <form id="affForm" novalidate>
+
+      <!-- ── Personal Info ─────────────────────────────────── -->
+      <div class="form-section-label">
+        <i class="ti ti-user"></i>
+        Personal Information
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-user-circle"></i>
+            পূর্ণ নাম
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="f_name" class="form-input" placeholder="আপনার পূর্ণ নাম লিখুন" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-school"></i>
+            University / College
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="f_university" class="form-input" placeholder="আপনার বিশ্ববিদ্যালয় বা কলেজ" required/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-phone"></i>
+            Phone Number
+            <span class="required">*</span>
+          </label>
+          <input type="tel" id="f_phone" class="form-input" placeholder="01XXXXXXXXX" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-brand-whatsapp"></i>
+            WhatsApp Number
+            <span class="required">*</span>
+          </label>
+          <input type="tel" id="f_whatsapp" class="form-input" placeholder="01XXXXXXXXX"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-mail"></i>
+            Email Address
+            <span class="required">*</span>
+          </label>
+          <input type="email" id="f_email" class="form-input" placeholder="your@email.com" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-brand-facebook"></i>
+            Facebook Profile Link
+            <span class="required">*</span>
+          </label>
+          <input type="url" id="f_facebook" class="form-input" placeholder="https://facebook.com/yourprofile" required/>
+        </div>
+      </div>
+
+      <!-- ── Payment Method ───────────────────────────────── -->
+      <div class="form-section-label">
+        <i class="ti ti-wallet"></i>
+        Payment / Cash-Out Method
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          কোন মাধ্যমে payment নিতে চান?
+          <span class="required">*</span>
+        </label>
+        <div class="payment-tabs">
+          <button type="button" class="pay-tab" data-method="bkash"       onclick="selectPayment(this)">
+            <span class="pay-icon">📱</span> bKash
+          </button>
+          <button type="button" class="pay-tab" data-method="nagad"       onclick="selectPayment(this)">
+            <span class="pay-icon">📲</span> Nagad
+          </button>
+          <button type="button" class="pay-tab" data-method="upay"        onclick="selectPayment(this)">
+            <span class="pay-icon">💳</span> Upay
+          </button>
+          <button type="button" class="pay-tab" data-method="banktransfer" onclick="selectPayment(this)">
+            <span class="pay-icon">🏦</span> Bank Transfer
+          </button>
+        </div>
+        <input type="hidden" id="f_payment_method" value=""/>
+
+        <!-- Dynamic number/account field -->
+        <div class="pay-number-wrap" id="payNumberWrap">
+          <label class="form-label" id="payNumberLabel">
+            <i class="ti ti-hash"></i>
+            Account Number
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="f_payment_number" class="form-input" placeholder="" autocomplete="off"/>
+        </div>
+      </div>
+
+      <!-- ── Identity Verification ────────────────────────── -->
+      <div class="form-section-label">
+        <i class="ti ti-id-badge"></i>
+        Identity Verification
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-credit-card"></i>
+            NID Number
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="f_nid_number" class="form-input" placeholder="আপনার জাতীয় পরিচয়পত্র নম্বর" required/>
+        </div>
+        <div class="form-group" style="opacity:0; pointer-events:none;"><!-- spacer --></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-id-badge-2"></i>
+            NID-এর Photo
+            <span class="required">*</span>
+          </label>
+          <div class="upload-area" id="nidUploadArea">
+            <input type="file" id="f_nid_photo" accept="image/*,.pdf" onchange="handleFileUpload(this, 'nidPreview', 'nidUploadArea')"/>
+            <i class="ti ti-upload"></i>
+            <p>NID কার্ডের ছবি drag করুন অথবা <strong>browse</strong> করুন</p>
+            <p style="margin-top:4px;font-size:.7rem;">JPG, PNG, PDF — max 5MB</p>
+            <div class="upload-preview" id="nidPreview">
+              <i class="ti ti-check-circle"></i>
+              <span id="nidFileName">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-camera"></i>
+            আপনার একটি Photo
+            <span class="required">*</span>
+          </label>
+          <div class="upload-area" id="photoUploadArea">
+            <input type="file" id="f_photo" accept="image/*" onchange="handleFileUpload(this, 'photoPreview', 'photoUploadArea')"/>
+            <i class="ti ti-user-circle"></i>
+            <p>আপনার স্পষ্ট একটি ছবি দিন<br><strong>browse</strong> করুন</p>
+            <p style="margin-top:4px;font-size:.7rem;">JPG, PNG — max 5MB</p>
+            <div class="upload-preview" id="photoPreview">
+              <i class="ti ti-check-circle"></i>
+              <span id="photoFileName">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Marketing Skills ─────────────────────────────── -->
+      <div class="form-section-label">
+        <i class="ti ti-bulb"></i>
+        Marketing Skills
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          <i class="ti ti-tags"></i>
+          আপনার marketing-সম্পর্কিত skills
+          <span class="required">*</span>
+        </label>
+        <div class="skills-wrap" id="skillsWrap" onclick="document.getElementById('skillInput').focus()">
+          <input
+            type="text"
+            id="skillInput"
+            class="skills-input"
+            placeholder="Skill লিখে Enter চাপুন…"
+            onkeydown="handleSkillInput(event)"
+          />
+        </div>
+        <div class="skills-hint">উদাহরণ: Facebook Marketing, Content Creation, Video Editing, WhatsApp Marketing, SEO</div>
+        <input type="hidden" id="f_skills" value="[]"/>
+      </div>
+
+      <!-- ── Services to Affiliate ────────────────────────── -->
+      <div class="form-section-label">
+        <i class="ti ti-layout-grid"></i>
+        Service Sectors (সর্বোচ্চ ৫টি)
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          কোন service গুলোতে affiliate করতে চান?
+          <span class="required">*</span>
+        </label>
+        <div class="services-grid" id="servicesGrid">
+          <!-- dynamically built -->
+        </div>
+        <div class="service-limit-note" id="serviceLimitNote">০টি selected</div>
+        <input type="hidden" id="f_services" value="[]"/>
+      </div>
+
+      <!-- ── Affiliate ID (optional) ──────────────────────── -->
+      <div class="form-section-label">
+        <i class="ti ti-link"></i>
+        Referral / Affiliate
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-hash"></i>
+            Affiliate ID (যদি কেউ refer করে থাকে)
+          </label>
+          <input type="text" id="f_referrer_code" class="form-input" placeholder="REF-XXXXXX (optional)"/>
+          <div class="aff-id-hint">কোনো affiliate আপনাকে invite করে থাকলে তার code লিখুন</div>
+        </div>
+        <div class="form-group" style="opacity:0;pointer-events:none;"></div>
+      </div>
+
+      <!-- ── About yourself ───────────────────────────────── -->
+      <div class="form-section-label">
+        <i class="ti ti-message-2"></i>
+        নিজের সম্পর্কে বলুন
+      </div>
+
+      <div class="form-group form-row single">
+        <label class="form-label">
+          <i class="ti ti-writing"></i>
+          আপনি কে এবং কেন Affiliate হতে চান?
+          <span class="required">*</span>
+        </label>
+        <textarea
+          id="f_about"
+          class="form-textarea"
+          placeholder="নিজের সম্পর্কে সুন্দরভাবে লিখুন — আপনার background, motivation, এবং কীভাবে আপনি এই program-এ contribute করতে পারবেন সেটা জানান।"
+          required
+        ></textarea>
+      </div>
+
+      <!-- ── Error banner ──────────────────────────────────── -->
+      <div class="aff-error-banner hidden" id="errorBanner">
+        <i class="ti ti-alert-circle"></i>
+        <span id="errorMsg">—</span>
+      </div>
+
+      <!-- ── Submit ─────────────────────────────────────────── -->
+      <button type="submit" class="aff-submit-btn" id="submitBtn">
+        <i class="ti ti-send"></i>
+        Application Submit করুন
+      </button>
+
+    </form><!-- /affForm -->
+  </div><!-- /aff-form-card -->
+</div><!-- /aff-form-wrap -->
+
+<!-- Shared footer -->
+<script src="../shared/footer.js"></script>
+
+<script>
+'use strict';
+
+/* ── Services list ──────────────────────────────────────── */
+const SERVICES = [
+  'Thesis Writing',
+  'Assignment Writing',
+  'Research Paper & Proposal',
+  'SPSS Analysis',
+  'Proofreading & Editing',
+  'Formatting',
+  'Turnitin / Plagiarism Check',
+  'Presentation Slides',
+  'Handwritten Service',
+  'CSE/SWE Technical Support',
+  'Data Collection',
+];
+
+let selectedSkills   = [];
+let selectedServices = [];
+const MAX_SERVICES   = 5;
+
+/* ── Build service checkboxes ───────────────────────────── */
+(function buildServices() {
+  const grid = document.getElementById('servicesGrid');
+  SERVICES.forEach(svc => {
+    const item = document.createElement('label');
+    item.className = 'service-check-item';
+    item.innerHTML = `
+      <input type="checkbox" value="${svc}" onchange="toggleService(this, '${svc}')"/>
+      <span>${svc}</span>
+    `;
+    grid.appendChild(item);
+  });
+})();
+
+/* ── Service toggle ─────────────────────────────────────── */
+window.toggleService = function(el, svc) {
+  const note = document.getElementById('serviceLimitNote');
+  if (el.checked) {
+    if (selectedServices.length >= MAX_SERVICES) {
+      el.checked = false;
+      note.textContent = `সর্বোচ্চ ${MAX_SERVICES}টি select করা যাবে`;
+      note.classList.add('exceeded');
+      return;
+    }
+    selectedServices.push(svc);
+    el.closest('.service-check-item').classList.add('checked');
+  } else {
+    selectedServices = selectedServices.filter(s => s !== svc);
+    el.closest('.service-check-item').classList.remove('checked');
+  }
+  note.textContent = `${selectedServices.length}টি selected`;
+  note.classList.toggle('exceeded', selectedServices.length >= MAX_SERVICES);
+  document.getElementById('f_services').value = JSON.stringify(selectedServices);
+};
+
+/* ── Payment method ─────────────────────────────────────── */
+window.selectPayment = function(btn) {
+  document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const method = btn.dataset.method;
+  document.getElementById('f_payment_method').value = method;
+
+  const wrap = document.getElementById('payNumberWrap');
+  const label = document.getElementById('payNumberLabel');
+  const input = document.getElementById('f_payment_number');
+  wrap.classList.add('visible');
+
+  const labels = {
+    bkash: 'bKash Number',
+    nagad: 'Nagad Number',
+    upay: 'Upay Number',
+    banktransfer: 'Bank Account Number / Routing Info',
+  };
+  const placeholders = {
+    bkash: '01XXXXXXXXX',
+    nagad: '01XXXXXXXXX',
+    upay: '01XXXXXXXXX',
+    banktransfer: 'Account No — Bank Name — Branch',
+  };
+  label.innerHTML = `<i class="ti ti-hash"></i> ${labels[method]} <span class="required">*</span>`;
+  input.placeholder = placeholders[method];
+  input.focus();
+};
+
+/* ── Skill tag input ────────────────────────────────────── */
+window.handleSkillInput = function(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/, '');
+    if (val && !selectedSkills.includes(val)) {
+      selectedSkills.push(val);
+      renderSkillTags();
+    }
+    e.target.value = '';
+  } else if (e.key === 'Backspace' && e.target.value === '' && selectedSkills.length > 0) {
+    selectedSkills.pop();
+    renderSkillTags();
+  }
+};
+
+function renderSkillTags() {
+  const wrap = document.getElementById('skillsWrap');
+  const input = document.getElementById('skillInput');
+  // clear old tags
+  wrap.querySelectorAll('.skill-tag').forEach(t => t.remove());
+  selectedSkills.forEach((sk, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'skill-tag';
+    tag.innerHTML = `${sk} <button type="button" class="skill-tag-remove" onclick="removeSkill(${i})">✕</button>`;
+    wrap.insertBefore(tag, input);
+  });
+  document.getElementById('f_skills').value = JSON.stringify(selectedSkills);
+}
+
+window.removeSkill = function(i) {
+  selectedSkills.splice(i, 1);
+  renderSkillTags();
+};
+
+/* ── File upload preview ────────────────────────────────── */
+window.handleFileUpload = function(input, previewId, areaId) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById(previewId);
+  const area    = document.getElementById(areaId);
+  // show preview
+  const nameSpan = previewId === 'nidPreview' ? 'nidFileName' : 'photoFileName';
+  document.getElementById(nameSpan).textContent = file.name.length > 30
+    ? file.name.slice(0,27) + '…' : file.name;
+  preview.classList.add('visible');
+  area.querySelector('i.ti:not(.upload-preview .ti)').style.display = 'none';
+  area.querySelectorAll('p').forEach(p => p.style.display = 'none');
+};
+
+/* ── Error banner ───────────────────────────────────────── */
+function showError(msg) {
+  const banner = document.getElementById('errorBanner');
+  document.getElementById('errorMsg').textContent = msg;
+  banner.classList.remove('hidden');
+  banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideError() {
+  document.getElementById('errorBanner').classList.add('hidden');
+}
+
+/* ── Validate ───────────────────────────────────────────── */
+function validate() {
+  const v = id => document.getElementById(id).value.trim();
+  if (!v('f_name'))        return 'নাম লিখুন।';
+  if (!v('f_university'))  return 'University/College-এর নাম লিখুন।';
+  if (!v('f_phone'))       return 'Phone number দিন।';
+  if (!v('f_whatsapp'))    return 'WhatsApp number দিন।';
+  if (!/\S+@\S+\.\S+/.test(v('f_email'))) return 'Valid email address দিন।';
+  if (!v('f_facebook'))    return 'Facebook profile link দিন।';
+  if (!v('f_payment_method'))  return 'Payment method select করুন।';
+  if (!v('f_payment_number'))  return 'Payment account number দিন।';
+  if (!v('f_nid_number'))      return 'NID number লিখুন।';
+  if (!document.getElementById('f_nid_photo').files[0])  return 'NID-এর photo দিন।';
+  if (!document.getElementById('f_photo').files[0])      return 'আপনার একটি photo দিন।';
+  if (selectedSkills.length === 0)   return 'কমপক্ষে একটি marketing skill যোগ করুন।';
+  if (selectedServices.length === 0) return 'কমপক্ষে একটি service sector select করুন।';
+  if (!v('f_about'))       return 'নিজের সম্পর্কে কিছু লিখুন।';
+  return null;
+}
+
+/* ── Upload file to Supabase Storage ───────────────────── */
+async function uploadFile(bucket, file, path) {
+  const { data, error } = await window._supabase.storage
+    .from(bucket)
+    .upload(path, file, { upsert: false });
+  if (error) throw new Error('File upload failed: ' + error.message);
+  const { data: urlData } = window._supabase.storage.from(bucket).getPublicUrl(path);
+  return urlData.publicUrl;
+}
+
+/* ── Form submit ─────────────────────────────────────────── */
+document.getElementById('affForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  hideError();
+
+  const err = validate();
+  if (err) { showError(err); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Submit হচ্ছে…';
+
+  try {
+    const supabase = window._supabase;
+    const ts = Date.now();
+
+    /* Upload files */
+    const nidFile   = document.getElementById('f_nid_photo').files[0];
+    const photoFile = document.getElementById('f_photo').files[0];
+
+    const nidUrl   = await uploadFile('affiliate-docs', nidFile,   `nid/${ts}_${nidFile.name}`);
+    const photoUrl = await uploadFile('affiliate-docs', photoFile, `photo/${ts}_${photoFile.name}`);
+
+    /* Insert application row */
+    const payload = {
+      full_name:        document.getElementById('f_name').value.trim(),
+      university:       document.getElementById('f_university').value.trim(),
+      phone:            document.getElementById('f_phone').value.trim(),
+      whatsapp:         document.getElementById('f_whatsapp').value.trim(),
+      email:            document.getElementById('f_email').value.trim(),
+      facebook_url:     document.getElementById('f_facebook').value.trim(),
+      payment_method:   document.getElementById('f_payment_method').value,
+      payment_number:   document.getElementById('f_payment_number').value.trim(),
+      nid_number:       document.getElementById('f_nid_number').value.trim(),
+      nid_photo_url:    nidUrl,
+      photo_url:        photoUrl,
+      skills:           selectedSkills,
+      preferred_services: selectedServices,
+      referrer_code:    document.getElementById('f_referrer_code').value.trim() || null,
+      about_self:       document.getElementById('f_about').value.trim(),
+      status:           'pending',
+    };
+
+    const { error: insertErr } = await supabase
+      .from('affiliate_applications')
+      .insert([payload]);
+
+    if (insertErr) throw new Error(insertErr.message);
+
+    /* Show success */
+    document.getElementById('affForm').style.display = 'none';
+    document.getElementById('successView').classList.add('visible');
+
+  } catch (ex) {
+    showError('Submit করতে সমস্যা হয়েছে: ' + ex.message);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-send"></i> Application Submit করুন';
+  }
+});
+
+/* ── CSS spin keyframe ───────────────────────────────────── */
+const style = document.createElement('style');
+style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>

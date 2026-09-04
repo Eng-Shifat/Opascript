@@ -231,7 +231,7 @@ function buildAppRow(app) {
     : '<span style="color:var(--muted);font-size:.75rem;">—</span>';
 
   return `
-    <tr>
+    <tr style="cursor:pointer;" onclick="affProfileOpen && affProfileOpen('${app.id}')" title="Profile দেখুন">
       <td>
         <div class="cl-name-cell">
           ${esAvatarHtml(name, client?.avatar_url, avatarBg, initials)}
@@ -245,7 +245,7 @@ function buildAppRow(app) {
       <td>${buildStatusBadge(app.status)}</td>
       <td style="color:var(--muted2);font-size:.78rem;">${reviewedAt}</td>
       <td style="font-size:.78rem;">${adminNote}</td>
-      <td>${actions}</td>
+      <td onclick="event.stopPropagation()">${actions}</td>
     </tr>`;
 }
 
