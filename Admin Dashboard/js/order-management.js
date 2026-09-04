@@ -1102,7 +1102,6 @@ async function loadRealOrders() {
     const { data, error } = await sb
       .from('orders')
       .select('*')
-      .or('payment_status.not.in.(unpaid,rejected),advance_paid.gt.0')
       .order('order_date', { ascending: false });
 
     if (error) throw error;
@@ -1136,6 +1135,25 @@ async function loadRealOrders() {
     renderTable();
     updateStatCounts();
 
+    /* ── URL param: ?order=ID  → auto-open that order ── */
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetOrderId = urlParams.get('order');
+    const targetTab     = urlParams.get('tab'); /* payment | files etc */
+
+    if (targetOrderId) {
+      /* UUID or order_number match */
+      const matched = ORDERS.find(o =>
+        (o.id          || '').toLowerCase() === targetOrderId.toLowerCase() ||
+        (o.orderId     || '').toLowerCase() === targetOrderId.toLowerCase()
+      );
+
+      if (matched) {
+        _highlightAndOpenOrder(matched, targetTab);
+      } else {
+        showOMToast('⚠️ Order খুঁজে পাওয়া যায়নি', '#f87171');
+      }
+    }
+
     /* Update tab counts */
     const all       = ORDERS.length;
     const overdue   = ORDERS.filter(o => o.statusClass === 's-overdue').length;
@@ -1161,6 +1179,62 @@ async function loadRealOrders() {
     console.error('[Scriptora] Order load error:', e.message);
     /* Silently keep mock data on error */
   }
+}
+
+/* ══════════════════════════════════════════
+   NOTIFICATION DEEP-LINK HELPER
+   Notification click → order highlight + open
+══════════════════════════════════════════ */
+function _highlightAndOpenOrder(order, tab) {
+  if (!order) return;
+
+  /* 1. Switch to ALL tab so row is visible */
+  const allTab = document.querySelector('.tab-btn[data-tab="all"], .tab-btn:first-child');
+  if (allTab && !allTab.classList.contains('active')) allTab.click();
+
+  /* 2. Clear any active search/filter so order shows */
+  const searchEl = document.getElementById('topbarSearchInput') || document.getElementById('searchInput');
+  if (searchEl && searchEl.value) { searchEl.value = ''; if (typeof handleSearch === 'function') handleSearch(''); }
+
+  /* 3. Find & scroll to row, add pulsing highlight */
+  setTimeout(() => {
+    const row = document.querySelector(`#ordersTableBody tr[data-id="${order.id}"]`);
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      /* Pulse highlight */
+      row.style.transition      = 'box-shadow 0.3s';
+      row.style.boxShadow       = '0 0 0 2px #6c63ff, 0 0 20px rgba(108,99,255,0.4)';
+      row.style.borderRadius    = '8px';
+      setTimeout(() => {
+        row.style.boxShadow = '0 0 0 2px rgba(108,99,255,0.3)';
+        setTimeout(() => { row.style.boxShadow = ''; }, 2000);
+      }, 1500);
+    }
+
+    /* 4. Open detail panel */
+    selectOrder(order.id);
+
+    /* 5. Switch tab inside detail panel if needed */
+    if (tab) {
+      setTimeout(() => {
+        const tabSelectors = [
+          `.detail-tab[data-tab="${tab}"]`,
+          `[data-target="${tab}"]`,
+          `#tab-${tab}`,
+          `#tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`,
+        ];
+        for (const sel of tabSelectors) {
+          const el = document.querySelector(sel);
+          if (el) { el.click(); break; }
+        }
+      }, 350);
+    }
+
+    /* 6. Toast — কোন order-এর জন্য এসেছে */
+    const label = order.topic || order.orderId || order.id?.slice(0,8) || 'Order';
+    showOMToast(`🔔 ${order.orderId} — ${order.client || label}`, '#6c63ff');
+  }, 250);
 }
 
 /* DOMContentLoaded এ hook করি */

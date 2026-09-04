@@ -106,14 +106,16 @@
     if (!sb) return;
     try {
       await sb.from('admin_notifications').upsert({
-        id:      notif.id,
-        icon:    notif.icon,
-        color:   notif.color,
-        text:    notif.text,
-        sub:     notif.sub || null,
-        time:    notif.time || new Date().toISOString(),
-        read:    notif.read || false,
-        onclick: notif.onclick || null,
+        id:       notif.id,
+        icon:     notif.icon,
+        color:    notif.color,
+        text:     notif.text,
+        sub:      notif.sub    || null,
+        time:     notif.time   || new Date().toISOString(),
+        read:     notif.read   || false,
+        onclick:  notif.onclick|| null,
+        type:     notif.type   || null,
+        order_id: notif.orderId|| null,
       }, { onConflict: 'id' });
     } catch (e) { console.error('notif save error', e); }
   }
@@ -194,77 +196,137 @@
     sb.channel('topbar-orders')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, async (payload) => {
         const o = payload.new;
+        /* Client name fetch */
+        let clientName = '';
+        try {
+          if (o.client_id) {
+            const { data: cl } = await sb.from('clients').select('name,email').eq('id', o.client_id).single();
+            if (cl) clientName = cl.name || cl.email || '';
+          }
+          if (!clientName) {
+            const lines = (o.special_instructions || '').split('\n');
+            const nl = lines.find(l => l.startsWith('Name:'));
+            if (nl) clientName = nl.replace('Name:', '').trim();
+          }
+        } catch (_) {}
         _addNotif({
-          id:     'order-new-' + o.id,
-          icon:   'ti-file-plus',
-          color:  'dp-green',
-          text:   `নতুন order এসেছে`,
-          sub:    o.title || 'New Order',
-          time:   new Date().toISOString(),
-          onclick: `window.location.href='order-management.html'`,
+          id:      'order-new-' + o.id,
+          icon:    'ti-file-plus',
+          color:   'dp-green',
+          text:    `নতুন order এসেছে`,
+          sub:     (clientName ? clientName + ' — ' : '') + (o.title || o.order_number || 'New Order'),
+          time:    new Date().toISOString(),
+          onclick: `window.location.href='order-management.html?highlight=${o.id}'`,
+          orderId: o.id,
+          type:    'new_order',
         });
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, async (payload) => {
         const o   = payload.new;
         const old = payload.old;
 
-        /* Payment proof submitted */
+        /* ── Client name helper ── */
+        let clientName = '';
+        try {
+          if (o.client_id) {
+            const { data: cl } = await sb.from('clients').select('name,email').eq('id', o.client_id).single();
+            if (cl) clientName = cl.name || cl.email || '';
+          }
+          if (!clientName) {
+            const lines = (o.special_instructions || '').split('\n');
+            const nl = lines.find(l => l.startsWith('Name:'));
+            if (nl) clientName = nl.replace('Name:', '').trim();
+          }
+        } catch (_) {}
+        const oNum = o.order_number || o.id?.slice(0, 8) || '';
+        const orderPage = `order-management.html?order=${o.id}`;
+
+        /* ── Payment proof submitted ── */
         if (o.payment_status === 'under_review' && old.payment_status !== 'under_review') {
           _addNotif({
-            id:     'payment-' + o.id,
-            icon:   'ti-cash',
-            color:  'dp-purple',
-            text:   `Payment proof জমা দেওয়া হয়েছে`,
-            sub:    o.title || 'Order',
-            time:   new Date().toISOString(),
-            onclick: `window.location.href='order-management.html'`,
+            id:      'payment-proof-' + o.id,
+            icon:    'ti-receipt',
+            color:   'dp-purple',
+            text:    `Payment proof জমা দেওয়া হয়েছে`,
+            sub:     (clientName || oNum) + (o.title ? ' — ' + o.title : ''),
+            time:    new Date().toISOString(),
+            onclick: `window.location.href='${orderPage}&tab=payment'`,
+            orderId: o.id,
+            type:    'payment_proof',
           });
         }
 
-        /* Status change */
-        if (o.status !== old.status) {
+        /* ── Payment approved/confirmed ── */
+        if ((o.payment_status === 'approved' || o.payment_status === 'confirmed') &&
+             old.payment_status !== o.payment_status) {
           _addNotif({
-            id:     'status-' + o.id + '-' + Date.now(),
-            icon:   'ti-refresh',
-            color:  'dp-blue',
-            text:   `Order status পরিবর্তন হয়েছে`,
-            sub:    `${old.status || '?'} → ${o.status}`,
-            time:   new Date().toISOString(),
-            onclick: `window.location.href='order-management.html'`,
+            id:      'payment-confirm-' + o.id + '-' + Date.now(),
+            icon:    'ti-circle-check',
+            color:   'dp-green',
+            text:    `Payment confirm হয়েছে`,
+            sub:     (clientName || oNum) + (o.total_price ? ' — ৳' + Number(o.total_price).toLocaleString() : ''),
+            time:    new Date().toISOString(),
+            onclick: `window.location.href='${orderPage}&tab=payment'`,
+            orderId: o.id,
+            type:    'payment_confirmed',
           });
         }
 
-        /* Revision requested */
+        /* ── Status change — semantic icon per status ── */
+        if (o.status !== old.status) {
+          const statusMeta = {
+            writing:     { icon: 'ti-pencil',        color: 'dp-blue',   label: 'লেখা শুরু হয়েছে' },
+            draft_ready: { icon: 'ti-file-check',    color: 'dp-green',  label: 'Draft ready — review করুন' },
+            in_review:   { icon: 'ti-eye',           color: 'dp-purple', label: 'Client review করছেন' },
+            revision:    { icon: 'ti-edit',          color: 'dp-orange', label: 'Revision চাওয়া হয়েছে' },
+            completed:   { icon: 'ti-check',         color: 'dp-green',  label: 'Order completed' },
+            overdue:     { icon: 'ti-alert-triangle',color: 'dp-red',    label: 'Deadline পার হয়ে গেছে!' },
+            hold:        { icon: 'ti-pause',         color: 'dp-gray',   label: 'Order hold করা হয়েছে' },
+            confirmed:   { icon: 'ti-circle-check',  color: 'dp-green',  label: 'Order confirmed' },
+            pending:     { icon: 'ti-clock',         color: 'dp-yellow', label: 'Order pending' },
+          };
+          const sm = statusMeta[o.status] || { icon: 'ti-refresh', color: 'dp-blue', label: o.status };
+          _addNotif({
+            id:      'status-' + o.id + '-' + o.status,
+            icon:    sm.icon,
+            color:   sm.color,
+            text:    sm.label,
+            sub:     (clientName || oNum) + (o.title ? ' — ' + o.title : ''),
+            time:    new Date().toISOString(),
+            onclick: `window.location.href='${orderPage}'`,
+            orderId: o.id,
+            type:    'status_change',
+          });
+        }
+
+        /* ── Revision requested ── */
         if (o.revision_requested && !old.revision_requested) {
           _addNotif({
-            id:     'revision-' + o.id,
-            icon:   'ti-edit',
-            color:  'dp-orange',
-            text:   `Revision request এসেছে`,
-            sub:    o.title || 'Order',
-            time:   new Date().toISOString(),
-            onclick: `window.location.href='order-management.html'`,
+            id:      'revision-' + o.id,
+            icon:    'ti-edit',
+            color:   'dp-orange',
+            text:    `Revision request এসেছে`,
+            sub:     (clientName || oNum) + (o.title ? ' — ' + o.title : ''),
+            time:    new Date().toISOString(),
+            onclick: `window.location.href='${orderPage}'`,
+            orderId: o.id,
+            type:    'revision',
           });
         }
 
-        /* Client rating submitted */
+        /* ── Rating submitted ── */
         if (o.rating && !old.rating) {
-          const starStr = '★'.repeat(o.rating) + ' (' + o.rating + '*)';
-          let clientName = 'Client';
-          try {
-            if (o.client_id) {
-              const { data: cl } = await sb.from('clients').select('name,email').eq('id', o.client_id).single();
-              if (cl) clientName = cl.name || cl.email || 'Client';
-            }
-          } catch (_) {}
+          const stars = '★'.repeat(o.rating) + '☆'.repeat(5 - o.rating);
           _addNotif({
             id:      'rating-' + o.id,
             icon:    'ti-star',
             color:   'dp-yellow',
-            text:    `${clientName} রেটিং দিয়েছেন: ${starStr}`,
-            sub:     o.order_number || o.id,
+            text:    `${clientName || 'Client'} রেটিং দিয়েছেন`,
+            sub:     stars + ' (' + o.rating + '/5) — ' + (oNum || o.title || ''),
             time:    new Date().toISOString(),
-            onclick: `window.location.href='order-management.html'`,
+            onclick: `window.location.href='${orderPage}'`,
+            orderId: o.id,
+            type:    'rating',
           });
         }
       })
@@ -285,19 +347,54 @@
           existing.preview = m.text;
           existing.time    = m.sent_at || new Date().toISOString();
           existing.read    = false;
+          _renderMsgPanel();
+          _updateMsgBadge();
         } else {
+          /* Client name fetch করো */
+          let clientName = 'Client';
+          let orderTitle = '';
+          try {
+            const { data: ord } = await sb.from('orders')
+              .select('client_id, title, special_instructions, order_number')
+              .eq('id', m.order_id).single();
+            if (ord) {
+              orderTitle = ord.title || ord.order_number || '';
+              if (ord.client_id) {
+                const { data: cl } = await sb.from('clients')
+                  .select('name,email').eq('id', ord.client_id).single();
+                if (cl) clientName = cl.name || cl.email || 'Client';
+              }
+              if (clientName === 'Client') {
+                const lines = (ord.special_instructions || '').split('\n');
+                const nl = lines.find(l => l.startsWith('Name:'));
+                if (nl) clientName = nl.replace('Name:', '').trim();
+              }
+            }
+          } catch (_) {}
           store.msgs.unshift({
-            orderId: m.order_id,
-            name:    'Client',
-            preview: m.text || '—',
+            orderId:    m.order_id,
+            name:       clientName,
+            orderTitle: orderTitle,
+            preview:    m.text || '—',
+            time:       m.sent_at || new Date().toISOString(),
+            count:      1,
+            read:       false,
+          });
+          _renderMsgPanel();
+          _updateMsgBadge();
+          /* Notification panel এও add করো */
+          _addNotif({
+            id:      'msg-' + m.id + '-' + Date.now(),
+            icon:    'ti-message',
+            color:   'dp-blue',
+            text:    `${clientName} message পাঠিয়েছেন`,
+            sub:     (m.text || '').slice(0, 55) + ((m.text||'').length > 55 ? '…' : ''),
             time:    m.sent_at || new Date().toISOString(),
-            count:   1,
-            read:    false,
+            onclick: `window.location.href='admin-messages.html?order=${m.order_id}'`,
+            orderId: m.order_id,
+            type:    'message',
           });
         }
-
-        _renderMsgPanel();
-        _updateMsgBadge();
       })
       .subscribe((status, err) => {
         console.log('[Realtime] topbar-messages status:', status, err || '');
@@ -309,13 +406,15 @@
         const f = payload.new;
         if (f.uploaded_by === 'admin') return;
         _addNotif({
-          id:     'file-' + f.id,
-          icon:   'ti-file-upload',
-          color:  'dp-blue',
-          text:   `Client নতুন file upload করেছেন`,
-          sub:    f.file_name || 'File',
-          time:   new Date().toISOString(),
-          onclick: `window.location.href='order-management.html'`,
+          id:      'file-' + f.id,
+          icon:    'ti-file-upload',
+          color:   'dp-blue',
+          text:    'Client নতুন file upload করেছেন',
+          sub:     f.file_name || 'File',
+          time:    new Date().toISOString(),
+          onclick: `window.location.href='order-management.html?order=${f.order_id || ''}&tab=files'`,
+          orderId: f.order_id,
+          type:    'file_upload',
         });
       })
       .subscribe((status, err) => {
@@ -340,15 +439,29 @@
         .limit(NOTIF_MAX);
 
       (saved || []).forEach(n => {
+        /* icon ও color DB থেকে না পেলে type দিয়ে derive করো */
+        const typeIconMap = {
+          new_order:        { icon: 'ti-file-plus',    color: 'dp-green'  },
+          payment_proof:    { icon: 'ti-receipt',      color: 'dp-purple' },
+          payment_confirmed:{ icon: 'ti-circle-check', color: 'dp-green'  },
+          status_change:    { icon: 'ti-refresh',      color: 'dp-blue'   },
+          revision:         { icon: 'ti-edit',         color: 'dp-orange' },
+          rating:           { icon: 'ti-star',         color: 'dp-yellow' },
+          message:          { icon: 'ti-message',      color: 'dp-blue'   },
+          file_upload:      { icon: 'ti-file-upload',  color: 'dp-blue'   },
+        };
+        const tm = typeIconMap[n.type] || {};
         fresh.push({
           id:      n.id,
-          icon:    n.icon,
-          color:   n.color,
+          icon:    n.icon  || tm.icon  || 'ti-bell',
+          color:   n.color || tm.color || 'dp-blue',
           text:    n.text,
           sub:     n.sub,
           time:    n.time,
           read:    n.read,
           onclick: n.onclick,
+          orderId: n.order_id || n.orderId,
+          type:    n.type,
         });
       });
 
@@ -361,14 +474,16 @@
         .limit(10);
 
       (proofOrders || []).forEach(o => {
-        const id = 'payment-' + o.id;
+        const id = 'payment-proof-' + o.id;
         if (!fresh.find(n => n.id === id)) {
           fresh.push({
-            id, icon: 'ti-cash', color: 'dp-purple',
-            text:   'Payment proof review pending',
-            sub:    o.title || o.order_number || o.id.slice(0, 8),
-            time:   o.updated_at, read: false,
-            onclick: `window.location.href='order-management.html'`,
+            id, icon: 'ti-receipt', color: 'dp-purple',
+            text:    'Payment proof review pending',
+            sub:     o.title || o.order_number || o.id.slice(0, 8),
+            time:    o.updated_at, read: false,
+            onclick: `window.location.href='order-management.html?order=${o.id}&tab=payment'`,
+            orderId: o.id,
+            type:    'payment_proof',
           });
         }
       });
@@ -384,11 +499,13 @@
         const id = 'overdue-' + o.id;
         if (!fresh.find(n => n.id === id)) {
           fresh.push({
-            id, icon: 'ti-alert-circle', color: 'dp-red',
-            text: 'Order overdue',
-            sub:  o.title || 'Order',
-            time: o.deadline, read: false,
-            onclick: `window.location.href='order-management.html'`,
+            id, icon: 'ti-alert-triangle', color: 'dp-red',
+            text:    'Deadline পার হয়ে গেছে!',
+            sub:     o.title || 'Order',
+            time:    o.deadline, read: false,
+            onclick: `window.location.href='order-management.html?order=${o.id}'`,
+            orderId: o.id,
+            type:    'overdue',
           });
         }
       });
@@ -471,15 +588,20 @@
       return;
     }
 
-    list.innerHTML = store.notifs.slice(0, 20).map(item => `
-      <div class="dp-item ${item.read ? '' : 'unread'}" onclick="${item.onclick}" style="cursor:pointer">
-        <div class="dp-icon ${item.color}"><i class="ti ${item.icon}"></i></div>
+    list.innerHTML = store.notifs.slice(0, 20).map(item => {
+      const safeOnclick = item.onclick
+        ? item.onclick.replace(/"/g, '&quot;')
+        : '';
+      return `
+      <div class="dp-item ${item.read ? '' : 'unread'}" onclick="${safeOnclick}" style="cursor:${item.onclick ? 'pointer' : 'default'}">
+        <div class="dp-icon ${item.color || 'dp-blue'}"><i class="ti ${item.icon || 'ti-bell'}"></i></div>
         <div class="dp-body">
-          <div class="dp-text">${item.text}</div>
+          <div class="dp-text">${_esc(item.text)}</div>
           ${item.sub ? `<div class="dp-sub">${_esc(item.sub)}</div>` : ''}
           <div class="dp-time">${_relTime(item.time)}</div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
 
   function _renderMsgPanel() {

@@ -75,6 +75,9 @@ async function loadOrdersFromSupabase() {
       (clients || []).forEach(c => { clientMap[c.id] = c; });
     }
 
+    /* Store clientMap globally for activity feed */
+    window._clientMap = clientMap;
+
     /* ── Map to display format ── */
     const colors = ['#6c63ff','#34d399','#f59e0b','#a78bfa','#f87171','#11b5d9','#fb923c'];
     const mapped = allOrders.map((o, i) => {
@@ -499,72 +502,85 @@ function buildDonutChart(orders, counts) {
    ACTIVITY FEED — real Supabase data
 ═══════════════════════════════════════════ */
 async function loadActivityFeed() {
-  const db = window.scriptoraSupabase;
   const el = document.getElementById('activityList');
   if (!el) return;
 
-  if (!db) {
-    el.innerHTML = '<div class="activity-item"><div class="activity-body"><div class="activity-title">Supabase সংযুক্ত নেই</div></div></div>';
-    return;
+  /* allOrders empty হলে আবার চেষ্টা করব */
+  if (!allOrders.length) {
+    el.innerHTML = '<div class="activity-item"><div class="activity-body"><div class="activity-title" style="color:#6b7280">Loading...</div></div></div>';
+    await new Promise(r => setTimeout(r, 1000));
+    if (!allOrders.length) {
+      el.innerHTML = '<div class="activity-item"><div class="activity-body"><div class="activity-title">কোনো order নেই</div></div></div>';
+      return;
+    }
   }
 
   try {
-    /* Last 20 orders sorted by creation — derive activity from them */
-    const { data: recentOrders } = await db
-      .from('orders')
-      .select('id, order_number, title, service_type, status, total_price, advance_paid, client_id, order_date, created_at, updated_at')
-      .order('created_at', { ascending: false })
-      .limit(20);
+    const recentOrders = [...allOrders]
+      .sort((a, b) => new Date(b.created_at || b.order_date) - new Date(a.created_at || a.order_date))
+      .slice(0, 15);
 
-    /* Fetch client names */
-    const cids = [...new Set((recentOrders || []).map(o => o.client_id).filter(Boolean))];
-    let cMap = {};
-    if (cids.length) {
-      const { data: cls } = await db.from('clients').select('id, name, email').in('id', cids);
-      (cls || []).forEach(c => { cMap[c.id] = c; });
+    const cMap = window._clientMap || {};
+
+    /* Messages — optional */
+    let recentMsgs = [];
+    const db = window.scriptoraSupabase;
+    if (db) {
+      try {
+        const { data: msgs } = await db
+          .from('messages')
+          .select('order_id, text, sent_at')
+          .order('sent_at', { ascending: false })
+          .limit(5);
+        recentMsgs = msgs || [];
+      } catch (_) {}
     }
 
-    /* Fetch recent unread messages — from_admin column olmayabilir */
-    const { data: recentMsgs } = await db
-      .from('messages')
-      .select('order_id, text, sent_at')
-      .order('sent_at', { ascending: false })
-      .limit(5);
+    const statusIcons = {
+      completed:   { icon: '✅', color: 'rgba(52,211,153,0.15)',  label: 'completed' },
+      in_progress: { icon: '🔄', color: 'rgba(108,99,255,0.15)',  label: 'in progress' },
+      writing:     { icon: '🔄', color: 'rgba(108,99,255,0.15)',  label: 'in progress' },
+      confirmed:   { icon: '✅', color: 'rgba(108,99,255,0.15)',  label: 'confirmed' },
+      draft_ready: { icon: '📤', color: 'rgba(52,211,153,0.15)',  label: 'delivered' },
+      in_review:   { icon: '👁', color: 'rgba(167,139,250,0.15)', label: 'in review' },
+      revision:    { icon: '✏', color: 'rgba(245,158,11,0.15)',   label: 'revision requested' },
+      hold:        { icon: '⏸', color: 'rgba(156,163,175,0.15)', label: 'on hold' },
+      pending:     { icon: '📋', color: 'rgba(245,158,11,0.15)',  label: 'created' },
+      overdue:     { icon: '⚠', color: 'rgba(248,113,113,0.15)', label: 'overdue' },
+    };
 
-    /* Build activity items from orders + messages, merged & sorted */
     const items = [];
 
-    (recentOrders || []).forEach(o => {
-      const cl     = cMap[o.client_id];
-      const name   = cl?.name || cl?.email || 'Client';
-      const oNum   = o.order_number || '#' + (o.id || '').slice(0, 8);
-      const svc    = o.title || o.service_type || 'Academic Service';
-      const time   = o.created_at;
+    recentOrders.forEach(o => {
+      /* Client name — from clientMap, or special_instructions, or order title */
+      let name = 'Client';
+      const cl = cMap[o.client_id];
+      if (cl?.name)  name = cl.name;
+      else if (cl?.email) name = cl.email;
+      else {
+        const lines = (o.special_instructions || '').split('\n');
+        const nl    = lines.find(l => l.startsWith('Name:'));
+        if (nl) name = nl.replace('Name:', '').trim();
+        else if (o.title) name = o.title.split(' ').slice(0,2).join(' ');
+      }
 
-      const statusIcons = {
-        completed:   { icon: '✅', color: 'rgba(52,211,153,0.15)',  label: 'completed' },
-        in_progress: { icon: '🔄', color: 'rgba(108,99,255,0.15)',  label: 'in progress' },
-        writing:     { icon: '🔄', color: 'rgba(108,99,255,0.15)',  label: 'in progress' },
-        confirmed:   { icon: '🔄', color: 'rgba(108,99,255,0.15)',  label: 'confirmed' },
-        draft_ready: { icon: '📤', color: 'rgba(52,211,153,0.15)',  label: 'delivered' },
-        in_review:   { icon: '👁', color: 'rgba(167,139,250,0.15)', label: 'in review' },
-        revision:    { icon: '✏', color: 'rgba(245,158,11,0.15)',   label: 'revision requested' },
-        hold:        { icon: '⏸', color: 'rgba(156,163,175,0.15)', label: 'on hold' },
-        pending:     { icon: '📋', color: 'rgba(245,158,11,0.15)',  label: 'created' },
-        overdue:     { icon: '⚠', color: 'rgba(248,113,113,0.15)', label: 'overdue' },
-      };
-      const si = statusIcons[o.status] || { icon: '📋', color: 'rgba(108,99,255,0.15)', label: o.status || 'created' };
+      const oNum = o.order_number || '#' + (o.id || '').slice(0, 8);
+      const svc  = o.title || o.service_type || 'Academic Service';
+      const time = o.created_at || o.order_date;
+      const si   = statusIcons[o.status] || { icon: '📋', color: 'rgba(108,99,255,0.15)', label: o.status || 'created' };
 
-      if (o.advance_paid > 0) {
+      /* Payment activity */
+      if (Number(o.advance_paid) > 0) {
         items.push({
           icon:  '💳',
           color: 'rgba(52,211,153,0.15)',
           title: `Payment received <b>৳${Number(o.advance_paid).toLocaleString()}</b>`,
           sub:   `${name} — ${oNum}`,
-          time,
+          time:  o.updated_at || time,
         });
       }
 
+      /* Order status activity */
       items.push({
         icon:  si.icon,
         color: si.color,
@@ -574,7 +590,7 @@ async function loadActivityFeed() {
       });
     });
 
-    (recentMsgs || []).forEach(m => {
+    recentMsgs.forEach(m => {
       items.push({
         icon:  '💬',
         color: 'rgba(17,181,217,0.15)',
@@ -584,7 +600,6 @@ async function loadActivityFeed() {
       });
     });
 
-    /* Sort all items by time descending */
     items.sort((a, b) => new Date(b.time) - new Date(a.time));
 
     if (!items.length) {
@@ -592,7 +607,7 @@ async function loadActivityFeed() {
       return;
     }
 
-    el.innerHTML = items.slice(0, 8).map(a => `
+    el.innerHTML = items.slice(0, 10).map(a => `
       <div class="activity-item">
         <div class="activity-dot-wrap">
           <div class="activity-dot" style="background:${a.color}">${a.icon}</div>
