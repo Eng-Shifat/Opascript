@@ -2807,6 +2807,535 @@
   <script src="js/cd-topbar.js?v=4"></script>
   <script src="../shared/revision-service.js"></script>
   <script src="js/revision-center.js"></script>
+
+<!-- ══ AFFILIATE APPLY MODAL ══════════════════════════════════════════ -->
+<div id="affApplyModal" style="display:none;position:fixed;inset:0;z-index:9999;overflow-y:auto;">
+  <!-- Backdrop -->
+  <div id="affApplyBackdrop" onclick="closeAffApplyModal()"
+    style="position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);"></div>
+
+  <!-- Modal panel -->
+  <div style="position:relative;z-index:1;max-width:720px;margin:40px auto;padding:0 1rem 60px;">
+    <div style="background:var(--bg-card,#111e3f);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:36px 40px;box-shadow:0 24px 80px rgba(0,0,0,.5);">
+
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+        <div>
+          <div style="font-size:.68rem;font-weight:700;color:#60a5fa;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;">
+            🚀 Affiliate Program
+          </div>
+          <h2 style="font-size:1.25rem;font-weight:800;margin:0;letter-spacing:-.02em;">
+            Affiliate Application
+          </h2>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin:6px 0 0;">
+            নিচের form সম্পূর্ণ পূরণ করুন। ২৪ ঘণ্টার মধ্যে আপনাকে জানানো হবে।
+          </p>
+        </div>
+        <button onclick="closeAffApplyModal()"
+          style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.6);font-size:1.1rem;flex-shrink:0;transition:background .2s;"
+          onmouseover="this.style.background='rgba(255,255,255,.13)'"
+          onmouseout="this.style.background='rgba(255,255,255,.07)'">&times;</button>
+      </div>
+
+      <!-- Success state -->
+      <div id="affModalSuccess" style="display:none;text-align:center;padding:40px 20px;">
+        <div style="width:64px;height:64px;background:rgba(52,211,153,.15);border:2px solid rgba(52,211,153,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 18px;">✓</div>
+        <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:10px;">Application জমা হয়েছে! 🎉</h3>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.7;max-width:380px;margin:0 auto 20px;">
+          আপনার Affiliate Application সফলভাবে submit হয়েছে। Admin review করে ২৪ ঘণ্টার মধ্যে জানাবে।
+        </p>
+        <span style="display:inline-flex;align-items:center;gap:8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#f59e0b;padding:8px 18px;border-radius:50px;font-size:.8rem;font-weight:600;">
+          ⏰ সর্বোচ্চ ২৪ ঘণ্টা অপেক্ষা করুন
+        </span>
+      </div>
+
+      <!-- Form -->
+      <form id="affModalForm" novalidate>
+
+        <!-- Section: Personal Info -->
+        <div style="display:flex;align-items:center;gap:10px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin:0 0 16px;">
+          👤 Personal Information
+          <span style="flex:1;height:1px;background:rgba(255,255,255,.07);display:inline-block;"></span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">পূর্ণ নাম <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <input type="text" id="m_name" class="aff-modal-input" placeholder="আপনার পূর্ণ নাম লিখুন" required/>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">University / College <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <input type="text" id="m_university" class="aff-modal-input" placeholder="আপনার বিশ্ববিদ্যালয় বা কলেজ" required/>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">Phone Number <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <input type="tel" id="m_phone" class="aff-modal-input" placeholder="01XXXXXXXXX" required/>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">WhatsApp Number <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <input type="tel" id="m_whatsapp" class="aff-modal-input" placeholder="01XXXXXXXXX"/>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">Email Address <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <input type="email" id="m_email" class="aff-modal-input" placeholder="your@email.com" required/>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">Facebook Profile Link <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <input type="url" id="m_facebook" class="aff-modal-input" placeholder="https://facebook.com/yourprofile" required/>
+          </div>
+        </div>
+
+        <!-- Section: Payment -->
+        <div style="display:flex;align-items:center;gap:10px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin:20px 0 16px;">
+          💳 Payment / Cash-Out Method
+          <span style="flex:1;height:1px;background:rgba(255,255,255,.07);display:inline-block;"></span>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);display:block;margin-bottom:10px;">কোন মাধ্যমে payment নিতে চান? <span style="color:#f87171;font-size:.65rem;">*</span></label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <button type="button" class="aff-pay-tab" data-method="bkash" onclick="mSelectPayment(this)">📱 bKash</button>
+            <button type="button" class="aff-pay-tab" data-method="nagad" onclick="mSelectPayment(this)">📲 Nagad</button>
+            <button type="button" class="aff-pay-tab" data-method="upay" onclick="mSelectPayment(this)">💳 Upay</button>
+            <button type="button" class="aff-pay-tab" data-method="banktransfer" onclick="mSelectPayment(this)">🏦 Bank Transfer</button>
+          </div>
+          <input type="hidden" id="m_payment_method" value=""/>
+          <div id="mPayNumberWrap" style="display:none;flex-direction:column;gap:7px;">
+            <label id="mPayNumberLabel" style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">Account Number <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <input type="text" id="m_payment_number" class="aff-modal-input" placeholder="" autocomplete="off"/>
+          </div>
+        </div>
+
+        <!-- Section: Identity -->
+        <div style="display:flex;align-items:center;gap:10px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin:20px 0 16px;">
+          🪪 Identity Verification
+          <span style="flex:1;height:1px;background:rgba(255,255,255,.07);display:inline-block;"></span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">NID Number <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <input type="text" id="m_nid_number" class="aff-modal-input" placeholder="জাতীয় পরিচয়পত্র নম্বর" required/>
+          </div>
+          <div style="opacity:0;pointer-events:none;"></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+          <div>
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);display:block;margin-bottom:7px;">NID-এর Photo <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <div id="mNidArea" style="border:2px dashed rgba(255,255,255,.12);border-radius:10px;padding:18px 12px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s;"
+              onmouseover="this.style.borderColor='rgba(45,110,247,.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,.12)'">
+              <input type="file" id="m_nid_photo" accept="image/*,.pdf" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                onchange="mHandleFile(this,'mNidPreview')"/>
+              <div style="font-size:1.4rem;margin-bottom:6px;">📄</div>
+              <p style="font-size:.75rem;color:rgba(255,255,255,.4);margin:0;" id="mNidText">NID ছবি browse করুন<br><span style="font-size:.68rem;">JPG, PNG, PDF — max 5MB</span></p>
+              <div id="mNidPreview" style="display:none;align-items:center;justify-content:center;gap:8px;font-size:.8rem;color:#34d399;">
+                ✔ <span id="mNidFileName">—</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);display:block;margin-bottom:7px;">আপনার একটি Photo <span style="color:#f87171;font-size:.65rem;">*</span></label>
+            <div id="mPhotoArea" style="border:2px dashed rgba(255,255,255,.12);border-radius:10px;padding:18px 12px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s;"
+              onmouseover="this.style.borderColor='rgba(45,110,247,.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,.12)'">
+              <input type="file" id="m_photo" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                onchange="mHandleFile(this,'mPhotoPreview')"/>
+              <div style="font-size:1.4rem;margin-bottom:6px;">🤳</div>
+              <p style="font-size:.75rem;color:rgba(255,255,255,.4);margin:0;" id="mPhotoText">আপনার ছবি browse করুন<br><span style="font-size:.68rem;">JPG, PNG — max 5MB</span></p>
+              <div id="mPhotoPreview" style="display:none;align-items:center;justify-content:center;gap:8px;font-size:.8rem;color:#34d399;">
+                ✔ <span id="mPhotoFileName">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Marketing Skills -->
+        <div style="display:flex;align-items:center;gap:10px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin:20px 0 16px;">
+          💡 Marketing Skills
+          <span style="flex:1;height:1px;background:rgba(255,255,255,.07);display:inline-block;"></span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+          <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">আপনার marketing skills <span style="color:#f87171;font-size:.65rem;">*</span></label>
+          <div id="mSkillsWrap" onclick="document.getElementById('mSkillInput').focus()"
+            style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;min-height:48px;cursor:text;transition:border-color .2s,box-shadow .2s;"
+            onfocusin="this.style.borderColor='rgba(45,110,247,.6)';this.style.boxShadow='0 0 0 3px rgba(45,110,247,.12)'"
+            onfocusout="this.style.borderColor='rgba(255,255,255,.1)';this.style.boxShadow='none'">
+            <input type="text" id="mSkillInput"
+              style="background:none;border:none;outline:none;color:#fff;font-family:inherit;font-size:.85rem;min-width:140px;flex:1;"
+              placeholder="Skill লিখে Enter চাপুন…"
+              onkeydown="mHandleSkillInput(event)"/>
+          </div>
+          <div style="font-size:.72rem;color:rgba(255,255,255,.3);">উদাহরণ: Facebook Marketing, Content Creation, SEO, WhatsApp Marketing</div>
+          <input type="hidden" id="m_skills" value="[]"/>
+        </div>
+
+        <!-- Section: Services -->
+        <div style="display:flex;align-items:center;gap:10px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin:20px 0 16px;">
+          📋 Service Sectors (সর্বোচ্চ ৫টি)
+          <span style="flex:1;height:1px;background:rgba(255,255,255,.07);display:inline-block;"></span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+          <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">কোন service-এ affiliate করতে চান? <span style="color:#f87171;font-size:.65rem;">*</span></label>
+          <div id="mServicesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;"></div>
+          <div id="mServiceNote" style="font-size:.73rem;color:rgba(255,255,255,.35);margin-top:4px;">০টি selected</div>
+          <input type="hidden" id="m_services" value="[]"/>
+        </div>
+
+        <!-- Section: Referral code -->
+        <div style="display:flex;align-items:center;gap:10px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin:20px 0 16px;">
+          🔗 Referral
+          <span style="flex:1;height:1px;background:rgba(255,255,255,.07);display:inline-block;"></span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">Affiliate ID (যদি কেউ refer করে থাকে)</label>
+            <input type="text" id="m_referrer_code" class="aff-modal-input" placeholder="REF-XXXXXX (optional)"/>
+            <div style="font-size:.72rem;color:rgba(255,255,255,.3);">কোনো affiliate invite করে থাকলে তার code লিখুন</div>
+          </div>
+          <div style="opacity:0;pointer-events:none;"></div>
+        </div>
+
+        <!-- Section: About -->
+        <div style="display:flex;align-items:center;gap:10px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin:20px 0 16px;">
+          ✍️ নিজের সম্পর্কে বলুন
+          <span style="flex:1;height:1px;background:rgba(255,255,255,.07);display:inline-block;"></span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+          <label style="font-size:.77rem;font-weight:600;color:rgba(255,255,255,.65);">আপনি কে এবং কেন Affiliate হতে চান? <span style="color:#f87171;font-size:.65rem;">*</span></label>
+          <textarea id="m_about" class="aff-modal-input" rows="4"
+            style="resize:vertical;min-height:110px;line-height:1.6;"
+            placeholder="নিজের সম্পর্কে সুন্দরভাবে লিখুন — background, motivation, কীভাবে contribute করবেন সেটা জানান।"
+            required></textarea>
+        </div>
+
+        <!-- Error banner -->
+        <div id="mErrorBanner" style="display:none;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:12px 16px;font-size:.82rem;color:#fca5a5;margin-top:8px;">
+          ⚠ <span id="mErrorMsg"></span>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" id="mSubmitBtn"
+          style="width:100%;margin-top:28px;padding:14px;background:linear-gradient(135deg,#2d6ef7,#3b82f6);border:none;border-radius:12px;color:#fff;font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s;">
+          🚀 Application Submit করুন
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal styles -->
+<style>
+.aff-modal-input {
+  background: rgba(255,255,255,.05);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: #fff;
+  font-family: inherit;
+  font-size: .85rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+}
+.aff-modal-input:focus {
+  border-color: rgba(45,110,247,.6);
+  box-shadow: 0 0 0 3px rgba(45,110,247,.12);
+}
+.aff-modal-input::placeholder { color: rgba(255,255,255,.25); }
+.aff-modal-input option { background: #0d1b38; color: #fff; }
+.aff-pay-tab {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.55);
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s;
+  font-family: inherit;
+}
+.aff-pay-tab:hover { border-color: rgba(45,110,247,.4); color: #fff; }
+.aff-pay-tab.active {
+  background: rgba(45,110,247,.18);
+  border-color: rgba(45,110,247,.6);
+  color: #60a5fa;
+}
+.aff-svc-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  cursor: pointer;
+  transition: all .18s;
+  user-select: none;
+  font-size: .8rem;
+  color: rgba(255,255,255,.65);
+  font-weight: 500;
+}
+.aff-svc-item:hover { border-color: rgba(45,110,247,.3); background: rgba(45,110,247,.06); }
+.aff-svc-item.checked { border-color: rgba(45,110,247,.5); background: rgba(45,110,247,.12); color: #fff; }
+.aff-svc-item input[type="checkbox"] { accent-color: #2d6ef7; width:15px;height:15px;cursor:pointer;flex-shrink:0; }
+.aff-skill-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(45,110,247,.18);
+  border: 1px solid rgba(45,110,247,.35);
+  color: #60a5fa;
+  border-radius: 6px;
+  padding: 3px 10px 3px 8px;
+  font-size: .75rem;
+  font-weight: 600;
+}
+</style>
+
+<!-- Modal JS -->
+<script>
+'use strict';
+/* ── Open / Close ───────────────────────────────────── */
+function affiliateApply() {
+  document.getElementById('affApplyModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  mBuildServices();
+  mPrefillUser();
+}
+function closeAffApplyModal() {
+  document.getElementById('affApplyModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+// ESC key closes
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAffApplyModal();
+});
+
+/* ── Prefill email & name from Supabase session ─────── */
+async function mPrefillUser() {
+  try {
+    const sb = window._supabase || window.scriptoraSupabase;
+    if (!sb) return;
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    const emailEl = document.getElementById('m_email');
+    if (emailEl && !emailEl.value) emailEl.value = user.email || '';
+    const meta = user.user_metadata || {};
+    const nameEl = document.getElementById('m_name');
+    if (nameEl && !nameEl.value && meta.full_name) nameEl.value = meta.full_name;
+  } catch(e) {}
+}
+
+/* ── Services list ──────────────────────────────────── */
+const M_SERVICES = [
+  'Thesis Writing','Assignment Writing','Research Paper & Proposal',
+  'SPSS Analysis','Proofreading & Editing','Formatting',
+  'Turnitin / Plagiarism Check','Presentation Slides',
+  'Handwritten Service','CSE/SWE Technical Support','Data Collection'
+];
+let mSelectedSkills   = [];
+let mSelectedServices = [];
+const M_MAX_SERVICES  = 5;
+let mServicesBuilt    = false;
+
+function mBuildServices() {
+  if (mServicesBuilt) return;
+  mServicesBuilt = true;
+  const grid = document.getElementById('mServicesGrid');
+  M_SERVICES.forEach(svc => {
+    const label = document.createElement('label');
+    label.className = 'aff-svc-item';
+    label.innerHTML = `<input type="checkbox" value="${svc}" onchange="mToggleService(this,'${svc}')"/><span>${svc}</span>`;
+    grid.appendChild(label);
+  });
+}
+
+window.mToggleService = function(el, svc) {
+  const note = document.getElementById('mServiceNote');
+  if (el.checked) {
+    if (mSelectedServices.length >= M_MAX_SERVICES) {
+      el.checked = false;
+      note.textContent = `সর্বোচ্চ ${M_MAX_SERVICES}টি select করা যাবে`;
+      note.style.color = '#f87171';
+      return;
+    }
+    mSelectedServices.push(svc);
+    el.closest('.aff-svc-item').classList.add('checked');
+  } else {
+    mSelectedServices = mSelectedServices.filter(s => s !== svc);
+    el.closest('.aff-svc-item').classList.remove('checked');
+  }
+  note.textContent = `${mSelectedServices.length}টি selected`;
+  note.style.color = mSelectedServices.length >= M_MAX_SERVICES ? '#f59e0b' : 'rgba(255,255,255,.35)';
+  document.getElementById('m_services').value = JSON.stringify(mSelectedServices);
+};
+
+/* ── Payment method ─────────────────────────────────── */
+window.mSelectPayment = function(btn) {
+  document.querySelectorAll('.aff-pay-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const method = btn.dataset.method;
+  document.getElementById('m_payment_method').value = method;
+  const wrap  = document.getElementById('mPayNumberWrap');
+  const label = document.getElementById('mPayNumberLabel');
+  const input = document.getElementById('m_payment_number');
+  wrap.style.display = 'flex';
+  const labels = { bkash:'bKash Number', nagad:'Nagad Number', upay:'Upay Number', banktransfer:'Bank Account Number' };
+  const placeholders = { bkash:'01XXXXXXXXX', nagad:'01XXXXXXXXX', upay:'01XXXXXXXXX', banktransfer:'Account No — Bank Name — Branch' };
+  label.innerHTML = `${labels[method]} <span style="color:#f87171;font-size:.65rem;">*</span>`;
+  input.placeholder = placeholders[method];
+  input.focus();
+};
+
+/* ── Skill tags ─────────────────────────────────────── */
+window.mHandleSkillInput = function(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/, '');
+    if (val && !mSelectedSkills.includes(val)) {
+      mSelectedSkills.push(val);
+      mRenderSkillTags();
+    }
+    e.target.value = '';
+  } else if (e.key === 'Backspace' && e.target.value === '' && mSelectedSkills.length > 0) {
+    mSelectedSkills.pop();
+    mRenderSkillTags();
+  }
+};
+function mRenderSkillTags() {
+  const wrap  = document.getElementById('mSkillsWrap');
+  const input = document.getElementById('mSkillInput');
+  wrap.querySelectorAll('.aff-skill-tag').forEach(t => t.remove());
+  mSelectedSkills.forEach((sk, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'aff-skill-tag';
+    tag.innerHTML = `${sk} <button type="button" onclick="mRemoveSkill(${i})" style="cursor:pointer;color:#f87171;font-size:.65rem;opacity:.7;background:none;border:none;padding:0;line-height:1;">✕</button>`;
+    wrap.insertBefore(tag, input);
+  });
+  document.getElementById('m_skills').value = JSON.stringify(mSelectedSkills);
+}
+window.mRemoveSkill = function(i) { mSelectedSkills.splice(i,1); mRenderSkillTags(); };
+
+/* ── File upload ────────────────────────────────────── */
+window.mHandleFile = function(input, previewId) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById(previewId);
+  const nameSpanId = previewId === 'mNidPreview' ? 'mNidFileName' : 'mPhotoFileName';
+  document.getElementById(nameSpanId).textContent = file.name.length > 28 ? file.name.slice(0,25)+'…' : file.name;
+  preview.style.display = 'flex';
+  const textId = previewId === 'mNidPreview' ? 'mNidText' : 'mPhotoText';
+  const textEl = document.getElementById(textId);
+  if (textEl) textEl.style.display = 'none';
+};
+
+/* ── Validation ─────────────────────────────────────── */
+function mValidate() {
+  const v = id => document.getElementById(id).value.trim();
+  if (!v('m_name'))            return 'নাম লিখুন।';
+  if (!v('m_university'))      return 'University/College-এর নাম লিখুন।';
+  if (!v('m_phone'))           return 'Phone number দিন।';
+  if (!v('m_whatsapp'))        return 'WhatsApp number দিন।';
+  if (!/\S+@\S+\.\S+/.test(v('m_email'))) return 'Valid email দিন।';
+  if (!v('m_facebook'))        return 'Facebook profile link দিন।';
+  if (!v('m_payment_method'))  return 'Payment method select করুন।';
+  if (!v('m_payment_number'))  return 'Payment account number দিন।';
+  if (!v('m_nid_number'))      return 'NID number লিখুন।';
+  if (!document.getElementById('m_nid_photo').files[0]) return 'NID-এর photo দিন।';
+  if (!document.getElementById('m_photo').files[0])     return 'আপনার একটি photo দিন।';
+  if (mSelectedSkills.length === 0)   return 'কমপক্ষে একটি marketing skill যোগ করুন।';
+  if (mSelectedServices.length === 0) return 'কমপক্ষে একটি service sector select করুন।';
+  if (!v('m_about'))           return 'নিজের সম্পর্কে কিছু লিখুন।';
+  return null;
+}
+function mShowError(msg) {
+  const b = document.getElementById('mErrorBanner');
+  document.getElementById('mErrorMsg').textContent = msg;
+  b.style.display = 'block';
+  b.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+function mHideError() { document.getElementById('mErrorBanner').style.display = 'none'; }
+
+/* ── Upload file to Supabase Storage ────────────────── */
+async function mUploadFile(bucket, file, path) {
+  const sb = window._supabase || window.scriptoraSupabase;
+  const { data, error } = await sb.storage.from(bucket).upload(path, file, { upsert: false });
+  if (error) throw new Error('File upload failed: ' + error.message);
+  const { data: urlData } = sb.storage.from(bucket).getPublicUrl(path);
+  return urlData.publicUrl;
+}
+
+/* ── Submit ─────────────────────────────────────────── */
+document.getElementById('affModalForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  mHideError();
+  const err = mValidate();
+  if (err) { mShowError(err); return; }
+
+  const btn = document.getElementById('mSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submit হচ্ছে…';
+
+  try {
+    const sb = window._supabase || window.scriptoraSupabase;
+    const ts = Date.now();
+    const nidFile   = document.getElementById('m_nid_photo').files[0];
+    const photoFile = document.getElementById('m_photo').files[0];
+    const nidUrl    = await mUploadFile('affiliate-docs', nidFile,   `nid/${ts}_${nidFile.name}`);
+    const photoUrl  = await mUploadFile('affiliate-docs', photoFile, `photo/${ts}_${photoFile.name}`);
+
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Login করুন — session নেই।');
+
+    const v = id => document.getElementById(id).value.trim();
+    const payload = {
+      client_id:          user.id,
+      full_name:          v('m_name'),
+      university:         v('m_university'),
+      phone:              v('m_phone'),
+      whatsapp:           v('m_whatsapp'),
+      email:              v('m_email'),
+      facebook_url:       v('m_facebook'),
+      payment_method:     v('m_payment_method'),
+      payment_number:     v('m_payment_number'),
+      nid_number:         v('m_nid_number'),
+      nid_photo_url:      nidUrl,
+      photo_url:          photoUrl,
+      skills:             mSelectedSkills,
+      preferred_services: mSelectedServices,
+      referrer_code:      v('m_referrer_code') || null,
+      about_self:         v('m_about'),
+      status:             'pending',
+    };
+
+    const { error: insertErr } = await sb.from('affiliate_applications').insert([payload]);
+    if (insertErr) throw new Error(insertErr.message);
+
+    /* Show success */
+    document.getElementById('affModalForm').style.display = 'none';
+    document.getElementById('affModalSuccess').style.display = 'block';
+
+    /* Refresh affiliate state after 2s so dashboard updates */
+    setTimeout(() => { loadAffiliateState(true); }, 2000);
+
+  } catch(ex) {
+    mShowError('Submit করতে সমস্যা: ' + ex.message);
+    btn.disabled = false;
+    btn.textContent = '🚀 Application Submit করুন';
+  }
+});
+</script>
 </body>
 
 </html>
