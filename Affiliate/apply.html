@@ -985,7 +985,11 @@ document.getElementById('affForm').addEventListener('submit', async function(e) 
     const photoUrl = await uploadFile('affiliate-docs', photoFile, `photo/${ts}_${photoFile.name}`);
 
     /* Insert application row */
+    const { data: { user } } = await window._supabase.auth.getUser();
+    if (!user) throw new Error("Login করুন — session নেই।");
+
     const payload = {
+      client_id: user.id,
       full_name:        document.getElementById('f_name').value.trim(),
       university:       document.getElementById('f_university').value.trim(),
       phone:            document.getElementById('f_phone').value.trim(),

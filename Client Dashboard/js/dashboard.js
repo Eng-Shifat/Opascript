@@ -1737,7 +1737,12 @@ async function loadAffiliateState(force = false) {
   }
 }
 
-async function affiliateApply() {
+function affiliateApply() {
+  /* Redirect to full application form */
+  window.location.href = '../Affiliate/apply.html';
+}
+
+async function affiliateApply_OLD_UNUSED() {
   const btn = document.getElementById('affApplyBtn');
   const msg = document.getElementById('affApplyMsg');
   if (btn) { btn.disabled = true; btn.textContent = 'Applying…'; }
