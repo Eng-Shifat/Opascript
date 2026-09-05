@@ -28,7 +28,7 @@ body {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, var(--hero-bg-1) 0%, var(--hero-bg-2) 50%, var(--hero-bg-1) 100%);
-  padding: 4rem 7.25rem 3.5rem 7.25rem;
+  padding: 2rem 7.25rem 2.5rem 7.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1533,7 +1533,7 @@ body {
 
   /* Hero */
   .hero {
-    padding: 4rem 7.25rem 3.5rem 7.25rem;
+    padding: 2rem 7.25rem 2.5rem 7.25rem;
     justify-content: space-between;
     gap: 3rem;
   }
