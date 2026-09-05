@@ -1,0 +1,66 @@
+/* ════════════════════════════════════════════════════════════════
+   shared/fluid-layout.css
+   সব page-এ include করা হয়েছে।
+   1440px+ স্ক্রিনে activate হয় — 1920px এ content proportionally
+   বড় হয়, দুইপাশে empty space থাকে না।
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1440px) {
+
+  /* ── Pricing page ── */
+  .pr-hero {
+    padding-left:  clamp(2rem, 7vw, 10rem);
+    padding-right: clamp(2rem, 7vw, 10rem);
+  }
+  .pr-trust {
+    max-width: clamp(1060px, 82vw, 1550px);
+    padding-left:  clamp(2.5rem, 5vw, 8rem);
+    padding-right: clamp(2.5rem, 5vw, 8rem);
+  }
+  .pr-cards-section {
+    padding-left:  clamp(2.5rem, 7vw, 10rem);
+    padding-right: clamp(2.5rem, 7vw, 10rem);
+  }
+  .pr-cards {
+    max-width: clamp(1060px, 85vw, 1600px);
+    gap: clamp(16px, 1.5vw, 28px);
+  }
+  .pr-faq {
+    max-width: clamp(720px, 65vw, 1100px);
+  }
+
+  /* ── Service pages ── */
+  .svc-breadcrumb {
+    max-width: clamp(1440px, 90vw, 1800px);
+    padding-left:  clamp(4rem, 7vw, 10rem);
+    padding-right: clamp(4rem, 7vw, 10rem);
+  }
+  .svc-grid {
+    max-width: clamp(1440px, 90vw, 1800px);
+    padding-left:  clamp(4rem, 7vw, 10rem);
+    padding-right: clamp(4rem, 7vw, 10rem);
+  }
+  .svc-hero-fb-inner {
+    padding-left:  clamp(4rem, 8vw, 12rem);
+    padding-right: clamp(4rem, 8vw, 12rem);
+  }
+
+  /* ── Affiliate page ── */
+  .aff-hero {
+    padding-left:  clamp(2.5rem, 7vw, 10rem);
+    padding-right: clamp(2.5rem, 7vw, 10rem);
+  }
+  .aff-section {
+    padding-left:  clamp(2.5rem, 7vw, 10rem);
+    padding-right: clamp(2.5rem, 7vw, 10rem);
+    max-width: clamp(1060px, 82vw, 1550px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Order page ── */
+  .order-wrapper,
+  .order-container {
+    max-width: clamp(900px, 75vw, 1400px);
+  }
+}

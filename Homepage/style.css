@@ -28,7 +28,7 @@ body {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, var(--hero-bg-1) 0%, var(--hero-bg-2) 50%, var(--hero-bg-1) 100%);
-  padding: 4rem 4rem 3.5rem;
+  padding: 4rem 7.25rem 3.5rem 7.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,7 +54,7 @@ body {
   bottom: -150px; left: 3%;
   background: radial-gradient(circle, rgba(var(--accent-rgb),0.1) 0%, transparent 70%);
 }
-.hero-left { flex: 1; max-width: 560px; order: 1; position: relative; z-index: 1; }
+.hero-left { flex: 1; order: 1; position: relative; z-index: 1; }
 
 .badge {
   display: inline-flex;
@@ -155,7 +155,7 @@ body {
   border-radius: 22px;
   padding: 1.5px;
   animation: border-color-change 4s linear infinite;
-  margin-right: 2rem;
+  margin-right: 0;
   order: 2;
   box-shadow: 0 24px 60px -20px rgba(var(--shadow-rgb),0.4);
 }
@@ -215,7 +215,7 @@ body {
 /* -------- BOTTOM STATS -------- */
 .bottom-stats {
   background: var(--bg-deep-2);
-  padding: 2.2rem 2.5rem;
+  padding: 2.2rem 7.25rem;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -229,7 +229,7 @@ body {
 /* -------- SERVICES -------- */
 .services-section {
   background: linear-gradient(180deg, var(--bg-main) 0%, var(--bg-gradient-alt) 100%);
-  padding: 2.5rem 2.5rem;
+  padding: 2.5rem 7.25rem;
 }
 .section-header { text-align: center; margin-bottom: 2.5rem; }
 .section-badge {
@@ -266,8 +266,8 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  max-width: 1150px;
-  margin: 0 auto 1.8rem;
+  max-width: 100%;
+  margin: 0 0 1.8rem;
 }
 
 @media (max-width: 1024px) {
@@ -309,8 +309,8 @@ body {
 .services-grid-2 {
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  max-width: 1150px;
-  margin: 0 auto 1.8rem;
+  max-width: 100%;
+  margin: 0 0 1.8rem;
 }
 .services-grid-2 .service-card {
   position: relative;
@@ -399,8 +399,8 @@ body {
 
 /* -------- TRUST BAR -------- */
 .trust-bar {
-  max-width: 1150px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   background: rgba(var(--text-rgb),0.04);
   border: 0.5px solid rgba(var(--text-rgb),0.1);
   border-radius: 18px;
@@ -510,7 +510,7 @@ body {
 /* -------- WHY CHOOSE US -------- */
 .wcu-section {
   background: linear-gradient(180deg, var(--bg-card-alt) 0%, var(--bg-main) 100%);
-  padding: 1.5rem 2.5rem 1.5rem;
+  padding: 1.5rem 7.25rem 1.5rem;
   border-top: 0.5px solid rgba(var(--text-rgb),0.06);
 }
 .wcu-section .section-header { margin-bottom: 1.2rem; }
@@ -518,8 +518,8 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  max-width: 1100px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
 }
 .wcu-card {
   background: rgba(var(--text-rgb),0.05);
@@ -623,7 +623,7 @@ body {
 }
 .hiw-section {
   background: linear-gradient(180deg, var(--bg-main) 0%, var(--bg-card-alt) 100%);
-  padding: 1.5rem 2.5rem 1.5rem;
+  padding: 1.5rem 7.25rem 1.5rem;
 }
 .hiw-header {
   text-align: center;
@@ -830,7 +830,7 @@ body {
 .cta-section {
   position: relative;
   background: linear-gradient(180deg, var(--bg-card-alt) 0%, var(--bg-main) 100%);
-  padding: 5rem 2.5rem;
+  padding: 5rem 7.25rem;
   text-align: center;
   overflow: hidden;
   border-top: 0.5px solid rgba(var(--text-rgb),0.07);
@@ -1521,4 +1521,93 @@ body {
 @media (max-width: 600px) {
   .hero-btns { flex-direction: row !important; gap: 8px !important; width: auto !important; }
   .btn-primary, .btn-secondary { flex: 0 !important; width: auto !important; padding: 10px 20px !important; white-space: nowrap !important; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   1920×1080 FLUID LAYOUT
+   1366px → 1920px: content proportionally বড় হবে
+   ছোট স্ক্রিনে কোনো পরিবর্তন নেই
+   ════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1440px) {
+
+  /* Hero */
+  .hero {
+    padding: 4rem 7.25rem 3.5rem 7.25rem;
+    justify-content: space-between;
+    gap: 3rem;
+  }
+  .hero-left {
+    flex: 1;
+    max-width: none;
+  }
+  .stats-card-wrapper {
+    width: 340px;
+    margin-right: 0;
+    flex-shrink: 0;
+  }
+
+  /* Bottom stats */
+  .bottom-stats {
+    padding: clamp(2.2rem, 3vw, 3.5rem) clamp(2.5rem, 7vw, 10rem);
+  }
+
+  /* Services */
+  .services-section {
+    padding: clamp(2.5rem, 3.5vw, 5rem) 7.25rem;
+  }
+  .services-grid,
+  .services-grid-2 {
+    max-width: 100%;
+    gap: 16px;
+  }
+
+  /* Trust bar */
+  .trust-bar {
+    max-width: clamp(1150px, 82vw, 1550px);
+    padding: clamp(1.4rem, 2vw, 2.5rem) clamp(2rem, 3vw, 4rem);
+  }
+
+  /* Why Choose Us */
+  .wcu-section {
+    padding: clamp(1.5rem, 3vw, 4rem) clamp(2.5rem, 7vw, 10rem);
+  }
+  .wcu-grid {
+    max-width: clamp(1100px, 82vw, 1550px);
+    gap: clamp(16px, 1.5vw, 28px);
+  }
+
+  /* How it Works */
+  .hiw-section {
+    padding: clamp(1.5rem, 3vw, 4rem) clamp(2.5rem, 7vw, 10rem);
+  }
+  .hiw-header {
+    max-width: clamp(1100px, 82vw, 1550px);
+  }
+  .hiw-track {
+    max-width: clamp(1300px, 90vw, 1800px);
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: clamp(5rem, 6vw, 9rem) clamp(2.5rem, 7vw, 10rem);
+  }
+
+  /* Footer */
+  .footer-top {
+    max-width: clamp(1200px, 84vw, 1600px);
+    padding: clamp(3.5rem, 4vw, 6rem) clamp(4rem, 6vw, 9rem);
+  }
+  .footer-bottom {
+    max-width: clamp(1200px, 84vw, 1600px);
+    padding: clamp(1.3rem, 2vw, 2rem) clamp(4rem, 6vw, 9rem);
+  }
+
+  /* Uni Trust */
+  .uni-trust-section {
+    padding: clamp(2rem, 3vw, 4rem) clamp(2.5rem, 7vw, 10rem) clamp(4rem, 5vw, 7rem);
+  }
+  .uni-trust-inner {
+    max-width: clamp(1100px, 82vw, 1550px);
+  }
 }

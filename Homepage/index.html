@@ -24,17 +24,45 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
-  <link rel="stylesheet" href="style.css?v=2" />
+  <link rel="stylesheet" href="../shared/variables.css" />
+  <link rel="stylesheet" href="style.css?v=9" />
 </head>
 
 <body>
 
   <!-- NAV -->
   <!-- SHARED NAVBAR -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-  <script src="../shared/supabaseClient.js"></script>
-  <script src="../shared/theme.js"></script>
-  <script src="../shared/navbar.js"></script>
+  <!-- theme + navbar: defer করা হয়েছে — render block করে না -->
+  <script src="../shared/theme.js" defer></script>
+  <script src="../shared/navbar.js" defer></script>
+
+  <!-- Supabase: lazy load — DOMContentLoaded-এর পরে load হবে, render block করবে না -->
+  <script>
+    (function () {
+      function loadSupabase() {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+        s.onload = function () {
+          // supabase global ready — client বানাও
+          var SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
+          var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
+          if (!window.scriptoraSupabase) {
+            window.scriptoraSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+          }
+          // opascriptSupabase alias (কিছু page এটা use করে)
+          if (!window.opascriptSupabase) {
+            window.opascriptSupabase = window.scriptoraSupabase;
+          }
+        };
+        document.head.appendChild(s);
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadSupabase);
+      } else {
+        loadSupabase();
+      }
+    })();
+  </script>
 
   <!-- LIVE CHAT WIDGET -->
   <script type="module" src="../shared/chatbot/main.js"></script>
