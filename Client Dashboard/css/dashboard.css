@@ -4719,61 +4719,149 @@ input, select, textarea { font-family: inherit; }
 .affd-earn-teal .affd-earn-dot { background: #2dd4bf; }
 .affd-earn-teal .affd-earn-val { color: #2dd4bf; }
 
-/* ── 10. Performance analytics ───────────────────────────────── */
-.affd-panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+/* ── 10. Performance Analytics (Upgraded) ────────────────────── */
+.affd-analytics-card { position: relative; overflow: hidden; }
+
+/* Header */
+.affd-analytics-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+}
+
+/* Period tabs */
+.affd-period-tabs {
+  display: flex; background: rgba(255,255,255,.05);
+  border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 2px;
+}
+.affd-period-tab {
+  font-size: 10px; font-weight: 700; letter-spacing: .03em;
+  color: var(--text-muted); background: none; border: none;
+  border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  transition: all .15s;
+}
+.affd-period-tab:hover { color: var(--text-primary); }
+.affd-period-tab.active {
+  background: var(--accent-color); color: #fff;
+}
+/* Keep old .affd-period-pill for backwards compat if referenced elsewhere */
 .affd-period-pill {
   font-size: 10px; font-weight: 600; color: var(--text-secondary);
   background: var(--bg-input); border: 1px solid var(--border);
   border-radius: 20px; padding: 3px 10px;
 }
+
+/* ── Stat Cards grid ── */
+.affd-stat-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.affd-stat-card {
+  border-radius: 10px; padding: 11px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+  border: 1px solid transparent;
+  position: relative; overflow: hidden;
+  transition: transform .15s;
+}
+.affd-stat-card:hover { transform: translateY(-1px); }
+.affd-stat-card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.affd-stat-card-icon {
+  width: 26px; height: 26px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.affd-stat-card-val {
+  font-size: 20px; font-weight: 800;
+  font-family: 'Sora', sans-serif; line-height: 1;
+}
+.affd-stat-card-lbl {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--text-muted); white-space: nowrap;
+}
+
+/* Colour variants */
+.affd-stat-blue  { background: rgba(96,165,250,.08); border-color: rgba(96,165,250,.18); }
+.affd-stat-blue .affd-stat-card-icon  { background: rgba(96,165,250,.15); color:#60a5fa; }
+.affd-stat-blue .affd-stat-card-val   { color:#60a5fa; }
+
+.affd-stat-purple { background: rgba(167,139,250,.08); border-color: rgba(167,139,250,.18); }
+.affd-stat-purple .affd-stat-card-icon { background: rgba(167,139,250,.15); color:#a78bfa; }
+.affd-stat-purple .affd-stat-card-val  { color:#a78bfa; }
+
+.affd-stat-green  { background: rgba(52,211,153,.08); border-color: rgba(52,211,153,.18); }
+.affd-stat-green .affd-stat-card-icon  { background: rgba(52,211,153,.15); color:#34d399; }
+.affd-stat-green .affd-stat-card-val   { color:#34d399; }
+
+.affd-stat-amber  { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.18); }
+.affd-stat-amber .affd-stat-card-icon  { background: rgba(245,158,11,.15); color:#f59e0b; }
+.affd-stat-amber .affd-stat-card-val   { color:#f59e0b; }
+
+.affd-stat-pink   { background: rgba(244,114,182,.08); border-color: rgba(244,114,182,.18); }
+.affd-stat-pink .affd-stat-card-icon   { background: rgba(244,114,182,.15); color:#f472b6; }
+.affd-stat-pink .affd-stat-card-val    { color:#f472b6; }
+
+/* Trend badge */
+.affd-stat-trend {
+  font-size: 9px; font-weight: 700; border-radius: 4px; padding: 2px 5px; display: none;
+}
+.affd-stat-trend.up   { background: rgba(52,211,153,.15); color: #34d399; display: inline-block; }
+.affd-stat-trend.down { background: rgba(248,113,113,.15); color: #f87171; display: inline-block; }
+.affd-stat-trend.same { background: rgba(255,255,255,.07); color: var(--text-muted); display: inline-block; }
+
+/* ── Chart area ── */
+.affd-chart-area { position: relative; }
+.affd-chart-legend {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: var(--text-muted); margin-bottom: 8px;
+}
+.affd-legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.affd-legend-lbl { font-weight: 600; }
+
+.affd-analytics-chart-wrap {
+  position: relative; height: 140px; width: 100%;
+}
+.affd-analytics-chart-wrap canvas {
+  display: block; width: 100% !important; height: 100% !important;
+}
+
+/* Empty chart state */
+.affd-empty-chart {
+  padding: 24px 16px; text-align: center;
+}
+.affd-empty-chart-icon { font-size: 28px; margin-bottom: 8px; }
+.affd-empty-chart-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.affd-empty-chart-sub { font-size: 11px; color: var(--text-muted); font-family: 'Noto Sans Bengali', sans-serif; margin-bottom: 14px; }
+.affd-empty-share-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(45,110,247,.15); border: 1px solid rgba(45,110,247,.3);
+  color: var(--accent-light); border-radius: 7px;
+  padding: 6px 14px; font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: background .15s;
+}
+.affd-empty-share-btn:hover { background: rgba(45,110,247,.25); }
+
+/* Chart loading */
+.affd-chart-loader {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(var(--bg-main-rgb),.6); border-radius: 8px;
+}
+.affd-chart-loader-spin {
+  width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.15);
+  border-top-color: var(--accent-light); border-radius: 50%;
+  animation: affSpin .7s linear infinite;
+}
+@keyframes affSpin { to { transform: rotate(360deg); } }
+
+/* Backwards compat — old classes still referenced in other parts */
+.affd-analytics-stats-row { display: none; } /* superseded by .affd-stat-cards */
 .affd-analytics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .affd-metric { background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
 .affd-metric-lbl { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
 .affd-metric-val { font-size: 18px; font-weight: 800; color: var(--text-primary); font-family: 'Sora', sans-serif; }
-
-/* ── Analytics stats row (compact) ── */
-.affd-analytics-stats-row {
-  display: flex;
-  flex-wrap: wrap;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-.affd-analytics-stat {
-  flex: 0 1 180px;
-  padding: 8px 14px;
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.affd-analytics-stat:last-child { border-right: none; }
-.affd-analytics-stat-icon { margin-bottom: 0; }
-.affd-analytics-stat-icon svg { width: 12px; height: 12px; }
-.affd-analytics-stat-lbl {
-  font-size: 8px; font-weight: 700; color: var(--text-muted);
-  text-transform: uppercase; letter-spacing: .04em;
-  white-space: nowrap;
-}
-.affd-analytics-stat-val {
-  font-size: 15px; font-weight: 800;
-  font-family: 'Sora', sans-serif;
-  color: var(--text-primary);
-  line-height: 1.1;
-}
-
-/* ── Analytics line chart ── */
-.affd-analytics-chart-wrap {
-  position: relative;
-  height: 90px;
-  width: 100%;
-}
-.affd-analytics-chart-wrap canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-}
 
 /* ── Top Affiliates + My Referrals row ───────────────────────── */
 .affd-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
@@ -4886,7 +4974,13 @@ input, select, textarea { font-family: inherit; }
   .affd-two-col { grid-template-columns: 1fr; }
   .affd-earnings-grid { grid-template-columns: repeat(2, 1fr); }
   .affd-analytics-grid { grid-template-columns: repeat(2, 1fr); }
+  .affd-stat-cards { grid-template-columns: repeat(3, 1fr); }
   .affd-earn-wrapper { padding: 12px; }
+}
+@media (max-width: 600px) {
+  .affd-stat-cards { grid-template-columns: repeat(2, 1fr); }
+  .affd-period-tabs { flex-wrap: wrap; }
+  .affd-stat-card-val { font-size: 17px; }
 }
 @media (max-width: 680px) {
   /* Banner: horizontal layout, art hidden on small */
