@@ -2601,30 +2601,20 @@ async function loadAffiliateStats() {
     const analyticsPanel = document.getElementById('affAnalyticsPanel');
     if (tierPanel) tierPanel.style.display = 'block';
 
-    /* Analytics panel: show always; use empty state if no clicks yet */
+    /* Analytics panel: always show */
     if (analyticsPanel) {
       analyticsPanel.style.display = 'block';
-      const hasData = (stats.total_clicks || 0) > 0 || (stats.conversions || 0) > 0;
-      const chartWrap = document.querySelector('.affd-analytics-chart-wrap');
-      let emptyState = document.getElementById('affAnalyticsEmpty');
-      if (!hasData) {
-        if (chartWrap) chartWrap.style.display = 'none';
-        if (!emptyState) {
-          emptyState = document.createElement('div');
-          emptyState.id = 'affAnalyticsEmpty';
-          emptyState.style.cssText = 'text-align:center;padding:28px 12px;color:var(--text-muted);font-size:12px;';
-          emptyState.innerHTML = `
-            <div style="font-size:28px;margin-bottom:8px;">📊</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">কোনো Analytics Data নেই</div>
-            <div style="font-family:'Noto Sans Bengali',sans-serif;font-size:11px;">আপনার referral link শেয়ার করুন — clicks ও signups শুরু হলে এখানে chart দেখাবে।</div>`;
-          if (chartWrap) chartWrap.parentNode.insertBefore(emptyState, chartWrap.nextSibling);
-        }
-        emptyState.style.display = 'block';
-      } else {
-        if (chartWrap) chartWrap.style.display = '';
-        if (emptyState) emptyState.style.display = 'none';
-      }
     }
+
+    // Debug log — helps diagnose if stats fields are missing
+    console.log('[Affiliate] get_affiliate_stats response:', {
+      total_clicks:     stats.total_clicks,
+      unique_clicks:    stats.unique_clicks,
+      conversions:      stats.conversions,
+      converted_orders: stats.converted_orders,
+      conversion_rate:  stats.conversion_rate,
+      this_month_earn:  stats.this_month_earnings,
+    });
 
     /* Tier badge & name */
     const tier = stats.tier || {};

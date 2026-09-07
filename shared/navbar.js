@@ -10,6 +10,70 @@
     sessionStorage.setItem('scriptora_ref_code', _refParam.trim().toUpperCase());
   }
 
+  // ── Universal affiliate click tracker ─────────────────────────────────
+  // Runs on EVERY page that has ?ref=CODE in the URL.
+  // Waits for scriptoraSupabase to be ready, then fires one insert per
+  // session (deduped by 'nav_click_tracked_CODE' in sessionStorage).
+  // Uses the same affiliate_clicks table as order-popup.js.
+  (function _navTrackClick() {
+    const refCode = (_refParam && _refParam.trim())
+      ? _refParam.trim().toUpperCase()
+      : null;
+    if (!refCode) return;
+
+    // Already tracked this code in this browser session? Skip.
+    if (sessionStorage.getItem('nav_click_tracked_' + refCode)) return;
+
+    const MAX_WAIT = 6000; // ms
+    const start    = Date.now();
+
+    async function _doTrack() {
+      try {
+        const sb = window.scriptoraSupabase;
+        if (!sb) {
+          if (Date.now() - start < MAX_WAIT) {
+            setTimeout(_doTrack, 300);
+          }
+          return;
+        }
+
+        // Find affiliate by referral_code
+        const { data: aff, error: affErr } = await sb
+          .from('affiliates')
+          .select('id')
+          .eq('referral_code', refCode)
+          .eq('status', 'approved')
+          .maybeSingle();
+
+        if (affErr || !aff?.id) return; // invalid code — silent fail
+
+        // Privacy-safe fingerprint for dedup across sessions
+        const ua  = navigator.userAgent || '';
+        const raw = ua + (screen.width || '') + (screen.height || '') + (navigator.language || '');
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+        const ipHash = Array.from(new Uint8Array(buf))
+          .map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+
+        const { error: insErr } = await sb.from('affiliate_clicks').insert({
+          referral_code: refCode,
+          affiliate_id:  aff.id,
+          ip_hash:       ipHash,
+          user_agent:    ua.slice(0, 300),
+          landed_at:     new Date().toISOString(),
+          converted:     false,
+        });
+
+        if (!insErr) {
+          sessionStorage.setItem('nav_click_tracked_' + refCode, '1');
+          // Also mark for order-popup.js so it doesn't double-insert
+          sessionStorage.setItem('op_click_tracked_' + refCode, '1');
+        }
+      } catch (e) { /* silent — never break page load */ }
+    }
+
+    _doTrack();
+  })();
+
   const path       = window.location.pathname;
   const isHome     = path.includes('/Homepage/') || path.includes('/Homepage\\') || (path.endsWith('index.html') && !path.includes('/Affiliate/') && !path.includes('/Login') && !path.includes('/Register'));
   const isLogin    = path.includes('Login');

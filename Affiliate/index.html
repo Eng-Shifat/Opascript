@@ -325,31 +325,63 @@ function toggleFaq(btn) {
 /* ── Phase 6: Track referral click ─────────────────────────── */
 (function() {
   const params = new URLSearchParams(window.location.search);
-  const refCode = params.get('ref') || sessionStorage.getItem('ref_code');
+  // FIX: read from correct key 'scriptora_ref_code' (saved by navbar.js)
+  // Also accept legacy 'ref_code' key just in case
+  const refCode = (params.get('ref') || '').trim().toUpperCase()
+    || sessionStorage.getItem('scriptora_ref_code')
+    || sessionStorage.getItem('ref_code');
   if (!refCode) return;
 
-  // Fire-and-forget click tracking
-  try {
-    // Simple hash of user agent for dedup (no privacy-sensitive data)
-    const uaRaw = navigator.userAgent || '';
-    async function hashString(str) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('').slice(0, 16);
-    }
-    hashString(uaRaw + (new Date()).toISOString().slice(0,13)).then(ipHash => {
-      const waitSb = setInterval(() => {
+  // If navbar.js already tracked this click this session, skip
+  if (sessionStorage.getItem('nav_click_tracked_' + refCode)) return;
+  if (sessionStorage.getItem('op_click_tracked_'  + refCode)) return;
+
+  (async function() {
+    try {
+      const ua  = navigator.userAgent || '';
+      const raw = ua + (screen.width || '') + (screen.height || '') + (navigator.language || '');
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+      const ipHash = Array.from(new Uint8Array(buf))
+        .map(b => b.toString(16).padStart(2,'0')).join('').slice(0, 32);
+
+      const MAX_WAIT = 6000;
+      const start    = Date.now();
+
+      async function attempt() {
         const sb = window.scriptoraSupabase;
-        if (!sb) return;
-        clearInterval(waitSb);
-        sb.rpc('track_affiliate_click', {
-          p_referral_code: refCode,
-          p_ip_hash: ipHash,
-          p_user_agent: uaRaw.slice(0, 200)
-        }).catch(() => {});
-      }, 300);
-      setTimeout(() => clearInterval(waitSb), 5000);
-    });
-  } catch(_) {}
+        if (!sb) {
+          if (Date.now() - start < MAX_WAIT) setTimeout(attempt, 300);
+          return;
+        }
+
+        // Resolve affiliate_id from referral_code
+        const { data: aff } = await sb
+          .from('affiliates')
+          .select('id')
+          .eq('referral_code', refCode)
+          .eq('status', 'approved')
+          .maybeSingle();
+
+        if (!aff?.id) return;
+
+        // Direct insert — same table as order-popup.js
+        const { error } = await sb.from('affiliate_clicks').insert({
+          referral_code: refCode,
+          affiliate_id:  aff.id,
+          ip_hash:       ipHash,
+          user_agent:    ua.slice(0, 300),
+          landed_at:     new Date().toISOString(),
+          converted:     false,
+        });
+
+        if (!error) {
+          sessionStorage.setItem('nav_click_tracked_' + refCode, '1');
+          sessionStorage.setItem('op_click_tracked_'  + refCode, '1');
+        }
+      }
+      attempt();
+    } catch(_) {}
+  })();
 })();
 
 /* ── Smooth scroll for anchor link ─────────────────────────── */
