@@ -307,7 +307,10 @@ body {
   color: transparent;
 }
 .services-grid-2 {
+  display: grid;
   grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
+  align-items: stretch;
   gap: 16px;
   max-width: 100%;
   margin: 0 0 1.8rem;
@@ -320,6 +323,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  height: 100%;
+  box-sizing: border-box;
 }
 .card-icon-box {
   position: relative;
