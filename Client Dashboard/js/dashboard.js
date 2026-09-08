@@ -2585,12 +2585,19 @@ async function affiliateRequestWithdrawal() {
 }
 
 /* ── AFFILIATE STATS (Phase 6) ───────────────────────────────── */
-async function loadAffiliateStats() {
+function setAffiliatePeriod(period, btn) {
+  document.querySelectorAll('.affd-period-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  loadAffiliateStats(period);
+}
+
+async function loadAffiliateStats(period) {
+  period = period || 'month';
   const errBanner = document.getElementById('affStatsErrorBanner');
   if (errBanner) errBanner.style.display = 'none';
 
   try {
-    const { data: stats, error } = await sb.rpc('get_affiliate_stats');
+    const { data: stats, error } = await sb.rpc('get_affiliate_stats', { p_period: period });
     if (error || !stats?.success) {
       if (errBanner) errBanner.style.display = 'flex';
       return;
@@ -2612,11 +2619,8 @@ async function loadAffiliateStats() {
         if (!emptyState) {
           emptyState = document.createElement('div');
           emptyState.id = 'affAnalyticsEmpty';
-          emptyState.style.cssText = 'text-align:center;padding:28px 12px;color:var(--text-muted);font-size:12px;';
-          emptyState.innerHTML = `
-            <div style="font-size:28px;margin-bottom:8px;">📊</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">কোনো Analytics Data নেই</div>
-            <div style="font-family:'Noto Sans Bengali',sans-serif;font-size:11px;">আপনার referral link শেয়ার করুন — clicks ও signups শুরু হলে এখানে chart দেখাবে।</div>`;
+          emptyState.style.cssText = 'text-align:center;padding:32px 12px;';
+          emptyState.innerHTML = '<div style="font-size:28px;margin-bottom:10px;">📊</div><div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">কোনো Data নেই</div><div style="font-size:11px;color:var(--text-muted);">Referral link share করুন — clicks ও signups হলে chart দেখাবে।</div>';
           if (chartWrap) chartWrap.parentNode.insertBefore(emptyState, chartWrap.nextSibling);
         }
         emptyState.style.display = 'block';
