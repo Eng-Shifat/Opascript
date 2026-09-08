@@ -2708,17 +2708,28 @@ function drawAnalyticsChart(stats) {
   canvas.style.height = H + 'px';
   ctx.scale(dpr, dpr);
 
-  // Use real total_clicks distributed across 31 days (honest flat chart when no data)
-  const days = 31;
-  const totalClicks = stats.total_clicks || 0;
-  const clicks = [];
-  if (totalClicks === 0) {
-    // No data — flat zero line
-    for (let i = 0; i < days; i++) clicks.push(0);
-  } else {
-    // Distribute real total evenly with minor natural variance (no fake randomness)
-    const base = totalClicks / days;
-    for (let i = 0; i < days; i++) clicks.push(Math.max(0, base));
+  // Build daily arrays from real data
+  const now = new Date();
+  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+  // Build lookup maps from daily_clicks and daily_signups
+  const clickMap = {};
+  const signupMap = {};
+  (stats.daily_clicks || []).forEach(d => {
+    const day = new Date(d.date).getDate();
+    clickMap[day] = d.clicks;
+  });
+  (stats.daily_signups || []).forEach(d => {
+    const day = new Date(d.date).getDate();
+    signupMap[day] = d.signups;
+  });
+
+  const clicks  = [];
+  const signups = [];
+  for (let i = 1; i <= days; i++) {
+    clicks.push(clickMap[i] || 0);
+    signups.push(signupMap[i] || 0);
   }
 
   const maxVal = Math.max(...clicks, 1);
@@ -2726,7 +2737,7 @@ function drawAnalyticsChart(stats) {
   const drawW = W - padL - padR;
   const drawH = H - padT - padB;
 
-  const toX = i => padL + (i / (days - 1)) * drawW;
+  const toX = i => padL + (days > 1 ? (i / (days - 1)) : 0) * drawW;
   const toY = v => padT + (1 - v / maxVal) * drawH;
 
   // Grid lines
@@ -2743,16 +2754,18 @@ function drawAnalyticsChart(stats) {
     ctx.fillText(label, padL - 6, y + 3);
   }
 
-  // X axis date labels (Aug 1, Aug 5 … Aug 31)
+  // X axis date labels — actual days of month
   ctx.fillStyle = 'rgba(255,255,255,0.25)';
   ctx.font = '9px sans-serif';
   ctx.textAlign = 'center';
-  const now = new Date();
   const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  [0, 4, 9, 14, 19, 24, 30].forEach(i => {
+  const labelCount = Math.min(7, days);
+  const step = Math.floor((days - 1) / (labelCount - 1));
+  for (let li = 0; li < labelCount; li++) {
+    const i = Math.min(li * step, days - 1);
     const d = new Date(now.getFullYear(), now.getMonth(), i + 1);
-    ctx.fillText(monthNames[d.getMonth()] + ' ' + d.getDate(), toX(i), H - padB + 14);
-  });
+    ctx.fillText(monthNames[d.getMonth()] + ' ' + (i + 1), toX(i), H - padB + 14);
+  }
 
   // Gradient fill under curve
   const grad = ctx.createLinearGradient(0, padT, 0, padT + drawH);
@@ -2785,9 +2798,26 @@ function drawAnalyticsChart(stats) {
   ctx.lineCap  = 'round';
   ctx.stroke();
 
-  // Data points
+  // Signups line (green)
+  const maxSig = Math.max(...signups, 0);
+  if (maxSig > 0) {
+    const toYs = v => padT + (1 - v / Math.max(maxVal, maxSig)) * drawH;
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toYs(signups[0]));
+    for (let i = 1; i < days; i++) {
+      const cx = (toX(i-1) + toX(i)) / 2;
+      ctx.bezierCurveTo(cx, toYs(signups[i-1]), cx, toYs(signups[i]), toX(i), toYs(signups[i]));
+    }
+    ctx.strokeStyle = '#34d399';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Data points — clicks
   clicks.forEach((v, i) => {
-    if (i % 5 !== 0 && i !== days - 1) return;
+    if (v === 0) return;
     const x = toX(i), y = toY(v);
     ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2);
     ctx.fillStyle = '#1a1040'; ctx.fill();
