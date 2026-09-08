@@ -2210,12 +2210,12 @@ async function loadAffiliateWithdrawals(affiliateId) {
       const walletEarned  = parseFloat(clearanceEl2.dataset.walletTotalEarned  || '0');
       const walletAvail   = parseFloat(clearanceEl2.dataset.walletAvailable    || '0');
       const walletPendWd  = parseFloat(clearanceEl2.dataset.walletPendingWd    || '0');
-      if (walletEarned > 0) {
-        /* wallet data was stored on the element — use precise arithmetic */
-        const fmt2 = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const correctClearance = Math.max(0, walletEarned - walletAvail - paidSum - walletPendWd);
-        clearanceEl2.textContent = fmt2(correctClearance);
-      }
+      /* Always recalculate — including when walletEarned is 0, otherwise
+         clearanceEl2 is left showing '…' forever for zero-earning affiliates
+         instead of ৳0.00. */
+      const fmt2 = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const correctClearance = Math.max(0, walletEarned - walletAvail - paidSum - walletPendWd);
+      clearanceEl2.textContent = fmt2(correctClearance);
     }
 
     if (!rows || rows.length === 0) {
@@ -2585,9 +2585,7 @@ async function affiliateRequestWithdrawal() {
 }
 
 /* ── AFFILIATE STATS (Phase 6) ───────────────────────────────── */
-function setAffiliatePeriod(period, btn) {
-  document.querySelectorAll('.affd-period-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+function setAffiliatePeriod(period) {
   loadAffiliateStats(period);
 }
 
@@ -2696,11 +2694,11 @@ async function loadAffiliateStats(period) {
 function drawAnalyticsChart(stats) {
   const canvas = document.getElementById('affAnalyticsChart');
   if (!canvas) return;
-  const ctx  = canvas.getContext('2d');
-  const dpr  = window.devicePixelRatio || 1;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
   const wrap = canvas.parentElement;
-  const W    = wrap.clientWidth  || 600;
-  const H    = wrap.clientHeight || 180;
+  const W = wrap.clientWidth || 700;
+  const H = 220;
 
   canvas.width  = Math.round(W * dpr);
   canvas.height = Math.round(H * dpr);
@@ -2708,37 +2706,35 @@ function drawAnalyticsChart(stats) {
   canvas.style.height = H + 'px';
   ctx.scale(dpr, dpr);
 
-  // Build daily arrays from real data
-  const now = new Date();
-  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  // Build lookup maps from daily_clicks and daily_signups
-  const clickMap = {};
-  const signupMap = {};
-  (stats.daily_clicks || []).forEach(d => {
-    const day = new Date(d.date).getDate();
-    clickMap[day] = d.clicks;
-  });
-  (stats.daily_signups || []).forEach(d => {
-    const day = new Date(d.date).getDate();
-    signupMap[day] = d.signups;
-  });
+  /* The backend now returns a dense, zero-filled daily series — one entry
+     per calendar day actually covered by the selected period — so the
+     chart just plots what it's given. It used to compute the date range
+     itself from the browser's clock, which meant any drift between the
+     client's "today" and the server's "today" (timezone, stale tab, clock
+     skew) made every point fall through to 0 even when real data existed. */
+  const dailyClicks  = stats.daily_clicks  || [];
+  const dailySignups = stats.daily_signups || [];
+  const parseDate = s => {
+    const [y, m, d] = String(s).slice(0, 10).split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+  const dateList = dailyClicks.length ? dailyClicks.map(d => parseDate(d.date)) : [new Date()];
+  const clicks   = dailyClicks.length ? dailyClicks.map(d => d.clicks || 0) : [0];
+  const signups  = dailySignups.length ? dailySignups.map(d => d.signups || 0) : [0];
+  const days = dateList.length;
 
-  const clicks  = [];
-  const signups = [];
-  for (let i = 1; i <= days; i++) {
-    clicks.push(clickMap[i] || 0);
-    signups.push(signupMap[i] || 0);
-  }
-
-  const maxVal = Math.max(...clicks, 1);
-  const padL = 36, padR = 16, padT = 16, padB = 36;
+  const padL = 40, padR = 20, padT = 24, padB = 40;
   const drawW = W - padL - padR;
   const drawH = H - padT - padB;
+  const maxVal = Math.max(...clicks, ...signups, 1);
 
   const toX = i => padL + (days > 1 ? (i / (days - 1)) : 0) * drawW;
   const toY = v => padT + (1 - v / maxVal) * drawH;
+
+  // Clear
+  ctx.clearRect(0, 0, W, H);
 
   // Grid lines
   ctx.strokeStyle = 'rgba(255,255,255,0.06)';
@@ -2746,46 +2742,57 @@ function drawAnalyticsChart(stats) {
   for (let g = 0; g <= 4; g++) {
     const y = padT + (g / 4) * drawH;
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
-    // Y labels
     const label = Math.round(maxVal * (1 - g / 4));
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
-    ctx.font = '9px sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '10px sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(label, padL - 6, y + 3);
   }
 
-  // X axis date labels — actual days of month
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
-  ctx.font = '9px sans-serif';
+  // X axis labels — evenly spaced dates
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '10px sans-serif';
   ctx.textAlign = 'center';
-  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const labelCount = Math.min(7, days);
-  const step = Math.floor((days - 1) / (labelCount - 1));
-  for (let li = 0; li < labelCount; li++) {
-    const i = Math.min(li * step, days - 1);
-    const d = new Date(now.getFullYear(), now.getMonth(), i + 1);
-    ctx.fillText(monthNames[d.getMonth()] + ' ' + (i + 1), toX(i), H - padB + 14);
-  }
+  const labelIdxs = [0];
+  const step = Math.max(1, Math.floor(days / 6));
+  for (let i = step; i < days - 1; i += step) labelIdxs.push(i);
+  labelIdxs.push(days - 1);
+  labelIdxs.forEach(i => {
+    const d = dateList[i];
+    ctx.fillText(monthNames[d.getMonth()] + ' ' + d.getDate(), toX(i), H - padB + 16);
+  });
 
-  // Gradient fill under curve
+  // Clicks gradient fill
   const grad = ctx.createLinearGradient(0, padT, 0, padT + drawH);
-  grad.addColorStop(0,   'rgba(139,92,246,0.35)');
-  grad.addColorStop(0.5, 'rgba(139,92,246,0.12)');
-  grad.addColorStop(1,   'rgba(139,92,246,0.00)');
+  grad.addColorStop(0,   'rgba(139,92,246,0.4)');
+  grad.addColorStop(0.6, 'rgba(139,92,246,0.1)');
+  grad.addColorStop(1,   'rgba(139,92,246,0.0)');
 
-  ctx.beginPath();
-  ctx.moveTo(toX(0), toY(clicks[0]));
-  for (let i = 1; i < days; i++) {
-    const cx = (toX(i-1) + toX(i)) / 2;
-    ctx.bezierCurveTo(cx, toY(clicks[i-1]), cx, toY(clicks[i]), toX(i), toY(clicks[i]));
-  }
-  ctx.lineTo(toX(days-1), padT + drawH);
-  ctx.lineTo(toX(0), padT + drawH);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
+  const drawLine = (data, strokeColor, fillGrad) => {
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toY(data[0]));
+    for (let i = 1; i < days; i++) {
+      const cx = (toX(i-1) + toX(i)) / 2;
+      ctx.bezierCurveTo(cx, toY(data[i-1]), cx, toY(data[i]), toX(i), toY(data[i]));
+    }
+    if (fillGrad) {
+      ctx.lineTo(toX(days-1), padT + drawH);
+      ctx.lineTo(toX(0), padT + drawH);
+      ctx.closePath();
+      ctx.fillStyle = fillGrad;
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  };
 
-  // Stroke line
+  drawLine(clicks, null, grad);
+
+  // Clicks stroke line
   ctx.beginPath();
   ctx.moveTo(toX(0), toY(clicks[0]));
   for (let i = 1; i < days; i++) {
@@ -2795,35 +2802,68 @@ function drawAnalyticsChart(stats) {
   ctx.strokeStyle = '#8b5cf6';
   ctx.lineWidth = 2;
   ctx.lineJoin = 'round';
-  ctx.lineCap  = 'round';
+  ctx.lineCap = 'round';
+  ctx.setLineDash([]);
   ctx.stroke();
 
-  // Signups line (green)
-  const maxSig = Math.max(...signups, 0);
-  if (maxSig > 0) {
-    const toYs = v => padT + (1 - v / Math.max(maxVal, maxSig)) * drawH;
-    ctx.beginPath();
-    ctx.moveTo(toX(0), toYs(signups[0]));
-    for (let i = 1; i < days; i++) {
-      const cx = (toX(i-1) + toX(i)) / 2;
-      ctx.bezierCurveTo(cx, toYs(signups[i-1]), cx, toYs(signups[i]), toX(i), toYs(signups[i]));
-    }
-    ctx.strokeStyle = '#34d399';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 3]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
+  // Signups dashed green line
+  if (Math.max(...signups) > 0) drawLine(signups, '#34d399', null);
 
-  // Data points — clicks
+  // Data point dots — only where value > 0
   clicks.forEach((v, i) => {
     if (v === 0) return;
     const x = toX(i), y = toY(v);
-    ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#1a1040'; ctx.fill();
-    ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e1b4b'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2);
     ctx.fillStyle = '#a78bfa'; ctx.fill();
   });
+  signups.forEach((v, i) => {
+    if (v === 0) return;
+    const x = toX(i), y = toY(v);
+    ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#34d399'; ctx.fill();
+  });
+
+  // Hover tooltip
+  canvas._chartData = { clicks, signups, days, dateList, toX, toY, W, H, padL, padR, padT, padB, maxVal, monthNames };
+  canvas.onmousemove = function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const cd = canvas._chartData;
+    // Find nearest day
+    let nearest = 0, minDist = Infinity;
+    for (let i = 0; i < cd.days; i++) {
+      const dist = Math.abs(cd.toX(i) - mx);
+      if (dist < minDist) { minDist = dist; nearest = i; }
+    }
+    if (minDist > drawW / cd.days + 10) { canvas._tip && (canvas._tip.style.display = 'none'); return; }
+    const cl = cd.clicks[nearest];
+    const sg = cd.signups[nearest];
+    const d = cd.dateList[nearest];
+    const label = cd.monthNames[d.getMonth()] + ' ' + d.getDate();
+
+    let tip = canvas._tip;
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.style.cssText = 'position:absolute;background:rgba(15,10,40,0.92);border:1px solid rgba(139,92,246,0.4);border-radius:8px;padding:8px 12px;font-size:12px;color:#fff;pointer-events:none;z-index:99;min-width:110px;backdrop-filter:blur(8px);';
+      canvas.parentElement.style.position = 'relative';
+      canvas.parentElement.appendChild(tip);
+      canvas._tip = tip;
+    }
+    tip.innerHTML = '<div style="font-weight:700;margin-bottom:4px;color:#a78bfa;">' + label + '</div>'
+      + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:8px;height:8px;border-radius:50%;background:#8b5cf6;display:inline-block;"></span>Clicks: <b>' + cl + '</b></div>'
+      + '<div style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:#34d399;display:inline-block;"></span>Signups: <b>' + sg + '</b></div>';
+
+    const tipX = Math.min(cd.toX(nearest) + 12, W - 130);
+    const tipY = cd.toY(Math.max(cl, sg)) - 20;
+    tip.style.left = tipX + 'px';
+    tip.style.top  = Math.max(4, tipY) + 'px';
+    tip.style.display = 'block';
+  };
+  canvas.onmouseleave = function() {
+    if (canvas._tip) canvas._tip.style.display = 'none';
+  };
 }
 
 /* ── AFFILIATE LEADERBOARD (Phase 8) ─────────────────────────── */
