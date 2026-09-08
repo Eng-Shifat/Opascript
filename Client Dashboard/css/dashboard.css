@@ -4822,7 +4822,8 @@ input, select, textarea { font-family: inherit; }
 .affd-legend-lbl { font-weight: 600; }
 
 .affd-analytics-chart-wrap {
-  position: relative; height: 140px; width: 100%;
+  position: relative; height: 240px; width: 100%;
+  margin-top: 12px;
 }
 .affd-analytics-chart-wrap canvas {
   display: block; width: 100% !important; height: 100% !important;
