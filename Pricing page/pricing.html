@@ -280,19 +280,21 @@
     }
 
     const uaRaw = navigator.userAgent || '';
-    hashString(uaRaw + (new Date()).toISOString().slice(0, 13)).then(ipHash => {
-      const interval = setInterval(() => {
+    hashString(uaRaw + (new Date()).toISOString().slice(0, 13)).then(async ipHash => {
+      const interval = setInterval(async () => {
         const sb = window.scriptoraSupabase;
         if (!sb) return;
         clearInterval(interval);
-        sb.rpc('track_affiliate_click', {
-          p_referral_code: code,
-          p_ip_hash:       ipHash,
-          p_user_agent:    uaRaw.slice(0, 200)
-        }).catch(() => {});
+        try {
+          await sb.rpc('track_affiliate_click', {
+            p_referral_code: code,
+            p_ip_hash:       ipHash,
+            p_user_agent:    uaRaw.slice(0, 200)
+          });
+        } catch(e) {}
       }, 300);
       setTimeout(() => clearInterval(interval), 5000);
-    }).catch(() => {});
+    });
   })();
   </script>
 
