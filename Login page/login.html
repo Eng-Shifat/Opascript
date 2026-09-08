@@ -132,6 +132,16 @@
             </button>
           </div>
           <div class="field-error" id="passError"></div>
+          <!-- Password Strength Meter -->
+          <div class="pass-meter-wrap" id="loginPassStrength" style="display:none;margin-top:8px;">
+            <div class="pass-meter-bars" style="display:flex;gap:4px;margin-bottom:4px;">
+              <div class="pass-bar" id="lpbar1" style="height:4px;flex:1;border-radius:4px;background:rgba(255,255,255,0.1);transition:background 0.3s;"></div>
+              <div class="pass-bar" id="lpbar2" style="height:4px;flex:1;border-radius:4px;background:rgba(255,255,255,0.1);transition:background 0.3s;"></div>
+              <div class="pass-bar" id="lpbar3" style="height:4px;flex:1;border-radius:4px;background:rgba(255,255,255,0.1);transition:background 0.3s;"></div>
+              <div class="pass-bar" id="lpbar4" style="height:4px;flex:1;border-radius:4px;background:rgba(255,255,255,0.1);transition:background 0.3s;"></div>
+            </div>
+            <span class="pass-meter-label" id="loginPassLabel" style="font-size:12px;font-weight:500;"></span>
+          </div>
           <div class="auth-forgot-wrap">
             <a href="forgot-password.html" class="auth-forgot">পাসওয়ার্ড ভুলে গেছেন?</a>
           </div>

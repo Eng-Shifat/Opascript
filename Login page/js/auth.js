@@ -56,9 +56,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     document.getElementById('email').classList.remove('input-error');
   });
 
-  document.getElementById('password')?.addEventListener('input', () => {
+  document.getElementById('password')?.addEventListener('input', function () {
     showError('passError', '');
-    document.getElementById('password').classList.remove('input-error');
+    this.classList.remove('input-error');
+    updateLoginStrengthMeter(this.value);
   });
 
   // ── Enter key → login ─────────────────────────────────────────────────
@@ -178,6 +179,57 @@ function redirectAfterLogin() {
 
 
 // ════════════════════════════════════════════════════════════════
+//  Password Strength Meter (Login page)
+// ════════════════════════════════════════════════════════════════
+function calcLoginStrength(val) {
+  if (!val) return 0;
+  return [
+    val.length >= 8,
+    val.length >= 12,
+    /[A-Z]/.test(val) && /[a-z]/.test(val),
+    /[0-9]/.test(val),
+    /[^A-Za-z0-9]/.test(val),
+  ].filter(Boolean).length;
+}
+
+const strengthColors = {
+  weak:   '#ef4444',
+  fair:   '#f97316',
+  good:   '#eab308',
+  strong: '#22c55e',
+};
+
+function updateLoginStrengthMeter(val) {
+  const wrap  = document.getElementById('loginPassStrength');
+  const label = document.getElementById('loginPassLabel');
+  const bars  = [1,2,3,4].map(i => document.getElementById('lpbar'+i));
+  if (!wrap || !label || bars.some(b => !b)) return;
+
+  if (!val) {
+    wrap.style.display = 'none';
+    bars.forEach(b => { b.style.background = 'rgba(255,255,255,0.1)'; });
+    label.textContent = '';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  const score = calcLoginStrength(val);
+  let level, labelText, cls;
+  if      (score <= 1) { level = 1; labelText = 'দুর্বল';       cls = 'weak'; }
+  else if (score <= 2) { level = 2; labelText = 'মোটামুটি';     cls = 'fair'; }
+  else if (score <= 3) { level = 3; labelText = 'ভালো';          cls = 'good'; }
+  else                 { level = 4; labelText = 'শক্তিশালী ✓';  cls = 'strong'; }
+
+  const color = strengthColors[cls];
+  bars.forEach((b, i) => {
+    b.style.background = i < level ? color : 'rgba(255,255,255,0.1)';
+  });
+  label.textContent = labelText;
+  label.style.color = color;
+}
+
+
+// ════════════════════════════════════════════════════════════════
 //  Main Login Handler
 // ════════════════════════════════════════════════════════════════
 async function handleLogin() {
@@ -202,8 +254,8 @@ async function handleLogin() {
     showError('passError', 'পাসওয়ার্ড দিন');
     document.getElementById('password').classList.add('input-error');
     valid = false;
-  } else if (pass.length < 6) {
-    showError('passError', 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে');
+  } else if (pass.length < 8) {
+    showError('passError', 'পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে');
     document.getElementById('password').classList.add('input-error');
     valid = false;
   }
@@ -302,8 +354,10 @@ async function handleForgotPassword() {
   }
 
   try {
+    // ── redirect URL: origin থেকে current page এর folder বের করে reset page বানাও ──
+    const resetUrl = window.location.href.replace(/\/[^/]+$/, '/reset-password.html');
     const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/Login%20page/reset-password.html',
+      redirectTo: resetUrl,
     });
 
     if (error) {
