@@ -692,13 +692,14 @@ function closeModalOutside(e) {
 }
 
 async function submitOrder() {
-  const client  = document.getElementById('m-client').value.trim();
-  const contact = document.getElementById('m-contact').value.trim();
-  const amount  = parseInt(document.getElementById('m-amount').value) || 0;
-  const service = document.getElementById('m-service').value;
-  const dept    = document.getElementById('m-dept').value;
-  const deadline= document.getElementById('m-deadline').value;
-  const notes   = document.getElementById('m-notes').value.trim();
+  const client       = document.getElementById('m-client').value.trim();
+  const contact      = document.getElementById('m-contact').value.trim();
+  const amount       = parseInt(document.getElementById('m-amount').value) || 0;
+  const service      = document.getElementById('m-service').value;
+  const dept         = document.getElementById('m-dept').value;
+  const deadline     = document.getElementById('m-deadline').value;
+  const notes        = document.getElementById('m-notes').value.trim();
+  const referralCode = (document.getElementById('m-referral-code')?.value || '').trim().toUpperCase() || null;
 
   if (!client) { showToast('⚠️ Client name দিন!', '#f87171'); return; }
 
@@ -728,8 +729,9 @@ async function submitOrder() {
       }
     }
 
+    let newOrderId = null;
     if (sb) {
-      const { error: orderErr } = await sb.from('orders').insert({
+      const orderPayload = {
         order_number:         orderNum,
         client_id:            clientId,
         title:                service,
@@ -744,8 +746,60 @@ async function submitOrder() {
         special_instructions: notes || null,
         order_date:           new Date().toISOString(),
         created_at:           new Date().toISOString(),
-      });
+      };
+
+      /* ── Referral: referred_by_code থাকলে order-এ attach করো ── */
+      if (referralCode) orderPayload.referred_by_code = referralCode;
+
+      const { data: newOrder, error: orderErr } = await sb
+        .from('orders')
+        .insert(orderPayload)
+        .select('id')
+        .single();
       if (orderErr) throw orderErr;
+      newOrderId = newOrder?.id || null;
+
+      /* ── Referral: client row-এ referred_by_code save করো ──
+         এটা না করলে v_referred_clients view-এ client দেখাবে না।
+         শুধু তখনই update করব যখন client-এর referred_by_code এখনো NULL। ── */
+      if (referralCode && clientId) {
+        try {
+          const { data: existingRef } = await sb
+            .from('clients')
+            .select('referred_by_code')
+            .eq('id', clientId)
+            .single();
+          if (!existingRef?.referred_by_code) {
+            await sb
+              .from('clients')
+              .update({ referred_by_code: referralCode })
+              .eq('id', clientId);
+          }
+        } catch (refEx) {
+          console.warn('[Admin] referred_by_code update failed:', refEx);
+        }
+      }
+
+      /* ── Referral: commission row তৈরি করো (যদি referral code valid হয়) ──
+         record_affiliate_commission RPC নিজেই check করে:
+           1. referral code valid কিনা (affiliate আছে কিনা)
+           2. আগে কোনো commission row ছিল কিনা (duplicate prevent)
+         Payment এখনো হয়নি, তাই status 'pending' হবে।                    ── */
+      if (referralCode && newOrderId && clientId) {
+        try {
+          const { data: commRes, error: commErr } = await sb.rpc('record_affiliate_commission', {
+            p_order_id: newOrderId,
+            p_client_id: clientId,
+          });
+          if (commErr) {
+            console.warn('[Admin] Commission auto-create failed:', commErr.message);
+          } else if (commRes?.success) {
+            console.log('[Admin] Commission row created for referral:', referralCode);
+          }
+        } catch (commEx) {
+          console.warn('[Admin] Commission RPC exception:', commEx);
+        }
+      }
     }
 
     closeModal();
@@ -759,7 +813,7 @@ async function submitOrder() {
     }, 800);
 
     /* Reset form */
-    ['m-client','m-contact','m-amount','m-notes'].forEach(id => {
+    ['m-client','m-contact','m-amount','m-notes','m-referral-code'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
