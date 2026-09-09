@@ -2027,6 +2027,11 @@ async function loadAffiliateEarnings(affiliateId) {
        overwrite this with a precise value once total_withdrawn is known.
        Provisional formula: total_earned - available - pending_withdrawal
        (ignores total_withdrawn — will be corrected below after withdrawals load). */
+    /* cancelled commission গুলো sum করো */
+    const cancelledCommSum = Array.isArray(comms)
+      ? comms.filter(c => c.status === 'cancelled').reduce((s, c) => s + Number(c.commission_amount || 0), 0)
+      : 0;
+
     if (clearanceEl) {
       const wTotalEarned = Number(wallet.total_earned       || 0);
       const wAvailable   = Number(wallet.available_balance  || 0);
@@ -2036,11 +2041,12 @@ async function loadAffiliateEarnings(affiliateId) {
       clearanceEl.dataset.walletTotalEarned = wTotalEarned;
       clearanceEl.dataset.walletAvailable   = wAvailable;
       clearanceEl.dataset.walletPendingWd   = wPendingWd;
+      clearanceEl.dataset.cancelledSum      = cancelledCommSum;
 
       if (_affiliateTotalWithdrawn !== null) {
         /* loadAffiliateWithdrawals already ran — use the exact value */
         clearanceEl.textContent = fmt(Math.max(0,
-          wTotalEarned - wAvailable - _affiliateTotalWithdrawn - wPendingWd
+          wTotalEarned - wAvailable - _affiliateTotalWithdrawn - wPendingWd - cancelledCommSum
         ));
       } else {
         /* Provisional until withdrawals load — show '…' */
@@ -2214,7 +2220,9 @@ async function loadAffiliateWithdrawals(affiliateId) {
          clearanceEl2 is left showing '…' forever for zero-earning affiliates
          instead of ৳0.00. */
       const fmt2 = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const correctClearance = Math.max(0, walletEarned - walletAvail - paidSum - walletPendWd);
+      /* cancelledSum — clearanceEl2 এ cancelled commission total store করা আছে */
+      const cancelledSum = parseFloat(clearanceEl2.dataset.cancelledSum || '0');
+      const correctClearance = Math.max(0, walletEarned - walletAvail - paidSum - walletPendWd - cancelledSum);
       clearanceEl2.textContent = fmt2(correctClearance);
     }
 
