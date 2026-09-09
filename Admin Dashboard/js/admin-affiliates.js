@@ -252,6 +252,29 @@ function buildAppRow(app) {
     </tr>`;
 }
 
+/* Live payment-progress cell — how much of the ORDER the client has
+   actually paid so far (advance_paid/total_price), independent of the
+   commission's own status. Exposed on window so the affiliate commission
+   history modal (aff-commission-history-modal.js) can reuse it without
+   duplicating the math. */
+window.buildPaidPctCell = function buildPaidPctCell(cm) {
+  const info = (window._cmOrderInfo || {})[cm.order_id] || {};
+  if (info.status === 'cancelled') {
+    return `<span style="font-size:.7rem;color:var(--muted2);">order cancelled</span>`;
+  }
+  const totalPrice  = Number(info.total_price ?? cm.order_amount ?? 0);
+  const advancePaid = Math.min(Math.max(Number(info.advance_paid || 0), 0), totalPrice);
+  const pct   = totalPrice > 0 ? Math.min(100, Math.round(advancePaid / totalPrice * 100)) : 0;
+  const color = pct >= 100 ? '#34d399' : pct > 0 ? '#f59e0b' : '#94a3b8';
+  return `
+    <div style="display:flex;flex-direction:column;gap:4px;min-width:64px;">
+      <span style="font-size:.75rem;font-weight:700;color:${color};">${pct}%</span>
+      <div style="width:56px;height:4px;border-radius:2px;background:rgba(148,163,184,.15);overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${color};"></div>
+      </div>
+    </div>`;
+};
+
 function buildStatusBadge(status) {
   const map = {
     pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: 'ti-clock',        label: 'Pending'   },
@@ -410,15 +433,27 @@ async function loadCommissions() {
       (refClients || []).forEach(c => { REFERRED_CLIENT_MAP[c.id] = c; });
     }
 
-    /* 4. Fetch order numbers for display */
+    /* 4. Fetch order numbers, status, and live payment progress for revenue calc.
+       Order status matters separately from commission status: if the whole
+       ORDER is cancelled, nothing counts for that row. If only the COMMISSION
+       is cancelled (order itself still valid/completed), whatever the client
+       has actually paid stays entirely with the platform. advance_paid/total_price
+       let us track only the portion of commission that has actually cleared
+       so far (same live-proportional approach as get_affiliate_wallet()), not
+       the full target — that only reaches 'Commission Paid Out' as the client
+       keeps paying. */
     const orderIds = [...new Set(ALL_COMMISSIONS.map(c => c.order_id))];
-    window._cmOrderMap = {};
+    window._cmOrderMap  = {};
+    window._cmOrderInfo = {};
     if (orderIds.length > 0) {
       const { data: orders } = await sb
         .from('orders')
-        .select('id, order_number')
+        .select('id, order_number, status, total_price, advance_paid')
         .in('id', orderIds);
-      (orders || []).forEach(o => { window._cmOrderMap[o.id] = o.order_number || o.id.slice(0,8).toUpperCase(); });
+      (orders || []).forEach(o => {
+        window._cmOrderMap[o.id]  = o.order_number || o.id.slice(0,8).toUpperCase();
+        window._cmOrderInfo[o.id] = { status: o.status, total_price: o.total_price, advance_paid: o.advance_paid };
+      });
     }
 
     updateCmStats();
@@ -433,21 +468,70 @@ async function loadCommissions() {
 
 function updateCmStats() {
   const total     = ALL_COMMISSIONS.length;
-  const earned    = ALL_COMMISSIONS.filter(c => c.status === 'earned');
-  const cancelled = ALL_COMMISSIONS.filter(c => c.status === 'cancelled').length;
+  const cancelled = ALL_COMMISSIONS.filter(c => c.status === 'cancelled').length; /* commission-level cancel */
 
-  /* Commission Paid Out — affiliate দের দেওয়া মোট commission */
-  const earnedAmt = earned.reduce((s, c) => s + Number(c.commission_amount || 0), 0);
+  /* Order-level cancel — distinct orders (behind these commissions) whose
+     order.status is 'cancelled'. Separate metric from commission-level
+     cancel: an order can be cancelled while its commission row still says
+     'pending'/'earned' (never explicitly voided), and a commission can be
+     cancelled while the order itself completed fine. */
+  const cancelledOrderIds = new Set(
+    ALL_COMMISSIONS
+      .filter(c => ((window._cmOrderInfo || {})[c.order_id] || {}).status === 'cancelled')
+      .map(c => c.order_id)
+  );
+  const orderCancelled = cancelledOrderIds.size;
 
-  /* Platform Revenue — সব earned order এর total amount - commission */
-  const totalOrderAmt  = earned.reduce((s, c) => s + Number(c.order_amount || 0), 0);
-  const platformRevenue = totalOrderAmt - earnedAmt;
+  /* Commission Paid Out / Platform Revenue — aggregated live across every
+     affiliate's commissions, per commission row:
+       - order itself cancelled → skip entirely (nothing happened)
+       - commission cancelled (order still valid) → whatever the client has
+         actually paid so far (advance_paid) goes 100% to Platform Revenue —
+         affiliate isn't owed anything, so 0 to Commission Paid Out
+       - otherwise (pending/earned/withdrawn) → only the CLEARED slice counts
+         as Commission Paid Out: full commission_amount once status is
+         'earned'/'withdrawn' (order fully paid), or the proportional slice
+         of commission_amount matching advance_paid/total_price while still
+         'pending'. The remainder of what's been paid so far
+         (advance_paid − cleared commission) goes to Platform Revenue.
+     This auto-updates the moment a client sends more payment (advance_paid
+     changes) or a commission is cancelled — no separate manual step needed.
+     Actual money sent to affiliates lives in the separate Withdrawals tab. */
+  let earnedAmt      = 0;
+  let platformRevenue = 0;
+
+  ALL_COMMISSIONS.forEach(c => {
+    const info = (window._cmOrderInfo || {})[c.order_id] || {};
+    if (info.status === 'cancelled') return; /* whole order voided — nothing counts */
+
+    const totalPrice  = Number(info.total_price ?? c.order_amount ?? 0);
+    const advancePaid = Math.min(Math.max(Number(info.advance_paid || 0), 0), totalPrice);
+    const commAmt     = Number(c.commission_amount || 0);
+
+    if (c.status === 'cancelled') {
+      platformRevenue += advancePaid; /* affiliate cut cancelled, platform keeps whatever client already paid */
+      return;
+    }
+
+    let cleared;
+    if (c.status === 'earned' || c.status === 'withdrawn') {
+      cleared = commAmt; /* order fully paid — full commission cleared */
+    } else if (totalPrice > 0) {
+      cleared = Math.round((commAmt * advancePaid / totalPrice) * 100) / 100; /* proportional to payment received so far */
+    } else {
+      cleared = 0;
+    }
+
+    earnedAmt        += cleared;
+    platformRevenue  += (advancePaid - cleared);
+  });
 
   const fmt = n => '৳' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   document.getElementById('cm-total').textContent            = total;
   document.getElementById('cm-earned-amount').textContent    = fmt(earnedAmt);
   document.getElementById('cm-platform-revenue').textContent = fmt(platformRevenue);
+  document.getElementById('cm-order-cancelled').textContent  = orderCancelled;
   document.getElementById('cm-cancelled').textContent        = cancelled;
   document.getElementById('cm-subtitle').textContent =
     `${total} টি commission — Commission Paid ৳${earnedAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })} · Platform Revenue ৳${platformRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
@@ -469,7 +553,7 @@ function renderCmTable() {
   if (rows.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="cl-empty">
+        <td colspan="10" class="cl-empty">
           <i class="ti ti-inbox"></i>
           <p>${CM_FILTER === 'all' ? 'কোনো commission নেই' : `কোনো ${CM_FILTER} commission নেই`}</p>
         </td>
@@ -529,7 +613,7 @@ function buildCmRow(cm) {
                    </button>`;
 
   return `
-    <tr>
+    <tr onclick="cmHistoryOpen && cmHistoryOpen('${cm.affiliate_id}')" style="cursor:pointer;" title="এই affiliate-এর order history দেখুন">
       <td>
         <div class="cl-name-cell">
           ${esAvatarHtml(affName, aff.avatar_url, affBg, affInitials)}
@@ -547,6 +631,7 @@ function buildCmRow(cm) {
         </div>
       </td>
       <td style="font-size:.82rem;font-weight:600;">${orderAmt}</td>
+      <td>${buildPaidPctCell(cm)}</td>
       <td style="font-size:.78rem;color:var(--muted2);">${rate}</td>
       <td style="font-size:.85rem;font-weight:700;color:#34d399;">${commAmt}</td>
       <td>
@@ -554,7 +639,7 @@ function buildCmRow(cm) {
         ${noteHtml}
       </td>
       <td style="color:var(--muted2);font-size:.78rem;">${date}</td>
-      <td style="white-space:nowrap;">
+      <td style="white-space:nowrap;" onclick="event.stopPropagation();">
         ${actionBtn}
         ${noteBtn}
       </td>

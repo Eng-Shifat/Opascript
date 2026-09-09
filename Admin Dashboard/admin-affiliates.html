@@ -118,7 +118,7 @@
     <div id="tabCommissions" style="display:none;">
 
       <!-- Commission Stats -->
-      <div class="cl-stats">
+      <div class="cl-stats" style="grid-template-columns:repeat(5,1fr);">
         <div class="cl-stat">
           <div class="cl-stat-label">Commission Paid Out</div>
           <div class="cl-stat-val green" id="cm-earned-amount">—</div>
@@ -135,9 +135,14 @@
           <div class="cl-stat-sub">সব commission entries</div>
         </div>
         <div class="cl-stat">
-          <div class="cl-stat-label">Cancelled</div>
+          <div class="cl-stat-label">Order Cancelled</div>
+          <div class="cl-stat-val red" id="cm-order-cancelled">—</div>
+          <div class="cl-stat-sub">পুরো order বাতিল হয়েছে</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-label">Commission Cancelled</div>
           <div class="cl-stat-val red" id="cm-cancelled">—</div>
-          <div class="cl-stat-sub">voided</div>
+          <div class="cl-stat-sub">order ঠিক আছে, শুধু commission voided</div>
         </div>
       </div>
 
@@ -159,6 +164,7 @@
               <th>Order #</th>
               <th>Referred Client</th>
               <th>Order Amount</th>
+              <th>Paid %</th>
               <th>Rate</th>
               <th>Commission</th>
               <th>Status / Note</th>
@@ -168,7 +174,7 @@
           </thead>
           <tbody id="cm-tbody">
             <tr>
-              <td colspan="8" class="cl-empty">
+              <td colspan="10" class="cl-empty">
                 <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
                 <p>Loading commissions...</p>
               </td>
@@ -507,6 +513,7 @@
 </style>
 
 <script src="js/aff-profile-modal.js"></script>
-<script src="js/admin-affiliates.js?v=3"></script>
+<script src="js/aff-commission-history-modal.js"></script>
+<script src="js/admin-affiliates.js?v=4"></script>
 </body>
 </html>
