@@ -1666,7 +1666,7 @@ function initNav() {
 /* ── AFFILIATE STATE ─────────────────────────────────────────── */
 let _affStateLoaded = false; /* একবার load হলে আর reload দরকার নেই, unless forced */
 let _currentAffiliateId = null;
-let _affiliateTotalWithdrawn = null; /* set by loadAffiliateWithdrawals, read by pending_clearance */
+
 
 async function loadAffiliateState(force = false) {
   if (_affStateLoaded && !force) return;
@@ -2007,8 +2007,12 @@ async function loadAffiliateEarnings(affiliateId) {
     }
 
     if (pendingEl)   pendingEl.textContent   = fmt(wallet.pending_withdrawal);
-    /* pending_clearance will be recalculated accurately from commission data below */
-    if (clearanceEl) clearanceEl.textContent = '…';
+    /* pending_clearance comes straight from get_affiliate_wallet(): it already sums,
+       per commission, the unpaid slice of 'pending' rows (commission_amount minus the
+       proportional amount the client has paid so far via orders.advance_paid) and
+       counts 0 for 'cancelled' rows (excluded server-side entirely). No client-side
+       recalculation needed or wanted — that was the source of the wrong ৳30 value. */
+    if (clearanceEl) clearanceEl.textContent = fmt(wallet.pending_clearance);
 
     // Draw sparklines after values are set
     setTimeout(initEarningSparklines, 50);
@@ -2021,38 +2025,6 @@ async function loadAffiliateEarnings(affiliateId) {
     const { data: comms, error } = await sb.rpc('get_my_affiliate_commissions');
 
     if (error) throw error;
-
-    /* ── Pending clearance — provisional value using wallet arithmetic ─────
-       Store wallet fields as data-attrs so loadAffiliateWithdrawals can
-       overwrite this with a precise value once total_withdrawn is known.
-       Provisional formula: total_earned - available - pending_withdrawal
-       (ignores total_withdrawn — will be corrected below after withdrawals load). */
-    /* cancelled commission গুলো sum করো */
-    const cancelledCommSum = Array.isArray(comms)
-      ? comms.filter(c => c.status === 'cancelled').reduce((s, c) => s + Number(c.commission_amount || 0), 0)
-      : 0;
-
-    if (clearanceEl) {
-      const wTotalEarned = Number(wallet.total_earned       || 0);
-      const wAvailable   = Number(wallet.available_balance  || 0);
-      const wPendingWd   = Number(wallet.pending_withdrawal || 0);
-
-      /* Store on element for use by loadAffiliateWithdrawals */
-      clearanceEl.dataset.walletTotalEarned = wTotalEarned;
-      clearanceEl.dataset.walletAvailable   = wAvailable;
-      clearanceEl.dataset.walletPendingWd   = wPendingWd;
-      clearanceEl.dataset.cancelledSum      = cancelledCommSum;
-
-      if (_affiliateTotalWithdrawn !== null) {
-        /* loadAffiliateWithdrawals already ran — use the exact value */
-        clearanceEl.textContent = fmt(Math.max(0,
-          wTotalEarned - wAvailable - _affiliateTotalWithdrawn - wPendingWd - cancelledCommSum
-        ));
-      } else {
-        /* Provisional until withdrawals load — show '…' */
-        clearanceEl.textContent = '…';
-      }
-    }
 
     /* Show/hide withdrawal form based on balance & pending requests */
     const { data: openReq } = await sb
@@ -2202,29 +2174,12 @@ async function loadAffiliateWithdrawals(affiliateId) {
     const totalWithdrawnEl = document.getElementById('affTotalWithdrawn');
     const paidSum = (rows || []).filter(w => w.status === 'paid')
       .reduce((sum, w) => sum + Number(w.amount || 0), 0);
-    _affiliateTotalWithdrawn = paidSum; /* share with pending_clearance recalc */
     if (totalWithdrawnEl) {
       totalWithdrawnEl.textContent = '৳' + paidSum.toLocaleString('en-IN', { minimumFractionDigits: 2 });
       setTimeout(() => drawEarningSparkline('sparkWithdrawn', '#a78bfa'), 50);
     }
-
-    /* ── Re-render pending_clearance now that total_withdrawn is confirmed ──
-       loadAffiliateEarnings runs concurrently and may have used a fallback.
-       Now we have the exact paid sum, so overwrite with the correct value.  */
-    const clearanceEl2 = document.getElementById('affPendingClearance');
-    if (clearanceEl2) {
-      const walletEarned  = parseFloat(clearanceEl2.dataset.walletTotalEarned  || '0');
-      const walletAvail   = parseFloat(clearanceEl2.dataset.walletAvailable    || '0');
-      const walletPendWd  = parseFloat(clearanceEl2.dataset.walletPendingWd    || '0');
-      /* Always recalculate — including when walletEarned is 0, otherwise
-         clearanceEl2 is left showing '…' forever for zero-earning affiliates
-         instead of ৳0.00. */
-      const fmt2 = n => '৳' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      /* cancelledSum — clearanceEl2 এ cancelled commission total store করা আছে */
-      const cancelledSum = parseFloat(clearanceEl2.dataset.cancelledSum || '0');
-      const correctClearance = Math.max(0, walletEarned - walletAvail - paidSum - walletPendWd - cancelledSum);
-      clearanceEl2.textContent = fmt2(correctClearance);
-    }
+    /* pending_clearance is set once, directly from wallet.pending_clearance,
+       in loadAffiliateEarnings() — no re-render needed here. */
 
     if (!rows || rows.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted);font-size:12px;">কোনো withdrawal request নেই।</td></tr>';
