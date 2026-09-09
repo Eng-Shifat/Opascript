@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>404 — পেজ খুঁজে পাওয়া যায়নি | Opascript</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: #0a0f1e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      padding: 40px 20px;
+      color: #fff;
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 40px;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: #3b82f6; }
+    .num-wrap {
+      position: relative;
+      margin-bottom: 16px;
+      line-height: 1;
+    }
+    .num-bg {
+      font-size: clamp(80px, 18vw, 130px);
+      font-weight: 800;
+      color: #1a2540;
+      user-select: none;
+    }
+    .num-fg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(80px, 18vw, 130px);
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      border-radius: 2px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    p.sub {
+      font-size: 14px;
+      color: #64748b;
+      text-align: center;
+      max-width: 320px;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .btns {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-primary {
+      padding: 12px 28px;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-secondary {
+      padding: 12px 28px;
+      background: transparent;
+      color: #94a3b8;
+      border: 1.5px solid #1e293b;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: #3b82f6; color: #fff; }
+    footer {
+      margin-top: 48px;
+      font-size: 12px;
+      color: #1e3a5f;
+    }
+  </style>
+</head>
+<body>
+  <a class="logo" href="/index.html">Opa<span>script</span></a>
+
+  <div class="num-wrap">
+    <div class="num-bg">404</div>
+    <div class="num-fg">404</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h1>পেজটি খুঁজে পাওয়া যায়নি</h1>
+  <p class="sub">আপনি যে পেজটি খুঁজছেন সেটি সরানো হয়েছে, নামে পরিবর্তন হয়েছে, বা এটি কখনো ছিল না।</p>
+
+  <div class="btns">
+    <a class="btn-primary" href="/index.html">🏠 হোমপেজে যান</a>
+    <a class="btn-secondary" href="/index.html#contact">📞 যোগাযোগ করুন</a>
+  </div>
+
+  <footer>© 2025 Opascript. সর্বস্বত্ব সংরক্ষিত।</footer>
+</body>
+</html>
