@@ -71,4 +71,29 @@
     checkAuth();
   }
 
+  /* ── SESSION TIMEOUT — 30 মিনিট inactive হলে auto logout ── */
+  const TIMEOUT_MS = 30 * 60 * 1000; // 30 মিনিট
+  let timeoutTimer = null;
+
+  function resetTimer() {
+    clearTimeout(timeoutTimer);
+    timeoutTimer = setTimeout(async () => {
+      const sb = window.scriptoraSupabase;
+      if (sb) await sb.auth.signOut({ scope: 'local' });
+      localStorage.removeItem('scriptora_role');
+      localStorage.removeItem('scriptora_email');
+      localStorage.removeItem('scriptora_client_id');
+      sessionStorage.setItem('scriptora_timeout', '1');
+      window.location.href = LOGIN_PATH;
+    }, TIMEOUT_MS);
+  }
+
+  /* User activity এ timer reset করো */
+  ['click','mousemove','keydown','scroll','touchstart'].forEach(evt => {
+    document.addEventListener(evt, resetTimer, { passive: true });
+  });
+
+  /* প্রথমবার start করো */
+  resetTimer();
+
 })();

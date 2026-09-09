@@ -108,25 +108,36 @@
   async function verifyAdminAccess() {
     try {
       if (!window.scriptoraSupabase) {
-        window.location.href = '../Login Page/login.html';
+        window.location.href = '../Login page/login.html';
         return null;
       }
       const sb = window.scriptoraSupabase;
       const { data: { session } } = await sb.auth.getSession();
 
       if (!session) {
-        window.location.href = '../Login Page/login.html';
+        window.location.href = '../Login page/login.html';
         return null;
       }
       const user = session.user;
+
+      // ── Layer 1: email check (fast) ──
       if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-        /* Valid login কিন্তু admin না — client dashboard এ পাঠিয়ে দিন */
         window.location.href = '../Client Dashboard/dashboard.html';
         return null;
       }
+
+      // ── Layer 2: database check via is_admin() RPC ──
+      // এটা admins table এ actual row আছে কিনা verify করে
+      // কেউ email spoof করলেও এই check pass করতে পারবে না
+      const { data: isAdmin, error } = await sb.rpc('is_admin');
+      if (error || !isAdmin) {
+        window.location.href = '../Client Dashboard/dashboard.html';
+        return null;
+      }
+
       return user;
     } catch (e) {
-      window.location.href = '../Login Page/login.html';
+      window.location.href = '../Login page/login.html';
       return null;
     }
   }
