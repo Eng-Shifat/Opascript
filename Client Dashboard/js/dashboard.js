@@ -2639,8 +2639,26 @@ async function loadAffiliateStats(period) {
     set('affStatThisMonth',  fmt(stats.this_month_earnings));
     set('affStatLastMonth',  fmt(stats.last_month_earnings));
 
-    // Draw analytics line chart
-    setTimeout(() => drawAnalyticsChart(stats), 80);
+    // Draw analytics line chart — daily orders commission থেকে আনো
+    setTimeout(async () => {
+      let dailyOrders = [];
+      try {
+        const { data: commRows } = await sb.rpc('get_my_affiliate_commissions');
+        if (commRows && commRows.length) {
+          // commission row-এর date দিয়ে group করো
+          const ordersByDate = {};
+          commRows.forEach(r => {
+            const date = String(r.created_at || r.order_date || '').slice(0, 10);
+            if (!date) return;
+            ordersByDate[date] = (ordersByDate[date] || 0) + 1;
+          });
+          // daily_clicks-এর date list অনুযায়ী align করো
+          const dateList = (stats.daily_clicks || []).map(d => String(d.date).slice(0, 10));
+          dailyOrders = dateList.map(d => ordersByDate[d] || 0);
+        }
+      } catch(e) { /* silent */ }
+      drawAnalyticsChart(stats, dailyOrders);
+    }, 80);
 
     // Referral funnel visual (Step 3)
     setTimeout(() => renderAffiliateFunnel(stats), 100);
@@ -2653,211 +2671,129 @@ async function loadAffiliateStats(period) {
   }
 }
 
-/* ── Analytics Line Chart ────────────────────────────────────── */
-function drawAnalyticsChart(stats) {
+/* ── Analytics Chart — Chart.js (admin style bar + line combo) ── */
+let _affAnalyticsChart = null;
+
+function drawAnalyticsChart(stats, dailyOrders) {
   const canvas = document.getElementById('affAnalyticsChart');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const wrap = canvas.parentElement;
-  const W = wrap.clientWidth || 700;
-  const H = 240;
 
-  canvas.width  = Math.round(W * dpr);
-  canvas.height = Math.round(H * dpr);
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
-  ctx.scale(dpr, dpr);
-
+  /* ── Parse data ───────────────────────────────────────────── */
   const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const parseDate  = s => { const [y,m,d] = String(s).slice(0,10).split('-').map(Number); return new Date(y,m-1,d); };
 
-  /* The backend returns a dense, zero-filled daily series — one entry
-     per calendar day actually covered by the selected period. */
   const dailyClicks  = stats.daily_clicks  || [];
   const dailySignups = stats.daily_signups || [];
-  const parseDate = s => {
-    const [y, m, d] = String(s).slice(0, 10).split('-').map(Number);
-    return new Date(y, m - 1, d);
-  };
-  const dateList = dailyClicks.length ? dailyClicks.map(d => parseDate(d.date)) : [new Date()];
-  const clicks   = dailyClicks.length  ? dailyClicks.map(d => d.clicks || 0)    : [0];
-  const unique   = dailyClicks.length  ? dailyClicks.map(d => d.unique_clicks || Math.round((d.clicks || 0) * 0.7)) : [0];
-  const signups  = dailySignups.length ? dailySignups.map(d => d.signups || 0)  : [0];
-  const days = dateList.length;
 
-  const padL = 38, padR = 16, padT = 18, padB = 44;
-  const drawW = W - padL - padR;
-  const drawH = H - padT - padB;
+  const dateList = dailyClicks.length ? dailyClicks.map(r => parseDate(r.date)) : [new Date()];
+  const clicks   = dailyClicks.length  ? dailyClicks.map(r => r.clicks || 0) : [0];
+  const unique   = dailyClicks.length  ? dailyClicks.map(r => r.unique_clicks || Math.round((r.clicks||0)*0.7)) : [0];
+  const signups  = dailySignups.length ? dailySignups.map(r => r.signups || 0) : [0];
+  const orders   = (dailyOrders && dailyOrders.length) ? dailyOrders : dateList.map(() => 0);
 
-  // Nice rounded max
-  const rawMax = Math.max(...clicks, ...unique, ...signups, 1);
-  const mag    = Math.pow(10, Math.floor(Math.log10(rawMax)));
-  const maxVal = rawMax <= 5 ? 5 : Math.ceil(rawMax / mag) * mag;
+  const labels = dateList.map(d => monthNames[d.getMonth()] + ' ' + d.getDate());
 
-  const toX = i => padL + (days > 1 ? (i / (days - 1)) : 0) * drawW;
-  const toY = v => padT + (1 - Math.min(v, maxVal) / maxVal) * drawH;
+  /* ── Destroy previous instance ───────────────────────────── */
+  if (_affAnalyticsChart) { _affAnalyticsChart.destroy(); _affAnalyticsChart = null; }
 
-  // Smooth cubic bezier path builder (tension 0.38)
-  const buildPath = data => {
-    let d = '';
-    for (let i = 0; i < days; i++) {
-      if (i === 0) { d += `M ${toX(0)},${toY(data[0])}`; continue; }
-      const tension = 0.38;
-      const x0 = toX(i - 1), y0 = toY(data[i - 1]);
-      const x1 = toX(i),     y1 = toY(data[i]);
-      const cpx1 = x0 + (x1 - x0) * tension;
-      const cpx2 = x1 - (x1 - x0) * tension;
-      d += ` C ${cpx1},${y0} ${cpx2},${y1} ${x1},${y1}`;
-    }
-    return d;
-  };
+  const ctx = canvas.getContext('2d');
 
-  // Clear
-  ctx.clearRect(0, 0, W, H);
+  /* ── Gradients ───────────────────────────────────────────── */
+  const gradPurple = ctx.createLinearGradient(0, 0, 0, 260);
+  gradPurple.addColorStop(0,   'rgba(108,99,255,0.50)');
+  gradPurple.addColorStop(1,   'rgba(108,99,255,0.02)');
 
-  // ── Background subtle grid ──────────────────────────────────
-  ctx.strokeStyle = 'rgba(255,255,255,0.055)';
-  ctx.lineWidth = 1;
-  const gridSteps = 4;
-  for (let g = 0; g <= gridSteps; g++) {
-    const y = padT + (g / gridSteps) * drawH;
-    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
-    // Y labels
-    const label = Math.round(maxVal * (1 - g / gridSteps));
-    ctx.fillStyle = 'rgba(255,255,255,0.28)';
-    ctx.font = '9.5px "Sora",sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(label, padL - 7, y + 3.5);
-  }
+  const gradBlue = ctx.createLinearGradient(0, 0, 0, 260);
+  gradBlue.addColorStop(0,   'rgba(96,165,250,0.30)');
+  gradBlue.addColorStop(1,   'rgba(96,165,250,0.01)');
 
-  // ── X-axis date labels — all 30 dates, show every 5th ───────
-  ctx.fillStyle = 'rgba(255,255,255,0.32)';
-  ctx.font = '9px "Sora",sans-serif';
-  ctx.textAlign = 'center';
-  // Show label every 5 days; always show first and last
-  const xStep = days <= 10 ? 1 : days <= 20 ? 2 : 5;
-  for (let i = 0; i < days; i++) {
-    if (i % xStep !== 0 && i !== days - 1) continue;
-    const d   = dateList[i];
-    const lbl = monthNames[d.getMonth()] + ' ' + d.getDate();
-    ctx.fillText(lbl, toX(i), H - padB + 14);
-  }
-
-  // ── Helper: draw smooth filled area ─────────────────────────
-  const drawArea = (data, colorStop0, colorStop1) => {
-    const path2d = new Path2D();
-    path2d.moveTo(toX(0), toY(data[0]));
-    for (let i = 1; i < days; i++) {
-      const tension = 0.38;
-      const x0 = toX(i-1), y0 = toY(data[i-1]);
-      const x1 = toX(i),   y1 = toY(data[i]);
-      path2d.bezierCurveTo(x0 + (x1-x0)*tension, y0, x1 - (x1-x0)*tension, y1, x1, y1);
-    }
-    path2d.lineTo(toX(days-1), padT + drawH);
-    path2d.lineTo(toX(0), padT + drawH);
-    path2d.closePath();
-    const g = ctx.createLinearGradient(0, padT, 0, padT + drawH);
-    g.addColorStop(0,   colorStop0);
-    g.addColorStop(0.65, colorStop1);
-    g.addColorStop(1,   'rgba(0,0,0,0)');
-    ctx.fillStyle = g;
-    ctx.fill(path2d);
-  };
-
-  // ── Helper: draw smooth stroke line ─────────────────────────
-  const drawStroke = (data, color, lineWidth, dash) => {
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(toX(0), toY(data[0]));
-    for (let i = 1; i < days; i++) {
-      const tension = 0.38;
-      const x0 = toX(i-1), y0 = toY(data[i-1]);
-      const x1 = toX(i),   y1 = toY(data[i]);
-      ctx.bezierCurveTo(x0 + (x1-x0)*tension, y0, x1 - (x1-x0)*tension, y1, x1, y1);
-    }
-    ctx.strokeStyle = color;
-    ctx.lineWidth   = lineWidth;
-    ctx.lineJoin    = 'round';
-    ctx.lineCap     = 'round';
-    if (dash) ctx.setLineDash(dash); else ctx.setLineDash([]);
-
-    // Glow: draw wide blurred layer first
-    ctx.shadowColor   = color;
-    ctx.shadowBlur    = 8;
-    ctx.globalAlpha   = 0.5;
-    ctx.stroke();
-    // Crisp top layer
-    ctx.shadowBlur    = 0;
-    ctx.globalAlpha   = 1;
-    ctx.stroke();
-    ctx.restore();
-  };
-
-  // ── Draw areas (bottom layers) ───────────────────────────────
-  drawArea(clicks,  'rgba(139,92,246,0.32)',  'rgba(139,92,246,0.06)');
-  drawArea(unique,  'rgba(96,165,250,0.18)',  'rgba(96,165,250,0.03)');
-  drawArea(signups, 'rgba(52,211,153,0.2)',   'rgba(52,211,153,0.03)');
-
-  // ── Draw lines ───────────────────────────────────────────────
-  drawStroke(clicks,  '#a78bfa', 2.2, null);
-  drawStroke(unique,  '#60a5fa', 1.6, null);
-  if (Math.max(...signups) > 0) drawStroke(signups, '#34d399', 1.8, null);
-
-  // ── Dots on non-zero points ──────────────────────────────────
-  const drawDot = (v, i, outerColor, innerColor, outerR, innerR) => {
-    if (v === 0) return;
-    const x = toX(i), y = toY(v);
-    ctx.beginPath(); ctx.arc(x, y, outerR, 0, Math.PI * 2);
-    ctx.fillStyle = outerColor; ctx.fill();
-    ctx.beginPath(); ctx.arc(x, y, innerR, 0, Math.PI * 2);
-    ctx.fillStyle = innerColor; ctx.fill();
-  };
-  clicks.forEach((v, i)  => drawDot(v, i, 'rgba(15,18,40,0.9)', '#a78bfa', 4,   2.5));
-  unique.forEach((v, i)  => drawDot(v, i, 'rgba(15,18,40,0.9)', '#60a5fa', 3.5, 2));
-  signups.forEach((v, i) => drawDot(v, i, 'rgba(15,18,40,0.9)', '#34d399', 3.5, 2));
-
-  // ── Hover crosshair + tooltip ────────────────────────────────
-  canvas._chartData = { clicks, unique, signups, days, dateList, toX, toY, W, H, drawW, padT, padB, maxVal, monthNames };
-  canvas.onmousemove = function(e) {
-    const rect = canvas.getBoundingClientRect();
-    const mx   = (e.clientX - rect.left) * (W / rect.width);
-    const cd   = canvas._chartData;
-    let nearest = 0, minDist = Infinity;
-    for (let i = 0; i < cd.days; i++) {
-      const dist = Math.abs(cd.toX(i) - mx);
-      if (dist < minDist) { minDist = dist; nearest = i; }
-    }
-    if (minDist > cd.drawW / cd.days + 12) { canvas._tip && (canvas._tip.style.display = 'none'); return; }
-
-    const cl = cd.clicks[nearest];
-    const uq = cd.unique[nearest];
-    const sg = cd.signups[nearest];
-    const d  = cd.dateList[nearest];
-    const label = cd.monthNames[d.getMonth()] + ' ' + d.getDate();
-
-    let tip = canvas._tip;
-    if (!tip) {
-      tip = document.createElement('div');
-      tip.style.cssText = 'position:absolute;background:rgba(10,14,35,0.95);border:1px solid rgba(139,92,246,0.35);border-radius:10px;padding:10px 14px;font-size:12px;color:#fff;pointer-events:none;z-index:99;min-width:130px;backdrop-filter:blur(10px);box-shadow:0 8px 24px rgba(0,0,0,0.5);';
-      canvas.parentElement.style.position = 'relative';
-      canvas.parentElement.appendChild(tip);
-      canvas._tip = tip;
-    }
-    tip.innerHTML =
-      '<div style="font-weight:700;margin-bottom:6px;font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:.05em;text-transform:uppercase;">' + label + '</div>'
-      + '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#a78bfa;box-shadow:0 0 5px #a78bfa88;display:inline-block;flex-shrink:0;"></span><span style="color:rgba(255,255,255,0.55);flex:1;">Clicks</span><b style="color:#fff;">' + cl + '</b></div>'
-      + '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#60a5fa;display:inline-block;flex-shrink:0;"></span><span style="color:rgba(255,255,255,0.55);flex:1;">Unique</span><b style="color:#fff;">' + uq + '</b></div>'
-      + '<div style="display:flex;align-items:center;gap:7px;"><span style="width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 5px #34d39988;display:inline-block;flex-shrink:0;"></span><span style="color:rgba(255,255,255,0.55);flex:1;">Signups</span><b style="color:#34d399;">' + sg + '</b></div>';
-
-    const tipX = Math.min(cd.toX(nearest) + 14, W - 148);
-    const topY = cd.toY(Math.max(cl, sg, 1)) - 24;
-    tip.style.left    = tipX + 'px';
-    tip.style.top     = Math.max(4, topY) + 'px';
-    tip.style.display = 'block';
-  };
-  canvas.onmouseleave = function() {
-    if (canvas._tip) canvas._tip.style.display = 'none';
-  };
+  /* ── Build chart ─────────────────────────────────────────── */
+  _affAnalyticsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label:           'Clicks',
+          data:            clicks,
+          backgroundColor: gradPurple,
+          borderRadius:    5,
+          borderSkipped:   false,
+          order:           3,
+        },
+        {
+          label:           'Unique Clicks',
+          data:            unique,
+          backgroundColor: gradBlue,
+          borderRadius:    5,
+          borderSkipped:   false,
+          order:           4,
+        },
+        {
+          label:                'Signups',
+          data:                 signups,
+          type:                 'line',
+          borderColor:          '#34d399',
+          backgroundColor:      'transparent',
+          borderWidth:          2.5,
+          pointBackgroundColor: '#34d399',
+          pointRadius:          4,
+          pointHoverRadius:     6,
+          tension:              0.4,
+          order:                2,
+        },
+        {
+          label:                'Orders',
+          data:                 orders,
+          type:                 'line',
+          borderColor:          '#f59e0b',
+          backgroundColor:      'transparent',
+          borderWidth:          2.5,
+          pointBackgroundColor: '#f59e0b',
+          pointRadius:          4,
+          pointHoverRadius:     6,
+          tension:              0.4,
+          order:                1,
+        },
+      ],
+    },
+    options: {
+      responsive:          true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color:    '#6b7280',
+            font:     { family: 'Sora', size: 11 },
+            boxWidth: 12,
+            padding:  16,
+          },
+        },
+        tooltip: {
+          backgroundColor: '#131629',
+          borderColor:     'rgba(255,255,255,0.1)',
+          borderWidth:     1,
+          titleColor:      '#e8eaf6',
+          bodyColor:       '#9ca3af',
+          callbacks: {
+            label: c => ` ${c.dataset.label}: ${c.raw}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid:  { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#6b7280', font: { family: 'Sora', size: 10 }, maxRotation: 0 },
+        },
+        y: {
+          grid:  { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#6b7280', font: { family: 'Sora', size: 10 }, precision: 0 },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
 }
 
 /* ── AFFILIATE LEADERBOARD (Phase 8) ─────────────────────────── */
@@ -2870,7 +2806,7 @@ async function loadAffiliateLeaderboard() {
   try {
     const { data, error } = await sb.rpc('get_affiliate_leaderboard', {
       p_limit: 10,
-      p_period: 'all_time'
+      p_period: 'this_month'
     });
     if (error || !data?.success) {
       /* Real fetch failure — surface it via the shared error banner instead
