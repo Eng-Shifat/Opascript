@@ -80,20 +80,21 @@ window._loadRevisions = async function () {
     const revisions = await RevisionService.getRevisions(orderId);
 
     if (!revisions.length) {
-      const { data: allRevs, error: allErr } = await window._sb()
-        .from('revisions')
-        .select('id, order_id, revision_number')
-        .limit(10);
+      /* Normal, expected state: this order simply has no revision
+         requests yet — not an error. Render the Final Delivery section
+         (still fully usable) plus a plain empty-state card instead of
+         a raw table dump.
 
-      const dbIds = (allRevs || []).map(r => r.order_id).join('<br>');
-      const errMsg = allErr ? 'DB Error: ' + allErr.message : '';
-      el.innerHTML = '<div class="rev-error" style="font-size:12px;line-height:1.8">'
-        + '<b>Debug — order_id mismatch check</b><br>'
-        + 'Panel order_id: <code style="color:#f97316;word-break:break-all">' + _esc(orderId) + '</code><br><br>'
-        + (errMsg ? errMsg + '<br>' : '')
-        + 'DB revisions order_id গুলো:<br>'
-        + '<code style="color:#22c55e;word-break:break-all">' + (dbIds || '(table খালি বা RLS block)') + '</code>'
+         Note: an actual DB/RLS failure would throw inside
+         RevisionService.getRevisions() above and be caught by the
+         outer try/catch (see bottom of this function), so reaching
+         this branch always means "zero rows", never "query failed". */
+      el.innerHTML = _buildFinalDeliverySectionHTML(orderId)
+        + '<div class="rev-empty" style="padding:16px;text-align:center;color:var(--muted,#8b93a7);font-size:13px;">'
+        + 'এই Order-এর জন্য এখনো কোনো Revision Request আসেনি।'
         + '</div>';
+      _bindFinalDeliveryActions(el);
+      _loadFinalDeliveryFiles(orderId);
       return;
     }
 
