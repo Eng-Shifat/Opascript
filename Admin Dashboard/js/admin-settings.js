@@ -21,10 +21,11 @@ function loadSaved() {
   const d = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
   if (d.displayName)  setVal('s-display-name',  d.displayName);
   if (d.phone)        setVal('s-phone',          d.phone);
-  if (d.platformName) setVal('s-platform-name',  d.platformName);
-  if (d.contactEmail) setVal('s-contact-email',  d.contactEmail);
-  if (d.waNumber)     setVal('s-wa-number',       d.waNumber);
-  if (d.monthlyGoal)  setVal('s-monthly-goal',    d.monthlyGoal);
+  if (d.platformName)    setVal('s-platform-name',    d.platformName);
+  if (d.contactEmail)    setVal('s-contact-email',    d.contactEmail);
+  if (d.waNumber)        setVal('s-wa-number',         d.waNumber);
+  if (d.monthlyGoal)     setVal('s-monthly-goal',      d.monthlyGoal);
+  if (d.commissionRate !== undefined) setVal('s-commission-rate', d.commissionRate);
 
   ['new-order', 'payment', 'message', 'overdue'].forEach(k => {
     const el = document.getElementById('n-' + k);
@@ -79,11 +80,14 @@ async function changePassword() {
 
 /* ── Save Business Settings ── */
 function saveBizSettings() {
+  const rateRaw = parseFloat(getVal('s-commission-rate'));
+  const commissionRate = isNaN(rateRaw) || rateRaw <= 0 ? 5 : rateRaw;
   persist({
-    platformName:  getVal('s-platform-name'),
-    contactEmail:  getVal('s-contact-email'),
-    waNumber:      getVal('s-wa-number'),
-    monthlyGoal:   getVal('s-monthly-goal'),
+    platformName:    getVal('s-platform-name'),
+    contactEmail:    getVal('s-contact-email'),
+    waNumber:        getVal('s-wa-number'),
+    monthlyGoal:     getVal('s-monthly-goal'),
+    commissionRate,
   });
   showMsg('biz-msg', 'ok', '✓ Saved');
   toast('✅ Business settings saved!', '#34d399');

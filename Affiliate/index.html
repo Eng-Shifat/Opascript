@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Affiliate Program — Opascript | Refer করুন, Earn করুন</title>
-  <meta name="description" content="Opascript Affiliate Program-এ যোগ দিন। প্রতিটি সফল referral-এ ১০% commission earn করুন। বাংলাদেশের সেরা academic writing service-এর affiliate হন।"/>
+  <meta name="description" content="Opascript Affiliate Program-এ যোগ দিন। প্রতিটি সফল referral-এ commission earn করুন। বাংলাদেশের সেরা academic writing service-এর affiliate হন।"/>
 
   <!-- Theme bootstrap (prevents flash) -->
   <script>
@@ -45,7 +45,7 @@
 
   <p class="aff-hero-desc">
     Opascript-এর Affiliate হন এবং আপনার Referral Link শেয়ার করুন।
-    প্রতিটি সফল Order-এ <strong style="color:var(--color-green,#34d399);">১০% Commission</strong> পাবেন —
+    প্রতিটি সফল Order-এ <strong style="color:var(--color-green,#34d399);"><span id="heroCommRateHero">৫%</span> Commission</strong> পাবেন —
     সরাসরি আপনার বাংলাদেশি Mobile Banking-এ।
   </p>
 
@@ -64,7 +64,7 @@
   <div class="aff-stat-item">
     <div class="aff-stat-icon">📈</div>
     <div class="aff-stat-body">
-      <div class="aff-stat-val" id="heroCommRate">১০%</div>
+      <div class="aff-stat-val" id="heroCommRate">৫%</div>
       <div class="aff-stat-lbl">Commission Rate</div>
       <div class="aff-stat-sub" id="heroTierBadge">🥉 Bronze Tier</div>
     </div>
@@ -123,7 +123,7 @@
       <div class="aff-step-num">৪</div>
       <span class="aff-step-icon">💰</span>
       <h3>Commission Earn করুন</h3>
-      <p>আপনার Link দিয়ে কেউ Register করে Order দিলে তার মোট Order-এর ১০% আপনার Wallet-এ যোগ হবে।</p>
+      <p>আপনার Link দিয়ে কেউ Register করে Order দিলে তার মোট Order-এর <span id="howItWorksRate">৫%</span> আপনার Wallet-এ যোগ হবে।</p>
     </div>
   </div>
 </section>
@@ -147,7 +147,7 @@
       <div class="aff-calc-result">
         <div style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">মাসিক আনুমানিক Commission</div>
         <div class="aff-calc-result-val" id="calcResult">৳ ১,৫০০</div>
-        <div class="aff-calc-result-note">১০% × <span id="calcRefVal2">৫</span> জন × ৳<span id="calcAmtShow">৩,০০০</span> = ৳<span id="calcBreakdown">১,৫০০</span></div>
+        <div class="aff-calc-result-note"><span id="calcRateLabel">৫%</span> × <span id="calcRefVal2">৫</span> জন × ৳<span id="calcAmtShow">৩,০০০</span> = ৳<span id="calcBreakdown">৭৫০</span></div>
       </div>
     </div>
   </div>
@@ -164,7 +164,7 @@
       <div style="font-size:2.5rem;margin-bottom:12px;">🎓</div>
       <div style="font-weight:700;font-size:1rem;margin-bottom:6px;">University Student</div>
       <div style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:16px;">ক্লাসমেটদের কাছে Share করেন</div>
-      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;">৳৩,০০০</div>
+      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;" id="earningAmt10">৳১,৫০০</div>
       <div style="color:rgba(255,255,255,.4);font-size:.78rem;">মাসে ১০ জন Refer × ৳৩,০০০ avg</div>
     </div>
 
@@ -173,7 +173,7 @@
       <div style="font-size:2.5rem;margin-bottom:12px;">📱</div>
       <div style="font-weight:700;font-size:1rem;margin-bottom:6px;">Facebook / YouTube Creator</div>
       <div style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:16px;">Audience-কে Refer করেন</div>
-      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;">৳১৫,০০০</div>
+      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;" id="earningAmt50">৳৭,৫০০</div>
       <div style="color:rgba(255,255,255,.4);font-size:.78rem;">মাসে ৫০ জন Refer × ৳৩,০০০ avg</div>
     </div>
 
@@ -181,7 +181,7 @@
       <div style="font-size:2.5rem;margin-bottom:12px;">🏫</div>
       <div style="font-weight:700;font-size:1rem;margin-bottom:6px;">Coaching Teacher</div>
       <div style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:16px;">Students-দের Refer করেন</div>
-      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;">৳৩০,০০০</div>
+      <div style="color:var(--color-green,#34d399);font-size:1.8rem;font-weight:800;" id="earningAmt100">৳১৫,০০০</div>
       <div style="color:rgba(255,255,255,.4);font-size:.78rem;">মাসে ১০০ জন Refer × ৳৩,০০০ avg</div>
     </div>
 
@@ -259,7 +259,7 @@
           <span class="aff-faq-arrow">▼</span>
         </button>
         <div class="aff-faq-a">
-          বর্তমানে Commission Rate ১০%। ভবিষ্যতে Top Affiliates-দের জন্য বিশেষ Rate বা Bonus দেওয়ার পরিকল্পনা আছে। যেকোনো পরিবর্তন আগে থেকে জানানো হবে।
+          বর্তমানে Commission Rate <span id="faqCommRate">৫%</span>। ভবিষ্যতে Top Affiliates-দের জন্য বিশেষ Rate বা Bonus দেওয়ার পরিকল্পনা আছে। যেকোনো পরিবর্তন আগে থেকে জানানো হবে।
         </div>
       </div>
 
@@ -285,19 +285,56 @@
 <script src="../shared/footer.js"></script>
 
 <script>
+/* ── Get commission rate from admin settings (localStorage) ── */
+function getCommissionRate() {
+  try {
+    const d = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
+    const r = parseFloat(d.commissionRate);
+    return (!isNaN(r) && r > 0) ? r : 5;
+  } catch(e) { return 5; }
+}
+
 /* ── Calculator ────────────────────────────────────────────── */
+let _tierRateOverride = null; /* set when Supabase tier loaded */
 function calcUpdate() {
+  const rate  = _tierRateOverride !== null ? _tierRateOverride : getCommissionRate();
   const refs  = parseInt(document.getElementById('calcRef').value, 10);
   const amt   = parseFloat(document.getElementById('calcAmt').value) || 0;
-  const comm  = Math.round(refs * amt * 0.10);
+  const comm  = Math.round(refs * amt * (rate / 100));
   const fmt   = v => Number(v).toLocaleString('en-IN');
 
-  document.getElementById('calcRefVal').textContent  = refs + ' জন';
+  document.getElementById('calcRefVal').textContent   = refs + ' জন';
   document.getElementById('calcRefVal2').textContent  = refs;
   document.getElementById('calcAmtShow').textContent  = fmt(amt);
   document.getElementById('calcBreakdown').textContent = fmt(comm);
   document.getElementById('calcResult').textContent   = '৳ ' + fmt(comm);
+  /* update rate label in formula line */
+  const lbl = document.getElementById('calcRateLabel');
+  if (lbl) lbl.textContent = rate + '%';
 }
+
+/* ── Apply dynamic rate to all static rate displays & earning examples ── */
+function applyDynamicRate(rate) {
+  const r = rate || getCommissionRate();
+  if (rate) _tierRateOverride = rate; /* persist tier rate for calculator */
+  const rateText = r + '%';
+  const fmt = v => Number(v).toLocaleString('en-IN');
+
+  ['heroCommRate','heroCommRateHero','howItWorksRate','faqCommRate','calcRateLabel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = rateText;
+  });
+
+  /* Earning example cards: 10 refs, 50 refs, 100 refs × avg ৳3000 */
+  const avg = 3000;
+  const e10  = document.getElementById('earningAmt10');
+  const e50  = document.getElementById('earningAmt50');
+  const e100 = document.getElementById('earningAmt100');
+  if (e10)  e10.textContent  = '৳' + fmt(Math.round(10  * avg * r / 100));
+  if (e50)  e50.textContent  = '৳' + fmt(Math.round(50  * avg * r / 100));
+  if (e100) e100.textContent = '৳' + fmt(Math.round(100 * avg * r / 100));
+}
+applyDynamicRate();
 calcUpdate();
 
 /* ── FAQ accordion ─────────────────────────────────────────── */
@@ -439,23 +476,21 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
         if (!stats?.success) return;
 
         const tier    = stats.tier || {};
-        const rate    = tier.commission_rate || 10;
+        const rate    = tier.commission_rate || getCommissionRate();
         const name    = tier.name || 'Bronze';
         const color   = tier.badge_color || '#cd7f32';
         const emoji   = { Bronze: '🥉', Silver: '🥈', Gold: '🥇', Diamond: '💎' }[name] || '🏅';
 
-        const rateEl  = document.getElementById('heroCommRate');
         const badgeEl = document.getElementById('heroTierBadge');
-        if (rateEl)  rateEl.textContent  = rate + '%';
         if (badgeEl) {
           badgeEl.textContent  = emoji + ' ' + name + ' Tier';
           badgeEl.style.color  = color;
           badgeEl.style.fontWeight = '700';
         }
 
-        /* Also update calculator formula line */
-        const calcNoteEl = document.getElementById('calcRateLabel');
-        if (calcNoteEl) calcNoteEl.textContent = rate + '%';
+        /* Update all rate display spans & earning examples */
+        applyDynamicRate(rate);
+        calcUpdate();
 
       } catch (e) { /* not logged in or no affiliate — default values stay */ }
     }, 500);

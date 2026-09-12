@@ -186,6 +186,16 @@
             <input class="stg-input" type="number" id="s-monthly-goal" placeholder="100000">
           </div>
         </div>
+        <div class="stg-field-row">
+          <div>
+            <div class="stg-field-label">Default Affiliate Commission Rate (%)</div>
+            <div class="stg-field-hint">সব Affiliate-এর জন্য base commission rate — পরিবর্তন করলে Affiliate page ও Admin-এ auto-update হবে</div>
+          </div>
+          <div class="stg-input-wrap">
+            <i class="ti ti-percentage stg-input-icon"></i>
+            <input class="stg-input" type="number" id="s-commission-rate" placeholder="5" min="1" max="100" step="0.5">
+          </div>
+        </div>
         <div class="stg-action-row">
           <span class="stg-inline-msg" id="biz-msg"></span>
           <button class="stg-btn stg-btn-primary" onclick="saveBizSettings()">

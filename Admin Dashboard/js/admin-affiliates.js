@@ -22,6 +22,15 @@
 ══════════════════════════════════════════════════════════ */
 'use strict';
 
+/* ── Global: read default commission rate from admin settings ── */
+window.getDefaultCommissionRate = function() {
+  try {
+    const d = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
+    const r = parseFloat(d.commissionRate);
+    return (!isNaN(r) && r > 0) ? r : 5;
+  } catch(e) { return 5; }
+};
+
 /* ── Shared state ─────────────────────────────────────────── */
 let ALL_APPLICATIONS = [];
 let CLIENT_MAP       = {};   /* client_id → { name, email } */
@@ -1477,7 +1486,7 @@ function renderAnalyticsList() {
             ${tierEmoji} ${esc(r.tier_name || 'Bronze')}
           </span>
         </td>
-        <td style="padding:12px 12px;font-weight:700;color:var(--accent-light);font-size:.9rem;">${r.commission_rate || 10}%</td>
+        <td style="padding:12px 12px;font-weight:700;color:var(--accent-light);font-size:.9rem;">${r.commission_rate || window.getDefaultCommissionRate()}%</td>
         <td style="padding:12px 12px;text-align:right;font-weight:700;font-size:.9rem;">${r.total_referrals || 0}</td>
         <td style="padding:12px 12px;text-align:right;color:var(--muted2);font-size:.85rem;">${r.total_clicks || 0}</td>
         <td style="padding:12px 12px;text-align:right;font-weight:700;color:#34d399;font-size:.9rem;">${fmtAmt(r.total_earned)}</td>
@@ -1500,7 +1509,7 @@ window.loadAnalyticsDetail = async function(affiliateId) {
     const tierEl = document.getElementById('analyticsDetailTier');
     const selEl  = document.getElementById('analyticsSetTierSelect');
     if (codeEl) codeEl.textContent = aff.referral_code || '—';
-    if (tierEl) tierEl.textContent = `${aff.tier_name || 'Bronze'} · ${aff.commission_rate || 10}% commission · ${aff.total_referrals || 0} paid referrals`;
+    if (tierEl) tierEl.textContent = `${aff.tier_name || 'Bronze'} · ${aff.commission_rate || window.getDefaultCommissionRate()}% commission · ${aff.total_referrals || 0} paid referrals`;
     if (selEl)  selEl.value = String(aff.tier_id || 1);
   }
 
@@ -1566,7 +1575,7 @@ window.loadAnalyticsDetail = async function(affiliateId) {
     const codeEl = document.getElementById('analyticsDetailCode');
     const tierEl = document.getElementById('analyticsDetailTier');
     if (codeEl) codeEl.textContent = detail.referral_code || '—';
-    if (tierEl) tierEl.textContent = `${tier.name || 'Bronze'} · ${tier.commission_rate || 10}% commission · ${detail.total_referrals || 0} paid referrals`;
+    if (tierEl) tierEl.textContent = `${tier.name || 'Bronze'} · ${tier.commission_rate || window.getDefaultCommissionRate()}% commission · ${detail.total_referrals || 0} paid referrals`;
 
     // Scroll to panel
     panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
