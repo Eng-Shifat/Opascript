@@ -2,20 +2,54 @@
    SCRIPTORA — dashboard.js  (Supabase connected)
    ================================================ */
 
-/* ── Read default commission rate from admin localStorage settings ── */
-window._getClientCommissionRate = function() {
+/* ── Commission rate cache (localStorage seed, refreshed from Supabase) ── */
+window._clientCommRateCache = (function() {
   try {
     const d = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
     const r = parseFloat(d.commissionRate);
     return (!isNaN(r) && r > 0) ? r : 5;
   } catch(e) { return 5; }
+})();
+
+window._getClientCommissionRate = function() {
+  return window._clientCommRateCache;
 };
 
-/* Apply default rate to promo banner on DOM ready */
-document.addEventListener('DOMContentLoaded', function() {
+function _applyClientCommRate(rate) {
   const el = document.getElementById('clientAffCommRate');
-  if (el) el.textContent = window._getClientCommissionRate() + '%';
+  if (el) el.textContent = rate + '%';
+}
+
+/* Apply cached rate immediately on DOM ready */
+document.addEventListener('DOMContentLoaded', function() {
+  _applyClientCommRate(window._clientCommRateCache);
 });
+
+/* Fetch live rate from Supabase and update if different */
+(async function() {
+  const waitSb = setInterval(async () => {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    clearInterval(waitSb);
+    try {
+      const { data } = await sb.from('app_settings').select('value').eq('key', 'commission_rate').single();
+      if (data?.value) {
+        const r = parseFloat(data.value);
+        if (!isNaN(r) && r > 0) {
+          window._clientCommRateCache = r;
+          _applyClientCommRate(r);
+          /* sync localStorage */
+          try {
+            const ls = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
+            ls.commissionRate = r;
+            localStorage.setItem('scriptora_admin_settings', JSON.stringify(ls));
+          } catch(e) {}
+        }
+      }
+    } catch(e) { /* use cache */ }
+  }, 300);
+  setTimeout(() => clearInterval(waitSb), 6000);
+})();
 
 const SUPABASE_URL  = 'https://hivrmntxpmpwthmjtoem.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdnJtbnR4cG1wd3RobWp0b2VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTEzOTksImV4cCI6MjA5NjEyNzM5OX0.MvsL4Fp_FZI3XBhj3El5sdtO4wbwls90r1SoSVtjPBI';
@@ -2625,9 +2659,7 @@ async function loadAffiliateStats(period) {
     if (tierName) { tierName.textContent = tier.name || '—'; tierName.style.color = tier.badge_color || 'var(--text)'; }
     const resolvedRate = tier.commission_rate || window._getClientCommissionRate();
     if (commRate) commRate.textContent = resolvedRate + '%';
-    /* Also update the promo banner bullet */
-    const clientAffSpan = document.getElementById('clientAffCommRate');
-    if (clientAffSpan) clientAffSpan.textContent = resolvedRate + '%';
+    _applyClientCommRate(resolvedRate);
 
     /* Next tier progress */
     const nextTier = stats.next_tier;

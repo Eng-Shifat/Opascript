@@ -285,14 +285,44 @@
 <script src="../shared/footer.js"></script>
 
 <script>
-/* ── Get commission rate from admin settings (localStorage) ── */
-function getCommissionRate() {
+/* ── Commission rate: localStorage cache, refreshed from Supabase ── */
+let _commRateCache = (function() {
   try {
     const d = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
     const r = parseFloat(d.commissionRate);
     return (!isNaN(r) && r > 0) ? r : 5;
   } catch(e) { return 5; }
-}
+})();
+
+function getCommissionRate() { return _commRateCache; }
+
+/* Fetch live rate from Supabase then refresh all UI */
+(async function loadRateFromSupabase() {
+  const waitSb = setInterval(async () => {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    clearInterval(waitSb);
+    try {
+      const { data } = await sb.from('app_settings').select('value').eq('key', 'commission_rate').single();
+      if (data?.value) {
+        const r = parseFloat(data.value);
+        if (!isNaN(r) && r > 0 && r !== _commRateCache) {
+          _commRateCache = r;
+          /* persist to localStorage */
+          try {
+            const ls = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
+            ls.commissionRate = r;
+            localStorage.setItem('scriptora_admin_settings', JSON.stringify(ls));
+          } catch(e) {}
+          /* refresh all UI (will be overridden by tier rate if affiliate is logged in) */
+          applyDynamicRate(_commRateCache);
+          calcUpdate();
+        }
+      }
+    } catch(e) { /* use cache */ }
+  }, 300);
+  setTimeout(() => clearInterval(waitSb), 6000);
+})();
 
 /* ── Calculator ────────────────────────────────────────────── */
 let _tierRateOverride = null; /* set when Supabase tier loaded */

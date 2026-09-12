@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSaved();
 });
 
-/* ── Load saved settings from localStorage ── */
-function loadSaved() {
+/* ── Load saved settings from localStorage + Supabase ── */
+async function loadSaved() {
   const d = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
   if (d.displayName)  setVal('s-display-name',  d.displayName);
   if (d.phone)        setVal('s-phone',          d.phone);
@@ -25,7 +25,23 @@ function loadSaved() {
   if (d.contactEmail)    setVal('s-contact-email',    d.contactEmail);
   if (d.waNumber)        setVal('s-wa-number',         d.waNumber);
   if (d.monthlyGoal)     setVal('s-monthly-goal',      d.monthlyGoal);
-  if (d.commissionRate !== undefined) setVal('s-commission-rate', d.commissionRate);
+
+  /* Load commission rate from Supabase (authoritative source) */
+  try {
+    const sb = window.scriptoraSupabase;
+    if (sb) {
+      const { data } = await sb.from('app_settings').select('value').eq('key', 'commission_rate').single();
+      if (data?.value) {
+        setVal('s-commission-rate', data.value);
+        /* keep localStorage in sync */
+        persist({ commissionRate: parseFloat(data.value) });
+      } else if (d.commissionRate !== undefined) {
+        setVal('s-commission-rate', d.commissionRate);
+      }
+    }
+  } catch(e) {
+    if (d.commissionRate !== undefined) setVal('s-commission-rate', d.commissionRate);
+  }
 
   ['new-order', 'payment', 'message', 'overdue'].forEach(k => {
     const el = document.getElementById('n-' + k);
@@ -79,18 +95,32 @@ async function changePassword() {
 }
 
 /* ── Save Business Settings ── */
-function saveBizSettings() {
+async function saveBizSettings() {
   const rateRaw = parseFloat(getVal('s-commission-rate'));
   const commissionRate = isNaN(rateRaw) || rateRaw <= 0 ? 5 : rateRaw;
+
+  /* Save non-rate fields to localStorage as before */
   persist({
-    platformName:    getVal('s-platform-name'),
-    contactEmail:    getVal('s-contact-email'),
-    waNumber:        getVal('s-wa-number'),
-    monthlyGoal:     getVal('s-monthly-goal'),
+    platformName:  getVal('s-platform-name'),
+    contactEmail:  getVal('s-contact-email'),
+    waNumber:      getVal('s-wa-number'),
+    monthlyGoal:   getVal('s-monthly-goal'),
     commissionRate,
   });
-  showMsg('biz-msg', 'ok', '✓ Saved');
-  toast('✅ Business settings saved!', '#34d399');
+
+  /* Save commission rate to Supabase so all pages see the change */
+  try {
+    const sb = window.scriptoraSupabase;
+    if (!sb) throw new Error('Supabase not ready');
+    const { error } = await sb.from('app_settings')
+      .upsert({ key: 'commission_rate', value: String(commissionRate), updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
+    showMsg('biz-msg', 'ok', '✓ Saved — Commission Rate ' + commissionRate + '%');
+    toast('✅ Business settings saved! Commission: ' + commissionRate + '%', '#34d399');
+  } catch(e) {
+    showMsg('biz-msg', 'err', '⚠ Local saved, Supabase sync failed: ' + e.message);
+    toast('⚠ Commission rate Supabase-এ save হয়নি', '#f87171');
+  }
 }
 
 /* ── Save Notification Settings ── */

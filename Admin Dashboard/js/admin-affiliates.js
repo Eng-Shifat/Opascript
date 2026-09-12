@@ -22,14 +22,39 @@
 ══════════════════════════════════════════════════════════ */
 'use strict';
 
-/* ── Global: read default commission rate from admin settings ── */
-window.getDefaultCommissionRate = function() {
+/* ── Global: commission rate cache (loaded from Supabase on init) ── */
+window._cachedCommissionRate = (function() {
   try {
     const d = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
     const r = parseFloat(d.commissionRate);
     return (!isNaN(r) && r > 0) ? r : 5;
   } catch(e) { return 5; }
+})();
+
+window.getDefaultCommissionRate = function() {
+  return window._cachedCommissionRate;
 };
+
+/* Fetch from Supabase and refresh cache + any visible UI */
+(async function() {
+  try {
+    const sb = window.scriptoraSupabase;
+    if (!sb) return;
+    const { data } = await sb.from('app_settings').select('value').eq('key', 'commission_rate').single();
+    if (data?.value) {
+      const r = parseFloat(data.value);
+      if (!isNaN(r) && r > 0) {
+        window._cachedCommissionRate = r;
+        /* keep localStorage in sync */
+        try {
+          const ls = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
+          ls.commissionRate = r;
+          localStorage.setItem('scriptora_admin_settings', JSON.stringify(ls));
+        } catch(e) {}
+      }
+    }
+  } catch(e) { /* use localStorage fallback */ }
+})();
 
 /* ── Shared state ─────────────────────────────────────────── */
 let ALL_APPLICATIONS = [];
