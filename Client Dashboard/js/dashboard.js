@@ -25,28 +25,42 @@ document.addEventListener('DOMContentLoaded', function() {
   _applyClientCommRate(window._clientCommRateCache);
 });
 
-/* Fetch live rate from Supabase and update if different */
+/* Fetch live rate from Supabase + Realtime auto-update */
 (async function() {
   const waitSb = setInterval(async () => {
     const sb = window.scriptoraSupabase;
     if (!sb) return;
     clearInterval(waitSb);
+
+    function applyRate(r) {
+      if (isNaN(r) || r <= 0) return;
+      window._clientCommRateCache = r;
+      _applyClientCommRate(r);
+      try {
+        const ls = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
+        ls.commissionRate = r;
+        localStorage.setItem('scriptora_admin_settings', JSON.stringify(ls));
+      } catch(e) {}
+    }
+
+    /* ── Initial fetch ── */
     try {
       const { data } = await sb.from('app_settings').select('value').eq('key', 'commission_rate').single();
-      if (data?.value) {
-        const r = parseFloat(data.value);
-        if (!isNaN(r) && r > 0) {
-          window._clientCommRateCache = r;
-          _applyClientCommRate(r);
-          /* sync localStorage */
-          try {
-            const ls = JSON.parse(localStorage.getItem('scriptora_admin_settings') || '{}');
-            ls.commissionRate = r;
-            localStorage.setItem('scriptora_admin_settings', JSON.stringify(ls));
-          } catch(e) {}
-        }
-      }
+      if (data?.value) applyRate(parseFloat(data.value));
     } catch(e) { /* use cache */ }
+
+    /* ── Realtime: auto-update when admin saves new rate ── */
+    sb.channel('client_commission_rate')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'app_settings',
+        filter: 'key=eq.commission_rate'
+      }, (payload) => {
+        applyRate(parseFloat(payload.new?.value));
+      })
+      .subscribe();
+
   }, 300);
   setTimeout(() => clearInterval(waitSb), 6000);
 })();
