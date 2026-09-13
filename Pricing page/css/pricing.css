@@ -73,8 +73,8 @@ body {
 
 /* ── FAQ ── */
 .pr-faq {
-  padding: 2.5rem 2.5rem;
-  max-width: 720px;
+  padding: 2.5rem 7.25rem;
+  max-width: 100%;
   margin: 0 auto;
 }
 .pr-sec-title {
