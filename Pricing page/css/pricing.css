@@ -132,21 +132,25 @@ body {
 
 /* ── CTA ── */
 .pr-cta {
-  padding: 1.5rem 2.5rem 4rem;
+  padding: 1.5rem 7.25rem 2rem;
 }
 .pr-cta-inner {
-  max-width: 600px;
+  max-width: 100%;
   margin: 0 auto;
   background: linear-gradient(135deg, rgba(var(--accent-rgb),0.12), rgba(var(--color-indigo-rgb),0.08));
   border: 0.5px solid rgba(var(--accent-rgb),0.3);
   border-radius: 20px;
-  padding: 3rem 2rem;
-  text-align: center;
+  padding: 1.5rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  text-align: left;
 }
-.pr-cta-emoji { font-size: 40px; margin-bottom: 1rem; }
-.pr-cta-inner h2 { font-size: 24px; font-weight: 800; margin-bottom: 0.6rem; }
-.pr-cta-inner p { font-size: 13.5px; color: rgba(var(--text-rgb),0.5); margin-bottom: 1.5rem; }
-.pr-cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.pr-cta-emoji { font-size: 28px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+.pr-cta-inner h2 { font-size: 24px; font-weight: 800; margin-bottom: 0.4rem; display: flex; align-items: center; }
+.pr-cta-inner p { font-size: 13.5px; color: rgba(var(--text-rgb),0.5); margin-bottom: 0; }
+.pr-cta-btns { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; flex-shrink: 0; }
 .pr-cta-btn {
   padding: 11px 28px;
   border-radius: 10px;
@@ -181,7 +185,8 @@ body {
   .pr-trust-grid { grid-template-columns: repeat(2, 1fr); }
   .pr-faq { padding: 2rem 1.2rem; }
   .pr-cta { padding: 1rem 1.2rem 3rem; }
-  .pr-cta-inner { padding: 2rem 1.2rem; }
+  .pr-cta-inner { padding: 2rem 1.2rem; flex-direction: column; text-align: center; }
+  .pr-cta-btns { justify-content: center; }
 }
 
 /* ====================================================
@@ -893,9 +898,9 @@ body {
   .pr-faq-a     { font-size: 13px; }
 
   /* CTA */
-  .pr-cta-inner { padding: 2rem 1.25rem; }
+  .pr-cta-inner { padding: 2rem 1.25rem; flex-direction: column; text-align: center; }
   .pr-cta-inner h2 { font-size: 1.4rem; }
-  .pr-cta-btns  { flex-direction: column; gap: 0.6rem; }
+  .pr-cta-btns  { flex-direction: column; gap: 0.6rem; justify-content: center; width: 100%; }
   .pr-cta-btn   { width: 100%; }
 }
 

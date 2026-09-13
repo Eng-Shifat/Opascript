@@ -123,7 +123,7 @@
   display: grid;
   grid-template-columns: 2.2fr 1fr 1fr 1.3fr;
   gap: 3rem;
-  padding: 3.5rem 7.25rem;
+  padding: 2.25rem 7.25rem;
   max-width: 100%;
   margin: 0;
 }
