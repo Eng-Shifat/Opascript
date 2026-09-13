@@ -221,9 +221,9 @@ window.SCRIPTORA_CONFIG = {
      URGENCY MULTIPLIERS (services cards)
   ──────────────────────────────────────────── */
   urgency: {
-    normal:   { label: 'Standard', multiplier: 1.0 },
-    urgent:   { label: 'Express',  multiplier: 1.4 },
-    critical: { label: 'Rush',     multiplier: 1.8 },
+    normal:   { label: 'Standard', multiplier: 1.0, days: 15 },
+    urgent:   { label: 'Express',  multiplier: 1.4, days: 7  },
+    critical: { label: 'Rush',     multiplier: 1.8, days: 3  },
   },
 
   /* ────────────────────────────────────────────

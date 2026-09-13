@@ -65,6 +65,43 @@
   /* URL-এ ?ref= থাকলে page load-এ immediately track করো */
   if (_urlRef) trackAffiliateClick(_urlRef.toUpperCase());
 
+  /* Per-service delivery days for the currently selected urgency level.
+     Priority: assignment-writing's own live picker (৪/২/১ দিন shown in its
+     buttons) → the specific service's own `deadlineDays` map from
+     pricing-config.js (this is what the pricing card's "X Days Delivery"
+     badge is built from too) → the generic fallback in
+     SCRIPTORA_CONFIG.urgency[key].days. Using the SAME resolved number for
+     both display and the actual submitted deadline date (below, in
+     opConfirm) guarantees the popup, the pricing card, and the real
+     deadline saved to the DB can never disagree again. */
+  const ASSIGNMENT_URGENCY_DAYS = { normal: 4, urgent: 2, critical: 1 };
+
+  function resolveDeadlineDays(opts) {
+    if (opts.serviceId === 'assignment-writing') {
+      const key = window._opCalcUrgKey || 'normal';
+      return ASSIGNMENT_URGENCY_DAYS[key];
+    }
+    if (opts.deadlineDays && opts.urgency && opts.deadlineDays[opts.urgency] != null) {
+      return opts.deadlineDays[opts.urgency];
+    }
+    const cfg = window.SCRIPTORA_CONFIG && window.SCRIPTORA_CONFIG.urgency;
+    if (cfg && opts.urgency && cfg[opts.urgency]) return cfg[opts.urgency].days;
+    if (cfg) {
+      const entry = Object.values(cfg).find(u => u.label === opts.urgencyLabel);
+      if (entry) return entry.days;
+    }
+    return null;
+  }
+
+  /* Urgency label + day count, e.g. "Rush (১ দিন)" for display in the
+     static summary rows. */
+  function urgencyDaysSuffix(opts) {
+    const days = resolveDeadlineDays(opts);
+    if (days == null) return '';
+    const label = (!days || days < 1) ? `${Math.round((days || 0.5) * 24)} ঘন্টা` : `${days} দিন`;
+    return ` (${label})`;
+  }
+
   /* ────────────────────────────────
      BUILD ORDER POPUP HTML
   ──────────────────────────────── */
@@ -120,17 +157,17 @@
       const labelMap = { words: 'Word Count / শব্দ সংখ্যা', slides: 'Slide Count / স্লাইড', pages: 'Page Count / পৃষ্ঠা' };
       summaryRows += `
         <div class="op-row"><span>${labelMap[opts.unitType]||'Quantity'}</span><strong>${fmtNum(opts.qty)} ${esc(opts.unitLabel)}</strong></div>
-        <div class="op-row"><span>Deadline / সময়সীমা</span><strong>${esc(opts.urgencyLabel)}</strong></div>
+        <div class="op-row"><span>Deadline / সময়সীমা</span><strong>${esc(opts.urgencyLabel)}${urgencyDaysSuffix(opts)}</strong></div>
         <div class="op-row"><span>Rate / রেট</span><strong>৳${fmtNum(opts.rate)}/${opts.perUnit} ${esc(opts.unitLabel)}</strong></div>`;
     } else if (opts.unitType === 'tier') {
       const tierName = opts.tiers && opts.tiers[opts.tierIndex] ? opts.tiers[opts.tierIndex].name : '';
       summaryRows += `
         <div class="op-row"><span>Package / প্যাকেজ</span><strong>${esc(tierName)}</strong></div>
-        <div class="op-row"><span>Deadline / সময়সীমা</span><strong>${esc(opts.urgencyLabel)}</strong></div>`;
+        <div class="op-row"><span>Deadline / সময়সীমা</span><strong>${esc(opts.urgencyLabel)}${urgencyDaysSuffix(opts)}</strong></div>`;
     } else {
       summaryRows += `
         <div class="op-row"><span>Service Type</span><strong>Fixed Price</strong></div>
-        <div class="op-row"><span>Deadline / সময়সীমা</span><strong>${esc(opts.urgencyLabel)}</strong></div>`;
+        <div class="op-row"><span>Deadline / সময়সীমা</span><strong>${esc(opts.urgencyLabel)}${urgencyDaysSuffix(opts)}</strong></div>`;
     }
 
     /* Topic field label based on service */
@@ -667,10 +704,14 @@
       }
       const orderNumber = seqData;   // e.g. "OPA-202608-004"
 
-      /* ── Deadline ── */
-      const urgencyDays = { normal:15, urgent:7, critical:3, standard:15, express:7, rush:3 };
-      const daysAhead   = urgencyDays[(opts.urgency||'normal').toLowerCase()] || 15;
-      const deadline    = new Date(now.getTime() + daysAhead * 86400000).toISOString().slice(0,10);
+      /* ── Deadline ──
+         Use the exact same per-service day count shown on the pricing
+         card and in this popup's own summary (resolveDeadlineDays) —
+         previously this used one flat 15/7/3 map for every service,
+         which didn't match each service's own advertised delivery time. */
+      const fallbackDays = { normal:15, urgent:7, critical:3, standard:15, express:7, rush:3 };
+      const daysAhead    = resolveDeadlineDays(opts) ?? (fallbackDays[(opts.urgency||'normal').toLowerCase()] || 15);
+      const deadline     = new Date(now.getTime() + daysAhead * 86400000).toISOString().slice(0,10);
 
       /* ── service_type ── */
       const sid = opts.serviceId || '';

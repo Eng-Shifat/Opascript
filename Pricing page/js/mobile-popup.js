@@ -405,6 +405,8 @@
         qty:          st.qty,
         unitLabel:    s.unitLabel || '',
         urgencyLabel: urgencyLabel,
+        urgency:      st.urgency,
+        deadlineDays: s.deadlineDays,
         rate:         s.rate,
         perUnit:      s.perUnit,
         tiers:        s.tiers,
