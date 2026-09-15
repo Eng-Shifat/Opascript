@@ -228,6 +228,15 @@ window._loadFullOrderData = async function() {
     const due     = Math.max(0, total - paid);
     const paidPct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
 
+    /* Self-heal: orders that were already fully paid BEFORE the
+       auto-unlock feature existed never got their files flipped open
+       (that only fires at the moment a payment is confirmed). So any
+       time this panel loads a fully-paid order, make sure its files
+       are actually unlocked — cheap no-op if they already are. */
+    if (due === 0 && typeof window._autoUnlockOrderFiles === 'function') {
+      window._autoUnlockOrderFiles(window._currentOrderId);
+    }
+
     if (!window._currentOrder.detail) window._currentOrder.detail = {};
     window._currentOrder.detail.financials = { total, paid, due, paidPct };
     window._currentOrder.paymentStatus = ord.payment_status || window._currentOrder.paymentStatus;

@@ -3823,6 +3823,20 @@ window.showPaymentDuePopup = async function(event, orderIdArg) {
     due  = order.due_amount   || 0;
   }
 
+  /* Due is actually ৳0 — the lock icon that was just clicked is stale
+     (e.g. this order was paid off before auto-unlock existed, or the
+     unlock hasn't synced to this screen yet). Showing the "clear your
+     due amount" popup here would be flat-out wrong since there's
+     nothing left to pay. Instead, silently re-fetch the file list so
+     the lock clears on its own, and skip the misleading popup. */
+  if (due === 0) {
+    await loadOrderFiles(targetOrderId, false);
+    if (typeof loadFilesPage === 'function' && document.getElementById('filesPageList')) {
+      await loadFilesPage();
+    }
+    return;
+  }
+
   const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
   setTxt('popupDueAmount', `৳${fmt(due)}`);
   setTxt('popupTotal',     `৳${fmt(total)}`);
