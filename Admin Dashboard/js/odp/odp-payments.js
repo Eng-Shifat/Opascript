@@ -420,10 +420,11 @@
       }
 
       /* 5. Payment fully received (due === 0).
-            ❌ Files are NOT unlocked automatically.
+            ✅ All already-delivered files (regular + revision) are
+               auto-unlocked immediately — see _autoUnlockOrderFiles below.
             ❌ Order is NOT marked 'completed' automatically.
             ✅ Order moves to 'writing' (running) so countdown starts on client side.
-            ✅ Admin must deliver files manually, then mark status 'completed'. */
+            ✅ Admin must still deliver any remaining files manually, then mark status 'completed'. */
       let autoCommissionMsg = '';
       /* Determine correct running status — declared here so both branches can access */
       const currentStatusFull = window._currentOrder?._rawDB?.status || window._currentOrder?.status || 'pending';
@@ -438,7 +439,13 @@
           status:         newOrderStatusFull,
           updated_at:     new Date().toISOString(),
         }).eq('id', window._currentOrderId);
-        /* File cache NOT invalidated here — files unlock only when admin delivers */
+
+        /* Due just hit ৳0 — unlock every delivered file for this order so
+           the client can download without admin having to unlock each
+           file by hand. */
+        if (typeof window._autoUnlockOrderFiles === 'function') {
+          await window._autoUnlockOrderFiles(window._currentOrderId);
+        }
 
         /* ── Phase 12: Auto-record affiliate commission on full payment ──
            Reuses the same record_affiliate_commission RPC the manual

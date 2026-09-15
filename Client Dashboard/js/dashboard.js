@@ -1095,7 +1095,12 @@ async function loadOrderFiles(orderId, hasDue) {
         storage_path:    row.storage_path,
         file_name:       parts[parts.length - 1],
         date:            row.updated_at,
-        download_allowed: row.download_allowed,
+        /* Same rule as revision files below: admin's explicit choice
+           always wins; if it was never set (null/undefined), fall back
+           to due-amount gating so a paid-off order isn't stuck locked. */
+        download_allowed: (row.download_allowed === true || row.download_allowed === false)
+          ? row.download_allowed
+          : !hasDue,
         isRevision:      false,
       };
     });
@@ -1273,7 +1278,9 @@ async function loadFilesPage() {
         const iconCls = ext === 'PDF' ? 'fi-pdf' : 'fi-doc';
         /* Download: admin manually unlock করলে সবসময় পারবে
            due=0 হলে auto-unlock হয়, কিন্তু admin manually unlock করলে due থাকলেও পারবে */
-        const dlAllowed = row.download_allowed;
+        const dlAllowed = (row.download_allowed === true || row.download_allowed === false)
+          ? row.download_allowed
+          : !hasDue;
 
         const item = document.createElement('div'); item.className = 'file-item';
         item.innerHTML =

@@ -248,6 +248,46 @@ window._renderFileRow = function(f) {
     } catch(e) { console.error('[Files] meta save error', e); }
   }
 
+  /* ── Auto-unlock every delivered file for an order ──────────────────
+     Called the moment an order's due amount reaches ৳0 (see odp-payments.js).
+     Flips download_allowed=true on both regular delivery files
+     (order_file_access) and revision files (revision_files, via their
+     parent revisions row) so the client's "My Files" lock icons clear
+     immediately — no manual per-file unlock needed. Admin can still
+     re-lock an individual file afterwards if they want to. */
+  window._autoUnlockOrderFiles = async function(orderId) {
+    if (!window._sb() || !window._isRealUUID(orderId)) return;
+    try {
+      await window._sb().from('order_file_access')
+        .update({ download_allowed: true, updated_at: new Date().toISOString() })
+        .eq('order_id', orderId);
+
+      const { data: revRows } = await window._sb()
+        .from('revisions')
+        .select('id')
+        .eq('order_id', orderId);
+      const revIds = (revRows || []).map(r => r.id);
+      if (revIds.length) {
+        await window._sb().from('revision_files')
+          .update({ download_allowed: true })
+          .in('revision_id', revIds);
+      }
+
+      /* Keep the in-memory cache (used by the admin file rows) in sync */
+      Object.keys(window._fileMetaCache || {}).forEach(path => {
+        window._fileMetaCache[path] = { ...window._fileMetaCache[path], download_allowed: true };
+      });
+
+      /* Re-render admin's own file lists if this order is currently open */
+      if (window._currentOrderId === orderId) {
+        if (typeof window._loadFiles === 'function') await window._loadFiles();
+        if (typeof window._loadRevisionFiles === 'function') await window._loadRevisionFiles();
+      }
+    } catch (e) {
+      console.warn('[Files] auto-unlock on full payment failed', e);
+    }
+  }
+
   window.odpUploadFiles = async function(files) {
     if (!files || !files.length) return;
     const list = document.getElementById('odpFileList');
