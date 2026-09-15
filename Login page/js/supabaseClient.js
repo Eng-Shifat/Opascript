@@ -1,24 +1,4 @@
-/* ============================================
-   SCRIPTORA — Shared Supabase Client (supabaseClient.js)
-
-   ⚠️ গুরুত্বপূর্ণ: পুরো site-এ এই ফাইলটাই Supabase client
-   বানানোর একমাত্র জায়গা হওয়া উচিত। অন্য কোনো .js ফাইলে
-   (auth.js, sidebar.js, admin.js, dashboard.js, navbar.js...)
-   আর `supabase.createClient(...)` কল করা যাবে না।
-
-   কারণ: একাধিক client instance (multiple GoTrueClient)
-   একই localStorage token নিয়ে independently auto-refresh
-   করতে চেষ্টা করলে refresh token rotation race তৈরি হয় —
-   একটার refresh সফল হলে আরেকটার কাছে থাকা token "already used"
-   ধরে fail করে, এবং Supabase সাথে সাথে session টাকে invalid
-   ভেবে মুছে দেয়। এটাই login ↔ admin panel এর infinite loop-এর
-   মূল কারণ ছিল।
-
-   HTML-এ load order (এই ক্রমেই থাকতে হবে):
-   <script src=".../supabase-js@2/.../supabase.min.js"></script>
-   <script src="js/supabaseClient.js"></script>   <!-- এই ফাইল -->
-   <script src="js/auth.js"></script>              <!-- বা sidebar.js, admin.js ইত্যাদি -->
-   ============================================ */
+/* ================================== */
 
 (function () {
   if (window.scriptoraSupabase) return; // আগেই বানানো থাকলে আবার বানাবে না
